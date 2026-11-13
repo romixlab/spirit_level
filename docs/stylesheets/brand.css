@@ -1,0 +1,47 @@
+/* The book's colours from the logo (assets/README.md): the spirit's lime as the accent, darkened on white for text
+   contrast (4.99:1); the header in the page's colour, so the logo carries the lime. */
+
+[data-md-color-scheme="default"] {
+  --md-primary-fg-color: #4d7c0f;
+  --md-primary-fg-color--light: #65a30d;
+  --md-primary-fg-color--dark: #3f6212;
+  --md-primary-bg-color: #ffffff;
+  --md-primary-bg-color--light: #ffffffb3;
+  --md-accent-fg-color: #4d7c0f;
+  --md-accent-fg-color--transparent: #65a30d1a;
+  --md-accent-bg-color: #ffffff;
+  --md-typeset-a-color: #4d7c0f;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #a3e635;
+  --md-primary-fg-color--light: #bef264;
+  --md-primary-fg-color--dark: #65a30d;
+  --md-primary-bg-color: var(--md-default-bg-color);
+  --md-primary-bg-color--light: var(--md-default-bg-color--light);
+  --md-accent-fg-color: #bef264;
+  --md-accent-fg-color--transparent: #a3e6351f;
+  --md-accent-bg-color: var(--md-default-bg-color);
+  --md-typeset-a-color: #a3e635;
+}
+
+.md-header {
+  background-color: var(--md-default-bg-color);
+  color: var(--md-default-fg-color);
+  border-bottom: 1px solid var(--md-default-fg-color--lightest);
+}
+.md-search__form {
+  background-color: var(--md-default-fg-color--lightest);
+}
+.md-header .md-search__input::placeholder,
+.md-header .md-search__icon {
+  color: var(--md-default-fg-color--light);
+}
+
+/* The mark for each scheme: zensical.toml's theme.logo is the light one */
+[data-md-color-scheme="slate"] .md-logo img {
+  content: url("../assets/logo/mark-dark.svg");
+}
+.md-header__button.md-logo img {
+  height: 1.6rem;
+}

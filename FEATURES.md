@@ -67,3 +67,4 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 ## BOOK - the book
 
 - ✅ `BOOK-1` Lint and tier pages generated from metadata; `book --check` fails when stale.
+- ✅ `BOOK-2` Logo and brand assets from a Typst source (`assets/`); book favicon, header logo, README header.

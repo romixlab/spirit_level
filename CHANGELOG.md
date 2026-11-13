@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Logo, icons and social card from `assets/logo/logo.typ`; in the book and README (BOOK-2).
+
 ## [0.1.4] - 2026-11-13
 
 ### Added

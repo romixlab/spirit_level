@@ -1,3 +1,10 @@
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/logo/spirit_level-dark.svg">
+    <img alt="spirit_level" src="assets/logo/spirit_level-light.svg" width="420">
+  </picture>
+</p>
+
 # spirit_level
 
 A linter for Rust projects of every size, from one crate to a workspace of hundreds. Tiers are TOML files of lints; a project picks one and adds its own spin.

@@ -1,8 +1,14 @@
 # typos, run by spirit-level's typos-misspelling lint
 
 [files]
-# fixtures and captured tool output carry misspellings on purpose; vendor/ holds published crates as they are
-extend-exclude = ["crates/*/tests/fixtures/", "crates/*/tests/samples/", "crates/sl_testkit/vendor/"]
+# fixtures and captured tool output carry misspellings on purpose; vendor/ holds published crates as they are; the
+# logo's SVG exports are generated (`just logo`), their glyph ids are random letters
+extend-exclude = [
+  "crates/*/tests/fixtures/",
+  "crates/*/tests/samples/",
+  "crates/sl_testkit/vendor/",
+  "assets/logo/*.svg",
+]
 
 [default]
 # a line that misspells on purpose (a test of the typos adapter or of "no such parameter") says so

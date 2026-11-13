@@ -2,3 +2,5 @@
 /site
 /.venv
 
+# what `just docs-assets` copies from assets/logo
+/docs/assets/logo/
