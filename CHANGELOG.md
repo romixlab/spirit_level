@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-13
+
 ### Added
 
 - Licence files (MIT, Apache-2.0), `CONTRIBUTING.md` with dependency policy.
