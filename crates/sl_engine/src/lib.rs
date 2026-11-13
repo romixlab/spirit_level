@@ -173,6 +173,20 @@ fn has_nightly() -> bool {
         .is_ok_and(|o| o.status.success())
 }
 
+/// Sets each finding's level from the config and its scoped exceptions; an excepted finding keeps
+/// the lint's level and records the exception's reason
+fn apply_levels(diagnostics: &mut [Diagnostic], config: &Config) {
+    for d in diagnostics {
+        let path = d.primary().map(|s| s.file.clone());
+        let (level, exc) = config.level(&d.lint, d.krate.as_deref(), path.as_deref());
+        d.level = level;
+        if level == Level::Allow {
+            d.allowed = Some(exc.map_or_else(|| "allowed".to_string(), |e| e.reason.clone()));
+            d.level = config.lint(&d.lint).level;
+        }
+    }
+}
+
 /// Runs every enabled lint of `analyses` on the project
 pub fn run(
     project: &Project,
@@ -241,16 +255,7 @@ pub fn run(
         });
     }
 
-    // levels and scoped exceptions
-    for d in &mut diagnostics {
-        let path = d.primary().map(|s| s.file.clone());
-        let (level, exc) = config.level(&d.lint, d.krate.as_deref(), path.as_deref());
-        d.level = level;
-        if level == Level::Allow {
-            d.allowed = Some(exc.map_or_else(|| "allowed".to_string(), |e| e.reason.clone()));
-            d.level = config.lint(&d.lint).level;
-        }
-    }
+    apply_levels(&mut diagnostics, config);
 
     // source waivers
     let (waivers, problems) = waiver::collect(

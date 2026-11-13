@@ -2,7 +2,18 @@
 extends = "big"
 
 [lints.duplicate-versions]
-allow = ["foldhash", "getrandom", "hashbrown", "itertools", "linux-raw-sys", "r-efi", "rustix", "syn", "windows-sys"]
+allow = [
+  "foldhash",
+  "getrandom",
+  "hashbrown",
+  "itertools",
+  "linux-raw-sys",
+  "r-efi",
+  "rustix",
+  "syn",
+  "unicode-width",
+  "windows-sys",
+]
 reason = "second versions come only with the optional linked adapters (features hakari, geiger); deny.toml skips the same trees"
 
 [lints.no-sys-crates]
@@ -112,6 +123,12 @@ spirit_level = { layer = "app" }
 sl_book = { layer = "app" }
 spirit_level_cli = { layer = "app" }
 sl_testkit = { layer = "tests" }
+
+[map.external]
+# the generic CLI parts: colour, error line, exit codes (any layer above core), --version and completion (the binary)
+vc_ui = { git = "https://github.com/vhrdtech/vhrd_cli", branch = "main", role = "core" }
+vc_build = { git = "https://github.com/vhrdtech/vhrd_cli", branch = "main", role = "app" }
+vc_complete = { git = "https://github.com/vhrdtech/vhrd_cli", branch = "main", role = "app" }
 
 [map.forbid]
 # the library a project links to check itself never pulls the CLI's dependencies
