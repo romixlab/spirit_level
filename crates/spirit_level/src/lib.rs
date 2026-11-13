@@ -96,6 +96,8 @@ pub struct Options {
     pub tiers: Vec<String>,
     /// Only these lints or categories
     pub only: Vec<String>,
+    /// Linked ELFs of the project's firmware, for the embedded lints that read them
+    pub elf: Vec<PathBuf>,
 }
 
 impl Options {
@@ -106,6 +108,7 @@ impl Options {
             config: None,
             tiers: Vec::new(),
             only: Vec::new(),
+            elf: Vec::new(),
         }
     }
 }
@@ -230,6 +233,7 @@ pub fn check(dir: &Path, opts: &Options) -> Result<(Project, Report), CheckError
             only: opts.only.clone(),
             today: opts.today,
             path: None,
+            elf: opts.elf.clone(),
         },
     );
     Ok((project, report))

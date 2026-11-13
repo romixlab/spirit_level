@@ -48,6 +48,8 @@ pub struct RunOptions {
     pub today: Date,
     /// Whether a tool on PATH counts as present (tests set a fake PATH through this)
     pub path: Option<std::ffi::OsString>,
+    /// Linked ELFs of the project's firmware (`--elf`), for the lints that need [`Need::Elf`]
+    pub elf: Vec<std::path::PathBuf>,
 }
 
 /// A lint that did not run, and why
@@ -132,8 +134,9 @@ pub fn missing(
     need: Need,
     project: &Project,
     config: &Config,
-    path: Option<&std::ffi::OsStr>,
+    opts: &RunOptions,
 ) -> Option<String> {
+    let path = opts.path.as_deref();
     match need {
         Need::Resolve => project.resolve().err().map(|e| {
             format!("the dependency graph could not be resolved (full cargo metadata): {e}")
@@ -147,6 +150,10 @@ pub fn missing(
             .then(|| sl_tools::missing_reason(t)),
         Need::Nightly => (!has_nightly())
             .then(|| "no nightly toolchain: `rustup toolchain install nightly`".to_string()),
+        Need::Elf => opts.elf.is_empty().then(|| {
+            "no ELF given: build the firmware and pass --elf target/<triple>/release/<name>"
+                .to_string()
+        }),
     }
 }
 
@@ -185,7 +192,7 @@ pub fn run(
             match m
                 .needs
                 .iter()
-                .find_map(|n| missing(*n, project, config, opts.path.as_deref()).map(|r| (n, r)))
+                .find_map(|n| missing(*n, project, config, opts).map(|r| (n, r)))
             {
                 Some((need, reason)) => not_run.push(NotRun {
                     lint: m.id.to_string(),
@@ -200,7 +207,7 @@ pub fn run(
             continue;
         }
         let start = Instant::now();
-        let cx = Context::new(project, config, opts.today, runnable.clone());
+        let cx = Context::new(project, config, opts.today, runnable.clone()).with_elf(&opts.elf);
         a.run(&cx);
         let out = cx.take();
         ran.extend(

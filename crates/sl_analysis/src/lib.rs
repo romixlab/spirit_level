@@ -38,6 +38,7 @@ use sl_config::{Config, Map};
 use sl_core::{Date, Diagnostic, LintMeta, Params};
 use sl_model::{Package, Project};
 use std::cell::RefCell;
+use std::path::PathBuf;
 
 /// One analysis: a family of lints computed together (they share a parse, a graph, a tool run)
 pub trait Analysis: Sync {
@@ -59,6 +60,7 @@ pub struct Context<'a> {
     /// Today, for anything dated (expiries are checked by the configuration already)
     pub today: Date,
     runnable: Vec<&'static str>,
+    elf: &'a [PathBuf],
     out: RefCell<Vec<Diagnostic>>,
     skipped: RefCell<Vec<Skipped>>,
 }
@@ -97,9 +99,21 @@ impl<'a> Context<'a> {
             config,
             today,
             runnable,
+            elf: &[],
             out: RefCell::new(Vec::new()),
             skipped: RefCell::new(Vec::new()),
         }
+    }
+
+    /// The same context with the linked ELFs given for the run (`--elf`)
+    pub fn with_elf(mut self, elf: &'a [PathBuf]) -> Context<'a> {
+        self.elf = elf;
+        self
+    }
+
+    /// The linked ELFs given for the run; lints that read them declare [`sl_core::Need::Elf`]
+    pub fn elf(&self) -> &'a [PathBuf] {
+        self.elf
     }
 
     /// Whether a lint runs in this run (enabled, its needs met, selected)

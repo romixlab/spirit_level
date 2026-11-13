@@ -89,6 +89,8 @@ pub enum Need {
     Tool(&'static str),
     /// A nightly toolchain (`cargo +nightly`)
     Nightly,
+    /// A linked ELF of the project's firmware, given with `--elf`
+    Elf,
 }
 
 impl Need {
@@ -99,6 +101,7 @@ impl Need {
             Need::Map => "map".into(),
             Need::Tool(t) => format!("tool:{t}"),
             Need::Nightly => "nightly".into(),
+            Need::Elf => "elf".into(),
         }
     }
 }

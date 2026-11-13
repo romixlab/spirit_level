@@ -98,6 +98,9 @@ struct CheckArgs {
     /// Only this lint or category (repeat for more)
     #[arg(long, add = ArgValueCandidates::new(lint_candidates))]
     only: Vec<String>,
+    /// A linked ELF of the project's firmware, for the embedded lints that read it (repeat for several firmware crates)
+    #[arg(long, value_name = "PATH")]
+    elf: Vec<PathBuf>,
     /// Output for people or for machines
     #[arg(long, value_enum, default_value = "text")]
     format: Format,
@@ -187,6 +190,7 @@ fn check(a: CheckArgs) -> Result<u8, String> {
         config,
         tier,
         only,
+        elf,
         format,
         fix,
         show_allowed,
@@ -197,6 +201,13 @@ fn check(a: CheckArgs) -> Result<u8, String> {
     opts.config = config;
     opts.tiers = tier;
     opts.only = only;
+    for e in &elf {
+        if !e.is_file() {
+            return Err(format!("--elf {}: no such file", e.display()));
+        }
+        opts.elf
+            .push(std::path::absolute(e).map_err(|err| format!("--elf {}: {err}", e.display()))?);
+    }
     let (project, mut report) = match spirit_level::check(&path, &opts) {
         Ok(r) => r,
         Err(spirit_level::CheckError::Config(errs)) => {
