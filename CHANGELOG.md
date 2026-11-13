@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.1.2] - 2026-11-13
+
 ### Added
 
 - `module-graph-scc`: share of a crate's code in its biggest module cycle, and the cheapest cut (CODE-2).
