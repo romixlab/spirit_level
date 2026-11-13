@@ -1,0 +1,33 @@
+    Building sample v0.1.0 (current)
+       Built [   0.184s] (current)
+     Parsing sample v0.1.0 (current)
+      Parsed [   0.000s] (current)
+    Building sample v0.1.0 (baseline)
+       Built [   0.163s] (baseline)
+     Parsing sample v0.1.0 (baseline)
+      Parsed [   0.000s] (baseline)
+    Checking sample v0.1.0 -> v0.1.0 (no change; assume minor)
+     Checked [   0.005s] 202 checks: 200 pass, 2 fail, 0 warn, 58 skip
+
+--- failure constructible_struct_adds_field: struct exhaustively constructible through public API adds field ---
+
+Description:
+A pub struct that could be exhaustively constructed with a literal using only public API has a new pub field, breaking existing exhaustive literals.
+        ref: https://doc.rust-lang.org/reference/expressions/struct-expr.html
+       impl: https://github.com/obi1kenobi/cargo-semver-checks/tree/v0.51.0/src/lints/constructible_struct_adds_field.ron
+
+Failed in:
+  field S.b in /work/sample/src/lib.rs:12
+
+--- failure function_missing: pub fn removed or renamed ---
+
+Description:
+A publicly-visible function cannot be imported by its prior path. A `pub use` may have been removed, or the function itself may have been renamed or removed entirely.
+        ref: https://doc.rust-lang.org/cargo/reference/semver.html#item-remove
+       impl: https://github.com/obi1kenobi/cargo-semver-checks/tree/v0.51.0/src/lints/function_missing.ron
+
+Failed in:
+  function sample::gone, previously in file /work/base/src/lib.rs:10
+
+     Summary semver requires new major version: 2 major and 0 minor checks failed
+    Finished [   1.212s] sample

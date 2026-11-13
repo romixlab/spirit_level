@@ -1,0 +1,9 @@
+[map.layers.core]
+allow = []
+
+[map.crates]
+fx = { layer = "core", no_std = true }
+
+[lints.cargo-no-std]
+level = "deny"
+reason = "fixture"

@@ -64,3 +64,19 @@ reason = "a module cycle holding most of a crate can't be split into crates; cut
 [lints.error-enum-growth]
 level = "warn"
 reason = "a flat error enum grows a variant per failure and loses the source errors; wrap them by layer"
+
+[lints.deny-advisories]
+level = "deny"
+reason = "a vulnerable dependency is updated, or its advisory ignored with a reason in deny.toml"
+
+[lints.deny-licenses]
+level = "warn"
+reason = "every linked licence is one the project accepts, listed once in deny.toml"
+
+[lints.cargo-msrv]
+level = "warn"
+reason = "the declared rust-version is built, so it stays true"
+
+[lints.cargo-doc]
+level = "deny"
+reason = "the docs of internal crates are the map of the code; they build without a warning"

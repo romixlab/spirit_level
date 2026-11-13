@@ -1,0 +1,19 @@
+ INFO taplo:format_files:collect_files: found files total=3 excluded=0 files=["/work/sample/Cargo.toml", "/work/sample/bad.toml", "/work/sample/spirit_level.toml"] cwd="/work/sample"
+ERROR taplo:format_files: the file is not properly formatted path="/work/sample/Cargo.toml"
+error: invalid TOML
+  ┌─ /work/sample/bad.toml:1:5
+  │  
+1 │   a = 
+  │ ╭────^
+2 │ │ [b
+  │ ╰^ expected value
+
+error: invalid TOML
+  ┌─ /work/sample/bad.toml:2:3
+  │  
+2 │   [b
+  │ ╭──^
+3 │ │ 
+  │ ╰^ expected "]"
+
+ERROR operation failed error=some files were not formatted due to syntax errors

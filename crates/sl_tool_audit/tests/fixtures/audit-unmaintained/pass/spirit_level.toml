@@ -1,0 +1,8 @@
+[lints.audit-unmaintained]
+level = "deny"
+reason = "fixture"
+
+[lints.audit-vulnerabilities]
+level = "warn"
+reason = "fixture"
+fetch = false

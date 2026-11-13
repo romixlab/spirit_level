@@ -1,0 +1,2 @@
+error: toolchain '1.50.0-x86_64-unknown-linux-gnu' is not installed
+help: run `rustup toolchain install` to install it

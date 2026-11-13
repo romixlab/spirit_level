@@ -1,0 +1,9 @@
+[map.layers.core]
+allow = []
+
+[map.crates]
+fx = { layer = "core", wasm = true }
+
+[lints.cargo-wasm]
+level = "deny"
+reason = "fixture"

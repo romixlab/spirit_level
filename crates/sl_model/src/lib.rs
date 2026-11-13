@@ -14,7 +14,7 @@ pub mod toml_file;
 
 pub use lines::{LineCount, count_lines};
 pub use project::{
-    Dep, DepKind, LoadError, Package, Project, Resolve, ResolvedPackage, TargetKind,
+    Dep, DepKind, LoadError, Package, Project, Resolve, ResolvedPackage, TargetKind, command,
 };
 pub use source::{FileKind, SourceFile};
 pub use toml_edit;

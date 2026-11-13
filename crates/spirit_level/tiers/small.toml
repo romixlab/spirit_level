@@ -101,3 +101,19 @@ reason = "a CHANGELOG is a list: one short line per change"
 [lints.agent-file-lines]
 level = "warn"
 reason = "agents read AGENTS.md whole every session; a long one is skimmed, not followed"
+
+[lints.typos-misspelling]
+level = "warn"
+reason = "a misspelled identifier is copied to every call site; typos has almost no false positives"
+
+[lints.machete-unused-deps]
+level = "warn"
+reason = "an unused dependency costs build time, audit and lockfile churn for nothing"
+
+[lints.deny-advisories]
+level = "warn"
+reason = "a dependency with a known vulnerability is a risk taken unseen; needs no deny.toml"
+
+[lints.cargo-doc]
+level = "warn"
+reason = "broken intra-doc links and tags render wrong on docs.rs and in the IDE"

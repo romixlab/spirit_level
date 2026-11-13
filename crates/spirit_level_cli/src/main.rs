@@ -7,6 +7,8 @@ use sl_core::{Date, Level};
 use std::path::PathBuf;
 use std::process::ExitCode;
 
+mod tools;
+
 const VERSION: &str = concat!(
     env!("CARGO_PKG_VERSION"),
     " (",
@@ -65,6 +67,9 @@ enum Cmd {
         #[arg(long, default_value = "small", add = ArgValueCandidates::new(tier_candidates))]
         tier: Vec<String>,
     },
+    /// The external tools of the adapters: where each is found, and installing the pinned versions
+    #[command(subcommand)]
+    Tools(tools::ToolsCmd),
     /// Write the book's generated pages (lints, tiers, nav) from the lints' metadata
     Book {
         /// The docs directory
@@ -84,7 +89,7 @@ struct CheckArgs {
     /// The project directory (cargo's search for the workspace root starts here)
     #[arg(default_value = ".")]
     path: PathBuf,
-    /// A configuration file instead of <root>/spirit_level.toml
+    /// A configuration file instead of `<root>/spirit_level.toml`
     #[arg(long)]
     config: Option<PathBuf>,
     /// Use shipped tiers instead of a configuration file (repeat to combine)
@@ -167,6 +172,7 @@ fn run(cli: Cli) -> Result<u8, String> {
         Cmd::Tiers => tiers(),
         Cmd::Config(a) => show_config(a),
         Cmd::Init { path, tier } => init(path, tier),
+        Cmd::Tools(cmd) => tools::run(cmd),
         Cmd::Book {
             docs,
             zensical,

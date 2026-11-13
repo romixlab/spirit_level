@@ -1,0 +1,5 @@
+params = { packages = ["fx"], baseline-root = "../baseline" }
+
+[[finding]]
+at = "Cargo.toml:3"
+

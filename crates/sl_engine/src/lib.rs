@@ -142,24 +142,17 @@ pub fn missing(
             "no crate map: add [map] or map-file to spirit_level.toml (see the book's map page)"
                 .to_string()
         }),
-        Need::Tool(t) => find_tool(t, path).is_none().then(|| {
-            format!(
-                "{t} is not installed: `spirit-level tools install {t}` installs the pinned version"
-            )
-        }),
+        Need::Tool(t) => find_tool(t, path)
+            .is_none()
+            .then(|| sl_tools::missing_reason(t)),
         Need::Nightly => (!has_nightly())
             .then(|| "no nightly toolchain: `rustup toolchain install nightly`".to_string()),
     }
 }
 
-/// An executable on PATH (or in `path`), by name
+/// A tool's executable: the tool cache's build of its pinned version, then PATH (or `path`)
 pub fn find_tool(name: &str, path: Option<&std::ffi::OsStr>) -> Option<std::path::PathBuf> {
-    let path = path
-        .map(ToOwned::to_owned)
-        .or_else(|| std::env::var_os("PATH"))?;
-    std::env::split_paths(&path)
-        .map(|d| d.join(name))
-        .find(|p| p.is_file())
+    sl_tools::find(name, path)
 }
 
 fn has_nightly() -> bool {
@@ -206,11 +199,23 @@ pub fn run(
         if runnable.is_empty() {
             continue;
         }
-        ran.extend(runnable.iter().map(|s| s.to_string()));
         let start = Instant::now();
-        let cx = Context::new(project, config, opts.today, runnable);
+        let cx = Context::new(project, config, opts.today, runnable.clone());
         a.run(&cx);
-        diagnostics.extend(cx.take());
+        let out = cx.take();
+        ran.extend(
+            runnable
+                .iter()
+                .filter(|id| !out.skipped.iter().any(|s| s.lint == **id))
+                .map(|s| s.to_string()),
+        );
+        not_run.extend(out.skipped.into_iter().map(|s| NotRun {
+            level: config.lint(&s.lint).level,
+            lint: s.lint,
+            need: s.need,
+            reason: s.reason,
+        }));
+        diagnostics.extend(out.diagnostics);
         timings.push(Timing {
             analysis: a.name().to_string(),
             ms: start.elapsed().as_millis(),

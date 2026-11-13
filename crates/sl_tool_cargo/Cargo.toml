@@ -1,0 +1,22 @@
+[package]
+name = "sl_tool_cargo"
+description = "spirit_level checks driven by cargo: the MSRV build, no_std and wasm builds of the map's crates, cargo doc without warnings"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+sl_analysis.workspace = true
+sl_config.workspace = true
+sl_core.workspace = true
+sl_model.workspace = true
+sl_tools.workspace = true
+
+[dev-dependencies]
+sl_testkit.workspace = true
+
+[lints]
+workspace = true

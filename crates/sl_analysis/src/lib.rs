@@ -60,6 +60,28 @@ pub struct Context<'a> {
     pub today: Date,
     runnable: Vec<&'static str>,
     out: RefCell<Vec<Diagnostic>>,
+    skipped: RefCell<Vec<Skipped>>,
+}
+
+/// A lint an analysis could not run after all, found out while running (a tool that failed, a toolchain or
+/// target that is not installed); the engine reports it as not run, like a missing need
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Skipped {
+    /// The lint
+    pub lint: String,
+    /// What was missing, in the form of [`sl_core::Need::name`] (`tool:cargo-deny`, `toolchain:1.88`)
+    pub need: String,
+    /// Why, and what would provide it
+    pub reason: String,
+}
+
+/// What an analysis produced: its findings and the lints it could not run
+#[derive(Debug, Default)]
+pub struct Outcome {
+    /// The findings
+    pub diagnostics: Vec<Diagnostic>,
+    /// The lints it could not run
+    pub skipped: Vec<Skipped>,
 }
 
 impl<'a> Context<'a> {
@@ -76,6 +98,7 @@ impl<'a> Context<'a> {
             today,
             runnable,
             out: RefCell::new(Vec::new()),
+            skipped: RefCell::new(Vec::new()),
         }
     }
 
@@ -107,9 +130,34 @@ impl<'a> Context<'a> {
         }
     }
 
-    /// The findings emitted so far
-    pub fn take(self) -> Vec<Diagnostic> {
-        self.out.into_inner()
+    /// Reports that a running lint could not run after all; its findings are dropped, so a half-run lint never
+    /// reports a partial result as the whole
+    pub fn not_run(&self, lint: &str, need: impl Into<String>, reason: impl Into<String>) {
+        if self.enabled(lint) && !self.skipped.borrow().iter().any(|s| s.lint == lint) {
+            self.skipped.borrow_mut().push(Skipped {
+                lint: lint.to_string(),
+                need: need.into(),
+                reason: reason.into(),
+            });
+        }
+    }
+
+    /// Reports that every running lint of this analysis could not run after all (its tool failed)
+    pub fn not_run_all(&self, need: &str, reason: &str) {
+        for id in self.runnable.clone() {
+            self.not_run(id, need, reason);
+        }
+    }
+
+    /// The findings and the lints that could not run
+    pub fn take(self) -> Outcome {
+        let skipped = self.skipped.into_inner();
+        let mut diagnostics = self.out.into_inner();
+        diagnostics.retain(|d| !skipped.iter().any(|s| s.lint == d.lint));
+        Outcome {
+            diagnostics,
+            skipped,
+        }
     }
 }
 
@@ -120,8 +168,38 @@ impl<'a> Context<'a> {
 ///     params: [("max-lines", Int, "20000", "code lines above which a crate is reported")],
 ///     needs: [], fix: None);
 /// ```
+///
+/// An adapter of an external tool names the tool and how it is used after the summary:
+///
+/// ```ignore
+/// sl_analysis::lint!(DENY_BANS, "deny-bans", "tools", "no banned crate, no duplicate version deny.toml refuses",
+///     tool: ("cargo-deny", Executable), params: [], needs: [Need::Tool("cargo-deny")], fix: None);
+/// ```
 #[macro_export]
 macro_rules! lint {
+    ($name:ident, $id:literal, $cat:literal, $summary:literal, tool: ($tool:literal, $use:ident),
+     params: [$(($p:literal, $k:ident, $d:literal, $doc:literal)),* $(,)?],
+     needs: [$($need:expr),* $(,)?], fix: $fix:ident) => {
+        #[doc = concat!("`", $id, "`: ", $summary)]
+        pub static $name: $crate::reexport::LintMeta = $crate::reexport::LintMeta {
+            id: $id,
+            category: $cat,
+            summary: $summary,
+            docs: include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/", $id, ".md")),
+            params: &[$($crate::reexport::ParamSpec {
+                name: $p,
+                kind: $crate::reexport::ParamKind::$k,
+                default: $d,
+                doc: $doc,
+            }),*],
+            needs: &[$($need),*],
+            fix: $crate::reexport::FixKind::$fix,
+            source: $crate::reexport::Source::Tool {
+                name: $tool,
+                r#use: $crate::reexport::ToolUse::$use,
+            },
+        };
+    };
     ($name:ident, $id:literal, $cat:literal, $summary:literal,
      params: [$(($p:literal, $k:ident, $d:literal, $doc:literal)),* $(,)?],
      needs: [$($need:expr),* $(,)?], fix: $fix:ident) => {
@@ -147,5 +225,5 @@ macro_rules! lint {
 /// Paths the [`lint!`] macro uses
 #[doc(hidden)]
 pub mod reexport {
-    pub use sl_core::{FixKind, LintMeta, ParamKind, ParamSpec, Source};
+    pub use sl_core::{FixKind, LintMeta, ParamKind, ParamSpec, Source, ToolUse};
 }

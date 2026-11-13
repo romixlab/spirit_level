@@ -1,0 +1,9 @@
+{"type":"typo","path":"./notes.md","line_num":1,"byte_offset":0,"typo":"teh","corrections":["the"]}
+{"type":"typo","path":"./src/lib.rs","line_num":1,"byte_offset":6,"typo":"sampel","corrections":["sample"]}
+{"type":"typo","path":"./src/lib.rs","line_num":1,"byte_offset":24,"typo":"recieve","corrections":["receive"]}
+{"type":"typo","path":"./target/semver-checks/local-sample-0_1_0-x86_64_unknown_linux_gnu-dbdfa517ca9155f8/target/doc/sample.json","line_num":1,"byte_offset":3551,"typo":"sampel","corrections":["sample"]}
+{"type":"typo","path":"./target/semver-checks/local-sample-0_1_0-x86_64_unknown_linux_gnu-dbdfa517ca9155f8/target/doc/sample.json","line_num":1,"byte_offset":3569,"typo":"recieve","corrections":["receive"]}
+{"type":"typo","path":"./target/semver-checks/local-sample-0_1_0-x86_64_unknown_linux_gnu-dbdfa517ca9155f8/target/doc/sample.json","line_num":1,"byte_offset":29614,"typo":"aranges","corrections":["arranges"]}
+{"type":"typo","path":"./target/semver-checks/local-sample-0_1_0-x86_64_unknown_linux_gnu-dbdfa517ca9155f8/target/doc/sample.json","line_num":1,"byte_offset":29624,"typo":"Arange","corrections":["Arrange"]}
+{"type":"typo","path":"./target/semver-checks/local-sample-0_1_0-x86_64_unknown_linux_gnu-dbdfa517ca9155f8/target/doc/sample.json","line_num":1,"byte_offset":49093,"typo":"aranges","corrections":["arranges"]}
+{"type":"typo","path":"./target/semver-checks/local-sample-0_1_0-x86_64_unknown_linux_gnu-dbdfa517ca9155f8/target/doc/sample.json","line_num":1,"byte_offset":49103,"typo":"Arange","corrections":["Arrange"]}

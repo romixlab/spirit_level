@@ -43,3 +43,7 @@ reason = "thread-local state is a hidden side channel between functions"
 [lints.crate-cycles]
 level = "warn"
 reason = "crates in a cycle cannot be built or tested apart"
+
+[lints.taplo-fmt]
+level = "warn"
+reason = "manifests are edited by people and by tools; one TOML formatting keeps their diffs about the change"

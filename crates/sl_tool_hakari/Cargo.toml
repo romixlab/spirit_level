@@ -1,0 +1,29 @@
+[package]
+name = "sl_tool_hakari"
+description = "spirit_level adapter of hakari, linked: the workspace-hack package is up to date and every member depends on it"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+guppy = { workspace = true, optional = true }
+hakari = { workspace = true, optional = true }
+sl_analysis.workspace = true
+sl_core.workspace = true
+sl_model.workspace = true
+sl_tools.workspace = true
+
+[features]
+# links hakari and guppy, so the lints run (without it they report that they did not run)
+link = ["dep:guppy", "dep:hakari"]
+
+[dev-dependencies]
+# the fixtures run the linked analysis
+sl_tool_hakari = { workspace = true, features = ["link"] }
+sl_testkit.workspace = true
+
+[lints]
+workspace = true

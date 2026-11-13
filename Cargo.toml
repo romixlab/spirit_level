@@ -17,9 +17,14 @@ anstyle = { version = "1", default-features = false, features = ["std"] }
 cargo_metadata = { version = "0.23", default-features = false }
 clap = { version = "4", default-features = false, features = ["std", "derive", "help", "usage", "error-context", "color", "suggestions", "env"] }
 clap_complete = { version = "4", default-features = false, features = ["unstable-dynamic"] }
+# linked tool libraries (features of spirit_level):
+geiger = { version = "0.5", default-features = false }
+guppy = { version = "0.19", default-features = false }
+hakari = { version = "0.18", default-features = false, features = ["cli-support"] }
 proc-macro2 = { version = "1", default-features = false, features = ["span-locations"] }
 serde = { version = "1", default-features = false, features = ["std", "derive"] }
 serde_json = { version = "1", default-features = false, features = ["std"] }
+sha2 = { version = "0.11", default-features = false }
 syn = { version = "3", default-features = false, features = ["full", "visit", "parsing", "printing", "clone-impls", "extra-traits"] }
 toml_edit = { version = "0.25", default-features = false, features = ["parse", "display"] }
 
@@ -43,6 +48,20 @@ sl_lints_surface = { path = "crates/sl_lints_surface" }
 sl_model = { path = "crates/sl_model" }
 sl_report = { path = "crates/sl_report" }
 sl_testkit = { path = "crates/sl_testkit" }
+sl_tool_clippy = { path = "crates/sl_tool_clippy" }
+sl_tool_deny = { path = "crates/sl_tool_deny" }
+sl_tool_machete = { path = "crates/sl_tool_machete" }
+sl_tool_typos = { path = "crates/sl_tool_typos" }
+sl_tool_rustfmt = { path = "crates/sl_tool_rustfmt" }
+sl_tool_semver = { path = "crates/sl_tool_semver" }
+sl_tool_shear = { path = "crates/sl_tool_shear" }
+sl_tool_audit = { path = "crates/sl_tool_audit" }
+sl_tool_udeps = { path = "crates/sl_tool_udeps" }
+sl_tool_cargo = { path = "crates/sl_tool_cargo" }
+sl_tool_hakari = { path = "crates/sl_tool_hakari" }
+sl_tool_geiger = { path = "crates/sl_tool_geiger" }
+sl_tool_taplo = { path = "crates/sl_tool_taplo" }
+sl_tools = { path = "crates/sl_tools" }
 spirit_level = { path = "crates/spirit_level" }
 
 [workspace.lints.rust]

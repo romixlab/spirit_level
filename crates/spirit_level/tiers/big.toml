@@ -119,3 +119,51 @@ reason = "rustc can't see pub items no other crate uses; in a big workspace they
 [lints.pub-surface]
 level = "warn"
 reason = "in a big workspace pub is the easy way across crates; a library that is all surface keeps nothing apart"
+
+[lints.deny-bans]
+level = "deny"
+reason = "banned crates (OpenSSL, a second runtime) and duplicate versions stay out of a big graph"
+
+[lints.deny-licenses]
+level = "deny"
+reason = "every linked licence is one the project accepts, listed once in deny.toml"
+
+[lints.deny-sources]
+level = "deny"
+reason = "crates come only from the registries and git hosts deny.toml trusts"
+
+[lints.machete-unused-deps]
+level = "deny"
+reason = "an unused dependency in a big graph costs every build; false positives are listed in the manifest"
+
+[lints.typos-misspelling]
+level = "deny"
+reason = "names are searched across hundreds of crates; a misspelling hides from every search"
+
+[lints.taplo-fmt]
+level = "deny"
+reason = "manifests are edited by people and by tools; one TOML formatting keeps their diffs about the change"
+
+[lints.cargo-msrv]
+level = "deny"
+reason = "the declared rust-version is built, so it stays true"
+
+[lints.cargo-no-std]
+level = "deny"
+reason = "a crate the map marks no_std is built for a target without std, or the promise breaks unseen"
+
+[lints.cargo-wasm]
+level = "deny"
+reason = "a crate the map marks wasm is built for wasm32, or the promise breaks unseen"
+
+[lints.semver-checks-breaking]
+level = "deny"
+reason = "a crate the map marks stable changes its API only with the version bump it needs"
+
+[lints.hakari-generate]
+level = "warn"
+reason = "a workspace-hack builds each shared dependency once; warn, as the lint needs spirit-level built with the hakari feature"
+
+[lints.hakari-manage-deps]
+level = "warn"
+reason = "the workspace-hack helps only the members that depend on it; warn, as the lint needs the hakari feature"

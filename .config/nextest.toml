@@ -1,0 +1,4 @@
+# Tool fixtures print `skipped: ...` when their tool is missing: show that output even when they pass.
+[[profile.default.overrides]]
+filter = 'test(=tool_fixtures)'
+success-output = "immediate"

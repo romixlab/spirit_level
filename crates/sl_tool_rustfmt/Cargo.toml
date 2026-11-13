@@ -1,0 +1,20 @@
+[package]
+name = "sl_tool_rustfmt"
+description = "spirit_level adapter of rustfmt: every Rust file is formatted the way cargo fmt writes it"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+sl_analysis.workspace = true
+sl_core.workspace = true
+sl_tools.workspace = true
+
+[dev-dependencies]
+sl_testkit.workspace = true
+
+[lints]
+workspace = true

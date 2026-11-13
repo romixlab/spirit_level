@@ -58,6 +58,19 @@ pub fn analyses() -> Vec<&'static dyn Analysis> {
         &sl_lints_dead::DEAD,
         &sl_lints_errors::ERRORS,
         &sl_lints_surface::SURFACE,
+        &sl_tool_clippy::CLIPPY,
+        &sl_tool_deny::DENY,
+        &sl_tool_machete::MACHETE,
+        &sl_tool_rustfmt::RUSTFMT,
+        &sl_tool_typos::TYPOS,
+        &sl_tool_taplo::TAPLO,
+        &sl_tool_geiger::GEIGER,
+        &sl_tool_hakari::HAKARI,
+        &sl_tool_cargo::CARGO_CHECKS,
+        &sl_tool_udeps::UDEPS,
+        &sl_tool_audit::AUDIT,
+        &sl_tool_shear::SHEAR,
+        &sl_tool_semver::SEMVER,
     ]
 }
 

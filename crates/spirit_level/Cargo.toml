@@ -25,6 +25,25 @@ sl_lints_size.workspace = true
 sl_lints_state.workspace = true
 sl_lints_surface.workspace = true
 sl_model.workspace = true
+sl_tool_clippy.workspace = true
+sl_tool_deny.workspace = true
+sl_tool_machete.workspace = true
+sl_tool_rustfmt.workspace = true
+sl_tool_typos.workspace = true
+sl_tool_taplo.workspace = true
+sl_tool_geiger.workspace = true
+sl_tool_hakari.workspace = true
+sl_tool_cargo.workspace = true
+sl_tool_udeps.workspace = true
+sl_tool_audit.workspace = true
+sl_tool_shear.workspace = true
+sl_tool_semver.workspace = true
+
+[features]
+# links hakari: hakari-generate and hakari-manage-deps run (70+ crates)
+hakari = ["sl_tool_hakari/link"]
+# links geiger: geiger-unsafe-deps runs (pulls syn 2)
+geiger = ["sl_tool_geiger/link"]
 
 [lints]
 workspace = true

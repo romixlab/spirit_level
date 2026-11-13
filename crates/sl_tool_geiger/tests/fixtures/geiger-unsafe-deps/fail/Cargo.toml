@@ -1,0 +1,12 @@
+[package]
+name = "fx"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.88"
+license = "MIT"
+publish = false
+
+[dependencies]
+smallvec = "=1.6.0"
+
+[workspace]

@@ -23,10 +23,17 @@ sl_core.workspace = true
 sl_engine.workspace = true
 sl_model.workspace = true
 sl_report.workspace = true
+sl_tools.workspace = true
 spirit_level.workspace = true
 
 [dev-dependencies]
 serde_json.workspace = true
+
+[features]
+# the hakari lints run (links hakari)
+hakari = ["spirit_level/hakari"]
+# geiger-unsafe-deps runs (links geiger)
+geiger = ["spirit_level/geiger"]
 
 [lints]
 workspace = true

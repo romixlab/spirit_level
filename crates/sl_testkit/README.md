@@ -25,3 +25,5 @@ message = "Add the parser"
 ```
 
 `BLESS=1` writes the findings it got into `expect.toml` (keeping `params`), for a new case.
+
+An adapter of an external tool uses `check_tools` instead. Each case runs on a copy in the temporary directory (without `expect.toml` and `target/`), since the tool may write `Cargo.lock` or build into `target/`. A case whose lint cannot run because its tool, a toolchain, a target or a cargo feature is missing is skipped with a `skipped: <lint>/<case>: <reason>` line; the test is named `tool_fixtures`, and `.config/nextest.toml` shows its output even when it passes. A tool that ran and failed is a failure, never a skip. `SPIRIT_LEVEL_REQUIRE_TOOLS=1` turns skips into failures.

@@ -206,6 +206,8 @@ pub struct ResolvedPackage {
     pub member: bool,
     /// `links`
     pub links: Option<String>,
+    /// Its manifest, absolute (in the registry's source cache for a registry package)
+    pub manifest_path: PathBuf,
     /// Its normal, dev and build edges: (index into `packages`, kinds)
     pub deps: Vec<(usize, Vec<DepKind>)>,
 }
@@ -472,6 +474,7 @@ impl Project {
                 source: p.source.as_ref().map(|s| s.to_string()),
                 member: meta.workspace_members.contains(&p.id),
                 links: p.links.clone(),
+                manifest_path: p.manifest_path.clone().into_std_path_buf(),
                 deps: Vec::new(),
             })
             .collect();
@@ -514,8 +517,18 @@ impl Project {
 /// `cargo` with the environment of an outer cargo removed, so a run under `cargo test` or a build script sees
 /// the project as a person would (CARGO_HOME and registry settings stay)
 fn cargo(dir: &Path) -> Command {
-    let mut cmd =
-        Command::new(std::env::var_os("SPIRIT_LEVEL_CARGO").unwrap_or_else(|| "cargo".into()));
+    command(
+        std::env::var_os("SPIRIT_LEVEL_CARGO").unwrap_or_else(|| "cargo".into()),
+        dir,
+    )
+}
+
+/// A program started in `dir` with the environment of an outer cargo removed (`CARGO_*` but CARGO_HOME and the
+/// registry and network settings, `RUSTC*`, `RUSTFLAGS`, and the `RUSTUP_TOOLCHAIN` rustup sets for the outer
+/// cargo): every tool spirit_level runs sees the project, and the toolchain it pins, as a person would, also
+/// under `cargo test` or `cargo run`
+pub fn command(program: impl AsRef<std::ffi::OsStr>, dir: &Path) -> Command {
+    let mut cmd = Command::new(program);
     cmd.current_dir(dir);
     for (k, _) in std::env::vars_os() {
         let Some(k) = k.to_str() else { continue };
@@ -523,7 +536,12 @@ fn cargo(dir: &Path) -> Command {
             || k.starts_with("CARGO_REGISTRIES_")
             || k.starts_with("CARGO_NET_")
             || k.starts_with("CARGO_HTTP_");
-        if (k.starts_with("CARGO_") && !keep) || k.starts_with("RUSTC") || k == "RUSTFLAGS" {
+        if (k.starts_with("CARGO_") && !keep)
+            || k == "CARGO"
+            || k.starts_with("RUSTC")
+            || k == "RUSTFLAGS"
+            || k == "RUSTUP_TOOLCHAIN"
+        {
             cmd.env_remove(k);
         }
     }

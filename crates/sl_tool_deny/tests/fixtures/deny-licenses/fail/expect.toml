@@ -1,0 +1,6 @@
+[[finding]]
+at = "Cargo.lock:6"
+
+[[finding]]
+at = "deny.toml"
+

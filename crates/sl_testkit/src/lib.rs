@@ -14,7 +14,23 @@ pub const TODAY: &str = "2026-11-13";
 /// Runs every fixture of `analysis` under `dir` (relative to the calling crate's manifest dir, so pass
 /// `env!("CARGO_MANIFEST_DIR")` joined with `tests/fixtures`); panics with every difference found
 pub fn check(analysis: &dyn Analysis, dir: &Path) {
+    check_impl(analysis, dir, false);
+}
+
+/// Like [`check`], for an adapter that runs an external tool: each case runs on a copy in the temporary
+/// directory (the tool may write `Cargo.lock` or `target/`), and a case whose lint cannot run because the tool,
+/// a toolchain, a target or a cargo feature is missing is skipped with a `skipped:` line on stderr instead of
+/// failing. `SPIRIT_LEVEL_REQUIRE_TOOLS=1` turns those skips into failures (for a run that must cover them)
+pub fn check_tools(analysis: &dyn Analysis, dir: &Path) {
+    check_impl(analysis, dir, true);
+}
+
+/// The needs whose absence skips a tool fixture
+const SKIPPABLE: &[&str] = &["tool:", "nightly", "toolchain:", "target:", "feature:"];
+
+fn check_impl(analysis: &dyn Analysis, dir: &Path, tools: bool) {
     let mut problems = String::new();
+    let mut skipped = Vec::new();
     let lints = analysis.lints();
     for meta in lints {
         let lint_dir = dir.join(meta.id);
@@ -53,25 +69,79 @@ pub fn check(analysis: &dyn Analysis, dir: &Path) {
             .collect();
         cases.sort();
         for case in cases {
-            if let Err(e) = run_case(analysis, &id, &case) {
-                let _ = writeln!(
-                    problems,
-                    "{id}/{}: {e}",
-                    case.file_name().unwrap().to_string_lossy()
-                );
+            let name = case.file_name().unwrap().to_string_lossy().to_string();
+            match run_case(analysis, &id, &case, tools) {
+                Ok(None) => {}
+                Ok(Some(reason)) => skipped.push(format!("{id}/{name}: {reason}")),
+                Err(e) => {
+                    let _ = writeln!(problems, "{id}/{name}: {e}");
+                }
             }
         }
+    }
+    for s in &skipped {
+        eprintln!("skipped: {s}");
+    }
+    if !skipped.is_empty() && std::env::var_os("SPIRIT_LEVEL_REQUIRE_TOOLS").is_some() {
+        let _ = writeln!(
+            problems,
+            "{} cases skipped while SPIRIT_LEVEL_REQUIRE_TOOLS is set",
+            skipped.len()
+        );
     }
     assert!(problems.is_empty(), "fixture problems:\n{problems}");
 }
 
-fn run_case(analysis: &dyn Analysis, id: &str, case: &Path) -> Result<(), String> {
+/// Copies a case to a fixed place in the temporary directory (fixed, so a build directory keyed on the path is
+/// reused from run to run), without `target/`
+fn copy_case(analysis: &str, id: &str, case: &Path) -> Result<PathBuf, String> {
+    let dest = std::env::temp_dir()
+        .join("sl_testkit")
+        .join(analysis)
+        .join(id)
+        .join(case.file_name().unwrap_or_default());
+    let _ = std::fs::remove_dir_all(&dest);
+    copy_dir(case, &dest, true).map_err(|e| format!("copying the case: {e}"))?;
+    Ok(dest)
+}
+
+/// Copies a directory without `target/`; at the top, without the harness's `expect.toml` (a tool that walks
+/// the project would see it)
+fn copy_dir(from: &Path, to: &Path, top: bool) -> std::io::Result<()> {
+    std::fs::create_dir_all(to)?;
+    for e in std::fs::read_dir(from)? {
+        let e = e?;
+        let p = e.path();
+        if p.is_dir() {
+            if e.file_name() != "target" {
+                copy_dir(&p, &to.join(e.file_name()), false)?;
+            }
+        } else if !(top && e.file_name() == "expect.toml") {
+            std::fs::copy(&p, to.join(e.file_name()))?;
+        }
+    }
+    Ok(())
+}
+
+/// Runs one case: Ok(None) when it matches, Ok(Some(reason)) when it was skipped
+fn run_case(
+    analysis: &dyn Analysis,
+    id: &str,
+    case: &Path,
+    tools: bool,
+) -> Result<Option<String>, String> {
     let expect_path = case.join("expect.toml");
     let expect_text = std::fs::read_to_string(&expect_path).unwrap_or_default();
     let expect: toml_edit::DocumentMut = expect_text
         .parse()
         .map_err(|e| format!("expect.toml: {e}"))?;
     let today = Date::parse(TODAY).expect("date");
+    let copied = if tools {
+        Some(copy_case(analysis.name(), id, case)?)
+    } else {
+        None
+    };
+    let case = copied.as_deref().unwrap_or(case);
     // a case whose project sits in `project/` can keep things beside it (a sibling checkout)
     let case_dir = case;
     let case = &if case.join("project").is_dir() {
@@ -134,6 +204,9 @@ fn run_case(analysis: &dyn Analysis, id: &str, case: &Path) -> Result<(), String
         },
     );
     if let Some(n) = report.not_run.iter().find(|n| n.lint == id) {
+        if tools && SKIPPABLE.iter().any(|s| n.need.starts_with(s)) {
+            return Ok(Some(n.reason.clone()));
+        }
         return Err(format!("did not run: {} ({})", n.need, n.reason));
     }
     let got: Vec<(String, String)> = report
@@ -172,7 +245,7 @@ fn run_case(analysis: &dyn Analysis, id: &str, case: &Path) -> Result<(), String
             let _ = writeln!(out, "[[finding]]\nat = {at:?}\n");
         }
         std::fs::write(&expect_path, out).map_err(|e| e.to_string())?;
-        return Ok(());
+        return Ok(None);
     }
     let mut diff = Vec::new();
     let mut left = got.clone();
@@ -196,7 +269,7 @@ fn run_case(analysis: &dyn Analysis, id: &str, case: &Path) -> Result<(), String
         diff.push(format!("unexpected finding at {at}: {m}"));
     }
     if diff.is_empty() {
-        Ok(())
+        Ok(None)
     } else {
         Err(diff.join("\n    "))
     }

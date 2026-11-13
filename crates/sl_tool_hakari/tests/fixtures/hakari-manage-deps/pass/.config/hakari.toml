@@ -1,0 +1,3 @@
+hakari-package = "workspace-hack"
+dep-format-version = "4"
+resolver = "3"

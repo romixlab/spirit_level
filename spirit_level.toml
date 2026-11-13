@@ -39,6 +39,7 @@ allow = ["core", "model", "analysis", "engine", "tests"]
 sl_core = { layer = "core" }
 sl_model = { layer = "model" }
 sl_config = { layer = "model" }
+sl_tools = { layer = "model" }
 sl_analysis = { layer = "analysis" }
 sl_lints_ai = { layer = "lints" }
 sl_lints_code = { layer = "lints" }
@@ -51,6 +52,19 @@ sl_lints_modules = { layer = "lints" }
 sl_lints_dead = { layer = "lints" }
 sl_lints_errors = { layer = "lints" }
 sl_lints_surface = { layer = "lints" }
+sl_tool_clippy = { layer = "lints" }
+sl_tool_deny = { layer = "lints" }
+sl_tool_machete = { layer = "lints" }
+sl_tool_rustfmt = { layer = "lints" }
+sl_tool_typos = { layer = "lints" }
+sl_tool_taplo = { layer = "lints" }
+sl_tool_geiger = { layer = "lints" }
+sl_tool_hakari = { layer = "lints" }
+sl_tool_cargo = { layer = "lints" }
+sl_tool_udeps = { layer = "lints" }
+sl_tool_audit = { layer = "lints" }
+sl_tool_shear = { layer = "lints" }
+sl_tool_semver = { layer = "lints" }
 sl_engine = { layer = "engine" }
 sl_report = { layer = "engine" }
 spirit_level = { layer = "app" }
