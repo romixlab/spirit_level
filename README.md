@@ -25,3 +25,7 @@ Working name. Private for now.
 | [`spirit_level_cli`](crates/spirit_level_cli) | app | The spirit-level command: check a project, explain a lint, list lints and tiers, show the resolved configuration, write the book pages |
 | [`sl_testkit`](crates/sl_testkit) | tests | Golden fixture harness for spirit_level analyses: runs one lint on small projects and compares the findings with each project's expect.toml |
 <!-- /spirit-level:crates -->
+
+## Licence
+
+MIT OR Apache-2.0. See `CONTRIBUTING.md`.
