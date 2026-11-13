@@ -11,21 +11,29 @@ Use it with `extends = "big"` in `spirit_level.toml`.
 | Lint | Level | Reason | Set in |
 |---|---|---|---|
 | [changelog-unreleased](../lints/changelog-unreleased.md) | `warn` | work lands under [Unreleased]; the release step turns it into a version section | small |
+| [core-crate-deps](../lints/core-crate-deps.md) | `deny` | a _core crate holds shared types and drags nothing in | big |
+| [core-crate-types](../lints/core-crate-types.md) | `deny` | _core crates hold only types: no I/O, threads or runtimes | big |
+| [crate-cycles](../lints/crate-cycles.md) | `deny` | crates in a cycle cannot be built or tested apart | medium |
 | [crate-dir-name](../lints/crate-dir-name.md) | `warn` | flat crates/<name>: the folder is the crate | small-workspace |
 | [crate-docs](../lints/crate-docs.md) | `deny` | rustdoc's front page of the crate is its crate-level docs | big |
 | [crate-lines](../lints/crate-lines.md) | `warn` | split a crate before it passes ~20,000 lines: one crate is one serial compile step | medium |
+| [crate-table](../lints/crate-table.md) | `deny` | the crate table is generated from the manifests and the map, never written by hand | big |
 | [default-features-off](../lints/default-features-off.md) | `deny` | feature creep in a big graph costs every build | big |
 | [duplicate-versions](../lints/duplicate-versions.md) | `deny` | two versions of a crate double its build time and split its types | big |
 | [edition-latest](../lints/edition-latest.md) | `warn` | new code starts on the current edition | small |
+| [external-form](../lints/external-form.md) | `deny` | outside projects come by git on a branch, listed once, used where their role allows | big |
 | [feature-docs](../lints/feature-docs.md) | `warn` | a feature without a comment cannot be chosen by a reader | big |
+| [forbidden-closure](../lints/forbidden-closure.md) | `deny` | some crates must never end up in a binary, however far away they arrive | big |
 | [function-complexity](../lints/function-complexity.md) | `warn` | more paths than can be tested or held in one's head | small |
 | [function-lines](../lints/function-lines.md) | `warn` | a function longer than a screen is changed without being read whole | small |
 | [git-dependency-pins](../lints/git-dependency-pins.md) | `deny` | git dependencies follow a branch; a pin hides a break until it is old | medium |
 | [justfile-recipes](../lints/justfile-recipes.md) | `warn` | every repo answers to the same recipes: default, test, lint, install, deploy | small |
 | [justfile-simple](../lints/justfile-simple.md) | `warn` | recipes call programs; logic lives in Rust where it is tested | big |
+| [layer-edges](../lints/layer-edges.md) | `deny` | layers are declared and checked edge by edge; move a crate, never reorder layers | big |
 | [lock-held-across](../lints/lock-held-across.md) | `deny` | a guard across .await or I/O stalls every other caller for as long as the slowest peer | big |
 | [lock-unwrap](../lints/lock-unwrap.md) | `warn` | the count of lock().unwrap() per crate shows where shared state concentrates | medium |
 | [macro-crate-suffix](../lints/macro-crate-suffix.md) | `warn` | _macros and _derive mean proc macros and nothing else | small-workspace |
+| [map-complete](../lints/map-complete.md) | `deny` | the crate map is the source of truth: every crate in it, nothing gone | big |
 | [module-lines](../lints/module-lines.md) | `warn` | a file of thousands of lines holds several subjects and collects every edit | medium |
 | [nested-locks](../lints/nested-locks.md) | `warn` | two locks at once need one lock order everywhere | small-workspace |
 | [no-sys-crates](../lints/no-sys-crates.md) | `deny` | pure-Rust crates only: no bundled C, no -sys bindings without a written reason | small |
@@ -40,8 +48,10 @@ Use it with `extends = "big"` in `spirit_level.toml`.
 | [static-interior-mutability](../lints/static-interior-mutability.md) | `deny` | every piece of mutable state has one owner; a global lock says why on the item | big |
 | [static-mut](../lints/static-mut.md) | `deny` | global mutable state with no synchronisation; there is always a better owner | small |
 | [test-lines](../lints/test-lines.md) | `warn` | test code builds and links too | big |
+| [third-party-placement](../lints/third-party-placement.md) | `deny` | heavy dependencies sit in one crate each | big |
 | [thread-local-state](../lints/thread-local-state.md) | `warn` | thread-local state is a hidden side channel between functions | small-workspace |
 | [toolchain-pinned](../lints/toolchain-pinned.md) | `deny` | every PC and the gate build with the same compiler | big |
+| [unsafe-allow-list](../lints/unsafe-allow-list.md) | `deny` | unsafe is forbidden except in the crates the map lists | big |
 | [waiver-invalid](../lints/waiver-invalid.md) | `deny` | a waiver without a reason, for an unknown lint, or expired hides a finding without saying why | small |
 | [waiver-unused](../lints/waiver-unused.md) | `deny` | every waiver allows something, or it goes | big |
 | [workspace-dependencies](../lints/workspace-dependencies.md) | `deny` | one version per dependency per workspace, written once in [workspace.dependencies] | medium |
@@ -104,4 +114,40 @@ reason = "every piece of mutable state has one owner; a global lock says why on 
 [lints.lock-held-across]
 level = "deny"
 reason = "a guard across .await or I/O stalls every other caller for as long as the slowest peer"
+
+[lints.map-complete]
+level = "deny"
+reason = "the crate map is the source of truth: every crate in it, nothing gone"
+
+[lints.layer-edges]
+level = "deny"
+reason = "layers are declared and checked edge by edge; move a crate, never reorder layers"
+
+[lints.forbidden-closure]
+level = "deny"
+reason = "some crates must never end up in a binary, however far away they arrive"
+
+[lints.external-form]
+level = "deny"
+reason = "outside projects come by git on a branch, listed once, used where their role allows"
+
+[lints.third-party-placement]
+level = "deny"
+reason = "heavy dependencies sit in one crate each"
+
+[lints.core-crate-deps]
+level = "deny"
+reason = "a _core crate holds shared types and drags nothing in"
+
+[lints.core-crate-types]
+level = "deny"
+reason = "_core crates hold only types: no I/O, threads or runtimes"
+
+[lints.crate-table]
+level = "deny"
+reason = "the crate table is generated from the manifests and the map, never written by hand"
+
+[lints.unsafe-allow-list]
+level = "deny"
+reason = "unsafe is forbidden except in the crates the map lists"
 ```

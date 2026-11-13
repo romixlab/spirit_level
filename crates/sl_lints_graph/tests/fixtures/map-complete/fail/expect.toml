@@ -1,0 +1,8 @@
+
+[[finding]]
+at = "crates/b/Cargo.toml:1"
+contains = "b is not in the crate map"
+
+[[finding]]
+at = "spirit_level.toml:13"
+contains = "lists c"

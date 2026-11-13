@@ -35,3 +35,11 @@ reason = "split a crate before it passes ~20,000 lines: one crate is one serial 
 [lints.lock-unwrap]
 level = "warn"
 reason = "the count of lock().unwrap() per crate shows where shared state concentrates"
+
+[lints.crate-cycles]
+level = "deny"
+reason = "crates in a cycle cannot be built or tested apart"
+
+[lints.core-crate-deps]
+level = "warn"
+reason = "a _core crate holds shared types and drags nothing in"

@@ -1,0 +1,16 @@
+[lints.third-party-placement]
+level = "deny"
+reason = "fixture"
+
+[map.layers.utils]
+allow = ["utils"]
+
+[map.layers.model]
+allow = ["utils", "model"]
+
+[map.crates]
+a = { layer = "model" }
+gpu = { layer = "model" }
+
+[map.third-party]
+wgpu = ["gpu"]

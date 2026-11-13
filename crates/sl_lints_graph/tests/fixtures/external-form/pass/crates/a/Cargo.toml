@@ -1,0 +1,8 @@
+[package]
+name = "a"
+version = "0.1.0"
+edition = "2024"
+description = "the a crate"
+
+[dependencies]
+exact_units = { git = "https://github.com/romixlab/exact_units", branch = "main", default-features = false }

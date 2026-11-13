@@ -1,0 +1,8 @@
+
+[[finding]]
+at = "crates/a/Cargo.toml:8"
+contains = "pinned by tag"
+
+[[finding]]
+at = "crates/a/Cargo.toml:9"
+contains = "not in [map.external]"

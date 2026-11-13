@@ -1,0 +1,9 @@
+[package]
+name = "a"
+version = "0.1.0"
+edition = "2024"
+description = "the a crate"
+
+[dependencies]
+exact_units = { git = "https://github.com/romixlab/exact_units", tag = "v1" }
+napier = { git = "https://github.com/romixlab/napier" }

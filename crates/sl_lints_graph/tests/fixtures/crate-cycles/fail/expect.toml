@@ -1,0 +1,4 @@
+
+[[finding]]
+at = "crates/a/Cargo.toml:1"
+contains = "2 crates depend on each other in a cycle: a, b"

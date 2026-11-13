@@ -1,0 +1,13 @@
+[lints.map-complete]
+level = "deny"
+reason = "fixture"
+
+[map.layers.utils]
+allow = ["utils"]
+
+[map.layers.model]
+allow = ["utils", "model"]
+
+[map.crates]
+a = { layer = "model" }
+c = { layer = "utils" }

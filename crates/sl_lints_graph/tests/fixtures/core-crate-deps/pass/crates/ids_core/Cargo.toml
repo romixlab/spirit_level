@@ -1,0 +1,5 @@
+[package]
+name = "ids_core"
+version = "0.1.0"
+edition = "2024"
+description = "the ids_core crate"

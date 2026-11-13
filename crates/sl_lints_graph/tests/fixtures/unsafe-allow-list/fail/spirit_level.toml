@@ -1,0 +1,13 @@
+[lints.unsafe-allow-list]
+level = "deny"
+reason = "fixture"
+
+[map.layers.utils]
+allow = ["utils"]
+
+[map.layers.model]
+allow = ["utils", "model"]
+
+[map.crates]
+ffi = { layer = "utils", unsafe = true }
+safe = { layer = "utils" }

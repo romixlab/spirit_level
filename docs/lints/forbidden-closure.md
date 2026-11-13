@@ -1,0 +1,37 @@
+# forbidden-closure
+
+**Rule:** A crate never reaches the crates the map forbids it, directly or through others.
+
+| | |
+|---|---|
+| Category | [graph](index.md#graph) |
+| Source | spirit_level |
+| Fix | by hand |
+| Needs | the crate map ([map] or map-file), the resolved dependency graph (full `cargo metadata`) |
+
+## Level per tier
+
+| Tier | Level | Reason |
+|---|---|---|
+| [small](../tiers/small.md) | off |  |
+| [small-workspace](../tiers/small-workspace.md) | off |  |
+| [medium](../tiers/medium.md) | off |  |
+| [big](../tiers/big.md) | `deny` | some crates must never end up in a binary, however far away they arrive |
+
+## Why
+
+Some crates must never end up in a binary, directly or through others: a UI process that must not link a 3D renderer, a root-run tool that must stay small, a library that must not pull a CLI framework. Edge checks alone cannot see this, because the forbidden crate arrives three hops away. The lint walks the resolved graph from the crate (normal and build edges, plus its own dev-dependencies) and reports each forbidden crate it reaches, with the path.
+
+## How to fix
+
+Cut the edge on the path that brings it in, or move the part that needs it into a crate the binary does not link.
+
+## Configure
+
+```toml
+[lints.forbidden-closure]
+level = "deny"
+reason = "why this project wants it at this level"
+```
+
+Allow one finding in the code with `// spirit-level: allow(forbidden-closure) <reason>` ([waivers](../waivers.md)).

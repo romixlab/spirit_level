@@ -51,3 +51,39 @@ reason = "every piece of mutable state has one owner; a global lock says why on 
 [lints.lock-held-across]
 level = "deny"
 reason = "a guard across .await or I/O stalls every other caller for as long as the slowest peer"
+
+[lints.map-complete]
+level = "deny"
+reason = "the crate map is the source of truth: every crate in it, nothing gone"
+
+[lints.layer-edges]
+level = "deny"
+reason = "layers are declared and checked edge by edge; move a crate, never reorder layers"
+
+[lints.forbidden-closure]
+level = "deny"
+reason = "some crates must never end up in a binary, however far away they arrive"
+
+[lints.external-form]
+level = "deny"
+reason = "outside projects come by git on a branch, listed once, used where their role allows"
+
+[lints.third-party-placement]
+level = "deny"
+reason = "heavy dependencies sit in one crate each"
+
+[lints.core-crate-deps]
+level = "deny"
+reason = "a _core crate holds shared types and drags nothing in"
+
+[lints.core-crate-types]
+level = "deny"
+reason = "_core crates hold only types: no I/O, threads or runtimes"
+
+[lints.crate-table]
+level = "deny"
+reason = "the crate table is generated from the manifests and the map, never written by hand"
+
+[lints.unsafe-allow-list]
+level = "deny"
+reason = "unsafe is forbidden except in the crates the map lists"

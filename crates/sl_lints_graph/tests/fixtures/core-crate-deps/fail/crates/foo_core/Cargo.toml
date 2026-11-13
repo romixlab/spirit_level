@@ -1,0 +1,9 @@
+[package]
+name = "foo_core"
+version = "0.1.0"
+edition = "2024"
+description = "the foo_core crate"
+
+[dependencies]
+tokio = "1"
+foo_net = { path = "../foo_net" }

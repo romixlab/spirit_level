@@ -39,3 +39,7 @@ reason = "two locks at once need one lock order everywhere"
 [lints.thread-local-state]
 level = "warn"
 reason = "thread-local state is a hidden side channel between functions"
+
+[lints.crate-cycles]
+level = "warn"
+reason = "crates in a cycle cannot be built or tested apart"

@@ -1,0 +1,16 @@
+[lints.external-form]
+level = "deny"
+reason = "fixture"
+
+[map.layers.utils]
+allow = ["utils"]
+
+[map.layers.model]
+allow = ["utils", "model"]
+
+[map.crates]
+a = { layer = "model" }
+b = { layer = "utils" }
+
+[map.external]
+exact_units = { git = "git@github.com:romixlab/exact_units.git", branch = "main", role = "utils" }

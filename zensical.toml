@@ -30,21 +30,29 @@ nav = [
     { "Lints" = [
         "lints/index.md",
         "lints/changelog-unreleased.md",
+        "lints/core-crate-deps.md",
+        "lints/core-crate-types.md",
+        "lints/crate-cycles.md",
         "lints/crate-dir-name.md",
         "lints/crate-docs.md",
         "lints/crate-lines.md",
+        "lints/crate-table.md",
         "lints/default-features-off.md",
         "lints/duplicate-versions.md",
         "lints/edition-latest.md",
+        "lints/external-form.md",
         "lints/feature-docs.md",
+        "lints/forbidden-closure.md",
         "lints/function-complexity.md",
         "lints/function-lines.md",
         "lints/git-dependency-pins.md",
         "lints/justfile-recipes.md",
         "lints/justfile-simple.md",
+        "lints/layer-edges.md",
         "lints/lock-held-across.md",
         "lints/lock-unwrap.md",
         "lints/macro-crate-suffix.md",
+        "lints/map-complete.md",
         "lints/module-lines.md",
         "lints/nested-locks.md",
         "lints/no-sys-crates.md",
@@ -59,8 +67,10 @@ nav = [
         "lints/static-interior-mutability.md",
         "lints/static-mut.md",
         "lints/test-lines.md",
+        "lints/third-party-placement.md",
         "lints/thread-local-state.md",
         "lints/toolchain-pinned.md",
+        "lints/unsafe-allow-list.md",
         "lints/waiver-invalid.md",
         "lints/waiver-unused.md",
         "lints/workspace-dependencies.md",
@@ -69,6 +79,7 @@ nav = [
     ] },
 ]
 # spirit-level:book-nav-end
+
 
 
 

@@ -11,6 +11,7 @@ Use it with `extends = "small-workspace"` in `spirit_level.toml`.
 | Lint | Level | Reason | Set in |
 |---|---|---|---|
 | [changelog-unreleased](../lints/changelog-unreleased.md) | `warn` | work lands under [Unreleased]; the release step turns it into a version section | small |
+| [crate-cycles](../lints/crate-cycles.md) | `warn` | crates in a cycle cannot be built or tested apart | small-workspace |
 | [crate-dir-name](../lints/crate-dir-name.md) | `warn` | flat crates/<name>: the folder is the crate | small-workspace |
 | [crate-docs](../lints/crate-docs.md) | `warn` | rustdoc's front page of the crate is its crate-level docs | small |
 | [default-features-off](../lints/default-features-off.md) | `warn` | dependencies are added with default-features = false and only the features in use | small |
@@ -83,4 +84,8 @@ reason = "two locks at once need one lock order everywhere"
 [lints.thread-local-state]
 level = "warn"
 reason = "thread-local state is a hidden side channel between functions"
+
+[lints.crate-cycles]
+level = "warn"
+reason = "crates in a cycle cannot be built or tested apart"
 ```

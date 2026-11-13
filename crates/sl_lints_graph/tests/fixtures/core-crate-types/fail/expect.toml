@@ -1,0 +1,4 @@
+
+[[finding]]
+at = "crates/foo_core/src/lib.rs:2"
+contains = "uses std::fs"

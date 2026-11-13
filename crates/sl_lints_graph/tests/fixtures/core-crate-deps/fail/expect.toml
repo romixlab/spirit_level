@@ -1,0 +1,8 @@
+
+[[finding]]
+at = "crates/foo_core/Cargo.toml:8"
+contains = "depends on tokio"
+
+[[finding]]
+at = "crates/foo_core/Cargo.toml:9"
+contains = "depends on foo_net"

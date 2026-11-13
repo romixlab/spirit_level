@@ -49,6 +49,7 @@ pub fn analyses() -> Vec<&'static dyn Analysis> {
         &sl_lints_manifest::MANIFEST,
         &sl_lints_size::SIZE,
         &sl_lints_state::STATE,
+        &sl_lints_graph::GRAPH,
     ]
 }
 

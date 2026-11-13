@@ -1,0 +1,4 @@
+
+[[finding]]
+at = "spirit_level.toml:5"
+contains = "a reaches c, which the map forbids it: a -> b -> c"

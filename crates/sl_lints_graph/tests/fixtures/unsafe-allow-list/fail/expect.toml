@@ -1,0 +1,12 @@
+
+[[finding]]
+at = "Cargo.toml"
+contains = "does not set unsafe_code"
+
+[[finding]]
+at = "crates/safe/src/lib.rs:3"
+contains = "has an unsafe impl"
+
+[[finding]]
+at = "spirit_level.toml:12"
+contains = "marks ffi unsafe"

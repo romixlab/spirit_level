@@ -12,6 +12,21 @@ Every lint, grouped by category, with its level in each shipped tier (`off`: the
 | [no-sys-crates](no-sys-crates.md) | the dependency graph has no -sys crates and no C build steps | deny | deny | deny | deny |
 | [path-outside-workspace](path-outside-workspace.md) | path dependencies stay inside the workspace | deny | deny | deny | deny |
 
+## graph
+
+| Lint | Rule | small | small-workspace | medium | big |
+|---|---|---|---|---|---|
+| [core-crate-deps](core-crate-deps.md) | a _core crate depends only on other _core crates, the allowed layers and listed vocabulary crates | off | off | warn | deny |
+| [core-crate-types](core-crate-types.md) | a _core crate holds types: no I/O, no threads, no async runtime | off | off | off | deny |
+| [crate-cycles](crate-cycles.md) | workspace crates form no cycle, dev-dependencies included | off | warn | deny | deny |
+| [crate-table](crate-table.md) | the crate table in the README is the one generated from the manifests and the map | off | off | off | deny |
+| [external-form](external-form.md) | crates of other projects come by git as the map lists them, used only where their role allows | off | off | off | deny |
+| [forbidden-closure](forbidden-closure.md) | a crate never reaches the crates the map forbids it, directly or through others | off | off | off | deny |
+| [layer-edges](layer-edges.md) | every dependency edge between workspace crates is allowed by the map | off | off | off | deny |
+| [map-complete](map-complete.md) | the crate map and the workspace list the same crates | off | off | off | deny |
+| [third-party-placement](third-party-placement.md) | heavy third-party crates are used only by the crates the map names | off | off | off | deny |
+| [unsafe-allow-list](unsafe-allow-list.md) | unsafe code is forbidden except in the crates the map marks unsafe | off | off | off | deny |
+
 ## manifest
 
 | Lint | Rule | small | small-workspace | medium | big |

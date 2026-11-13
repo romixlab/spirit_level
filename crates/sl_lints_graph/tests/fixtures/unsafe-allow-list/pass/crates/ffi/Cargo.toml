@@ -1,0 +1,8 @@
+[package]
+name = "ffi"
+version = "0.1.0"
+edition = "2024"
+description = "the ffi crate"
+
+[lints.rust]
+unsafe_code = "allow"

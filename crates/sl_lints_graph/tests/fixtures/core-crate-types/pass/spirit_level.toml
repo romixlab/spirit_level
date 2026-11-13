@@ -1,0 +1,3 @@
+[lints.core-crate-types]
+level = "deny"
+reason = "fixture"
