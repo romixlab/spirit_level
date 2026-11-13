@@ -1,0 +1,20 @@
+[package]
+name = "spirit_level"
+description = "spirit_level as a library: the registry of every analysis, the shipped tier files, and a one-call check"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+sl_analysis.workspace = true
+sl_config.workspace = true
+sl_core.workspace = true
+sl_engine.workspace = true
+sl_lints_manifest.workspace = true
+sl_model.workspace = true
+
+[lints]
+workspace = true

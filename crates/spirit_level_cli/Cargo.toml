@@ -1,0 +1,29 @@
+[package]
+name = "spirit_level_cli"
+description = "The spirit-level command: check a project, explain a lint, list lints and tiers, show the resolved configuration, write the book pages"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[[bin]]
+name = "spirit-level"
+path = "src/main.rs"
+
+[dependencies]
+anstream.workspace = true
+clap.workspace = true
+clap_complete.workspace = true
+serde_json.workspace = true
+sl_book.workspace = true
+sl_config.workspace = true
+sl_core.workspace = true
+sl_engine.workspace = true
+sl_model.workspace = true
+sl_report.workspace = true
+spirit_level.workspace = true
+
+[lints]
+workspace = true

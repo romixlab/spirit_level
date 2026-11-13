@@ -1,0 +1,19 @@
+[package]
+name = "sl_analysis"
+description = "The one trait every spirit_level analysis implements, its run context, and syntax helpers shared by the source analyses"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+proc-macro2.workspace = true
+sl_config.workspace = true
+sl_core.workspace = true
+sl_model.workspace = true
+syn.workspace = true
+
+[lints]
+workspace = true

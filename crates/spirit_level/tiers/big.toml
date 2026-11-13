@@ -1,0 +1,41 @@
+# Tier 4: a big workspace (rerun, zed, bevy, intent): layers declared and checked, sizes watched, everything strict.
+extends = "medium"
+
+[tier]
+description = "A big workspace: a crate map with layers checked edge by edge, size limits with expiring exceptions, strict conformity"
+
+[lints.waiver-unused]
+level = "deny"
+reason = "every waiver allows something, or it goes"
+
+[lints.package-description]
+level = "deny"
+reason = "the generated crate table and READMEs are made from it"
+
+[lints.crate-docs]
+level = "deny"
+reason = "rustdoc's front page of the crate is its crate-level docs"
+
+[lints.default-features-off]
+level = "deny"
+reason = "feature creep in a big graph costs every build"
+
+[lints.duplicate-versions]
+level = "deny"
+reason = "two versions of a crate double its build time and split its types"
+
+[lints.rust-version-set]
+level = "deny"
+reason = "the MSRV is declared so it can be checked"
+
+[lints.toolchain-pinned]
+level = "deny"
+reason = "every PC and the gate build with the same compiler"
+
+[lints.feature-docs]
+level = "warn"
+reason = "a feature without a comment cannot be chosen by a reader"
+
+[lints.justfile-simple]
+level = "warn"
+reason = "recipes call programs; logic lives in Rust where it is tested"

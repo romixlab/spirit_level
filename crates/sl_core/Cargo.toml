@@ -1,0 +1,15 @@
+[package]
+name = "sl_core"
+description = "spirit_level's shared types: lint metadata, levels, parameters, diagnostics, spans, fixes, dates and globs"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+serde.workspace = true
+
+[lints]
+workspace = true

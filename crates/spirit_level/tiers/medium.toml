@@ -1,0 +1,25 @@
+# Tier 3: a medium workspace (wire_weaver's size): internal crates, MSRV, pinned toolchain.
+extends = "small-workspace"
+
+[tier]
+description = "A medium workspace: internal crates unpublished, MSRV declared, toolchain pinned, dependency rules strict"
+
+[lints.rust-version-set]
+level = "warn"
+reason = "the MSRV is declared so it can be checked"
+
+[lints.publish-false]
+level = "warn"
+reason = "internal crates are a build unit, not an API; only listed crates are published"
+
+[lints.toolchain-pinned]
+level = "warn"
+reason = "every PC and the gate build with the same compiler"
+
+[lints.workspace-dependencies]
+level = "deny"
+reason = "one version per dependency per workspace, written once in [workspace.dependencies]"
+
+[lints.git-dependency-pins]
+level = "deny"
+reason = "git dependencies follow a branch; a pin hides a break until it is old"

@@ -1,0 +1,17 @@
+[package]
+name = "sl_book"
+description = "Generates spirit_level's book pages (one per lint, one per tier, the indexes and the nav) from the lints' own metadata and the shipped tiers"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+sl_config.workspace = true
+sl_core.workspace = true
+spirit_level.workspace = true
+
+[lints]
+workspace = true

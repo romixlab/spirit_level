@@ -1,0 +1,71 @@
+[workspace]
+resolver = "3"
+members = ["crates/*"]
+
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.88"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/romixlab/spirit_level"
+
+[workspace.dependencies]
+# crates/core and model:
+anstream = { version = "1", default-features = false, features = ["auto"] }
+anstyle = { version = "1", default-features = false, features = ["std"] }
+cargo_metadata = { version = "0.23", default-features = false }
+clap = { version = "4", default-features = false, features = ["std", "derive", "help", "usage", "error-context", "color", "suggestions", "env"] }
+clap_complete = { version = "4", default-features = false, features = ["unstable-dynamic"] }
+proc-macro2 = { version = "1", default-features = false, features = ["span-locations"] }
+serde = { version = "1", default-features = false, features = ["std", "derive"] }
+serde_json = { version = "1", default-features = false, features = ["std"] }
+syn = { version = "3", default-features = false, features = ["full", "visit", "parsing", "printing", "clone-impls", "extra-traits"] }
+toml_edit = { version = "0.25", default-features = false, features = ["parse", "display"] }
+
+# workspace crates:
+sl_analysis = { path = "crates/sl_analysis" }
+sl_book = { path = "crates/sl_book" }
+sl_config = { path = "crates/sl_config" }
+sl_core = { path = "crates/sl_core" }
+sl_engine = { path = "crates/sl_engine" }
+sl_lints_code = { path = "crates/sl_lints_code" }
+sl_lints_graph = { path = "crates/sl_lints_graph" }
+sl_lints_manifest = { path = "crates/sl_lints_manifest" }
+sl_lints_size = { path = "crates/sl_lints_size" }
+sl_lints_state = { path = "crates/sl_lints_state" }
+sl_model = { path = "crates/sl_model" }
+sl_report = { path = "crates/sl_report" }
+sl_testkit = { path = "crates/sl_testkit" }
+spirit_level = { path = "crates/spirit_level" }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+rust_2018_idioms = { level = "warn", priority = -1 }
+unused_qualifications = "warn"
+missing_docs = "warn"
+
+[workspace.lints.clippy]
+dbg_macro = "deny"
+todo = "deny"
+unimplemented = "deny"
+allow_attributes_without_reason = "warn"
+await_holding_lock = "deny"
+await_holding_refcell_ref = "deny"
+
+[workspace.lints.rustdoc]
+missing_crate_level_docs = "warn"
+broken_intra_doc_links = "deny"
+
+[profile.dev]
+split-debuginfo = "unpacked"
+
+[profile.test]
+split-debuginfo = "unpacked"
+
+[profile.dev.package."*"]
+opt-level = 2
+
+[profile.deploy]
+inherits = "release"
+incremental = true

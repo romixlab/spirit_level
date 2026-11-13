@@ -1,0 +1,20 @@
+[package]
+name = "sl_lints_manifest"
+description = "spirit_level lints on manifests and repo files: package metadata, workspace inheritance and lints, dependency form, -sys crates, duplicates, profiles, toolchain, repo rule files, justfile, feature docs"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+sl_analysis.workspace = true
+sl_core.workspace = true
+sl_model.workspace = true
+
+[dev-dependencies]
+sl_testkit.workspace = true
+
+[lints]
+workspace = true

@@ -1,0 +1,20 @@
+[package]
+name = "sl_model"
+description = "spirit_level's project model: cargo metadata, manifests with spans, Rust sources parsed with syn, line counts"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+cargo_metadata.workspace = true
+proc-macro2.workspace = true
+serde_json.workspace = true
+sl_core.workspace = true
+syn.workspace = true
+toml_edit.workspace = true
+
+[lints]
+workspace = true

@@ -1,0 +1,20 @@
+[package]
+name = "sl_engine"
+description = "spirit_level's engine: picks the analyses a configuration enables, checks their needs, runs them, applies levels, exceptions and waivers, and applies exact fixes"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+serde.workspace = true
+sl_analysis.workspace = true
+sl_config.workspace = true
+sl_core.workspace = true
+sl_model.workspace = true
+syn.workspace = true
+
+[lints]
+workspace = true
