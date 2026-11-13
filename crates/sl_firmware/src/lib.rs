@@ -22,7 +22,6 @@
 //! ```
 
 pub mod build_script;
-pub mod code_size;
 pub mod context;
 pub mod elf;
 pub mod memory_x;
@@ -40,7 +39,7 @@ pub use source::{
     Binding, Call, Entry, ExecutorStart, Facts, Function, Handler, HandlerKind, Loc, PeripheralUse,
     PrioritySet, SourceFile, Spawn, Static, StaticUse, Task,
 };
-pub use source::{has_await, is_upper_name, path_text, tokens, type_name};
+pub use source::{has_await, is_upper_name, tokens, type_name};
 pub use toml::TomlExt;
 
 use sl_model::toml_edit::Item;
@@ -438,7 +437,7 @@ impl Dependency<'_> {
 /// Whether a member is a firmware crate: what `[package.metadata.spirit-level] firmware` says when it is set, else
 /// it builds a binary, and its binary's root is `#![no_std]`, or it has a `memory.x` or a `bedrock_fw.json`, or
 /// cargo builds it for a bare-metal target (`-none-` in `[build] target` or a `[target.<triple>]` section)
-pub fn is_firmware(project: &Project, pkg: &Package) -> bool {
+pub(crate) fn is_firmware(project: &Project, pkg: &Package) -> bool {
     if let Some(marked) = pkg
         .manifest
         .get(&["package", "metadata", "spirit-level", "firmware"])

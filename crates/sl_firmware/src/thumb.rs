@@ -8,7 +8,7 @@
 //! instruction, so a call graph from this is an estimate, and calls through a pointer (`blx rN`) are only counted.
 
 /// Halfwords of a prologue looked at
-pub const PROLOGUE: usize = 32;
+pub(crate) const PROLOGUE: usize = 32;
 
 /// What one function's code says
 #[derive(Clone, Debug, Default, PartialEq, Eq)]

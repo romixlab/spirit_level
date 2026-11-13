@@ -52,9 +52,7 @@ pub(crate) struct Check {
 }
 
 /// Declares the check modules and the lists made from them: [`LINTS`] and [`CHECKS`]
-#[macro_export]
-#[doc(hidden)]
-macro_rules! checks {
+macro_rules! declare_checks {
     ($($m:ident),* $(,)?) => {
         $(pub(crate) mod $m;)*
         /// Every check, in catalogue order
@@ -67,6 +65,7 @@ macro_rules! checks {
         pub(crate) static LINTS: &[&sl_core::LintMeta] = &[&$crate::FIRMWARE_READABLE, $(&$m::META),*];
     };
 }
+pub(crate) use declare_checks;
 
 /// The embedded analysis
 pub struct Embedded;

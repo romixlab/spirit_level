@@ -850,7 +850,7 @@ pub fn is_upper_name(s: &str) -> bool {
 }
 
 /// A path as written, segments joined by `::`
-pub fn path_text(p: &syn::Path) -> String {
+pub(crate) fn path_text(p: &syn::Path) -> String {
     p.segments
         .iter()
         .map(|s| s.ident.to_string())

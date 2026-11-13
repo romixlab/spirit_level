@@ -303,7 +303,7 @@ pub fn walk(block: &syn::Block, i: &mut dyn Inspect) {
 }
 
 /// Walks an expression, entering macro calls
-pub fn walk_expr(e: &Expr, i: &mut dyn Inspect) {
+pub(crate) fn walk_expr(e: &Expr, i: &mut dyn Inspect) {
     Deep(i).visit_expr(e);
 }
 

@@ -467,7 +467,7 @@ pub fn bytes(n: u64) -> String {
 }
 
 /// `_ZN4core3fmt5write17h0123456789abcdefE` → `core::fmt::write`; other names as they are
-pub fn demangle(raw: &str) -> String {
+pub(crate) fn demangle(raw: &str) -> String {
     format!("{:#}", rustc_demangle::demangle(raw))
 }
 

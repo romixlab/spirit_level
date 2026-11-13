@@ -1,9 +1,12 @@
 [[finding]]
 at = "crates/fx_a/src/lib.rs:12"
+confidence = "candidate"
 
 [[finding]]
 at = "crates/fx_a/src/lib.rs:15"
+confidence = "candidate"
 
 [[finding]]
 at = "crates/fx_a/src/lib.rs:20"
+confidence = "candidate"
 

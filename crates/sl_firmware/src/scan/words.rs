@@ -152,7 +152,7 @@ pub fn segments(name: &str) -> Vec<String> {
 }
 
 /// Whether `name` has the segment `seg` (lower case)
-pub fn has_segment(name: &str, seg: &str) -> bool {
+pub(crate) fn has_segment(name: &str, seg: &str) -> bool {
     segments(name).iter().any(|s| s == seg)
 }
 

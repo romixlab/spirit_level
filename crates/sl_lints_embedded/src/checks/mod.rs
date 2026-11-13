@@ -6,7 +6,7 @@ pub(crate) mod memx;
 pub(crate) mod pin;
 pub(crate) mod util;
 
-crate::checks! {
+crate::declare_checks! {
     boot_1,
     boot_2,
     boot_10,
