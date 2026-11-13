@@ -206,10 +206,7 @@ impl Runner<'_, '_> {
                     .line(&["workspace", "package", "rust-version"]),
             );
             let anchor = if anchor.line == 0 {
-                Span::new(
-                    first.manifest.rel.clone(),
-                    first.manifest.line(&["package", "rust-version"]),
-                )
+                first.manifest.span(&["package", "rust-version"])
             } else {
                 anchor
             };

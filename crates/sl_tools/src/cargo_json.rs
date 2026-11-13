@@ -35,6 +35,8 @@ pub struct MessageSpan {
     pub column: u32,
     /// The last line
     pub end_line: u32,
+    /// The column after the last highlighted character, 1-based
+    pub end_column: u32,
     /// The highlighted source text (first line)
     pub text: String,
 }
@@ -118,6 +120,7 @@ fn primary(m: &Value) -> Option<MessageSpan> {
         line: n("line_start"),
         column: n("column_start"),
         end_line: n("line_end"),
+        end_column: n("column_end"),
         text,
     })
 }
@@ -168,12 +171,11 @@ impl Message {
         } else {
             s.file.clone()
         };
-        let span = Span::at(rel, s.line, s.column);
-        Some(if s.end_line > s.line {
-            span.to(s.end_line)
-        } else {
-            span
-        })
+        Some(Span::range(
+            rel,
+            (s.line, s.column),
+            (s.end_line.max(s.line), s.end_column),
+        ))
     }
 
     /// The workspace package being built

@@ -106,12 +106,7 @@ impl Analysis for Semver {
                     .as_deref()
                     .and_then(|file| Path::new(file).strip_prefix(&p.root).ok())
                     .map(|rel| Span::new(rel.to_string_lossy().replace('\\', "/"), f.line))
-                    .unwrap_or_else(|| {
-                        Span::new(
-                            pkg.manifest.rel.clone(),
-                            pkg.manifest.line(&["package", "version"]),
-                        )
-                    });
+                    .unwrap_or_else(|| pkg.manifest.span(&["package", "version"]));
                 cx.emit(
                     Diagnostic::new(LINT, format!("crate:{krate}:{}:{}", f.check, f.item), format!("{krate}: {}: {}", f.what, f.item))
                         .span(span)

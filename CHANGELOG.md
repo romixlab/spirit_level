@@ -12,6 +12,11 @@
 
 - **Breaking:** the binary is `spl`; `spirit-level` is gone (CLI-3).
 - Book lint pages are named after codes (`lints/S0001.md`), with the id as anchor (ENG-9).
+- Spans carry an end column; source and manifest lints report exact ranges (ENG-8).
+
+### Fixed
+
+- `allow-without-reason` finds `allow` and `expect` inside `cfg_attr` (CODE-3).
 
 ## [0.1.5] - 2026-11-13
 

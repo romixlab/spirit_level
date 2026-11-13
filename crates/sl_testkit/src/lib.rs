@@ -394,12 +394,16 @@ fn bless(c: &Case<'_>, want: &[Want], got: &[Got]) -> Result<(), String> {
         }
     }
     for (at, m, conf) in got {
-        let _ = writeln!(out, "[[finding]]\nat = {at:?}");
-        // a `contains` written by hand stays while the finding still has it
-        if let Some(w) = want
-            .iter()
-            .find_map(|(a, w, _)| w.as_ref().filter(|w| a == at && m.contains(w.as_str())))
-        {
+        // a place and a `contains` written by hand stay while the finding still matches them
+        let kept = want.iter().find(|(a, w, _)| {
+            same_place(a, at) && w.as_ref().is_none_or(|w| m.contains(w.as_str()))
+        });
+        let _ = writeln!(
+            out,
+            "[[finding]]\nat = {:?}",
+            kept.map_or(at.as_str(), |(a, _, _)| a.as_str())
+        );
+        if let Some(w) = kept.and_then(|(_, w, _)| w.as_ref()) {
             let _ = writeln!(out, "contains = {w:?}");
         }
         match conf {
@@ -414,12 +418,24 @@ fn bless(c: &Case<'_>, want: &[Want], got: &[Got]) -> Result<(), String> {
 }
 
 /// Every wanted finding found, nothing more
+/// Whether a finding at `got` (`file:line:column`) is at the place `want` names: the same, or `want` without the
+/// column (`file:line`), which matches any column of that line
+fn same_place(want: &str, got: &str) -> bool {
+    want == got
+        || got
+            .strip_prefix(want)
+            .and_then(|r| r.strip_prefix(':'))
+            .is_some_and(|col| col.bytes().all(|b| b.is_ascii_digit()))
+}
+
 fn compare(want: &[Want], got: Vec<Got>) -> Result<(), String> {
     let mut diff = Vec::new();
     let mut left = got;
     for (at, contains, confidence) in want {
         match left.iter().position(|(g, m, c)| {
-            g == at && c == confidence && contains.as_ref().is_none_or(|w| m.contains(w.as_str()))
+            same_place(at, g)
+                && c == confidence
+                && contains.as_ref().is_none_or(|w| m.contains(w.as_str()))
         }) {
             Some(i) => {
                 left.remove(i);

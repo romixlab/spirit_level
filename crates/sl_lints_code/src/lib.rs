@@ -1,10 +1,9 @@
 //! Source lints, one analysis: [`CODE`].
 
-use sl_analysis::syntax::without_tests;
+use sl_analysis::syntax::{Range, range, without_tests};
 use sl_analysis::{Analysis, Context, lint};
 use sl_core::{Confidence, Diagnostic, LintMeta, Span};
 use sl_model::{FileKind, Package, SourceFile};
-use syn::spanned::Spanned;
 use syn::visit::Visit;
 
 lint!(TODO_MACROS, "C0008", "todo-macros", "code", "no todo!() or unimplemented!() outside tests",
@@ -95,10 +94,11 @@ impl Analysis for Code {
                 // allow-without-reason looks at test code too
                 let mut a = Allows { found: Vec::new() };
                 a.visit_file(ast);
-                for (line, what) in a.found {
+                for (r, what) in a.found {
+                    let line = r.0.0;
                     cx.emit(
                         Diagnostic::new("allow-without-reason", format!("{}:{}:{line}", pkg.name, f.rel), format!("#[{what}] gives no reason"))
-                            .span(Span::new(f.rel.clone(), line))
+                            .span(Span::range(f.rel.clone(), r.0, r.1))
                             .krate(&pkg.name)
                             .help("add `reason = \"...\"` (and prefer #[expect], which fails once the lint no longer fires)"),
                     );
@@ -118,10 +118,11 @@ impl Analysis for Code {
                     panics: Vec::new(),
                 };
                 v.visit_file(&ast);
-                for (lint, line, msg, help, conf) in v.found {
+                for (lint, r, msg, help, conf) in v.found {
+                    let line = r.0.0;
                     cx.emit(
                         Diagnostic::new(lint, format!("{}:{}:{line}", pkg.name, f.rel), msg)
-                            .span(Span::new(f.rel.clone(), line))
+                            .span(Span::range(f.rel.clone(), r.0, r.1))
                             .krate(&pkg.name)
                             .confidence(conf)
                             .help(help),
@@ -136,10 +137,11 @@ impl Analysis for Code {
             let max = cx.params_for("panic-in-library", pkg).int("max");
             if panics.len() as i64 > max {
                 let n = panics.len();
-                for (file, line, what) in panics {
+                for (file, r, what) in panics {
+                    let line = r.0.0;
                     cx.emit(
                         Diagnostic::new("panic-in-library", format!("{}:{file}:{line}", pkg.name), format!("{what} in library code ({n} in {})", pkg.name))
-                            .span(Span::new(file, line))
+                            .span(Span::range(file, r.0, r.1))
                             .krate(&pkg.name)
                             .metric("panics", n as f64, Some(max as f64))
                             .help("return an error the caller can handle; where the case truly cannot happen, say why in a waiver"),
@@ -159,33 +161,50 @@ fn is_library_file(pkg: &Package, f: &SourceFile) -> bool {
 }
 
 struct Allows {
-    found: Vec<(u32, String)>,
+    found: Vec<(Range, String)>,
 }
 
-impl<'ast> Visit<'ast> for Allows {
-    fn visit_attribute(&mut self, a: &'ast syn::Attribute) {
-        let name = if a.path().is_ident("allow") {
+impl Allows {
+    /// An `allow(...)` or `expect(...)` without a reason, also inside `cfg_attr(predicate, ...)`
+    fn check(&mut self, meta: &syn::Meta) {
+        let Ok(list) = meta.require_list() else {
+            return;
+        };
+        if list.path.is_ident("cfg_attr") {
+            type Metas = syn::punctuated::Punctuated<syn::Meta, syn::Token![,]>;
+            if let Ok(inner) = list.parse_args_with(Metas::parse_terminated) {
+                // the first is the predicate (`not(test)`), the rest are the attributes it applies
+                for m in inner.iter().skip(1) {
+                    self.check(m);
+                }
+            }
+            return;
+        }
+        let name = if list.path.is_ident("allow") {
             "allow"
-        } else if a.path().is_ident("expect") {
+        } else if list.path.is_ident("expect") {
             "expect"
         } else {
             return;
         };
-        if let Ok(list) = a.meta.require_list() {
-            let t = list.tokens.to_string();
-            if !t
-                .split(|c: char| !c.is_alphanumeric() && c != '_')
-                .any(|w| w == "reason")
-            {
-                self.found
-                    .push((a.span().start().line as u32, format!("{name}({t})")));
-            }
+        let t = list.tokens.to_string();
+        if !t
+            .split(|c: char| !c.is_alphanumeric() && c != '_')
+            .any(|w| w == "reason")
+        {
+            self.found.push((range(meta), format!("{name}({t})")));
         }
     }
 }
 
-/// (lint, line, message, help, confidence)
-type Found = Vec<(&'static str, u32, String, String, Confidence)>;
+impl<'ast> Visit<'ast> for Allows {
+    fn visit_attribute(&mut self, a: &'ast syn::Attribute) {
+        self.check(&a.meta);
+    }
+}
+
+/// (lint, range, message, help, confidence)
+type Found = Vec<(&'static str, Range, String, String, Confidence)>;
 
 struct Calls<'a> {
     cx: &'a Context<'a>,
@@ -194,7 +213,7 @@ struct Calls<'a> {
     det_float: bool,
     det_hash: bool,
     found: Found,
-    panics: Vec<(u32, String)>,
+    panics: Vec<(Range, String)>,
 }
 
 impl Calls<'_> {
@@ -214,7 +233,8 @@ fn mac_name(m: &syn::Macro) -> String {
 impl<'ast> Visit<'ast> for Calls<'_> {
     fn visit_macro(&mut self, m: &'ast syn::Macro) {
         let name = mac_name(m);
-        let line = m.path.span().start().line as u32;
+        // the macro's name and its `!`
+        let line = (range(&m.path).0, range(&m.bang_token).1);
         if (name == "todo" || name == "unimplemented") && self.on("todo-macros") {
             self.found.push((
                 "todo-macros",
@@ -250,7 +270,8 @@ impl<'ast> Visit<'ast> for Calls<'_> {
 
     fn visit_expr_method_call(&mut self, e: &'ast syn::ExprMethodCall) {
         let name = e.method.to_string();
-        let line = e.method.span().start().line as u32;
+        // `.name(args)`
+        let line = (range(&e.dot_token).0, range(&e.paren_token.span.join()).1);
         if self.lib
             && self.on("panic-in-library")
             && self
@@ -298,7 +319,7 @@ impl<'ast> Visit<'ast> for Calls<'_> {
             {
                 self.found.push((
                     "random-state-hash",
-                    p.span().start().line as u32,
+                    range(p),
                     format!(
                         "{} with the default random hasher: iteration order differs per run",
                         last.unwrap_or_default()
@@ -329,7 +350,7 @@ impl<'ast> Visit<'ast> for Calls<'_> {
                 })) = c.args.first()
                 && self.bins.contains(&s.value())
             {
-                self.found.push(("cli-subprocess", fp.span().start().line as u32, format!("runs the workspace's own binary `{}`", s.value()), "call the library the binary is built on; the CLI is for people, agents and recipes".into(), Confidence::Certain));
+                self.found.push(("cli-subprocess", range(c), format!("runs the workspace's own binary `{}`", s.value()), "call the library the binary is built on; the CLI is for people, agents and recipes".into(), Confidence::Certain));
             }
         }
         syn::visit::visit_expr_call(self, c);

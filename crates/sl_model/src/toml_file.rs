@@ -54,6 +54,19 @@ impl TomlFile {
             .map_or(0, |s| self.line_of_offset(s.start))
     }
 
+    /// Where the key path is written, as a range over the key (the header for a table); the whole file when it is
+    /// not there
+    pub fn span(&self, path: &[&str]) -> sl_core::Span {
+        match self.key_span(path) {
+            Some(r) => sl_core::Span::range(
+                self.rel.clone(),
+                line_col(&self.text, r.start),
+                line_col(&self.text, r.end),
+            ),
+            None => sl_core::Span::new(self.rel.clone(), 0),
+        }
+    }
+
     /// The byte range of the key at the end of `path` (or of the item when the key has no span)
     pub fn key_span(&self, path: &[&str]) -> Option<Range<usize>> {
         let (last, parent) = path.split_last()?;
@@ -72,6 +85,16 @@ impl TomlFile {
         let item = self.get(path)?;
         item.span()
     }
+}
+
+/// The 1-based line and column (in characters) of a byte offset of `text`
+pub fn line_col(text: &str, offset: usize) -> (u32, u32) {
+    let end = offset.min(text.len());
+    let start = text[..end].rfind('\n').map_or(0, |i| i + 1);
+    (
+        line_of(text, end),
+        text[start..end].chars().count() as u32 + 1,
+    )
 }
 
 /// The 1-based line of a byte offset in `text`

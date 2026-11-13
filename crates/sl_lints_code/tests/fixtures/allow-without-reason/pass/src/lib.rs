@@ -5,3 +5,7 @@ fn a() {}
 pub fn b() {}
 /// #[allow(x)] in a doc comment is not an attribute
 pub fn c() {}
+#[cfg_attr(not(test), allow(dead_code, reason = "used by the tests only"))]
+fn d() {}
+#[cfg_attr(feature = "x", derive(Debug))]
+struct T;

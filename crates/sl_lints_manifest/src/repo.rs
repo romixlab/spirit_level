@@ -15,7 +15,7 @@ pub(crate) fn run(cx: &Context<'_>) {
     {
         cx.emit(
             Diagnostic::new("profile-defaults", "profile.dev.split-debuginfo", "the dev profile does not split debug info")
-                .span(Span::new(root.rel.clone(), root.line(&["profile", "dev"])))
+                .span(root.span(&["profile", "dev"]))
                 .help("add `[profile.dev] split-debuginfo = \"unpacked\"` (and the same for [profile.test]): test binaries stop being I/O-bound"),
         );
     }
@@ -27,7 +27,7 @@ pub(crate) fn run(cx: &Context<'_>) {
     {
         cx.emit(
             Diagnostic::new("profile-defaults", format!("profile.{deploy}"), format!("there is no [profile.{deploy}] with incremental = true"))
-                .span(Span::new(root.rel.clone(), root.line(&["profile", deploy])))
+                .span(root.span(&["profile", deploy]))
                 .help(format!("add `[profile.{deploy}]` with `inherits = \"release\"` and `incremental = true`, and build installs with it")),
         );
     }
@@ -142,10 +142,7 @@ pub(crate) fn run(cx: &Context<'_>) {
                         format!("{}:feature:{k}", pkg.name),
                         format!("feature `{k}` of {} has no comment", pkg.name),
                     )
-                    .span(Span::new(
-                        pkg.manifest.rel.clone(),
-                        pkg.manifest.line(&["features", k]),
-                    ))
+                    .span(pkg.manifest.span(&["features", k]))
                     .krate(&pkg.name)
                     .help("put a `# ...` line right above it: what it turns on and when to use it"),
                 );

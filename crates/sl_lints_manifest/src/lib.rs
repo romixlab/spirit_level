@@ -113,12 +113,11 @@ impl Analysis for Manifest {
     }
 }
 
-/// The line of a key of a member's manifest; when the key is missing, the line of the nearest table above it
+/// The key of a member's manifest; when the key is missing, the nearest table above it, else the whole file
 fn at(pkg: &Package, path: &[&str]) -> Span {
-    let line = (1..=path.len())
+    (1..=path.len())
         .rev()
-        .map(|n| pkg.manifest.line(&path[..n]))
-        .find(|l| *l > 0)
-        .unwrap_or(0);
-    Span::new(pkg.manifest.rel.clone(), line)
+        .map(|n| pkg.manifest.span(&path[..n]))
+        .find(|s| s.line > 0)
+        .unwrap_or_else(|| Span::new(pkg.manifest.rel.clone(), 0))
 }

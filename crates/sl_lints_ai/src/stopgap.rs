@@ -240,7 +240,7 @@ fn dead_features(cx: &Context<'_>) {
             if !used {
                 cx.emit(
                     Diagnostic::new(id, format!("{}:feature:{f}", pkg.name), format!("feature `{f}` of {} enables nothing and no cfg tests it", pkg.name))
-                        .span(Span::new(pkg.manifest.rel.clone(), pkg.manifest.line(&["features", f])))
+                        .span(pkg.manifest.span(&["features", f]))
                         .krate(&pkg.name)
                         .help("remove it, or gate the code it was meant for with #[cfg(feature = \"...\")]"),
                 );

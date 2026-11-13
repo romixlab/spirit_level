@@ -48,6 +48,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 ## CODE - source lints
 
 - ✅ `CODE-1` todo!/unimplemented!, panics and prints in libraries, allows without reason, float and hash determinism, CLI subprocesses (`sl_lints_code`); the unsafe allow-list is GRAPH-1's.
+- ✅ `CODE-3` `allow-without-reason` looks inside `cfg_attr(predicate, allow(...))`.
 - ✅ `CODE-2` Module-graph SCC share, dead pub items, error enum growth, pub surface (`sl_lints_modules`, `sl_lints_dead`, `sl_lints_errors`, `sl_lints_surface`).
 
 ## STATE - shared state (fewer-locks)

@@ -142,10 +142,7 @@ fn check_names(cx: &Context<'_>, pkg: &Package) {
                     format!("crate:{}", pkg.name),
                     format!("crate {} lives in a directory named {dir}", pkg.name),
                 )
-                .span(Span::new(
-                    pkg.manifest.rel.clone(),
-                    pkg.manifest.line(&["package", "name"]),
-                ))
+                .span(pkg.manifest.span(&["package", "name"]))
                 .krate(&pkg.name)
                 .help("name the directory after the crate (flat crates/<name>)"),
             );
@@ -168,10 +165,7 @@ fn check_names(cx: &Context<'_>, pkg: &Package) {
     if let Some(m) = msg {
         cx.emit(
             Diagnostic::new("macro-crate-suffix", format!("crate:{}", pkg.name), m)
-                .span(Span::new(
-                    pkg.manifest.rel.clone(),
-                    pkg.manifest.line(&["package", "name"]),
-                ))
+                .span(pkg.manifest.span(&["package", "name"]))
                 .krate(&pkg.name)
                 .help("the suffixes _macros and _derive mean proc macros and nothing else"),
         );

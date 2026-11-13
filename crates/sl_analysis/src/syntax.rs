@@ -43,6 +43,26 @@ pub fn end_line<T: Spanned>(node: &T) -> u32 {
     node.span().end().line as u32
 }
 
+/// A node's range: its first line and column, and its last line and the column after it, all 1-based (columns in
+/// characters), for [`Span::range`](sl_core::Span::range)
+pub type Range = ((u32, u32), (u32, u32));
+
+/// The range a node covers
+pub fn range<T: Spanned>(node: &T) -> Range {
+    let s = node.span();
+    let (a, b) = (s.start(), s.end());
+    (
+        (a.line as u32, a.column as u32 + 1),
+        (b.line as u32, b.column as u32 + 1),
+    )
+}
+
+/// The place of a node in `file`, as an exact range
+pub fn span<T: Spanned>(file: &str, node: &T) -> sl_core::Span {
+    let ((l, c), end) = range(node);
+    sl_core::Span::range(file, (l, c), end)
+}
+
 /// A copy of the file without test-only items (modules, functions, impls marked as tests)
 pub fn without_tests(file: &syn::File) -> syn::File {
     let mut f = file.clone();

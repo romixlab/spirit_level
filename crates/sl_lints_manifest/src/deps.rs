@@ -12,19 +12,10 @@ fn decl(p: &Project, pkg: &Package, d: &Dep) -> (Span, bool) {
     path.push("workspace");
     if pkg.manifest.get(&path).and_then(|v| v.as_bool()) == Some(true) {
         let r = &p.root_manifest;
-        (
-            Span::new(
-                r.rel.clone(),
-                r.line(&["workspace", "dependencies", d.key()]),
-            ),
-            true,
-        )
+        (r.span(&["workspace", "dependencies", d.key()]), true)
     } else {
         path.pop();
-        (
-            Span::new(pkg.manifest.rel.clone(), pkg.manifest.line(&path)),
-            false,
-        )
+        (pkg.manifest.span(&path), false)
     }
 }
 
