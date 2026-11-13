@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-11-13
+
 ### Added
 
 - Lint format: `LintMeta`, tiers that extend, overrides with reason and expiry, scoped exceptions (CFG-1..4).
