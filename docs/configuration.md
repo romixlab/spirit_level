@@ -22,7 +22,7 @@ expires = "v0.4.0"
 
 ## Rules
 
-- **extends** is a tier name (`spirit-level tiers` lists them), a list (`["small", "embedded"]`, later ones win), or a path to a `.toml` file of the same form, relative to the file that names it.
+- **extends** is a tier name (`spl tiers` lists them), a list (`["small", "embedded"]`, later ones win), or a path to a `.toml` file of the same form, relative to the file that names it.
 - **Every entry needs a `reason`**, in tier files too. An entry without one is an error.
 - **Levels:** `allow` (off), `warn` (reported), `deny` (reported, fails the run). A lint that no extended tier enables needs a `level` when a project first sets it.
 - **Parameters** are the lint's own keys, listed on its page with their type and default. An unknown parameter or a value of the wrong type is an error.
@@ -32,4 +32,4 @@ expires = "v0.4.0"
 
 ## Seeing the result
 
-`spirit-level config` prints every lint that is on, the level, where it was set and the reason, then every exception with its scope, reason and expiry.
+`spl config` prints every lint that is on, the level, where it was set and the reason, then every exception with its scope, reason and expiry.

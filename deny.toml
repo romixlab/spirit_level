@@ -1,4 +1,4 @@
-# cargo-deny, run by spirit-level's deny-* lints at the big tier
+# cargo-deny, run by spirit_level's deny-* lints at the big tier
 
 [graph]
 all-features = true

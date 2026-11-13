@@ -6,7 +6,7 @@ For people: one block per finding with its level, lint id, place, message, measu
 
 ## JSON
 
-`spirit-level check --format json` prints one document:
+`spl check --format json` prints one document:
 
 ```json
 {

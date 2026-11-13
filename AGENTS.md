@@ -28,10 +28,10 @@ Result first, then only what the reader must decide or do. Bullets for lists, ta
 | `sl_report` | engine | text and JSON output |
 | `spirit_level` | app | the registry of analyses and the shipped tiers (`crates/spirit_level/tiers/*.toml`) |
 | `sl_book` | app | generated book pages |
-| `spirit_level_cli` | app | the `spirit-level` binary |
+| `spirit_level_cli` | app | the `spl` binary |
 | `sl_testkit` | tests | the golden fixture harness |
 
-The map in `spirit_level.toml` is the source of truth for layers; `spirit-level check` enforces it on this repo at the `big` tier.
+The map in `spirit_level.toml` is the source of truth for layers; `spl check` enforces it on this repo at the `big` tier.
 
 ## 4. Adding a lint
 
@@ -73,11 +73,11 @@ Lint ids are kebab-case and stable. Tool adapters prefix the tool's own ids (`cl
 ```sh
 just            # the recipes
 just test       # nextest; `just test --changed` tests only what changed against main
-just lint       # fmt, clippy -D warnings, spirit-level on itself at the big tier, book freshness
+just lint       # fmt, clippy -D warnings, spl on itself at the big tier, book freshness
 just book       # regenerate the book's generated pages
 just tools      # install the pinned external tools into the tool cache
 just docs       # serve the book (uv, Zensical)
-just install    # build with the deploy profile, put spirit-level on PATH
+just install    # build with the deploy profile, put spl on PATH
 ```
 
 ## 9. Tests

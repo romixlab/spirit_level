@@ -15,4 +15,4 @@ In TOML files the comment starts with `#`. An expiry goes right after the list: 
 
 ## How to fix
 
-Give the reason, correct the lint id (`spirit-level lints` lists them), or, for an expired waiver, fix what it allowed and remove it (or renew it with a new reason and a new expiry).
+Give the reason, correct the lint id (`spl lints` lists them), or, for an expired waiver, fix what it allowed and remove it (or renew it with a new reason and a new expiry).

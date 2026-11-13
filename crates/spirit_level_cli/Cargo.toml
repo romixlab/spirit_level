@@ -1,6 +1,6 @@
 [package]
 name = "spirit_level_cli"
-description = "The spirit-level command: check a project, explain a lint, list lints and tiers, show the resolved configuration, write the book pages"
+description = "The spl command: check a project, explain a lint, list lints and tiers, show the resolved configuration, write the book pages"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -9,7 +9,7 @@ repository.workspace = true
 publish = false
 
 [[bin]]
-name = "spirit-level"
+name = "spl"
 path = "src/main.rs"
 
 [dependencies]
@@ -25,6 +25,12 @@ sl_model.workspace = true
 sl_report.workspace = true
 sl_tools.workspace = true
 spirit_level.workspace = true
+vc_build.workspace = true
+vc_complete.workspace = true
+vc_ui.workspace = true
+
+[build-dependencies]
+vc_build.workspace = true
 
 [dev-dependencies]
 serde_json.workspace = true

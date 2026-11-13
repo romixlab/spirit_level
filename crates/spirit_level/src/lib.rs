@@ -164,7 +164,7 @@ pub fn config(project: &Project, opts: &Options) -> Result<Config, CheckError> {
 /// What the lints a configuration enables need installed
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct ToolNeeds {
-    /// Pinned tools (`spirit-level tools list` names them)
+    /// Pinned tools (`spl tools list` names them)
     pub tools: BTreeSet<String>,
     /// Toolchains: the members' rust-versions, for `cargo-msrv`
     pub toolchains: BTreeSet<String>,

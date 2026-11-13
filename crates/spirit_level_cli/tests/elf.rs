@@ -10,14 +10,14 @@ fn project() -> PathBuf {
 }
 
 fn check(extra: &[&str]) -> (i32, serde_json::Value) {
-    let out = Command::new(env!("CARGO_BIN_EXE_spirit-level"))
+    let out = Command::new(env!("CARGO_BIN_EXE_spl"))
         .arg("check")
         .arg(project())
         .args(["--tier", "embedded", "--only", "stk-6", "--format", "json"])
         .args(extra)
         .env("SPIRIT_LEVEL_TODAY", "2026-11-13")
         .output()
-        .expect("run spirit-level");
+        .expect("run spl");
     let json = serde_json::from_slice(&out.stdout)
         .unwrap_or_else(|e| panic!("{e}: {}", String::from_utf8_lossy(&out.stdout)));
     (out.status.code().unwrap_or(-1), json)
@@ -53,12 +53,12 @@ fn elf_lints_are_not_run_without_it() {
 
 #[test]
 fn a_missing_elf_is_a_usage_error() {
-    let out = Command::new(env!("CARGO_BIN_EXE_spirit-level"))
+    let out = Command::new(env!("CARGO_BIN_EXE_spl"))
         .arg("check")
         .arg(project())
         .args(["--tier", "embedded", "--elf", "no/such/file.elf"])
         .output()
-        .expect("run spirit-level");
+        .expect("run spl");
     assert_eq!(out.status.code(), Some(2));
     assert!(String::from_utf8_lossy(&out.stderr).contains("--elf no/such/file.elf: no such file"));
 }

@@ -18,7 +18,7 @@ reason = "split into foo_editor_core and foo_editor_ui is FEATURES SPLIT-3"
 expires = "2027-03-31"
 ```
 
-`spirit-level config` lists every exception with its reason and expiry.
+`spl config` lists every exception with its reason and expiry.
 
 ## How to fix
 

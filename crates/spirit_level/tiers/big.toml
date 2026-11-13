@@ -162,7 +162,7 @@ reason = "a crate the map marks stable changes its API only with the version bum
 
 [lints.hakari-generate]
 level = "warn"
-reason = "a workspace-hack builds each shared dependency once; warn, as the lint needs spirit-level built with the hakari feature"
+reason = "a workspace-hack builds each shared dependency once; warn, as the lint needs spl built with the hakari feature"
 
 [lints.hakari-manage-deps]
 level = "warn"

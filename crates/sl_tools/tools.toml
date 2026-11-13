@@ -1,5 +1,5 @@
 # The external tools spirit_level's adapters run, at the versions their output parsers are tested against.
-# `spirit-level tools install [TOOL]` installs these into the tool cache; a tool found on PATH instead may be another
+# `spl tools install [TOOL]` installs these into the tool cache; a tool found on PATH instead may be another
 # version. Keys:
 #   crate, version     a crates.io crate built with `cargo install --locked --version`
 #   features           cargo features to build it with; default-features = false drops the crate's defaults

@@ -23,6 +23,8 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 
 - ✅ `CLI-1` check, explain, lints, tiers, config, init, book; dynamic completion; version with SHA.
 - 📋 `CLI-2` Usage records per subcommand.
+- ✅ `CLI-3` The binary is `spl`; crate and repo stay spirit_level.
+- ✅ `CLI-4` The generic CLI parts from vhrd_cli: `--version` (vc_build), `--color`, error line, exit codes (vc_ui), completion (vc_complete).
 
 ## TIER - shipped tiers
 

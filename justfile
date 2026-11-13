@@ -12,7 +12,7 @@ test-all:
     cargo nextest run --workspace --no-fail-fast
     cargo test --workspace --doc -q
 
-# Format, clippy, spirit-level on itself at the big tier (after installing the tools it needs), book freshness
+# Format, clippy, spl on itself at the big tier (after installing the tools it needs), book freshness
 lint:
     cargo fmt --check
     cargo clippy --workspace --all-targets --all-features -- -D warnings
@@ -41,10 +41,10 @@ docs-assets:
     mkdir -p docs/assets/logo
     cp assets/logo/mark-light.svg assets/logo/mark-dark.svg assets/logo/icon-small.svg assets/logo/favicon.ico assets/logo/png/icon-180.png docs/assets/logo/
 
-# Build with the deploy profile and put spirit-level on PATH
+# Build with the deploy profile and put spl on PATH
 install:
     cargo build --profile deploy --locked -p spirit_level_cli
-    if command -v tpm >/dev/null; then tpm install target/deploy/spirit-level; else cargo install --locked --path crates/spirit_level_cli; fi
+    if command -v tpm >/dev/null; then tpm install target/deploy/spl; else cargo install --locked --path crates/spirit_level_cli; fi
 
 # Bring this PC up to main: refuse on local changes, pull, install
 deploy:

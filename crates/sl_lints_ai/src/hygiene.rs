@@ -41,7 +41,7 @@ pub(crate) fn run(cx: &Context<'_>) {
                     Diagnostic::new(id, "git", format!("tracked files not checked: {e}"))
                         .span(Span::new(".git", 0))
                         .confidence(Confidence::Candidate)
-                        .help("run spirit-level inside the project's git checkout"),
+                        .help("run spl inside the project's git checkout"),
                 );
             }
             return;

@@ -161,13 +161,11 @@ pub fn missing_reason(name: &str) -> String {
     match pin(name).map(|p| &p.kind) {
         Some(PinKind::Component(c)) => {
             format!(
-                "{name} is not installed: `rustup component add {c}` (or `spirit-level tools install {name}`)"
+                "{name} is not installed: `rustup component add {c}` (or `spl tools install {name}`)"
             )
         }
         Some(PinKind::Crate { .. }) => {
-            format!(
-                "{name} is not installed: `spirit-level tools install {name}` builds the pinned version"
-            )
+            format!("{name} is not installed: `spl tools install {name}` builds the pinned version")
         }
         None => format!("{name} is not on PATH"),
     }

@@ -78,7 +78,7 @@ impl Analysis for Taplo {
             let mut d =
                 Diagnostic::new("taplo-fmt", rel.clone(), format!("{rel} is not formatted"))
                     .span(Span::new(&rel, 0))
-                    .help("`spirit-level check --fix` (or `taplo fmt`) formats it");
+                    .help("`spl check --fix` (or `taplo fmt`) formats it");
             if let Some(fix) = formatted(&exe, root, &rel) {
                 d = d.fix(fix);
             }

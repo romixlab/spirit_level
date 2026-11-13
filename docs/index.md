@@ -8,6 +8,6 @@ spirit_level is a linter for Rust projects of every size, from one crate to a wo
 - **For people and for CI.** Coloured text or a JSON report, exit codes, and `--fix` where a fix is exact.
 
 ```sh
-spirit-level init --tier small-workspace
-spirit-level check
+spl init --tier small-workspace
+spl check
 ```

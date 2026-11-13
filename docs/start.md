@@ -6,6 +6,8 @@
 cargo install --locked --git https://github.com/romixlab/spirit_level spirit_level_cli
 ```
 
+It installs the `spl` command. Shell completion: `source <(COMPLETE=bash spl)` in `~/.bashrc` (zsh and fish alike).
+
 ## Pick a tier
 
 | Project | Tier |
@@ -16,9 +18,9 @@ cargo install --locked --git https://github.com/romixlab/spirit_level spirit_lev
 | a big workspace with declared layers | `big` (needs a [crate map](map.md)) |
 
 ```sh
-spirit-level init --tier small-workspace   # writes spirit_level.toml
-spirit-level check                         # runs it
-spirit-level check --tier big              # tries another tier without editing the file
+spl init --tier small-workspace   # writes spirit_level.toml
+spl check                         # runs it
+spl check --tier big              # tries another tier without editing the file
 ```
 
 ## Read a finding
@@ -30,7 +32,7 @@ deny workspace-lints crates/foo/Cargo.toml
   fix (--fix): add [lints] workspace = true
 ```
 
-`spirit-level explain workspace-lints` prints the lint's page. `spirit-level check --fix` applies the exact fixes and checks again.
+`spl explain workspace-lints` prints the lint's page. `spl check --fix` applies the exact fixes and checks again.
 
 ## Change what does not fit
 

@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Added
+
+- `--color auto|always|never`; colour, error line, exit codes and completion from vhrd_cli (CLI-4).
+
+### Changed
+
+- **Breaking:** the binary is `spl`; `spirit-level` is gone (CLI-3).
+
 ## [0.1.5] - 2026-11-13
 
 ### Added

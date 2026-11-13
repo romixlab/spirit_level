@@ -1,4 +1,4 @@
-//! `spirit-level`: a linter for Rust projects of every size. See the README for the commands.
+//! `spl`: a linter for Rust projects of every size. See the README for the commands.
 
 use anstream::{eprint, print, println};
 use clap::{Parser, Subcommand, ValueEnum};
@@ -6,24 +6,25 @@ use clap_complete::engine::{ArgValueCandidates, CompletionCandidate};
 use sl_core::{Date, Level};
 use std::path::PathBuf;
 use std::process::ExitCode;
+use vc_ui::Exit;
 
 mod tools;
 
-const VERSION: &str = concat!(
-    env!("CARGO_PKG_VERSION"),
-    " (",
-    env!("GIT_SHA"),
-    ", commit ",
-    env!("BUILD_TIME"),
-    ")"
-);
+/// The tool's name, in front of its error lines
+const TOOL: &str = "spl";
+/// A denied finding
+const DENIED: Exit = Exit::FAILURE;
+/// A denied lint could not run
+const NOT_RUN: Exit = Exit(3);
 
 #[derive(Parser)]
-#[command(name = "spirit-level", version = VERSION, about = "A linter for Rust projects of every size: tiers of lints in TOML, from one crate to a workspace of hundreds")]
+#[command(name = "spl", version = vc_build::version!(), about = "A linter for Rust projects of every size: tiers of lints in TOML, from one crate to a workspace of hundreds")]
 #[command(
-    after_help = "Examples:\n  spirit-level check\n  spirit-level check --format json --only crate-lines\n  spirit-level explain workspace-lints\n  spirit-level init --tier small-workspace"
+    after_help = "Examples:\n  spl check\n  spl check --format json --only crate-lines\n  spl explain workspace-lints\n  spl init --tier small-workspace"
 )]
 struct Cli {
+    #[command(flatten)]
+    color: vc_ui::ColorArg,
     #[command(subcommand)]
     cmd: Cmd,
 }
@@ -155,19 +156,19 @@ fn today(s: Option<String>) -> Result<Date, String> {
 }
 
 fn main() -> ExitCode {
-    clap_complete::CompleteEnv::with_factory(<Cli as clap::CommandFactory>::command).complete();
+    vc_complete::complete(<Cli as clap::CommandFactory>::command);
     let cli = Cli::parse();
+    cli.color.apply();
     match run(cli) {
-        Ok(code) => ExitCode::from(code),
+        Ok(code) => code.into(),
         Err(e) => {
-            eprint!("{}", e.trim_end());
-            eprint!("\n");
-            ExitCode::from(2)
+            vc_ui::eprint_error(TOOL, &e);
+            Exit::USAGE.into()
         }
     }
 }
 
-fn run(cli: Cli) -> Result<u8, String> {
+fn run(cli: Cli) -> Result<Exit, String> {
     match cli.cmd {
         Cmd::Check(a) => check(a),
         Cmd::Explain { lint } => explain(lint),
@@ -184,7 +185,7 @@ fn run(cli: Cli) -> Result<u8, String> {
     }
 }
 
-fn check(a: CheckArgs) -> Result<u8, String> {
+fn check(a: CheckArgs) -> Result<Exit, String> {
     let CheckArgs {
         path,
         config,
@@ -215,7 +216,7 @@ fn check(a: CheckArgs) -> Result<u8, String> {
                 Format::Text => eprint!("{}", sl_report::config_errors(&errs)),
                 Format::Json => println!("{}", sl_report::config_errors_json(&errs)),
             }
-            return Ok(2);
+            return Ok(Exit::USAGE);
         }
         Err(e) => return Err(e.to_string()),
     };
@@ -248,23 +249,23 @@ fn check(a: CheckArgs) -> Result<u8, String> {
         Format::Json => println!("{}", sl_report::json(&report)),
     }
     Ok(if report.failing() > 0 {
-        1
+        DENIED
     } else if report.incomplete() {
-        3
+        NOT_RUN
     } else {
-        0
+        Exit::OK
     })
 }
 
-fn explain(lint: String) -> Result<u8, String> {
+fn explain(lint: String) -> Result<Exit, String> {
     let m = spirit_level::lint(&lint)
-        .ok_or_else(|| format!("no lint {lint} (`spirit-level lints` lists them)"))?;
+        .ok_or_else(|| format!("no lint {lint} (`spl lints` lists them)"))?;
     let tiers = sl_book::tier_levels()?;
     print!("{}", sl_book::lint_page(m, &tiers));
-    Ok(0)
+    Ok(Exit::OK)
 }
 
-fn list_lints(format: Format) -> Result<u8, String> {
+fn list_lints(format: Format) -> Result<Exit, String> {
     let tiers = sl_book::tier_levels()?;
     let mut lints = spirit_level::lints();
     lints.sort_by_key(|m| (m.category, m.id));
@@ -299,17 +300,17 @@ fn list_lints(format: Format) -> Result<u8, String> {
             }
         }
     }
-    Ok(0)
+    Ok(Exit::OK)
 }
 
-fn tiers() -> Result<u8, String> {
+fn tiers() -> Result<Exit, String> {
     for (n, t) in spirit_level::TIERS {
         println!("{n:16} {}", spirit_level::tier_description(t));
     }
-    Ok(0)
+    Ok(Exit::OK)
 }
 
-fn show_config(a: ConfigArgs) -> Result<u8, String> {
+fn show_config(a: ConfigArgs) -> Result<Exit, String> {
     let ConfigArgs {
         path,
         all,
@@ -321,7 +322,7 @@ fn show_config(a: ConfigArgs) -> Result<u8, String> {
         Ok(c) => c,
         Err(spirit_level::CheckError::Config(errs)) => {
             eprint!("{}", sl_report::config_errors(&errs));
-            return Ok(2);
+            return Ok(Exit::USAGE);
         }
         Err(e) => return Err(e.to_string()),
     };
@@ -367,17 +368,17 @@ fn show_config(a: ConfigArgs) -> Result<u8, String> {
             m.crates.len()
         );
     }
-    Ok(0)
+    Ok(Exit::OK)
 }
 
-fn init(path: PathBuf, tier: Vec<String>) -> Result<u8, String> {
+fn init(path: PathBuf, tier: Vec<String>) -> Result<Exit, String> {
     let file = path.join(sl_config::FILE);
     if file.exists() {
         return Err(format!("{} exists already", file.display()));
     }
     for t in &tier {
         if spirit_level::tier(t).is_none() {
-            return Err(format!("no tier {t} (`spirit-level tiers` lists them)"));
+            return Err(format!("no tier {t} (`spl tiers` lists them)"));
         }
     }
     let ext = if tier.len() == 1 {
@@ -396,13 +397,17 @@ fn init(path: PathBuf, tier: Vec<String>) -> Result<u8, String> {
     );
     std::fs::write(&file, text).map_err(|e| e.to_string())?;
     println!("wrote {}", file.display());
-    Ok(0)
+    Ok(Exit::OK)
 }
 
-fn book(docs: PathBuf, zensical: PathBuf, check: bool) -> Result<u8, String> {
+fn book(docs: PathBuf, zensical: PathBuf, check: bool) -> Result<Exit, String> {
     let changed = sl_book::write(&docs, &zensical, check).map_err(|e| e.to_string())?;
     for c in &changed {
         println!("{} {c}", if check { "stale" } else { "wrote" });
     }
-    Ok(if check && !changed.is_empty() { 1 } else { 0 })
+    Ok(if check && !changed.is_empty() {
+        Exit::FAILURE
+    } else {
+        Exit::OK
+    })
 }

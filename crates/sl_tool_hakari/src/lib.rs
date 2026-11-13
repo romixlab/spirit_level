@@ -45,7 +45,7 @@ impl Analysis for Hakari {
 fn run(cx: &Context<'_>) {
     cx.not_run_all(
         "feature:hakari",
-        "spirit-level was built without the `hakari` feature (`cargo install spirit_level_cli --features hakari`)",
+        "spl was built without the `hakari` feature (`cargo install spirit_level_cli --features hakari`)",
     );
 }
 
@@ -188,10 +188,14 @@ mod linked {
                 let mut d = Diagnostic::new(
                     "hakari-generate",
                     "workspace-hack:generated",
-                    format!("the workspace-hack's dependencies are out of date ({changed} lines differ)"),
+                    format!(
+                        "the workspace-hack's dependencies are out of date ({changed} lines differ)"
+                    ),
                 )
                 .span(Span::new(&rel, line))
-                .help("`spirit-level check --fix` (or `cargo hakari generate`) rewrites the generated section")
+                .help(
+                    "`spl check --fix` (or `cargo hakari generate`) rewrites the generated section",
+                )
                 .fix(Fix {
                     description: "regenerate the workspace-hack's dependencies".into(),
                     edits: vec![Edit {

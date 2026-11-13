@@ -1,4 +1,4 @@
-//! The `spirit-level` binary driven as a person or CI would: exit codes, text and JSON output, `--fix`,
+//! The `spl` binary driven as a person or CI would: exit codes, text and JSON output, `--fix`,
 //! configuration errors, expiries, `explain`, `lints`, `init`.
 
 use std::path::{Path, PathBuf};
@@ -31,7 +31,7 @@ impl Drop for Scratch {
 }
 
 fn run(dir: &Path, args: &[&str]) -> Output {
-    Command::new(env!("CARGO_BIN_EXE_spirit-level"))
+    Command::new(env!("CARGO_BIN_EXE_spl"))
         .args(args)
         .current_dir(dir)
         .env("SPIRIT_LEVEL_TODAY", "2026-11-13")

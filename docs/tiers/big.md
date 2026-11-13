@@ -44,7 +44,7 @@ Use it with `extends = "big"` in `spirit_level.toml`.
 | [function-complexity](../lints/function-complexity.md) | `warn` | more paths than can be tested or held in one's head | small |
 | [function-lines](../lints/function-lines.md) | `warn` | a function longer than a screen is changed without being read whole | small |
 | [git-dependency-pins](../lints/git-dependency-pins.md) | `deny` | git dependencies follow a branch; a pin hides a break until it is old | medium |
-| [hakari-generate](../lints/hakari-generate.md) | `warn` | a workspace-hack builds each shared dependency once; warn, as the lint needs spirit-level built with the hakari feature | big |
+| [hakari-generate](../lints/hakari-generate.md) | `warn` | a workspace-hack builds each shared dependency once; warn, as the lint needs spl built with the hakari feature | big |
 | [hakari-manage-deps](../lints/hakari-manage-deps.md) | `warn` | the workspace-hack helps only the members that depend on it; warn, as the lint needs the hakari feature | big |
 | [justfile-recipes](../lints/justfile-recipes.md) | `warn` | every repo answers to the same recipes: default, test, lint, install, deploy | small |
 | [justfile-simple](../lints/justfile-simple.md) | `warn` | recipes call programs; logic lives in Rust where it is tested | big |
@@ -255,7 +255,7 @@ reason = "a crate the map marks stable changes its API only with the version bum
 
 [lints.hakari-generate]
 level = "warn"
-reason = "a workspace-hack builds each shared dependency once; warn, as the lint needs spirit-level built with the hakari feature"
+reason = "a workspace-hack builds each shared dependency once; warn, as the lint needs spl built with the hakari feature"
 
 [lints.hakari-manage-deps]
 level = "warn"

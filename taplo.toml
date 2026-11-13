@@ -1,4 +1,4 @@
-# taplo, run by spirit-level's taplo-fmt lint
+# taplo, run by spirit_level's taplo-fmt lint
 
 # fixtures are inputs of tests, formatted as each case needs; zensical.toml holds the nav the book generator writes
 exclude = ["crates/*/tests/fixtures/**", "crates/sl_testkit/vendor/**", "target/**", "zensical.toml"]

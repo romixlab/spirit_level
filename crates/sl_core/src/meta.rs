@@ -1,4 +1,4 @@
-//! A lint's metadata: the one place a lint is described. The book page, `spirit-level explain`, the parameter
+//! A lint's metadata: the one place a lint is described. The book page, `spl explain`, the parameter
 //! checks of the configuration and the tier files are all held to it.
 
 use crate::params::ParamSpec;

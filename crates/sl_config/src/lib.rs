@@ -137,7 +137,7 @@ impl Config {
             vec![ConfigError::new(
                 &rel,
                 0,
-                format!("cannot read it ({e}); `spirit-level init --tier small` writes one"),
+                format!("cannot read it ({e}); `spl init --tier small` writes one"),
             )]
         })?;
         let mut r = Resolver::new(env, root);
@@ -145,7 +145,7 @@ impl Config {
         r.finish(Some(rel))
     }
 
-    /// The configuration of shipped tiers alone, without a project file (`spirit-level check --tier big`)
+    /// The configuration of shipped tiers alone, without a project file (`spl check --tier big`)
     pub fn from_tiers(tiers: &[&str], env: &Env<'_>) -> Result<Config, Vec<ConfigError>> {
         let mut r = Resolver::new(env, Path::new("."));
         r.record_at = 0;
@@ -313,7 +313,7 @@ impl<'a> Resolver<'a> {
                     &at.file,
                     at.line,
                     format!(
-                        "extends {name:?}, which is not a shipped tier (`spirit-level tiers` lists them) nor a path to a .toml file"
+                        "extends {name:?}, which is not a shipped tier (`spl tiers` lists them) nor a path to a .toml file"
                     ),
                 )),
             }
@@ -654,7 +654,7 @@ fn unknown_lint(id: &str, lints: &[&'static LintMeta]) -> String {
         .collect();
     near.truncate(3);
     if near.is_empty() {
-        format!("unknown lint {id} (`spirit-level lints` lists them)")
+        format!("unknown lint {id} (`spl lints` lists them)")
     } else {
         format!("unknown lint {id}; did you mean {}?", near.join(", "))
     }

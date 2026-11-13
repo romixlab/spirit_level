@@ -41,7 +41,7 @@ impl Analysis for Geiger {
 fn run(cx: &Context<'_>) {
     cx.not_run_all(
         "feature:geiger",
-        "spirit-level was built without the `geiger` feature (`cargo install spirit_level_cli --features geiger`)",
+        "spl was built without the `geiger` feature (`cargo install spirit_level_cli --features geiger`)",
     );
 }
 

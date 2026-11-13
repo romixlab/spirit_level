@@ -16,4 +16,4 @@ Crates are ordered by their layer's place in the map, then by name.
 
 ## How to fix
 
-`spirit-level check --fix` regenerates the table. To change a row, edit the crate's `description` or its map entry.
+`spl check --fix` regenerates the table. To change a row, edit the crate's `description` or its map entry.

@@ -6,7 +6,7 @@
 |---|---|
 | Category | [hakari](index.md#hakari) |
 | Source | hakari (linked as a library) |
-| Fix | exact: `spirit-level check --fix` applies it |
+| Fix | exact: `spl check --fix` applies it |
 | Needs | the resolved dependency graph (full `cargo metadata`) |
 
 ## Level per tier
@@ -16,7 +16,7 @@
 | [small](../tiers/small.md) | off |  |
 | [small-workspace](../tiers/small-workspace.md) | off |  |
 | [medium](../tiers/medium.md) | off |  |
-| [big](../tiers/big.md) | `warn` | a workspace-hack builds each shared dependency once; warn, as the lint needs spirit-level built with the hakari feature |
+| [big](../tiers/big.md) | `warn` | a workspace-hack builds each shared dependency once; warn, as the lint needs spl built with the hakari feature |
 | [ai](../tiers/ai.md) | off |  |
 | [embedded](../tiers/embedded.md) | off |  |
 
@@ -26,7 +26,7 @@ In a big workspace each member enables other features of shared dependencies, so
 
 ## How to fix
 
-`spirit-level check --fix` rewrites the generated section of the workspace-hack's `Cargo.toml` (as `cargo hakari generate` does). A workspace without one starts with `cargo hakari init workspace-hack`.
+`spl check --fix` rewrites the generated section of the workspace-hack's `Cargo.toml` (as `cargo hakari generate` does). A workspace without one starts with `cargo hakari init workspace-hack`.
 
 ## Configure
 

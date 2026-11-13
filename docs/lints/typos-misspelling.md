@@ -6,7 +6,7 @@
 |---|---|
 | Category | [typos](index.md#typos) |
 | Source | typos (run as an executable) |
-| Fix | exact: `spirit-level check --fix` applies it |
+| Fix | exact: `spl check --fix` applies it |
 | Needs | `typos` installed |
 
 ## Level per tier
@@ -26,7 +26,7 @@ A misspelled identifier is copied into every call site, and a misspelled word in
 
 ## How to fix
 
-`spirit-level check --fix` writes the correction where typos knows exactly one. A word that is right in this project (a name, an abbreviation) goes into a checked-in `typos.toml`:
+`spl check --fix` writes the correction where typos knows exactly one. A word that is right in this project (a name, an abbreviation) goes into a checked-in `typos.toml`:
 
 ```toml
 [default.extend-words]

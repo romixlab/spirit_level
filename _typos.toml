@@ -1,4 +1,4 @@
-# typos, run by spirit-level's typos-misspelling lint
+# typos, run by spirit_level's typos-misspelling lint
 
 [files]
 # fixtures and captured tool output carry misspellings on purpose; vendor/ holds published crates as they are; the

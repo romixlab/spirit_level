@@ -4,4 +4,4 @@ In a big workspace each member enables other features of shared dependencies, so
 
 ## How to fix
 
-`spirit-level check --fix` rewrites the generated section of the workspace-hack's `Cargo.toml` (as `cargo hakari generate` does). A workspace without one starts with `cargo hakari init workspace-hack`.
+`spl check --fix` rewrites the generated section of the workspace-hack's `Cargo.toml` (as `cargo hakari generate` does). A workspace without one starts with `cargo hakari init workspace-hack`.

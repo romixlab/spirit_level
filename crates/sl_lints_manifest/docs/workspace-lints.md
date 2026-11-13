@@ -4,4 +4,4 @@ One `[workspace.lints]` table is the project's lint policy; every crate opts in 
 
 ## How to fix
 
-Declare `[workspace.lints.rust]` and `[workspace.lints.clippy]` in the root manifest. `spirit-level check --fix` appends `[lints]` with `workspace = true` to each member that has no `[lints]` table.
+Declare `[workspace.lints.rust]` and `[workspace.lints.clippy]` in the root manifest. `spl check --fix` appends `[lints]` with `workspace = true` to each member that has no `[lints]` table.

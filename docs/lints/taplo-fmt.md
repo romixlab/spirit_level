@@ -6,7 +6,7 @@
 |---|---|
 | Category | [taplo](index.md#taplo) |
 | Source | taplo (run as an executable) |
-| Fix | exact: `spirit-level check --fix` applies it |
+| Fix | exact: `spl check --fix` applies it |
 | Needs | `taplo` installed |
 
 ## Level per tier
@@ -33,7 +33,7 @@ column_width = 120
 
 ## How to fix
 
-`spirit-level check --fix` writes each file as `taplo fmt` formats it. A file that does not parse is fixed by hand at the place reported.
+`spl check --fix` writes each file as `taplo fmt` formats it. A file that does not parse is fixed by hand at the place reported.
 
 ## Configure
 

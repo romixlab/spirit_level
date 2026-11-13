@@ -6,7 +6,7 @@
 |---|---|
 | Category | [graph](index.md#graph) |
 | Source | spirit_level |
-| Fix | exact: `spirit-level check --fix` applies it |
+| Fix | exact: `spl check --fix` applies it |
 
 ## Level per tier
 
@@ -43,7 +43,7 @@ Crates are ordered by their layer's place in the map, then by name.
 
 ## How to fix
 
-`spirit-level check --fix` regenerates the table. To change a row, edit the crate's `description` or its map entry.
+`spl check --fix` regenerates the table. To change a row, edit the crate's `description` or its map entry.
 
 ## Configure
 

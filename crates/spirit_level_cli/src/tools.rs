@@ -1,4 +1,4 @@
-//! `spirit-level tools`: where each pinned tool is found, and installing the pinned versions
+//! `spl tools`: where each pinned tool is found, and installing the pinned versions
 
 use anstream::{eprint, println};
 use clap::Subcommand;
@@ -13,7 +13,7 @@ pub enum ToolsCmd {
     /// components are added to the project's toolchain
     #[command(after_help = "Exit codes: 0 installed, 1 an install failed, 2 usage error")]
     Install {
-        /// The tool (`spirit-level tools list` names them); none: every tool
+        /// The tool (`spl tools list` names them); none: every tool
         #[arg(add = ArgValueCandidates::new(tool_candidates), conflicts_with = "needed")]
         tool: Option<String>,
         /// The project whose toolchain gets rustup components
@@ -33,7 +33,7 @@ fn tool_candidates() -> Vec<CompletionCandidate> {
         .collect()
 }
 
-pub fn run(cmd: ToolsCmd) -> Result<u8, String> {
+pub fn run(cmd: ToolsCmd) -> Result<vc_ui::Exit, String> {
     match cmd {
         ToolsCmd::List => list(),
         ToolsCmd::Install {
@@ -47,7 +47,7 @@ pub fn run(cmd: ToolsCmd) -> Result<u8, String> {
     }
 }
 
-fn list() -> Result<u8, String> {
+fn list() -> Result<vc_ui::Exit, String> {
     let cache = sl_tools::Cache::from_env();
     println!("cache: {}", cache.root.display());
     for p in sl_tools::pins() {
@@ -59,21 +59,20 @@ fn list() -> Result<u8, String> {
         let nightly = if p.nightly { " (nightly)" } else { "" };
         println!("{:20} {:10} {at}{nightly}", p.name, p.version());
     }
-    Ok(0)
+    Ok(vc_ui::Exit::OK)
 }
 
-fn install(tool: Option<String>, path: PathBuf) -> Result<u8, String> {
+fn install(tool: Option<String>, path: PathBuf) -> Result<vc_ui::Exit, String> {
     let pins: Vec<&sl_tools::Pin> = match &tool {
         Some(t) => vec![
-            sl_tools::pin(t)
-                .ok_or_else(|| format!("no tool {t} (`spirit-level tools list` names them)"))?,
+            sl_tools::pin(t).ok_or_else(|| format!("no tool {t} (`spl tools list` names them)"))?,
         ],
         None => sl_tools::pins().iter().collect(),
     };
-    Ok(u8::from(install_pins(&pins, &path) > 0))
+    Ok(failed_if(install_pins(&pins, &path) > 0))
 }
 
-fn install_needed(path: PathBuf) -> Result<u8, String> {
+fn install_needed(path: PathBuf) -> Result<vc_ui::Exit, String> {
     let project = sl_model::Project::load(&path).map_err(|e| e.to_string())?;
     let opts = spirit_level::Options::new(sl_core::Date::today_utc());
     let config = spirit_level::config(&project, &opts).map_err(|e| e.to_string())?;
@@ -101,7 +100,15 @@ fn install_needed(path: PathBuf) -> Result<u8, String> {
             }
         }
     }
-    Ok(u8::from(failed > 0))
+    Ok(failed_if(failed > 0))
+}
+
+fn failed_if(failed: bool) -> vc_ui::Exit {
+    if failed {
+        vc_ui::Exit::FAILURE
+    } else {
+        vc_ui::Exit::OK
+    }
 }
 
 /// Installs each pin; the number that failed

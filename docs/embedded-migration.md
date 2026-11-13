@@ -6,13 +6,13 @@ spirit_level carries every automatic check of embedded_bedrock's firmware lint, 
 
 | bedrock-lint | spirit_level |
 |---|---|
-| `bedrock-lint check fw/board` in the firmware crate | `spirit-level check` in the workspace: every firmware crate of it is checked |
+| `bedrock-lint check fw/board` in the firmware crate | `spl check` in the workspace: every firmware crate of it is checked |
 | `--elf target/<triple>/release/<name>` | `--elf target/<triple>/release/<name>`, repeated for several firmware crates; an ELF goes with the crate that has a binary of its file name, or with the only firmware crate |
 | `--only EXE-3,STK` | `--only exe-3 --only stk` (a lint id or a category) |
 | `--format sarif` | `--format json`; SARIF is planned (FEATURES `ENG-5`) |
 | `--fail-on warning` (the default) | a `deny` finding fails the run, a `warn` one never does: set the warnings that must fail to `deny` in `spirit_level.toml` |
 | `--root` (where discovery stops) | discovery stops at the workspace root |
-| `checks list --all`, `explain EXE-3` | `spirit-level lints`, `spirit-level explain exe-3`, and the [lint pages](lints/index.md) |
+| `checks list --all`, `explain EXE-3` | `spl lints`, `spl explain exe-3`, and the [lint pages](lints/index.md) |
 | `code-size <ELF> --by-crate` | not ported: a report, not a check |
 
 A firmware crate is a workspace member with a binary whose root is `#![no_std]`, or with a `memory.x`, a `bedrock_fw.json` or a `-none-` target in its `.cargo/config.toml`. `[package.metadata.spirit-level] firmware = true` (or `false`) in the crate's `Cargo.toml` decides it by hand.

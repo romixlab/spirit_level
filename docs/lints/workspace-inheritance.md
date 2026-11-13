@@ -6,7 +6,7 @@
 |---|---|
 | Category | [workspace](index.md#workspace) |
 | Source | spirit_level |
-| Fix | exact: `spirit-level check --fix` applies it |
+| Fix | exact: `spl check --fix` applies it |
 
 ## Level per tier
 
@@ -48,7 +48,7 @@ license.workspace = true
 
 ## How to fix
 
-`spirit-level check --fix` rewrites `key = "..."` into `key.workspace = true`, or adds the line after `name` when the key is missing. A key missing from `[workspace.package]` itself is added by hand. The keys checked are the parameter `keys`.
+`spl check --fix` rewrites `key = "..."` into `key.workspace = true`, or adds the line after `name` when the key is missing. A key missing from `[workspace.package]` itself is added by hand. The keys checked are the parameter `keys`.
 
 ## Configure
 

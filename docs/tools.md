@@ -5,8 +5,8 @@ spirit_level reuses established Rust lint tools instead of reimplementing them. 
 - **Library or executable.** A tool with a library on stable Rust that does the whole job is linked. The others run as executables, and the adapter reads their machine-readable output (JSON where the tool has it, its stable text where not).
 - **Optional.** A linked tool is a cargo feature of `spirit_level` and `spirit_level_cli` (`hakari`, `geiger`), off by default. An executable adapter costs nothing to build, so it is always compiled in; it runs only when one of its lints is on.
 - **Missing tools.** A lint whose executable is not installed, or whose feature was not built, is reported as not run with the reason and the command that installs it. At `deny` the run then exits with code 3: it never passes green.
-- **Pinned versions.** `crates/sl_tools/tools.toml` pins each tool at the version its parser is tested against. `spirit-level tools install [TOOL]` installs it, `spirit-level tools list` shows where each is found.
-- **What a project needs.** `spirit-level tools install --needed` installs only what the project's enabled lints need: their tools, the toolchain of each `rust-version` for `cargo-msrv`, and the targets of `cargo-no-std` and `cargo-wasm` when the map marks crates. Run it before `check` in CI, so no lint is left not run.
+- **Pinned versions.** `crates/sl_tools/tools.toml` pins each tool at the version its parser is tested against. `spl tools install [TOOL]` installs it, `spl tools list` shows where each is found.
+- **What a project needs.** `spl tools install --needed` installs only what the project's enabled lints need: their tools, the toolchain of each `rust-version` for `cargo-msrv`, and the targets of `cargo-no-std` and `cargo-wasm` when the map marks crates. Run it before `check` in CI, so no lint is left not run.
 
 ## Library or executable
 
@@ -128,4 +128,4 @@ Builds that cargo does itself, reported from `--message-format json`. Other tool
 
 ## The tool cache
 
-`spirit-level tools install` builds each pinned crate with `cargo install --locked --version <v> --root <dir>`. The directory is keyed on the crate, its version, its features and `rustc -vV` (sha2), so a new compiler gets a new build and an old one is found again: `<cache>/<tool>/<version>-<key>/bin`. The cache is `$SPIRIT_LEVEL_TOOLS`, else `$XDG_CACHE_HOME/spirit_level/tools`, else `~/.cache/spirit_level/tools`. Adapters look in the cache first, then on PATH; a tool on PATH may be another version than the pin. rustup components (clippy, rustfmt) are added to the project's toolchain instead.
+`spl tools install` builds each pinned crate with `cargo install --locked --version <v> --root <dir>`. The directory is keyed on the crate, its version, its features and `rustc -vV` (sha2), so a new compiler gets a new build and an old one is found again: `<cache>/<tool>/<version>-<key>/bin`. The cache is `$SPIRIT_LEVEL_TOOLS`, else `$XDG_CACHE_HOME/spirit_level/tools`, else `~/.cache/spirit_level/tools`. Adapters look in the cache first, then on PATH; a tool on PATH may be another version than the pin. rustup components (clippy, rustfmt) are added to the project's toolchain instead.
