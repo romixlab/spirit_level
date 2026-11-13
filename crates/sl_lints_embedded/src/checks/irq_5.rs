@@ -16,6 +16,8 @@ lint!(META, "irq-5", "irq", "every routed interrupt line is enabled and has a ha
 /// What the check needs from a firmware crate; a crate without it is not checked
 pub(crate) const NEEDS: &[FwNeed] = &[FwNeed::Sources];
 
+const HELP: &str = "enable every routed line and bind a handler to every enabled vector; remove the routing of unused ones";
+
 
 /// `NVIC::unmask(Interrupt::X)` / `interrupt::X.enable()` with no `#[interrupt] fn X` and no binding of X; an
 /// M_CAN `.ils()` write (interrupt line select) with no `.ile()` write (interrupt line enable) anywhere
@@ -51,7 +53,8 @@ pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
                             text(&m.receiver)
                         ),
                     )
-                    .span(loc.span().label(format!("{}.enable()", text(&m.receiver)))),
+                    .help(HELP)
+.span(loc.span().label(format!("{}.enable()", text(&m.receiver)))),
                 );
             }
             Expr::Call(c) => {
@@ -79,7 +82,8 @@ pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
                             vector = vector
                         ),
                     )
-                    .span(loc.span().label(format!("NVIC::unmask({})", text(arg)))),
+                    .help(HELP)
+.span(loc.span().label(format!("NVIC::unmask({})", text(arg)))),
                 );
             }
             _ => {}
@@ -115,7 +119,8 @@ pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
                          enable) is in the source seen: the lines stay unanswered"
                     ),
                 )
-                .span(loc.span().label(format!("{recv}.write_value(..)")))
+                .help(HELP)
+.span(loc.span().label(format!("{recv}.write_value(..)")))
                 .confidence(Confidence::Estimate),
             );
         }

@@ -15,6 +15,8 @@ lint!(META, "irq-2", "irq", "write-1-to-clear flags are cleared with a write, no
 /// What the check needs from a firmware crate; a crate without it is not checked
 pub(crate) const NEEDS: &[FwNeed] = &[FwNeed::Sources];
 
+const HELP: &str = "write the one bit (a bare write of its mask), never modify(), on a register whose flags clear by writing 1";
+
 
 /// Receiver-chain names that read as a status / flag register, as the catalogue lists them
 const REGISTER_NAMES: &[&str] = &["isr", "sr", "ir", "ifr"];
@@ -45,7 +47,8 @@ pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
                         text(&m.receiver)
                     ),
                 )
-                .span(loc.span().label(format!("{}.modify(..)", text(&m.receiver))))
+                .help(HELP)
+.span(loc.span().label(format!("{}.modify(..)", text(&m.receiver))))
                 .confidence(Confidence::Candidate),
             );
         });

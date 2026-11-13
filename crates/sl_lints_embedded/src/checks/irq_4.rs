@@ -12,6 +12,8 @@ lint!(META, "irq-4", "irq", "no driver disables a shared interrupt vector that o
 /// What the check needs from a firmware crate; a crate without it is not checked
 pub(crate) const NEEDS: &[FwNeed] = &[FwNeed::Sources];
 
+const HELP: &str = "disable only the peripheral's own enable bit, or count the users of the shared vector before masking it";
+
 
 /// A chip family's vectors known to carry more than one peripheral, for the finding's message; the check itself
 /// needs no chip data, it only reads `bind_interrupts!` lines
@@ -49,6 +51,7 @@ pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
         }
         out.push(
             Diagnostic::new("irq-4", format!("{}:{}", b.group, b.vector), message)
+                .help(HELP)
                 .span(
                     b.loc
                         .span()

@@ -16,6 +16,8 @@ lint!(META, "irq-1", "irq", "interrupt handlers clear exactly the flags they han
 /// What the check needs from a firmware crate; a crate without it is not checked
 pub(crate) const NEEDS: &[FwNeed] = &[FwNeed::Sources];
 
+const HELP: &str = "clear only the bits the handler read and acted on, never a blanket mask or the value read back";
+
 
 /// Receiver-chain names that read as an interrupt flag / clear register
 const REGISTER_NAMES: &[&str] = &["ir", "icr", "ifcr", "isr", "sr", "clr"];
@@ -40,7 +42,8 @@ pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
                                 text(&m.receiver)
                             ),
                         )
-                        .span(loc.span().label(format!("{}.write_value({})", text(&m.receiver), text(arg)))),
+                        .help(HELP)
+.span(loc.span().label(format!("{}.write_value({})", text(&m.receiver), text(arg)))),
                     );
                 } else if let Expr::MethodCall(r) = strip(arg)
                     && r.method == "read"
@@ -57,7 +60,8 @@ pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
                                 text(&m.receiver)
                             ),
                         )
-                        .span(loc.span().label(format!("{0}.write_value({0}.read())", text(&m.receiver)))),
+                        .help(HELP)
+.span(loc.span().label(format!("{0}.write_value({0}.read())", text(&m.receiver)))),
                     );
                 }
             }
@@ -100,7 +104,8 @@ pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
                             text(ptr)
                         ),
                     )
-                    .span(loc.span().label(format!("write_volatile({0}, read_volatile({0}))", text(ptr)))),
+                    .help(HELP)
+.span(loc.span().label(format!("write_volatile({0}, read_volatile({0}))", text(ptr)))),
                 );
             }
             _ => {}
