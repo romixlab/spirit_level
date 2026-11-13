@@ -471,18 +471,6 @@ pub fn demangle(raw: &str) -> String {
     format!("{:#}", rustc_demangle::demangle(raw))
 }
 
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn demangles_without_the_hash() {
-        assert_eq!(
-            super::demangle("_ZN4core3fmt5write17h0123456789abcdefE"),
-            "core::fmt::write"
-        );
-        assert_eq!(super::demangle("_stack_start"), "_stack_start");
-    }
-}
-
 /// The symbol table, sorted by address and name: functions and objects, without mapping (`$t`) and file symbols;
 /// Thumb function addresses without their low bit
 fn read_symbols(
@@ -526,4 +514,16 @@ fn read_symbols(
     symbols.sort_by(|a, b| (a.addr, &a.raw).cmp(&(b.addr, &b.raw)));
     symbols.dedup_by(|a, b| a.addr == b.addr && a.raw == b.raw);
     symbols
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn demangles_without_the_hash() {
+        assert_eq!(
+            super::demangle("_ZN4core3fmt5write17h0123456789abcdefE"),
+            "core::fmt::write"
+        );
+        assert_eq!(super::demangle("_stack_start"), "_stack_start");
+    }
 }
