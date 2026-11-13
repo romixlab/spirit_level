@@ -87,12 +87,6 @@ nav = [
 ]
 # spirit-level:book-nav-end
 
-
-
-
-
-
-
 [project.theme]
 language = "en"
 features = [

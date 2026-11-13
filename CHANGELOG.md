@@ -11,5 +11,6 @@
 - Size lints: crate, test, module and function lines; cyclomatic complexity (SIZE-1).
 - Shared-state lints: interior-mutable statics, static mut, thread-locals, lock().unwrap(), guards across await or I/O (STATE-1).
 - Graph lints against the crate map: layers, forbid, external form, _core, cycles, crate table, unsafe list (GRAPH-1).
+- Source lints: todo macros, panics and prints in libraries, allow reasons, determinism, CLI subprocesses (CODE-1).
 - Tiers `small`, `small-workspace`, `medium`, `big` (TIER-1).
 - Book generated from lint metadata (BOOK-1).

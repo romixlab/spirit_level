@@ -321,8 +321,18 @@ pub fn write(docs: &Path, zensical: &Path, check: bool) -> std::io::Result<Vec<S
     }
     let z = std::fs::read_to_string(zensical).unwrap_or_default();
     let new = match (z.find(NAV_BEGIN), z.find(NAV_END)) {
-        (Some(a), Some(b)) if b > a => format!("{}{}{}", &z[..a], nav(), &z[b + NAV_END.len()..]),
-        _ => format!("{}\n{}\n", z.trim_end(), nav()),
+        (Some(a), Some(b)) if b > a => {
+            let rest = z[b + NAV_END.len()..]
+                .strip_prefix('\n')
+                .unwrap_or(&z[b + NAV_END.len()..]);
+            format!("{}{}{rest}", &z[..a], nav())
+        }
+        _ => {
+            return Err(std::io::Error::other(format!(
+                "{} has no nav markers: put a line `{NAV_BEGIN}` and a line `{NAV_END}` inside its [project] table",
+                zensical.display()
+            )));
+        }
     };
     if new != z {
         changed.push(zensical.display().to_string());
@@ -331,4 +341,34 @@ pub fn write(docs: &Path, zensical: &Path, check: bool) -> std::io::Result<Vec<S
         }
     }
     Ok(changed)
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn writing_twice_changes_nothing() {
+        let dir = std::env::temp_dir().join(format!("sl_book_{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).unwrap();
+        let z = dir.join("zensical.toml");
+        std::fs::write(
+            &z,
+            format!(
+                "[project]\nsite_name = \"x\"\n{}\n{}\n\n[project.theme]\nlanguage = \"en\"\n",
+                super::NAV_BEGIN,
+                super::NAV_END
+            ),
+        )
+        .unwrap();
+        assert!(
+            !super::write(&dir.join("docs"), &z, false)
+                .unwrap()
+                .is_empty()
+        );
+        assert_eq!(
+            super::write(&dir.join("docs"), &z, true).unwrap(),
+            Vec::<String>::new()
+        );
+        let _ = std::fs::remove_dir_all(&dir);
+    }
 }
