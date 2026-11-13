@@ -241,6 +241,89 @@ pub fn complexity(block: &Block) -> u32 {
     c.0
 }
 
+/// The line ranges of every test-only item in a file (nested ones inside inline modules included)
+pub fn test_ranges(file: &syn::File) -> Vec<(u32, u32)> {
+    fn walk(items: &[Item], out: &mut Vec<(u32, u32)>) {
+        for i in items {
+            if is_test(item_attrs(i)) {
+                out.push((line(i), end_line(i)));
+                continue;
+            }
+            match i {
+                Item::Mod(m) => {
+                    if let Some((_, inner)) = &m.content {
+                        walk(inner, out);
+                    }
+                }
+                Item::Impl(im) => {
+                    for ii in &im.items {
+                        if let ImplItem::Fn(f) = ii
+                            && is_test(&f.attrs)
+                        {
+                            out.push((line(f), end_line(f)));
+                        }
+                    }
+                }
+                _ => {}
+            }
+        }
+    }
+    let mut out = Vec::new();
+    walk(&file.items, &mut out);
+    out
+}
+
+/// A token of [`tokens`]
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum Tok {
+    /// An identifier or keyword (lifetimes are not)
+    Ident(String),
+    /// `::`
+    PathSep,
+    /// Anything else, group delimiters included
+    Other,
+}
+
+/// The tokens of a source text, macro bodies included, flattened with their lines; `None` when the text does not
+/// lex. Group delimiters are [`Tok::Other`], so a path never runs across a bracket
+pub fn tokens(text: &str) -> Option<Vec<(Tok, u32)>> {
+    use proc_macro2::{Spacing, TokenStream, TokenTree};
+    fn flat(ts: TokenStream, out: &mut Vec<(Tok, u32)>) {
+        let mut it = ts.into_iter().peekable();
+        while let Some(tt) = it.next() {
+            let at = tt.span().start().line as u32;
+            match tt {
+                TokenTree::Ident(i) => out.push((Tok::Ident(i.to_string()), at)),
+                TokenTree::Punct(p) if p.as_char() == ':' && p.spacing() == Spacing::Joint => {
+                    if matches!(it.peek(), Some(TokenTree::Punct(q)) if q.as_char() == ':') {
+                        it.next();
+                        out.push((Tok::PathSep, at));
+                    } else {
+                        out.push((Tok::Other, at));
+                    }
+                }
+                TokenTree::Punct(p) if p.as_char() == '\'' => {
+                    // a lifetime or label: its name is no identifier of the program
+                    out.push((Tok::Other, at));
+                    if matches!(it.peek(), Some(TokenTree::Ident(_))) {
+                        it.next();
+                    }
+                }
+                TokenTree::Group(g) => {
+                    out.push((Tok::Other, at));
+                    flat(g.stream(), out);
+                    out.push((Tok::Other, g.span_close().start().line as u32));
+                }
+                _ => out.push((Tok::Other, at)),
+            }
+        }
+    }
+    let ts: TokenStream = text.parse().ok()?;
+    let mut out = Vec::new();
+    flat(ts, &mut out);
+    Some(out)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -254,6 +337,26 @@ mod tests {
         let s = without_tests(&f);
         let names: Vec<String> = functions(&s, "k").into_iter().map(|f| f.path).collect();
         assert_eq!(names, vec!["k::a", "k::m::d", "k::X::g"]);
+    }
+
+    #[test]
+    fn tokens_and_test_ranges() {
+        let text = "fn a<'x>() { crate::b::c(); }\n#[cfg(test)]\nmod tests {}\n";
+        let t = tokens(text).unwrap();
+        let idents: Vec<&str> = t
+            .iter()
+            .filter_map(|(t, _)| match t {
+                Tok::Ident(s) => Some(s.as_str()),
+                _ => None,
+            })
+            .collect();
+        assert_eq!(
+            idents,
+            ["fn", "a", "crate", "b", "c", "cfg", "test", "mod", "tests"]
+        );
+        assert_eq!(t.iter().filter(|(t, _)| *t == Tok::PathSep).count(), 2);
+        let f: syn::File = syn::parse_str(text).unwrap();
+        assert_eq!(test_ranges(&f), vec![(2, 3)]);
     }
 
     #[test]

@@ -1,0 +1,5 @@
+params = { min-lines = 0, max-per-kloc = 200 }
+
+[[finding]]
+at = "src/lib.rs"
+contains = "offers 10 public items"

@@ -24,6 +24,7 @@ Use it with `extends = "medium"` in `spirit_level.toml`.
 | [default-features-off](../lints/default-features-off.md) | `warn` | dependencies are added with default-features = false and only the features in use | small |
 | [duplicate-versions](../lints/duplicate-versions.md) | `warn` | two versions of a crate double its build time and split its types | small-workspace |
 | [edition-latest](../lints/edition-latest.md) | `warn` | new code starts on the current edition | small |
+| [error-enum-growth](../lints/error-enum-growth.md) | `warn` | a flat error enum grows a variant per failure and loses the source errors; wrap them by layer | medium |
 | [function-complexity](../lints/function-complexity.md) | `warn` | more paths than can be tested or held in one's head | small |
 | [function-lines](../lints/function-lines.md) | `warn` | a function longer than a screen is changed without being read whole | small |
 | [git-dependency-pins](../lints/git-dependency-pins.md) | `deny` | git dependencies follow a branch; a pin hides a break until it is old | medium |
@@ -31,6 +32,7 @@ Use it with `extends = "medium"` in `spirit_level.toml`.
 | [lock-held-across](../lints/lock-held-across.md) | `warn` | a guard across .await or I/O stalls every other caller for as long as the slowest peer | small |
 | [lock-unwrap](../lints/lock-unwrap.md) | `warn` | the count of lock().unwrap() per crate shows where shared state concentrates | medium |
 | [macro-crate-suffix](../lints/macro-crate-suffix.md) | `warn` | _macros and _derive mean proc macros and nothing else | small-workspace |
+| [module-graph-scc](../lints/module-graph-scc.md) | `warn` | a module cycle holding most of a crate can't be split into crates; cut it while it is small | medium |
 | [module-lines](../lints/module-lines.md) | `warn` | a file of thousands of lines holds several subjects and collects every edit | medium |
 | [nested-locks](../lints/nested-locks.md) | `warn` | two locks at once need one lock order everywhere | small-workspace |
 | [no-sys-crates](../lints/no-sys-crates.md) | `deny` | pure-Rust crates only: no bundled C, no -sys bindings without a written reason | small |
@@ -115,4 +117,13 @@ reason = "components call each other as libraries, not through their CLIs"
 [lints.commit-subject-length]
 level = "warn"
 reason = "the subject is what one-line logs and reviews show"
+
+[lints.module-graph-scc]
+level = "warn"
+reason = "a module cycle holding most of a crate can't be split into crates; cut it while it is small"
+
+
+[lints.error-enum-growth]
+level = "warn"
+reason = "a flat error enum grows a variant per failure and loses the source errors; wrap them by layer"
 ```

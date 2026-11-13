@@ -29,7 +29,9 @@
 //! }
 //! ```
 
+pub mod api;
 pub mod comments;
+pub mod crate_tree;
 pub mod syntax;
 
 use sl_config::{Config, Map};

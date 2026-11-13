@@ -11,6 +11,12 @@ Every lint, grouped by category, with its level in each shipped tier (`off`: the
 | [agent-rules-match-lints](agent-rules-match-lints.md) | limits an agent file states are the limits the lints check | off | off | off | warn | deny |
 | [claude-md-duplicate](claude-md-duplicate.md) | CLAUDE.md points to AGENTS.md instead of copying it | off | off | off | off | deny |
 
+## api
+
+| Lint | Rule | small | small-workspace | medium | big | ai |
+|---|---|---|---|---|---|---|
+| [pub-surface](pub-surface.md) | a library's public surface stays small for its size | off | off | off | warn | off |
+
 ## code
 
 | Lint | Rule | small | small-workspace | medium | big | ai |
@@ -31,6 +37,12 @@ Every lint, grouped by category, with its level in each shipped tier (`off`: the
 | [commit-prose](commit-prose.md) | commit messages use no filler, narration or emoji and do not describe the diff | off | off | off | off | warn |
 | [commit-subject-length](commit-subject-length.md) | a commit subject stays under its length limit | off | off | warn | warn | deny |
 
+## dead-code
+
+| Lint | Rule | small | small-workspace | medium | big | ai |
+|---|---|---|---|---|---|---|
+| [dead-pub](dead-pub.md) | public items of workspace libraries are used outside their crate | off | off | off | warn | off |
+
 ## dependencies
 
 | Lint | Rule | small | small-workspace | medium | big | ai |
@@ -40,6 +52,12 @@ Every lint, grouped by category, with its level in each shipped tier (`off`: the
 | [git-dependency-pins](git-dependency-pins.md) | git dependencies follow a branch, with no rev or tag pin | warn | warn | deny | deny | off |
 | [no-sys-crates](no-sys-crates.md) | the dependency graph has no -sys crates and no C build steps | deny | deny | deny | deny | off |
 | [path-outside-workspace](path-outside-workspace.md) | path dependencies stay inside the workspace | deny | deny | deny | deny | off |
+
+## errors
+
+| Lint | Rule | small | small-workspace | medium | big | ai |
+|---|---|---|---|---|---|---|
+| [error-enum-growth](error-enum-growth.md) | a big error enum wraps the errors it comes from instead of listing every failure flat | off | off | warn | warn | off |
 
 ## graph
 
@@ -134,6 +152,12 @@ Every lint, grouped by category, with its level in each shipped tier (`off`: the
 | [near-duplicate-fns](near-duplicate-fns.md) | no two functions are near copies of each other | off | off | off | off | warn |
 | [near-duplicate-modules](near-duplicate-modules.md) | no two modules are near copies of each other | off | off | off | off | deny |
 | [stop-gap-comments](stop-gap-comments.md) | comments carry no stop-gap markers: TODO, FIXME, HACK, for now, workaround | off | off | off | deny | deny |
+
+## structure
+
+| Lint | Rule | small | small-workspace | medium | big | ai |
+|---|---|---|---|---|---|---|
+| [module-graph-scc](module-graph-scc.md) | no module cycle holds most of a crate's code | off | off | warn | warn | off |
 
 ## waivers
 

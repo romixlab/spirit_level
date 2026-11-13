@@ -47,6 +47,10 @@ sl_lints_manifest = { layer = "lints" }
 sl_lints_prose = { layer = "lints" }
 sl_lints_size = { layer = "lints" }
 sl_lints_state = { layer = "lints" }
+sl_lints_modules = { layer = "lints" }
+sl_lints_dead = { layer = "lints" }
+sl_lints_errors = { layer = "lints" }
+sl_lints_surface = { layer = "lints" }
 sl_engine = { layer = "engine" }
 sl_report = { layer = "engine" }
 spirit_level = { layer = "app" }

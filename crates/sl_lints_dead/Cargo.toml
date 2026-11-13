@@ -1,0 +1,21 @@
+[package]
+name = "sl_lints_dead"
+description = "spirit_level lint on dead code rustc cannot see: public items of workspace libraries no other crate names"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+proc-macro2.workspace = true
+sl_analysis.workspace = true
+sl_core.workspace = true
+syn.workspace = true
+
+[dev-dependencies]
+sl_testkit.workspace = true
+
+[lints]
+workspace = true

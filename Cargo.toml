@@ -31,11 +31,15 @@ sl_core = { path = "crates/sl_core" }
 sl_engine = { path = "crates/sl_engine" }
 sl_lints_ai = { path = "crates/sl_lints_ai" }
 sl_lints_code = { path = "crates/sl_lints_code" }
+sl_lints_dead = { path = "crates/sl_lints_dead" }
+sl_lints_errors = { path = "crates/sl_lints_errors" }
 sl_lints_graph = { path = "crates/sl_lints_graph" }
 sl_lints_manifest = { path = "crates/sl_lints_manifest" }
 sl_lints_prose = { path = "crates/sl_lints_prose" }
+sl_lints_modules = { path = "crates/sl_lints_modules" }
 sl_lints_size = { path = "crates/sl_lints_size" }
 sl_lints_state = { path = "crates/sl_lints_state" }
+sl_lints_surface = { path = "crates/sl_lints_surface" }
 sl_model = { path = "crates/sl_model" }
 sl_report = { path = "crates/sl_report" }
 sl_testkit = { path = "crates/sl_testkit" }

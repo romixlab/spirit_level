@@ -1,0 +1,21 @@
+[package]
+name = "sl_lints_errors"
+description = "spirit_level lints on error types: flat error enums that grow a variant per failure instead of wrapping the errors they come from"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+sl_analysis.workspace = true
+sl_core.workspace = true
+sl_model.workspace = true
+syn.workspace = true
+
+[dev-dependencies]
+sl_testkit.workspace = true
+
+[lints]
+workspace = true

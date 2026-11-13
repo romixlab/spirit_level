@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Added
+
+- `module-graph-scc`: share of a crate's code in its biggest module cycle, and the cheapest cut (CODE-2).
+- `dead-pub`: pub items of workspace libraries no other crate names (CODE-2).
+- `error-enum-growth`: big error enums that wrap no other error (CODE-2).
+- `pub-surface`: public items per 1000 code lines of each library (CODE-2).
+
 ## [0.1.1] - 2026-11-13
 
 ### Added

@@ -55,3 +55,12 @@ reason = "components call each other as libraries, not through their CLIs"
 [lints.commit-subject-length]
 level = "warn"
 reason = "the subject is what one-line logs and reviews show"
+
+[lints.module-graph-scc]
+level = "warn"
+reason = "a module cycle holding most of a crate can't be split into crates; cut it while it is small"
+
+
+[lints.error-enum-growth]
+level = "warn"
+reason = "a flat error enum grows a variant per failure and loses the source errors; wrap them by layer"

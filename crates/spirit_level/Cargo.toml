@@ -16,10 +16,14 @@ sl_engine.workspace = true
 sl_lints_ai.workspace = true
 sl_lints_code.workspace = true
 sl_lints_graph.workspace = true
+sl_lints_dead.workspace = true
+sl_lints_errors.workspace = true
+sl_lints_modules.workspace = true
 sl_lints_manifest.workspace = true
 sl_lints_prose.workspace = true
 sl_lints_size.workspace = true
 sl_lints_state.workspace = true
+sl_lints_surface.workspace = true
 sl_model.workspace = true
 
 [lints]

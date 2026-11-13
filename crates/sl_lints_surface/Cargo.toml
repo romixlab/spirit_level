@@ -1,0 +1,20 @@
+[package]
+name = "sl_lints_surface"
+description = "spirit_level lints on a library's public surface: public items reachable from the root per 1000 code lines"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+sl_analysis.workspace = true
+sl_core.workspace = true
+syn.workspace = true
+
+[dev-dependencies]
+sl_testkit.workspace = true
+
+[lints]
+workspace = true

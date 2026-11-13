@@ -1,0 +1,5 @@
+params = { min-lines = 0, max-share = 0.5 }
+
+[[finding]]
+at = "src/lib.rs"
+contains = "3 modules: a, c, b; cutting 1 references"

@@ -1,0 +1,9 @@
+[[finding]]
+at = "crates/fx_a/src/lib.rs:12"
+
+[[finding]]
+at = "crates/fx_a/src/lib.rs:15"
+
+[[finding]]
+at = "crates/fx_a/src/lib.rs:20"
+

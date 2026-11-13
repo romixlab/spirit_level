@@ -111,3 +111,11 @@ reason = "no stop-gaps: a TODO or a 'for now' names its tracker id or goes"
 [lints.agent-rules-match-lints]
 level = "warn"
 reason = "limits AGENTS.md states are the limits the lints check"
+
+[lints.dead-pub]
+level = "warn"
+reason = "rustc can't see pub items no other crate uses; in a big workspace they pile up (candidates, never fail)"
+
+[lints.pub-surface]
+level = "warn"
+reason = "in a big workspace pub is the easy way across crates; a library that is all surface keeps nothing apart"

@@ -15,11 +15,15 @@ Working name. Private for now.
 | [`sl_analysis`](crates/sl_analysis) | analysis | The one trait every spirit_level analysis implements, its run context, and syntax helpers shared by the source analyses |
 | [`sl_lints_ai`](crates/sl_lints_ai) | lints | spirit_level lints for code written with agents: stop-gap comments, commented-out code, near-duplicate functions, dead features, committed agent secrets and transcripts |
 | [`sl_lints_code`](crates/sl_lints_code) | lints | spirit_level source lints: todo!() and unimplemented!(), panics and prints in library code, allow without reason, float and hashing determinism, calls of the workspace's own CLIs |
+| [`sl_lints_dead`](crates/sl_lints_dead) | lints | spirit_level lint on dead code rustc cannot see: public items of workspace libraries no other crate names |
+| [`sl_lints_errors`](crates/sl_lints_errors) | lints | spirit_level lints on error types: flat error enums that grow a variant per failure instead of wrapping the errors they come from |
 | [`sl_lints_graph`](crates/sl_lints_graph) | lints | spirit_level crate-graph lints against the crate map: layers edge by edge, forbidden closures, external git form, third-party placement, _core rules, cycles, the generated crate table, the unsafe allow-list |
 | [`sl_lints_manifest`](crates/sl_lints_manifest) | lints | spirit_level lints on manifests and repo files: package metadata, workspace inheritance and lints, dependency form, -sys crates, duplicates, profiles, toolchain, repo rule files, justfile, feature docs |
+| [`sl_lints_modules`](crates/sl_lints_modules) | lints | spirit_level lints on a crate's module graph: the share of code caught in its biggest module cycle, and where to cut it |
 | [`sl_lints_prose`](crates/sl_lints_prose) | lints | spirit_level lints on prose: CHANGELOG and commit limits, agent files, filler, narration, emoji, comments that restate the code |
 | [`sl_lints_size`](crates/sl_lints_size) | lints | spirit_level size lints: god crates, modules and functions by code lines, test code size, cyclomatic complexity |
 | [`sl_lints_state`](crates/sl_lints_state) | lints | spirit_level shared-state lints from the fewer-locks rule: statics with interior mutability, static mut, thread-local state, lock().unwrap() counts, guards held across await or I/O, nested locks |
+| [`sl_lints_surface`](crates/sl_lints_surface) | lints | spirit_level lints on a library's public surface: public items reachable from the root per 1000 code lines |
 | [`sl_engine`](crates/sl_engine) | engine | spirit_level's engine: picks the analyses a configuration enables, checks their needs, runs them, applies levels, exceptions and waivers, and applies exact fixes |
 | [`sl_report`](crates/sl_report) | engine | spirit_level's report output: coloured text for people, a stable JSON document for CI and agents |
 | [`sl_book`](crates/sl_book) | app | Generates spirit_level's book pages (one per lint, one per tier, the indexes and the nav) from the lints' own metadata and the shipped tiers |

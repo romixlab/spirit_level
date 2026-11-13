@@ -24,9 +24,11 @@ Use it with `extends = "big"` in `spirit_level.toml`.
 | [crate-docs](../lints/crate-docs.md) | `deny` | rustdoc's front page of the crate is its crate-level docs | big |
 | [crate-lines](../lints/crate-lines.md) | `warn` | split a crate before it passes ~20,000 lines: one crate is one serial compile step | medium |
 | [crate-table](../lints/crate-table.md) | `deny` | the crate table is generated from the manifests and the map, never written by hand | big |
+| [dead-pub](../lints/dead-pub.md) | `warn` | rustc can't see pub items no other crate uses; in a big workspace they pile up (candidates, never fail) | big |
 | [default-features-off](../lints/default-features-off.md) | `deny` | feature creep in a big graph costs every build | big |
 | [duplicate-versions](../lints/duplicate-versions.md) | `deny` | two versions of a crate double its build time and split its types | big |
 | [edition-latest](../lints/edition-latest.md) | `warn` | new code starts on the current edition | small |
+| [error-enum-growth](../lints/error-enum-growth.md) | `warn` | a flat error enum grows a variant per failure and loses the source errors; wrap them by layer | medium |
 | [external-form](../lints/external-form.md) | `deny` | outside projects come by git on a branch, listed once, used where their role allows | big |
 | [feature-docs](../lints/feature-docs.md) | `warn` | a feature without a comment cannot be chosen by a reader | big |
 | [float-determinism](../lints/float-determinism.md) | `deny` | crates the map marks deterministic compute the same bits on every platform | big |
@@ -41,6 +43,7 @@ Use it with `extends = "big"` in `spirit_level.toml`.
 | [lock-unwrap](../lints/lock-unwrap.md) | `warn` | the count of lock().unwrap() per crate shows where shared state concentrates | medium |
 | [macro-crate-suffix](../lints/macro-crate-suffix.md) | `warn` | _macros and _derive mean proc macros and nothing else | small-workspace |
 | [map-complete](../lints/map-complete.md) | `deny` | the crate map is the source of truth: every crate in it, nothing gone | big |
+| [module-graph-scc](../lints/module-graph-scc.md) | `warn` | a module cycle holding most of a crate can't be split into crates; cut it while it is small | medium |
 | [module-lines](../lints/module-lines.md) | `warn` | a file of thousands of lines holds several subjects and collects every edit | medium |
 | [nested-locks](../lints/nested-locks.md) | `warn` | two locks at once need one lock order everywhere | small-workspace |
 | [no-sys-crates](../lints/no-sys-crates.md) | `deny` | pure-Rust crates only: no bundled C, no -sys bindings without a written reason | small |
@@ -50,6 +53,7 @@ Use it with `extends = "big"` in `spirit_level.toml`.
 | [path-outside-workspace](../lints/path-outside-workspace.md) | `deny` | a path into a sibling checkout builds differently on every PC | small |
 | [print-in-library](../lints/print-in-library.md) | `warn` | printing is the binary's choice | small |
 | [profile-defaults](../lints/profile-defaults.md) | `warn` | split debug info and an incremental deploy profile: measured large build-time wins | small |
+| [pub-surface](../lints/pub-surface.md) | `warn` | in a big workspace pub is the easy way across crates; a library that is all surface keeps nothing apart | big |
 | [publish-false](../lints/publish-false.md) | `warn` | internal crates are a build unit, not an API; only listed crates are published | medium |
 | [random-state-hash](../lints/random-state-hash.md) | `deny` | crates the map marks deterministic iterate in the same order every run | big |
 | [readme-per-crate](../lints/readme-per-crate.md) | `deny` | every crate of a workspace says what it is and what it may depend on | small-workspace |
@@ -186,4 +190,12 @@ reason = "no stop-gaps: a TODO or a 'for now' names its tracker id or goes"
 [lints.agent-rules-match-lints]
 level = "warn"
 reason = "limits AGENTS.md states are the limits the lints check"
+
+[lints.dead-pub]
+level = "warn"
+reason = "rustc can't see pub items no other crate uses; in a big workspace they pile up (candidates, never fail)"
+
+[lints.pub-surface]
+level = "warn"
+reason = "in a big workspace pub is the easy way across crates; a library that is all surface keeps nothing apart"
 ```

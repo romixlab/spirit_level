@@ -1,0 +1,21 @@
+[package]
+name = "sl_lints_modules"
+description = "spirit_level lints on a crate's module graph: the share of code caught in its biggest module cycle, and where to cut it"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+sl_analysis.workspace = true
+sl_core.workspace = true
+sl_model.workspace = true
+syn.workspace = true
+
+[dev-dependencies]
+sl_testkit.workspace = true
+
+[lints]
+workspace = true
