@@ -21,8 +21,11 @@ Use it with `extends = "medium"` in `spirit_level.toml`.
 | [function-lines](../lints/function-lines.md) | `warn` | a function longer than a screen is changed without being read whole | small |
 | [git-dependency-pins](../lints/git-dependency-pins.md) | `deny` | git dependencies follow a branch; a pin hides a break until it is old | medium |
 | [justfile-recipes](../lints/justfile-recipes.md) | `warn` | every repo answers to the same recipes: default, test, lint, install, deploy | small |
+| [lock-held-across](../lints/lock-held-across.md) | `warn` | a guard across .await or I/O stalls every other caller for as long as the slowest peer | small |
+| [lock-unwrap](../lints/lock-unwrap.md) | `warn` | the count of lock().unwrap() per crate shows where shared state concentrates | medium |
 | [macro-crate-suffix](../lints/macro-crate-suffix.md) | `warn` | _macros and _derive mean proc macros and nothing else | small-workspace |
 | [module-lines](../lints/module-lines.md) | `warn` | a file of thousands of lines holds several subjects and collects every edit | medium |
+| [nested-locks](../lints/nested-locks.md) | `warn` | two locks at once need one lock order everywhere | small-workspace |
 | [no-sys-crates](../lints/no-sys-crates.md) | `deny` | pure-Rust crates only: no bundled C, no -sys bindings without a written reason | small |
 | [package-description](../lints/package-description.md) | `warn` | the crate's one-line description is written once, in Cargo.toml; tables and READMEs are made from it | small |
 | [package-license](../lints/package-license.md) | `warn` | a crate without a licence cannot be reused or published | small |
@@ -32,6 +35,9 @@ Use it with `extends = "medium"` in `spirit_level.toml`.
 | [readme-per-crate](../lints/readme-per-crate.md) | `deny` | every crate of a workspace says what it is and what it may depend on | small-workspace |
 | [repo-files](../lints/repo-files.md) | `warn` | every work repo carries README, AGENTS, CLAUDE, FEATURES and CHANGELOG | small |
 | [rust-version-set](../lints/rust-version-set.md) | `warn` | the MSRV is declared so it can be checked | medium |
+| [static-interior-mutability](../lints/static-interior-mutability.md) | `warn` | every piece of mutable state has one owner; a global lock says why | small |
+| [static-mut](../lints/static-mut.md) | `deny` | global mutable state with no synchronisation; there is always a better owner | small |
+| [thread-local-state](../lints/thread-local-state.md) | `warn` | thread-local state is a hidden side channel between functions | small-workspace |
 | [toolchain-pinned](../lints/toolchain-pinned.md) | `warn` | every PC and the gate build with the same compiler | medium |
 | [waiver-invalid](../lints/waiver-invalid.md) | `deny` | a waiver without a reason, for an unknown lint, or expired hides a finding without saying why | small |
 | [waiver-unused](../lints/waiver-unused.md) | `warn` | a waiver that allows nothing is left over from changed code | small |
@@ -75,4 +81,8 @@ reason = "a file of thousands of lines holds several subjects and collects every
 [lints.crate-lines]
 level = "warn"
 reason = "split a crate before it passes ~20,000 lines: one crate is one serial compile step"
+
+[lints.lock-unwrap]
+level = "warn"
+reason = "the count of lock().unwrap() per crate shows where shared state concentrates"
 ```

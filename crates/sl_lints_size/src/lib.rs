@@ -58,9 +58,9 @@ impl Analysis for Size {
             let (mut src, mut test) = (LineCount::default(), LineCount::default());
             for f in files {
                 match f.kind {
-                    FileKind::Src => src += f.lines,
                     FileKind::Build => {}
-                    _ => test += f.lines,
+                    _ if p.is_test_file(pkg, f) => test += f.lines,
+                    _ => src += f.lines,
                 }
             }
             let root = files
@@ -89,7 +89,10 @@ impl Analysis for Size {
             let module_max = cx.params_for("module-lines", pkg).int("max-lines");
             let fn_max = cx.params_for("function-lines", pkg).int("max-lines");
             let cx_max = cx.params_for("function-complexity", pkg).int("max");
-            for f in files.iter().filter(|f| f.kind == FileKind::Src) {
+            for f in files
+                .iter()
+                .filter(|f| f.kind == FileKind::Src && !p.is_test_file(pkg, f))
+            {
                 if i64::from(f.lines.code) > module_max {
                     cx.emit(
                         Diagnostic::new("module-lines", format!("file:{}", f.rel), format!("{} has {} code lines (limit {module_max})", f.rel, f.lines.code))

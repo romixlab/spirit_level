@@ -42,8 +42,11 @@ nav = [
         "lints/git-dependency-pins.md",
         "lints/justfile-recipes.md",
         "lints/justfile-simple.md",
+        "lints/lock-held-across.md",
+        "lints/lock-unwrap.md",
         "lints/macro-crate-suffix.md",
         "lints/module-lines.md",
+        "lints/nested-locks.md",
         "lints/no-sys-crates.md",
         "lints/package-description.md",
         "lints/package-license.md",
@@ -53,7 +56,10 @@ nav = [
         "lints/readme-per-crate.md",
         "lints/repo-files.md",
         "lints/rust-version-set.md",
+        "lints/static-interior-mutability.md",
+        "lints/static-mut.md",
         "lints/test-lines.md",
+        "lints/thread-local-state.md",
         "lints/toolchain-pinned.md",
         "lints/waiver-invalid.md",
         "lints/waiver-unused.md",
@@ -63,6 +69,7 @@ nav = [
     ] },
 ]
 # spirit-level:book-nav-end
+
 
 
 

@@ -36,6 +36,7 @@ sl_config = { layer = "model" }
 sl_analysis = { layer = "analysis" }
 sl_lints_manifest = { layer = "lints" }
 sl_lints_size = { layer = "lints" }
+sl_lints_state = { layer = "lints" }
 sl_engine = { layer = "engine" }
 sl_report = { layer = "engine" }
 spirit_level = { layer = "app" }

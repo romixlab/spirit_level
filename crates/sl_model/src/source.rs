@@ -100,6 +100,66 @@ impl SourceFile {
     }
 }
 
+/// Collects the module paths of `#[cfg(test)] mod name;` declarations (out-of-line test modules) under `module`,
+/// and, for those with `#[path = "..."]`, the file as `file:<path in package>` (relative to the declaring file's
+/// directory, `file_dir`)
+pub(crate) fn cfg_test_mods(
+    items: &[syn::Item],
+    module: &str,
+    file_dir: &str,
+    out: &mut Vec<String>,
+) {
+    for i in items {
+        let syn::Item::Mod(m) = i else { continue };
+        let path = if module.is_empty() {
+            m.ident.to_string()
+        } else {
+            format!("{module}::{}", m.ident)
+        };
+        let test = m.attrs.iter().any(|a| {
+            a.path().is_ident("cfg")
+                && a.meta.require_list().is_ok_and(|l| {
+                    l.tokens
+                        .to_string()
+                        .split(|c: char| !c.is_alphanumeric())
+                        .any(|w| w == "test")
+                })
+        });
+        let explicit = m.attrs.iter().find_map(|a| {
+            let syn::Meta::NameValue(nv) = &a.meta else {
+                return None;
+            };
+            if !nv.path.is_ident("path") {
+                return None;
+            }
+            match &nv.value {
+                syn::Expr::Lit(syn::ExprLit {
+                    lit: syn::Lit::Str(s),
+                    ..
+                }) => Some(s.value()),
+                _ => None,
+            }
+        });
+        match &m.content {
+            None if test => {
+                if let Some(p) = explicit {
+                    out.push(format!(
+                        "file:{}",
+                        if file_dir.is_empty() {
+                            p
+                        } else {
+                            format!("{file_dir}/{p}")
+                        }
+                    ));
+                }
+                out.push(path);
+            }
+            Some((_, inner)) if !test => cfg_test_mods(inner, &path, file_dir, out),
+            _ => {}
+        }
+    }
+}
+
 fn kind_of(in_package: &str) -> FileKind {
     let first = in_package.split('/').next().unwrap_or("");
     match first {

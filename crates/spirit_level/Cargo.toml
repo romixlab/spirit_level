@@ -15,6 +15,7 @@ sl_core.workspace = true
 sl_engine.workspace = true
 sl_lints_manifest.workspace = true
 sl_lints_size.workspace = true
+sl_lints_state.workspace = true
 sl_model.workspace = true
 
 [lints]

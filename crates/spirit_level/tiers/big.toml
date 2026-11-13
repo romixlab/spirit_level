@@ -43,3 +43,11 @@ reason = "recipes call programs; logic lives in Rust where it is tested"
 [lints.test-lines]
 level = "warn"
 reason = "test code builds and links too"
+
+[lints.static-interior-mutability]
+level = "deny"
+reason = "every piece of mutable state has one owner; a global lock says why on the item"
+
+[lints.lock-held-across]
+level = "deny"
+reason = "a guard across .await or I/O stalls every other caller for as long as the slowest peer"

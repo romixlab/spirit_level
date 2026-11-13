@@ -160,6 +160,7 @@ pub struct Package {
     /// `links`
     pub links: Option<String>,
     sources: OnceLock<Vec<SourceFile>>,
+    test_modules: OnceLock<Vec<String>>,
 }
 
 impl Package {
@@ -360,6 +361,7 @@ impl Project {
                 features: p.features.clone(),
                 links: p.links.clone(),
                 sources: OnceLock::new(),
+                test_modules: OnceLock::new(),
             });
         }
         packages.sort_by(|a, b| a.dir.cmp(&b.dir));
@@ -403,6 +405,28 @@ impl Project {
                     SourceFile::read(&self.root, &rel, &pkg.name, &in_pkg).ok()
                 })
                 .collect()
+        })
+    }
+
+    /// Whether a file is test code: under tests/, benches/ or examples/, or a module declared with
+    /// `#[cfg(test)] mod name;` (and everything below it)
+    pub fn is_test_file(&self, pkg: &Package, f: &SourceFile) -> bool {
+        if f.kind.is_test_like() {
+            return true;
+        }
+        let tm = pkg.test_modules.get_or_init(|| {
+            let mut out = Vec::new();
+            for f in self.sources(pkg) {
+                if let Ok(ast) = f.ast() {
+                    let dir = f.in_package.rsplit_once('/').map_or("", |(d, _)| d);
+                    crate::source::cfg_test_mods(&ast.items, &f.module, dir, &mut out);
+                }
+            }
+            out
+        });
+        tm.iter().any(|m| match m.strip_prefix("file:") {
+            Some(path) => f.in_package == path,
+            None => f.module == *m || f.module.starts_with(&format!("{m}::")),
         })
     }
 

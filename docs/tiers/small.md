@@ -16,6 +16,7 @@ Use it with `extends = "small"` in `spirit_level.toml`.
 | [function-lines](../lints/function-lines.md) | `warn` | a function longer than a screen is changed without being read whole | small |
 | [git-dependency-pins](../lints/git-dependency-pins.md) | `warn` | git dependencies follow a branch; Cargo.lock fixes the commit | small |
 | [justfile-recipes](../lints/justfile-recipes.md) | `warn` | every repo answers to the same recipes: default, test, lint, install, deploy | small |
+| [lock-held-across](../lints/lock-held-across.md) | `warn` | a guard across .await or I/O stalls every other caller for as long as the slowest peer | small |
 | [no-sys-crates](../lints/no-sys-crates.md) | `deny` | pure-Rust crates only: no bundled C, no -sys bindings without a written reason | small |
 | [package-description](../lints/package-description.md) | `warn` | the crate's one-line description is written once, in Cargo.toml; tables and READMEs are made from it | small |
 | [package-license](../lints/package-license.md) | `warn` | a crate without a licence cannot be reused or published | small |
@@ -23,6 +24,8 @@ Use it with `extends = "small"` in `spirit_level.toml`.
 | [profile-defaults](../lints/profile-defaults.md) | `warn` | split debug info and an incremental deploy profile: measured large build-time wins | small |
 | [readme-per-crate](../lints/readme-per-crate.md) | `warn` | every crate says what it is and how to use it | small |
 | [repo-files](../lints/repo-files.md) | `warn` | every work repo carries README, AGENTS, CLAUDE, FEATURES and CHANGELOG | small |
+| [static-interior-mutability](../lints/static-interior-mutability.md) | `warn` | every piece of mutable state has one owner; a global lock says why | small |
+| [static-mut](../lints/static-mut.md) | `deny` | global mutable state with no synchronisation; there is always a better owner | small |
 | [waiver-invalid](../lints/waiver-invalid.md) | `deny` | a waiver without a reason, for an unknown lint, or expired hides a finding without saying why | small |
 | [waiver-unused](../lints/waiver-unused.md) | `warn` | a waiver that allows nothing is left over from changed code | small |
 
@@ -100,4 +103,16 @@ reason = "a function longer than a screen is changed without being read whole"
 [lints.function-complexity]
 level = "warn"
 reason = "more paths than can be tested or held in one's head"
+
+[lints.static-mut]
+level = "deny"
+reason = "global mutable state with no synchronisation; there is always a better owner"
+
+[lints.static-interior-mutability]
+level = "warn"
+reason = "every piece of mutable state has one owner; a global lock says why"
+
+[lints.lock-held-across]
+level = "warn"
+reason = "a guard across .await or I/O stalls every other caller for as long as the slowest peer"
 ```

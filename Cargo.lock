@@ -351,6 +351,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "sl_lints_state"
+version = "0.1.0"
+dependencies = [
+ "sl_analysis",
+ "sl_core",
+ "sl_model",
+ "sl_testkit",
+ "syn",
+]
+
+[[package]]
 name = "sl_model"
 version = "0.1.0"
 dependencies = [
@@ -395,6 +406,7 @@ dependencies = [
  "sl_engine",
  "sl_lints_manifest",
  "sl_lints_size",
+ "sl_lints_state",
  "sl_model",
 ]
 

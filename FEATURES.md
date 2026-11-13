@@ -40,7 +40,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 
 ## SIZE - size and complexity
 
-- 📋 `SIZE-1` Crate, test, module and function lines; cyclomatic complexity.
+- ✅ `SIZE-1` Crate, test, module and function lines; cyclomatic complexity.
 
 ## CODE - source lints
 
@@ -49,7 +49,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 
 ## STATE - shared state (fewer-locks)
 
-- 📋 `STATE-1` Statics with interior mutability, static mut, thread_local state, lock().unwrap() counts, guards across await or I/O, nested locks.
+- ✅ `STATE-1` Statics with interior mutability, static mut, thread_local state, lock().unwrap() counts, guards across await or I/O, nested locks.
 
 ## PROSE - prose and agent text
 

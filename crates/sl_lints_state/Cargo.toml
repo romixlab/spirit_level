@@ -1,0 +1,21 @@
+[package]
+name = "sl_lints_state"
+description = "spirit_level shared-state lints from the fewer-locks rule: statics with interior mutability, static mut, thread-local state, lock().unwrap() counts, guards held across await or I/O, nested locks"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+sl_analysis.workspace = true
+sl_core.workspace = true
+sl_model.workspace = true
+syn.workspace = true
+
+[dev-dependencies]
+sl_testkit.workspace = true
+
+[lints]
+workspace = true

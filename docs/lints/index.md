@@ -46,6 +46,17 @@ Every lint, grouped by category, with its level in each shipped tier (`off`: the
 | [module-lines](module-lines.md) | a source file stays under its line limit | off | off | warn | warn |
 | [test-lines](test-lines.md) | a crate's test code stays under its line limit | off | off | off | warn |
 
+## state
+
+| Lint | Rule | small | small-workspace | medium | big |
+|---|---|---|---|---|---|
+| [lock-held-across](lock-held-across.md) | no lock guard is held across an .await or an I/O call | warn | warn | warn | deny |
+| [lock-unwrap](lock-unwrap.md) | a crate keeps its lock().unwrap() calls under a limit | off | off | warn | warn |
+| [nested-locks](nested-locks.md) | no second lock is taken while a guard is alive | off | warn | warn | warn |
+| [static-interior-mutability](static-interior-mutability.md) | a static with interior mutability has one owner, or a reason why a global lock is right | warn | warn | warn | deny |
+| [static-mut](static-mut.md) | no static mut | deny | deny | deny | deny |
+| [thread-local-state](thread-local-state.md) | thread_local! state has one owner, or a reason | off | warn | warn | warn |
+
 ## waivers
 
 | Lint | Rule | small | small-workspace | medium | big |

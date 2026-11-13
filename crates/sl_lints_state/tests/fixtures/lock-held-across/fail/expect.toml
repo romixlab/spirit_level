@@ -1,0 +1,8 @@
+
+[[finding]]
+at = "src/lib.rs:5"
+contains = "held across an .await"
+
+[[finding]]
+at = "src/lib.rs:9"
+contains = "held across I/O (std::fs::write)"

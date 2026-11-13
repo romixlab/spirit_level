@@ -15,10 +15,12 @@
 //!     source: Source::Native,
 //! };
 //!
+//! static LINTS: &[&LintMeta] = &[&NO_EMPTY];
+//!
 //! struct Members;
 //! impl Analysis for Members {
 //!     fn name(&self) -> &'static str { "members" }
-//!     fn lints(&self) -> &'static [&'static LintMeta] { &[&NO_EMPTY] }
+//!     fn lints(&self) -> &'static [&'static LintMeta] { LINTS }
 //!     fn run(&self, cx: &Context<'_>) {
 //!         if cx.project.packages.is_empty() {
 //!             cx.emit(Diagnostic::new("no-empty-workspace", "workspace", "the workspace has no members"));

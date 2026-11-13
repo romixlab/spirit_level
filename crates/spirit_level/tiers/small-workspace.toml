@@ -31,3 +31,11 @@ reason = "_macros and _derive mean proc macros and nothing else"
 [lints.readme-per-crate]
 level = "deny"
 reason = "every crate of a workspace says what it is and what it may depend on"
+
+[lints.nested-locks]
+level = "warn"
+reason = "two locks at once need one lock order everywhere"
+
+[lints.thread-local-state]
+level = "warn"
+reason = "thread-local state is a hidden side channel between functions"
