@@ -29,6 +29,7 @@ sl_book = { path = "crates/sl_book" }
 sl_config = { path = "crates/sl_config" }
 sl_core = { path = "crates/sl_core" }
 sl_engine = { path = "crates/sl_engine" }
+sl_lints_ai = { path = "crates/sl_lints_ai" }
 sl_lints_code = { path = "crates/sl_lints_code" }
 sl_lints_graph = { path = "crates/sl_lints_graph" }
 sl_lints_manifest = { path = "crates/sl_lints_manifest" }

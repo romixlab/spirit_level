@@ -1,0 +1,12 @@
+[package]
+name = "fx"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]
+
+[lints.clippy]
+# the builder API takes many arguments by design
+too_many_arguments = "allow"
+module_name_repetitions = { level = "allow", priority = 1 } # names repeat the module on purpose
+needless_return = "warn"

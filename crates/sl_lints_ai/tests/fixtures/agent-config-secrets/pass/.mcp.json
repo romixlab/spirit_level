@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "gh": {
+      "command": "gh-mcp",
+      "env": { "GITHUB_TOKEN": "${GITHUB_TOKEN}", "API_KEY": "<your key>" },
+      "headers": { "Authorization": "Bearer ${TOKEN}" }
+    }
+  }
+}

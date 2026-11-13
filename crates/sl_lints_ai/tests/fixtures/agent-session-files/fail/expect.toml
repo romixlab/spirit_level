@@ -1,0 +1,9 @@
+[[finding]]
+at = ".claude/projects/x/s.jsonl"
+
+[[finding]]
+at = ".claude/settings.local.json"
+
+[[finding]]
+at = "session-transcript.md"
+

@@ -1,0 +1,21 @@
+## Why
+
+A rewrite that keeps the old version leaves two near-identical functions: both get called, one gets the fix. Agents do this when they add `parse_v2` instead of changing `parse`.
+
+The measure, for every function with a body in the non-test code of the workspace members:
+
+1. The function's text (signature and body) is tokenized. Local names (bindings, parameters, the function's own name) become `I` and literals `L`. Keywords, punctuation and the names the function calls or reaches through a path (`f(`, `.method`, `::item`) stay. Renamed copies give the same tokens; two functions that call different things do not.
+2. Functions with fewer than `min-tokens` tokens are skipped: small accessors are alike by nature.
+3. Each function's tokens become a set of 4-token shingles (windows of four).
+4. The similarity of two functions is the Jaccard index of their sets: shared shingles over all shingles.
+
+A pair at or above `min-similarity` is reported, with the similarity as its metric. The finding points at the later of the two and names the other.
+
+```rust
+fn load(path: &str) -> Config { ... }       // 40 lines
+fn load_v2(p: &str) -> Config { ... }       // the same 40 lines, one constant changed  <- 96% alike
+```
+
+## How to fix
+
+Keep one: delete the old version, or make both call a shared function with the difference as a parameter.

@@ -1,0 +1,1 @@
+{ "permissions": { "allow": ["Bash(cargo test:*)"] }, "model": "sk-is-not-a-token" }

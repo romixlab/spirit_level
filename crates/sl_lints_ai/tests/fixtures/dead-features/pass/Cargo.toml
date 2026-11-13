@@ -1,0 +1,15 @@
+[package]
+name = "fx"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]
+
+[features]
+default = []
+# the fast path
+fast = []
+# everything
+full = ["fast", "extra"]
+# alias target
+extra = []

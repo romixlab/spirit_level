@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "gh": {
+      "env": { "GITHUB_TOKEN": "ghp_1234567890abcdefXYZ" }
+    },
+    "db": {
+      "env": { "DB_PASSWORD": "hunter2hunter2" }
+    }
+  }
+}

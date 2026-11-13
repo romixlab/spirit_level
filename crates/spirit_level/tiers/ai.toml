@@ -75,3 +75,55 @@ reason = "emoji do not grep, diff or render the same everywhere"
 [lints.restating-comments]
 level = "warn"
 reason = "a comment says what the code cannot"
+
+# Stop-gap smells (the top rule)
+
+[lints.stop-gap-comments]
+level = "deny"
+reason = "a TODO or a 'for now' marks a path the final design throws away; tracked work names its id"
+
+[lints.todo-macros]
+level = "deny"
+reason = "todo!() and unimplemented!() are stop-gaps that compile"
+
+[lints.commented-out-code]
+level = "deny"
+reason = "git keeps the old code; commented-out code is a decision not taken"
+
+[lints.allow-without-reason]
+level = "deny"
+reason = "an allowed lint says why, so it can be turned back on"
+
+[lints.lint-table-allow-reason]
+level = "deny"
+reason = "a lint allowed for a whole crate in Cargo.toml says why"
+
+[lints.near-duplicate-fns]
+level = "warn"
+reason = "a rewrite that keeps the old function leaves two copies to fix"
+
+[lints.near-duplicate-modules]
+level = "deny"
+reason = "a rewrite that keeps the old module is not finished"
+
+[lints.dead-features]
+level = "warn"
+reason = "a feature that enables nothing and gates nothing is left over"
+
+# Agent-config hygiene
+
+[lints.leftover-files]
+level = "deny"
+reason = "merge, editor and scratch leftovers and session notes do not belong in history"
+
+[lints.agent-config-secrets]
+level = "deny"
+reason = "a committed key is public to every reader and stays in history"
+
+[lints.agent-config-permissions]
+level = "deny"
+reason = "committed settings apply to every agent; a blanket grant lets any of them run anything"
+
+[lints.agent-session-files]
+level = "deny"
+reason = "transcripts and per-person agent files hold private context and secrets"

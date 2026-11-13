@@ -331,6 +331,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "sl_lints_ai"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "serde_json",
+ "sl_analysis",
+ "sl_core",
+ "sl_model",
+ "sl_testkit",
+ "syn",
+]
+
+[[package]]
 name = "sl_lints_code"
 version = "0.1.0"
 dependencies = [
@@ -436,6 +449,7 @@ dependencies = [
  "sl_config",
  "sl_core",
  "sl_engine",
+ "sl_lints_ai",
  "sl_lints_code",
  "sl_lints_graph",
  "sl_lints_manifest",

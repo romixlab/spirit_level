@@ -1,0 +1,6 @@
+{
+  "permissions": {
+    "allow": ["Bash(cargo test:*)", "Bash(just lint)", "Read"],
+    "defaultMode": "acceptEdits"
+  }
+}
