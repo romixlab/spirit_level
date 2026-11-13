@@ -12,6 +12,8 @@ Use it with `extends = "small"` in `spirit_level.toml`.
 | [crate-docs](../lints/crate-docs.md) | `warn` | rustdoc's front page of the crate is its crate-level docs | small |
 | [default-features-off](../lints/default-features-off.md) | `warn` | dependencies are added with default-features = false and only the features in use | small |
 | [edition-latest](../lints/edition-latest.md) | `warn` | new code starts on the current edition | small |
+| [function-complexity](../lints/function-complexity.md) | `warn` | more paths than can be tested or held in one's head | small |
+| [function-lines](../lints/function-lines.md) | `warn` | a function longer than a screen is changed without being read whole | small |
 | [git-dependency-pins](../lints/git-dependency-pins.md) | `warn` | git dependencies follow a branch; Cargo.lock fixes the commit | small |
 | [justfile-recipes](../lints/justfile-recipes.md) | `warn` | every repo answers to the same recipes: default, test, lint, install, deploy | small |
 | [no-sys-crates](../lints/no-sys-crates.md) | `deny` | pure-Rust crates only: no bundled C, no -sys bindings without a written reason | small |
@@ -90,4 +92,12 @@ reason = "work lands under [Unreleased]; the release step turns it into a versio
 [lints.justfile-recipes]
 level = "warn"
 reason = "every repo answers to the same recipes: default, test, lint, install, deploy"
+
+[lints.function-lines]
+level = "warn"
+reason = "a function longer than a screen is changed without being read whole"
+
+[lints.function-complexity]
+level = "warn"
+reason = "more paths than can be tested or held in one's head"
 ```

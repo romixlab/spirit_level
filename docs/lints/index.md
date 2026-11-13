@@ -36,6 +36,16 @@ Every lint, grouped by category, with its level in each shipped tier (`off`: the
 | [repo-files](repo-files.md) | the repo carries its rule files | warn | warn | warn | warn |
 | [toolchain-pinned](toolchain-pinned.md) | the repo pins its toolchain in rust-toolchain.toml | off | off | warn | deny |
 
+## size
+
+| Lint | Rule | small | small-workspace | medium | big |
+|---|---|---|---|---|---|
+| [crate-lines](crate-lines.md) | a crate's src/ stays under its line limit | off | off | warn | warn |
+| [function-complexity](function-complexity.md) | a function's cyclomatic complexity stays under its limit | warn | warn | warn | warn |
+| [function-lines](function-lines.md) | a function stays under its line limit | warn | warn | warn | warn |
+| [module-lines](module-lines.md) | a source file stays under its line limit | off | off | warn | warn |
+| [test-lines](test-lines.md) | a crate's test code stays under its line limit | off | off | off | warn |
+
 ## waivers
 
 | Lint | Rule | small | small-workspace | medium | big |

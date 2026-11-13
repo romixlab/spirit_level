@@ -1,0 +1,5 @@
+params = { max-lines = 10 }
+
+[[finding]]
+at = "src/lib.rs"
+contains = "12 code lines in src/"

@@ -23,3 +23,11 @@ reason = "one version per dependency per workspace, written once in [workspace.d
 [lints.git-dependency-pins]
 level = "deny"
 reason = "git dependencies follow a branch; a pin hides a break until it is old"
+
+[lints.module-lines]
+level = "warn"
+reason = "a file of thousands of lines holds several subjects and collects every edit"
+
+[lints.crate-lines]
+level = "warn"
+reason = "split a crate before it passes ~20,000 lines: one crate is one serial compile step"

@@ -180,35 +180,7 @@ fn parse(
             continue;
         }
         let covers = if own_line {
-            let next = (i + 1..lines.len()).find(|&j| {
-                let t = lines[j].trim();
-                !(t.is_empty()
-                    || t.starts_with(comment)
-                    || (rust && t.starts_with("#["))
-                    || (rust && t.starts_with("#![")))
-            });
-            match next {
-                None => (line, line),
-                Some(j) => {
-                    let n = j as u32 + 1;
-                    let end = if rust {
-                        extents
-                            .iter()
-                            .filter(|(s, _)| *s > line && *s <= n)
-                            .map(|(_, e)| *e)
-                            .max()
-                            .unwrap_or(n)
-                            .max(n)
-                    } else if lines[j].trim().starts_with('[') {
-                        (j + 1..lines.len())
-                            .find(|&k| lines[k].trim().starts_with('['))
-                            .map_or(lines.len() as u32, |k| k as u32)
-                    } else {
-                        n
-                    };
-                    (n, end)
-                }
-            }
+            coverage(&lines, i, line, rust, comment, extents)
         } else {
             (line, line)
         };
@@ -220,6 +192,46 @@ fn parse(
             expires,
             covers,
         });
+    }
+}
+
+/// The lines an own-line waiver at index `i` (line `line`) covers: the next item
+fn coverage(
+    lines: &[&str],
+    i: usize,
+    line: u32,
+    rust: bool,
+    comment: &str,
+    extents: &[(u32, u32)],
+) -> (u32, u32) {
+    let next = (i + 1..lines.len()).find(|&j| {
+        let t = lines[j].trim();
+        !(t.is_empty()
+            || t.starts_with(comment)
+            || (rust && t.starts_with("#["))
+            || (rust && t.starts_with("#![")))
+    });
+    match next {
+        None => (line, line),
+        Some(j) => {
+            let n = j as u32 + 1;
+            let end = if rust {
+                extents
+                    .iter()
+                    .filter(|(s, _)| *s > line && *s <= n)
+                    .map(|(_, e)| *e)
+                    .max()
+                    .unwrap_or(n)
+                    .max(n)
+            } else if lines[j].trim().starts_with('[') {
+                (j + 1..lines.len())
+                    .find(|&k| lines[k].trim().starts_with('['))
+                    .map_or(lines.len() as u32, |k| k as u32)
+            } else {
+                n
+            };
+            (n, end)
+        }
     }
 }
 

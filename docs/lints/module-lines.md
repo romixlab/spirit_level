@@ -1,0 +1,43 @@
+# module-lines
+
+**Rule:** A source file stays under its line limit.
+
+| | |
+|---|---|
+| Category | [size](index.md#size) |
+| Source | spirit_level |
+| Fix | by hand |
+
+## Level per tier
+
+| Tier | Level | Reason |
+|---|---|---|
+| [small](../tiers/small.md) | off |  |
+| [small-workspace](../tiers/small-workspace.md) | off |  |
+| [medium](../tiers/medium.md) | `warn` | a file of thousands of lines holds several subjects and collects every edit |
+| [big](../tiers/big.md) | `warn` | a file of thousands of lines holds several subjects and collects every edit |
+
+## Parameters
+
+| Name | Type | Default | Meaning |
+|---|---|---|---|
+| `max-lines` | integer | `2000` | code lines of one file above which it is reported |
+
+## Why
+
+A source file of thousands of lines holds several subjects; reviews, merges and readers suffer first. tpm_cli's `main.rs` of 8,700 lines changed in 67% of all landings because it held every command's clap types.
+
+## How to fix
+
+Split the module by subject: a type and its impls, a command, a parser each in a file of its own.
+
+## Configure
+
+```toml
+[lints.module-lines]
+level = "deny"
+max-lines = 2000
+reason = "why this project wants it at this level"
+```
+
+Allow one finding in the code with `// spirit-level: allow(module-lines) <reason>` ([waivers](../waivers.md)).

@@ -1,0 +1,5 @@
+params = { max-lines = 10 }
+
+[[finding]]
+at = "src/lib.rs:3"
+contains = "long has 14 code lines"

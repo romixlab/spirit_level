@@ -45,7 +45,7 @@ pub fn tier_description(text: &str) -> String {
 
 /// Every registered analysis
 pub fn analyses() -> Vec<&'static dyn Analysis> {
-    vec![&sl_lints_manifest::MANIFEST]
+    vec![&sl_lints_manifest::MANIFEST, &sl_lints_size::SIZE]
 }
 
 /// Every lint: the engine's and every analysis's

@@ -1,0 +1,43 @@
+# function-complexity
+
+**Rule:** A function's cyclomatic complexity stays under its limit.
+
+| | |
+|---|---|
+| Category | [size](index.md#size) |
+| Source | spirit_level |
+| Fix | by hand |
+
+## Level per tier
+
+| Tier | Level | Reason |
+|---|---|---|
+| [small](../tiers/small.md) | `warn` | more paths than can be tested or held in one's head |
+| [small-workspace](../tiers/small-workspace.md) | `warn` | more paths than can be tested or held in one's head |
+| [medium](../tiers/medium.md) | `warn` | more paths than can be tested or held in one's head |
+| [big](../tiers/big.md) | `warn` | more paths than can be tested or held in one's head |
+
+## Parameters
+
+| Name | Type | Default | Meaning |
+|---|---|---|---|
+| `max` | integer | `25` | the highest complexity allowed |
+
+## Why
+
+Cyclomatic complexity counts the independent paths through a function: 1, plus one for each `if`, loop, `?`, `&&`, `||` and each `match` arm after the first. Above about 25 a function cannot be tested path by path or held in one's head.
+
+## How to fix
+
+Pull branches out into functions, turn chains of conditions into a table or an enum with methods, return early instead of nesting.
+
+## Configure
+
+```toml
+[lints.function-complexity]
+level = "deny"
+max = 25
+reason = "why this project wants it at this level"
+```
+
+Allow one finding in the code with `// spirit-level: allow(function-complexity) <reason>` ([waivers](../waivers.md)).

@@ -16,6 +16,8 @@ Use it with `extends = "small-workspace"` in `spirit_level.toml`.
 | [default-features-off](../lints/default-features-off.md) | `warn` | dependencies are added with default-features = false and only the features in use | small |
 | [duplicate-versions](../lints/duplicate-versions.md) | `warn` | two versions of a crate double its build time and split its types | small-workspace |
 | [edition-latest](../lints/edition-latest.md) | `warn` | new code starts on the current edition | small |
+| [function-complexity](../lints/function-complexity.md) | `warn` | more paths than can be tested or held in one's head | small |
+| [function-lines](../lints/function-lines.md) | `warn` | a function longer than a screen is changed without being read whole | small |
 | [git-dependency-pins](../lints/git-dependency-pins.md) | `warn` | git dependencies follow a branch; Cargo.lock fixes the commit | small |
 | [justfile-recipes](../lints/justfile-recipes.md) | `warn` | every repo answers to the same recipes: default, test, lint, install, deploy | small |
 | [macro-crate-suffix](../lints/macro-crate-suffix.md) | `warn` | _macros and _derive mean proc macros and nothing else | small-workspace |

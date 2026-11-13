@@ -13,12 +13,16 @@ Use it with `extends = "medium"` in `spirit_level.toml`.
 | [changelog-unreleased](../lints/changelog-unreleased.md) | `warn` | work lands under [Unreleased]; the release step turns it into a version section | small |
 | [crate-dir-name](../lints/crate-dir-name.md) | `warn` | flat crates/<name>: the folder is the crate | small-workspace |
 | [crate-docs](../lints/crate-docs.md) | `warn` | rustdoc's front page of the crate is its crate-level docs | small |
+| [crate-lines](../lints/crate-lines.md) | `warn` | split a crate before it passes ~20,000 lines: one crate is one serial compile step | medium |
 | [default-features-off](../lints/default-features-off.md) | `warn` | dependencies are added with default-features = false and only the features in use | small |
 | [duplicate-versions](../lints/duplicate-versions.md) | `warn` | two versions of a crate double its build time and split its types | small-workspace |
 | [edition-latest](../lints/edition-latest.md) | `warn` | new code starts on the current edition | small |
+| [function-complexity](../lints/function-complexity.md) | `warn` | more paths than can be tested or held in one's head | small |
+| [function-lines](../lints/function-lines.md) | `warn` | a function longer than a screen is changed without being read whole | small |
 | [git-dependency-pins](../lints/git-dependency-pins.md) | `deny` | git dependencies follow a branch; a pin hides a break until it is old | medium |
 | [justfile-recipes](../lints/justfile-recipes.md) | `warn` | every repo answers to the same recipes: default, test, lint, install, deploy | small |
 | [macro-crate-suffix](../lints/macro-crate-suffix.md) | `warn` | _macros and _derive mean proc macros and nothing else | small-workspace |
+| [module-lines](../lints/module-lines.md) | `warn` | a file of thousands of lines holds several subjects and collects every edit | medium |
 | [no-sys-crates](../lints/no-sys-crates.md) | `deny` | pure-Rust crates only: no bundled C, no -sys bindings without a written reason | small |
 | [package-description](../lints/package-description.md) | `warn` | the crate's one-line description is written once, in Cargo.toml; tables and READMEs are made from it | small |
 | [package-license](../lints/package-license.md) | `warn` | a crate without a licence cannot be reused or published | small |
@@ -63,4 +67,12 @@ reason = "one version per dependency per workspace, written once in [workspace.d
 [lints.git-dependency-pins]
 level = "deny"
 reason = "git dependencies follow a branch; a pin hides a break until it is old"
+
+[lints.module-lines]
+level = "warn"
+reason = "a file of thousands of lines holds several subjects and collects every edit"
+
+[lints.crate-lines]
+level = "warn"
+reason = "split a crate before it passes ~20,000 lines: one crate is one serial compile step"
 ```

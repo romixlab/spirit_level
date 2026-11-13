@@ -25,5 +25,8 @@ sl_model.workspace = true
 sl_report.workspace = true
 spirit_level.workspace = true
 
+[dev-dependencies]
+serde_json.workspace = true
+
 [lints]
 workspace = true

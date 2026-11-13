@@ -1,0 +1,5 @@
+params = { max = 5 }
+
+[[finding]]
+at = "src/lib.rs:3"
+contains = "complexity 6"

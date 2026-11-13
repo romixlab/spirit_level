@@ -1,0 +1,4 @@
+params = { max-lines = 10 }
+
+[[finding]]
+at = "src/lib.rs"

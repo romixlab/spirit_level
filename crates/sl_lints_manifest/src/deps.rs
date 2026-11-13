@@ -103,6 +103,12 @@ pub(crate) fn run(cx: &Context<'_>) {
         }
     }
 
+    resolved(cx);
+}
+
+/// The lints on the resolved graph: -sys crates and C build steps, duplicate versions
+fn resolved(cx: &Context<'_>) {
+    let p = cx.project;
     if !(cx.enabled("no-sys-crates") || cx.enabled("duplicate-versions")) {
         return;
     }
@@ -148,6 +154,15 @@ pub(crate) fn run(cx: &Context<'_>) {
             );
         }
     }
+    duplicates(cx, res, &reached, lock);
+}
+
+fn duplicates(
+    cx: &Context<'_>,
+    res: &sl_model::Resolve,
+    reached: &BTreeMap<usize, BTreeSet<String>>,
+    lock: &str,
+) {
     let allow_dup = cx.params("duplicate-versions").list("allow");
     let mut versions: BTreeMap<&str, BTreeSet<&str>> = BTreeMap::new();
     for &j in reached.keys() {

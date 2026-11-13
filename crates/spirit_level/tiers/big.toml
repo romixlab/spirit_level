@@ -39,3 +39,7 @@ reason = "a feature without a comment cannot be chosen by a reader"
 [lints.justfile-simple]
 level = "warn"
 reason = "recipes call programs; logic lives in Rust where it is tested"
+
+[lints.test-lines]
+level = "warn"
+reason = "test code builds and links too"

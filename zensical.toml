@@ -32,14 +32,18 @@ nav = [
         "lints/changelog-unreleased.md",
         "lints/crate-dir-name.md",
         "lints/crate-docs.md",
+        "lints/crate-lines.md",
         "lints/default-features-off.md",
         "lints/duplicate-versions.md",
         "lints/edition-latest.md",
         "lints/feature-docs.md",
+        "lints/function-complexity.md",
+        "lints/function-lines.md",
         "lints/git-dependency-pins.md",
         "lints/justfile-recipes.md",
         "lints/justfile-simple.md",
         "lints/macro-crate-suffix.md",
+        "lints/module-lines.md",
         "lints/no-sys-crates.md",
         "lints/package-description.md",
         "lints/package-license.md",
@@ -49,6 +53,7 @@ nav = [
         "lints/readme-per-crate.md",
         "lints/repo-files.md",
         "lints/rust-version-set.md",
+        "lints/test-lines.md",
         "lints/toolchain-pinned.md",
         "lints/waiver-invalid.md",
         "lints/waiver-unused.md",
@@ -58,6 +63,7 @@ nav = [
     ] },
 ]
 # spirit-level:book-nav-end
+
 
 
 [project.theme]
