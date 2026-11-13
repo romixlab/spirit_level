@@ -46,16 +46,6 @@ crate = "cargo-semver-checks"
 version = "0.51.0"
 exe = "cargo-semver-checks"
 
-[cargo-hakari]
-crate = "cargo-hakari"
-version = "0.9.39"
-exe = "cargo-hakari"
-
-[cargo-geiger]
-crate = "cargo-geiger"
-version = "0.14.0"
-exe = "cargo-geiger"
-
 [cargo-udeps]
 crate = "cargo-udeps"
 version = "0.1.61"
