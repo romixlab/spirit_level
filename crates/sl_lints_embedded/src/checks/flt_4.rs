@@ -58,7 +58,10 @@ pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
     if enabled {
         return Vec::new();
     }
-    let h = flt::handler(&fns, "UsageFault").expect("present");
+    // all three handlers exist here (checked above)
+    let Some(h) = flt::handler(&fns, "UsageFault") else {
+        return Vec::new();
+    };
     vec![
         Diagnostic::new(
             "flt-4",

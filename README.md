@@ -11,12 +11,14 @@ Working name. Private for now.
 |---|---|---|
 | [`sl_core`](crates/sl_core) | core | spirit_level's shared types: lint metadata, levels, parameters, diagnostics, spans, fixes, dates and globs |
 | [`sl_config`](crates/sl_config) | model | spirit_level's configuration format: tiers, extends, lint levels, parameters, reasons, expiries, scoped exceptions and the crate map |
+| [`sl_firmware`](crates/sl_firmware) | model | spirit_level's model of bare-metal firmware crates: cargo configuration, build script, memory.x, bedrock_fw.json, source facts, the linked ELF with frames and calls |
 | [`sl_model`](crates/sl_model) | model | spirit_level's project model: cargo metadata, manifests with spans, Rust sources parsed with syn, line counts |
 | [`sl_tools`](crates/sl_tools) | model | External tools for spirit_level's adapters: the pinned versions, the build cache, finding and running a tool, cargo's JSON messages |
 | [`sl_analysis`](crates/sl_analysis) | analysis | The one trait every spirit_level analysis implements, its run context, and syntax helpers shared by the source analyses |
 | [`sl_lints_ai`](crates/sl_lints_ai) | lints | spirit_level lints for code written with agents: stop-gap comments, commented-out code, near-duplicate functions, dead features, committed agent secrets and transcripts |
 | [`sl_lints_code`](crates/sl_lints_code) | lints | spirit_level source lints: todo!() and unimplemented!(), panics and prints in library code, allow without reason, float and hashing determinism, calls of the workspace's own CLIs |
 | [`sl_lints_dead`](crates/sl_lints_dead) | lints | spirit_level lint on dead code rustc cannot see: public items of workspace libraries no other crate names |
+| [`sl_lints_embedded`](crates/sl_lints_embedded) | lints | spirit_level lints on bare-metal firmware: executors, interrupts, DMA, stack, memory, size, faults, boot, power, flash, pins, clocks, errata, USB, host input, logging, counters, build configuration (embedded_bedrock's bedrock_lint checks) |
 | [`sl_lints_errors`](crates/sl_lints_errors) | lints | spirit_level lints on error types: flat error enums that grow a variant per failure instead of wrapping the errors they come from |
 | [`sl_lints_graph`](crates/sl_lints_graph) | lints | spirit_level crate-graph lints against the crate map: layers edge by edge, forbidden closures, external git form, third-party placement, _core rules, cycles, the generated crate table, the unsafe allow-list |
 | [`sl_lints_manifest`](crates/sl_lints_manifest) | lints | spirit_level lints on manifests and repo files: package metadata, workspace inheritance and lints, dependency form, -sys crates, duplicates, profiles, toolchain, repo rule files, justfile, feature docs |
