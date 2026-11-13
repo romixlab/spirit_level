@@ -6,6 +6,10 @@
 
 - Tier `embedded`: bedrock_lint's 97 firmware checks, `--elf`, migration page (TIER-2).
 
+### Fixed
+
+- `stop-gap-comments` takes `markers` and `phrases` from crate-scoped exceptions (AI-1).
+
 ## [0.1.3] - 2026-11-13
 
 ### Added

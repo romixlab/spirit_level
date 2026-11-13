@@ -64,9 +64,9 @@ fn find_whole(text: &str, word: &str, w: fn(char) -> bool) -> Option<usize> {
 
 fn markers(cx: &Context<'_>) {
     let id = "stop-gap-comments";
-    let p = cx.params(id);
-    let tracked_ok = p.bool("tracked-ok");
     for pkg in &cx.project.packages {
+        let p = cx.params_for(id, pkg);
+        let tracked_ok = p.bool("tracked-ok");
         for src in cx.project.sources(pkg) {
             for c in comments(&src.text) {
                 if c.kind.is_doc() && !p.bool("docs") {

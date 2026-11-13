@@ -1,0 +1,9 @@
+[lints.stop-gap-comments]
+level = "deny"
+reason = "fixture"
+
+[[exceptions]]
+lint = "stop-gap-comments"
+crates = ["fx"]
+phrases = ["for now"]
+reason = "fixture: errata quotes say workaround"
