@@ -10,6 +10,7 @@ Use it with `extends = "small-workspace"` in `spirit_level.toml`.
 
 | Lint | Level | Reason | Set in |
 |---|---|---|---|
+| [allow-without-reason](../lints/allow-without-reason.md) | `warn` | an exception to a lint says why, or it outlives its reason | small |
 | [changelog-unreleased](../lints/changelog-unreleased.md) | `warn` | work lands under [Unreleased]; the release step turns it into a version section | small |
 | [crate-cycles](../lints/crate-cycles.md) | `warn` | crates in a cycle cannot be built or tested apart | small-workspace |
 | [crate-dir-name](../lints/crate-dir-name.md) | `warn` | flat crates/<name>: the folder is the crate | small-workspace |
@@ -28,12 +29,14 @@ Use it with `extends = "small-workspace"` in `spirit_level.toml`.
 | [package-description](../lints/package-description.md) | `warn` | the crate's one-line description is written once, in Cargo.toml; tables and READMEs are made from it | small |
 | [package-license](../lints/package-license.md) | `warn` | a crate without a licence cannot be reused or published | small |
 | [path-outside-workspace](../lints/path-outside-workspace.md) | `deny` | a path into a sibling checkout builds differently on every PC | small |
+| [print-in-library](../lints/print-in-library.md) | `warn` | printing is the binary's choice | small |
 | [profile-defaults](../lints/profile-defaults.md) | `warn` | split debug info and an incremental deploy profile: measured large build-time wins | small |
 | [readme-per-crate](../lints/readme-per-crate.md) | `deny` | every crate of a workspace says what it is and what it may depend on | small-workspace |
 | [repo-files](../lints/repo-files.md) | `warn` | every work repo carries README, AGENTS, CLAUDE, FEATURES and CHANGELOG | small |
 | [static-interior-mutability](../lints/static-interior-mutability.md) | `warn` | every piece of mutable state has one owner; a global lock says why | small |
 | [static-mut](../lints/static-mut.md) | `deny` | global mutable state with no synchronisation; there is always a better owner | small |
 | [thread-local-state](../lints/thread-local-state.md) | `warn` | thread-local state is a hidden side channel between functions | small-workspace |
+| [todo-macros](../lints/todo-macros.md) | `warn` | no stop-gaps: a todo!() is a panic waiting in shipped code | small |
 | [waiver-invalid](../lints/waiver-invalid.md) | `deny` | a waiver without a reason, for an unknown lint, or expired hides a finding without saying why | small |
 | [waiver-unused](../lints/waiver-unused.md) | `warn` | a waiver that allows nothing is left over from changed code | small |
 | [workspace-dependencies](../lints/workspace-dependencies.md) | `warn` | one version per dependency per workspace, written once in [workspace.dependencies] | small-workspace |

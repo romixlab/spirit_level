@@ -395,7 +395,9 @@ fn cycles(cx: &Context<'_>, p: &Project) {
         }
         let mut members: Vec<&str> = comp.iter().map(|&i| names[i]).collect();
         members.sort();
-        let first = p.package(members[0]).expect("member");
+        let Some(first) = p.package(members[0]) else {
+            continue;
+        };
         cx.emit(
             Diagnostic::new("crate-cycles", format!("cycle:{}", members.join(",")), format!("{} crates depend on each other in a cycle: {}", members.len(), members.join(", ")))
                 .span(Span::new(first.manifest.rel.clone(), 1))

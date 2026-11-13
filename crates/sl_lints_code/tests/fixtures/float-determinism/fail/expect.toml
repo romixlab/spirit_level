@@ -1,0 +1,8 @@
+
+[[finding]]
+at = "src/lib.rs:2"
+contains = ".sin()"
+
+[[finding]]
+at = "src/lib.rs:2"
+contains = ".powf()"

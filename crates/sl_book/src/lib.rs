@@ -24,8 +24,9 @@ pub const HAND_PAGES: &[(&str, &str)] = &[
     ("Writing a lint", "writing-lints.md"),
 ];
 
-/// The level and reason of every lint in every shipped tier (each tier resolved with what it extends)
-pub fn tier_levels() -> Vec<(&'static str, Config)> {
+/// The level and reason of every lint in every shipped tier (each tier resolved with what it extends), in the
+/// order of `spirit_level::TIERS`; an error names a shipped tier that does not resolve
+pub fn tier_levels() -> Result<Vec<(&'static str, Config)>, String> {
     let lints = spirit_level::lints();
     spirit_level::TIERS
         .iter()
@@ -33,31 +34,34 @@ pub fn tier_levels() -> Vec<(&'static str, Config)> {
             let env = Env {
                 lints: &lints,
                 tier: &spirit_level::tier,
-                today: Date::parse("2000-01-01").expect("date"),
+                today: Date {
+                    year: 2000,
+                    month: 1,
+                    day: 1,
+                },
                 version: None,
             };
-            let c =
-                Config::from_tiers(&[name], &env).unwrap_or_else(|e| panic!("tier {name}: {e:?}"));
-            (*name, c)
+            Config::from_tiers(&[name], &env)
+                .map(|c| (*name, c))
+                .map_err(|e| format!("shipped tier {name} does not resolve: {e:?}"))
         })
         .collect()
 }
 
 /// Every generated file: path relative to the docs dir, and its text
-pub fn pages() -> BTreeMap<String, String> {
+pub fn pages() -> Result<BTreeMap<String, String>, String> {
     let lints = spirit_level::lints();
-    let tiers = tier_levels();
+    let tiers = tier_levels()?;
     let mut out = BTreeMap::new();
     for m in &lints {
         out.insert(format!("lints/{}.md", m.id), lint_page(m, &tiers));
     }
     out.insert("lints/index.md".into(), lints_index(&lints, &tiers));
-    for (name, text) in spirit_level::TIERS {
-        let c = &tiers.iter().find(|(n, _)| n == name).expect("tier").1;
+    for ((name, text), (_, c)) in spirit_level::TIERS.iter().zip(&tiers) {
         out.insert(format!("tiers/{name}.md"), tier_page(name, text, c, &lints));
     }
     out.insert("tiers/index.md".into(), tiers_index());
-    out
+    Ok(out)
 }
 
 fn source(m: &LintMeta) -> String {
@@ -286,7 +290,7 @@ pub fn nav() -> String {
 /// files that differ (written, or stale when checking). Pages of lints that no longer exist are reported too
 pub fn write(docs: &Path, zensical: &Path, check: bool) -> std::io::Result<Vec<String>> {
     let mut changed = Vec::new();
-    let pages = pages();
+    let pages = pages().map_err(std::io::Error::other)?;
     for (rel, text) in &pages {
         let p = docs.join(rel);
         if std::fs::read_to_string(&p).ok().as_deref() != Some(text.as_str()) {

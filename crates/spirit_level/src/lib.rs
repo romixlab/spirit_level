@@ -50,6 +50,7 @@ pub fn analyses() -> Vec<&'static dyn Analysis> {
         &sl_lints_size::SIZE,
         &sl_lints_state::STATE,
         &sl_lints_graph::GRAPH,
+        &sl_lints_code::CODE,
     ]
 }
 

@@ -1,0 +1,9 @@
+[lints.float-determinism]
+level = "deny"
+reason = "fixture"
+
+[map.layers.k]
+allow = ["k"]
+
+[map.crates]
+fx = { layer = "k", deterministic = true }

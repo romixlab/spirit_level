@@ -8,6 +8,7 @@ Use it with `extends = "small"` in `spirit_level.toml`.
 
 | Lint | Level | Reason | Set in |
 |---|---|---|---|
+| [allow-without-reason](../lints/allow-without-reason.md) | `warn` | an exception to a lint says why, or it outlives its reason | small |
 | [changelog-unreleased](../lints/changelog-unreleased.md) | `warn` | work lands under [Unreleased]; the release step turns it into a version section | small |
 | [crate-docs](../lints/crate-docs.md) | `warn` | rustdoc's front page of the crate is its crate-level docs | small |
 | [default-features-off](../lints/default-features-off.md) | `warn` | dependencies are added with default-features = false and only the features in use | small |
@@ -21,11 +22,13 @@ Use it with `extends = "small"` in `spirit_level.toml`.
 | [package-description](../lints/package-description.md) | `warn` | the crate's one-line description is written once, in Cargo.toml; tables and READMEs are made from it | small |
 | [package-license](../lints/package-license.md) | `warn` | a crate without a licence cannot be reused or published | small |
 | [path-outside-workspace](../lints/path-outside-workspace.md) | `deny` | a path into a sibling checkout builds differently on every PC | small |
+| [print-in-library](../lints/print-in-library.md) | `warn` | printing is the binary's choice | small |
 | [profile-defaults](../lints/profile-defaults.md) | `warn` | split debug info and an incremental deploy profile: measured large build-time wins | small |
 | [readme-per-crate](../lints/readme-per-crate.md) | `warn` | every crate says what it is and how to use it | small |
 | [repo-files](../lints/repo-files.md) | `warn` | every work repo carries README, AGENTS, CLAUDE, FEATURES and CHANGELOG | small |
 | [static-interior-mutability](../lints/static-interior-mutability.md) | `warn` | every piece of mutable state has one owner; a global lock says why | small |
 | [static-mut](../lints/static-mut.md) | `deny` | global mutable state with no synchronisation; there is always a better owner | small |
+| [todo-macros](../lints/todo-macros.md) | `warn` | no stop-gaps: a todo!() is a panic waiting in shipped code | small |
 | [waiver-invalid](../lints/waiver-invalid.md) | `deny` | a waiver without a reason, for an unknown lint, or expired hides a finding without saying why | small |
 | [waiver-unused](../lints/waiver-unused.md) | `warn` | a waiver that allows nothing is left over from changed code | small |
 
@@ -115,4 +118,16 @@ reason = "every piece of mutable state has one owner; a global lock says why"
 [lints.lock-held-across]
 level = "warn"
 reason = "a guard across .await or I/O stalls every other caller for as long as the slowest peer"
+
+[lints.todo-macros]
+level = "warn"
+reason = "no stop-gaps: a todo!() is a panic waiting in shipped code"
+
+[lints.allow-without-reason]
+level = "warn"
+reason = "an exception to a lint says why, or it outlives its reason"
+
+[lints.print-in-library]
+level = "warn"
+reason = "printing is the binary's choice"
 ```

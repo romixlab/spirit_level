@@ -1,0 +1,43 @@
+# print-in-library
+
+**Rule:** Library code does not print.
+
+| | |
+|---|---|
+| Category | [code](index.md#code) |
+| Source | spirit_level |
+| Fix | by hand |
+
+## Level per tier
+
+| Tier | Level | Reason |
+|---|---|---|
+| [small](../tiers/small.md) | `warn` | printing is the binary's choice |
+| [small-workspace](../tiers/small-workspace.md) | `warn` | printing is the binary's choice |
+| [medium](../tiers/medium.md) | `warn` | printing is the binary's choice |
+| [big](../tiers/big.md) | `warn` | printing is the binary's choice |
+
+## Parameters
+
+| Name | Type | Default | Meaning |
+|---|---|---|---|
+| `macros` | list of strings | `["println", "eprintln", "print", "eprint", "dbg"]` | macros that print |
+
+## Why
+
+Whether and where to print is the binary's decision. A library that prints writes into a GUI's terminal, a JSON stream or an agent's tool output, and cannot be silenced. `dbg!` left in code is debugging that escaped.
+
+## How to fix
+
+Return the text, or log through `log` or `tracing`; the binary sets the output.
+
+## Configure
+
+```toml
+[lints.print-in-library]
+level = "deny"
+macros = ["println", "eprintln", "print", "eprint", "dbg"]
+reason = "why this project wants it at this level"
+```
+
+Allow one finding in the code with `// spirit-level: allow(print-in-library) <reason>` ([waivers](../waivers.md)).

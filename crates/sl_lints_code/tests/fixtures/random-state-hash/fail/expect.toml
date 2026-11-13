@@ -1,0 +1,4 @@
+
+[[finding]]
+at = "src/lib.rs:3"
+contains = "HashSet with the default random hasher"

@@ -242,13 +242,13 @@ fn check(a: CheckArgs) -> Result<u8, String> {
 fn explain(lint: String) -> Result<u8, String> {
     let m = spirit_level::lint(&lint)
         .ok_or_else(|| format!("no lint {lint} (`spirit-level lints` lists them)"))?;
-    let tiers = sl_book::tier_levels();
+    let tiers = sl_book::tier_levels()?;
     print!("{}", sl_book::lint_page(m, &tiers));
     Ok(0)
 }
 
 fn list_lints(format: Format) -> Result<u8, String> {
-    let tiers = sl_book::tier_levels();
+    let tiers = sl_book::tier_levels()?;
     let mut lints = spirit_level::lints();
     lints.sort_by_key(|m| (m.category, m.id));
     match format {

@@ -215,10 +215,20 @@ fn coverage(
         None => (line, line),
         Some(j) => {
             let n = j as u32 + 1;
+            // the run of comment and attribute lines the waiver sits in: an item's span starts at its first
+            // doc comment or attribute, which may be above the waiver
+            let top = (0..i)
+                .rev()
+                .take_while(|&k| {
+                    let t = lines[k].trim();
+                    t.starts_with(comment) || (rust && t.starts_with("#["))
+                })
+                .last()
+                .map_or(line, |k| k as u32 + 1);
             let end = if rust {
                 extents
                     .iter()
-                    .filter(|(s, _)| *s > line && *s <= n)
+                    .filter(|(s, _)| *s >= top && *s <= n)
                     .map(|(_, e)| *e)
                     .max()
                     .unwrap_or(n)
@@ -329,6 +339,15 @@ mod tests {
         assert_eq!(w[0].lints, vec!["god-function"]);
         assert_eq!(w[1].covers, (6, 6));
         assert_eq!(w[1].reason, "set once");
+    }
+
+    #[test]
+    fn waiver_inside_a_doc_block_covers_the_item() {
+        let (w, _) = run(
+            "a.rs",
+            "/// Doc\n// spirit-level: allow(x) because\nfn f() {\n    g();\n}\n",
+        );
+        assert_eq!(w[0].covers, (3, 5));
     }
 
     #[test]

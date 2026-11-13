@@ -81,3 +81,15 @@ reason = "every piece of mutable state has one owner; a global lock says why"
 [lints.lock-held-across]
 level = "warn"
 reason = "a guard across .await or I/O stalls every other caller for as long as the slowest peer"
+
+[lints.todo-macros]
+level = "warn"
+reason = "no stop-gaps: a todo!() is a panic waiting in shipped code"
+
+[lints.allow-without-reason]
+level = "warn"
+reason = "an exception to a lint says why, or it outlives its reason"
+
+[lints.print-in-library]
+level = "warn"
+reason = "printing is the binary's choice"

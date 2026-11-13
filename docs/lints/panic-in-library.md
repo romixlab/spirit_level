@@ -1,0 +1,49 @@
+# panic-in-library
+
+**Rule:** Library code returns errors instead of panicking.
+
+| | |
+|---|---|
+| Category | [code](index.md#code) |
+| Source | spirit_level |
+| Fix | by hand |
+
+## Level per tier
+
+| Tier | Level | Reason |
+|---|---|---|
+| [small](../tiers/small.md) | off |  |
+| [small-workspace](../tiers/small-workspace.md) | off |  |
+| [medium](../tiers/medium.md) | `warn` | a library returns errors; its caller decides what is fatal |
+| [big](../tiers/big.md) | `warn` | a library returns errors; its caller decides what is fatal |
+
+## Parameters
+
+| Name | Type | Default | Meaning |
+|---|---|---|---|
+| `methods` | list of strings | `["unwrap", "expect"]` | methods that panic on None or Err |
+| `macros` | list of strings | `["panic", "unreachable"]` | macros that panic |
+| `max` | integer | `0` | panicking calls allowed per crate before each is reported |
+
+## Why
+
+A library that panics takes its caller down: a server, a GUI, an agent's long run. `unwrap()`, `expect()`, `panic!` and `unreachable!` in library code are places where an error was not designed. Binaries (`src/main.rs`, `src/bin/`) and test code are not checked, and `.lock().unwrap()` is left to [lock-unwrap](lock-unwrap.md).
+
+Without types, `.unwrap()` on anything counts, including types where it cannot panic in practice; the parameter `max` sets how many a crate may have before each is reported.
+
+## How to fix
+
+Return an error the caller can handle. Where the case really cannot happen, say why in a waiver on the line.
+
+## Configure
+
+```toml
+[lints.panic-in-library]
+level = "deny"
+methods = ["unwrap", "expect"]
+macros = ["panic", "unreachable"]
+max = 0
+reason = "why this project wants it at this level"
+```
+
+Allow one finding in the code with `// spirit-level: allow(panic-in-library) <reason>` ([waivers](../waivers.md)).

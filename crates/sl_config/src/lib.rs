@@ -156,6 +156,7 @@ impl Config {
     }
 
     /// The setting of a lint; panics for an unregistered id (a bug)
+    // spirit-level: allow(panic-in-library) every registered lint has a setting; an analysis asking for another id is a bug its fixtures catch
     pub fn lint(&self, id: &str) -> &LintSetting {
         self.lints
             .get(id)
@@ -431,7 +432,9 @@ impl<'a> Resolver<'a> {
             let expires = self.expiry(&mut t, expiring, &format!("the override of {id}"), errs);
             let params = params_of(&mut t, meta, errs);
             t.finish(errs);
-            let s = self.lints.get_mut(&id).expect("registered");
+            let Some(s) = self.lints.get_mut(&id) else {
+                continue;
+            };
             if level.is_none() && s.origin.is_none() {
                 errs.push(ConfigError::new(
                     &origin.file,
@@ -630,6 +633,7 @@ pub fn default_params(meta: &LintMeta) -> Params {
                 };
                 p.0.insert(spec.name.to_string(), v);
             }
+            // spirit-level: allow(panic-in-library) a default that does not fit its kind is a declaration bug; the registry test resolves every lint's defaults
             _ => panic!(
                 "lint {}: the default of {} ({}) is not a {}",
                 meta.id,

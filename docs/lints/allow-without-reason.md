@@ -1,0 +1,38 @@
+# allow-without-reason
+
+**Rule:** Every allow or expect of a lint says why.
+
+| | |
+|---|---|
+| Category | [code](index.md#code) |
+| Source | spirit_level |
+| Fix | by hand |
+
+## Level per tier
+
+| Tier | Level | Reason |
+|---|---|---|
+| [small](../tiers/small.md) | `warn` | an exception to a lint says why, or it outlives its reason |
+| [small-workspace](../tiers/small-workspace.md) | `warn` | an exception to a lint says why, or it outlives its reason |
+| [medium](../tiers/medium.md) | `warn` | an exception to a lint says why, or it outlives its reason |
+| [big](../tiers/big.md) | `deny` | an exception to a lint says why, or it outlives its reason |
+
+## Why
+
+An `#[allow(...)]` silences a lint where a person decided it does not apply. Without the reason the next reader cannot tell a considered exception from a silenced warning, and it outlives the code it was for. Rust's `reason = "..."` field (and `#[expect]`, which fails once the lint no longer fires) keep the exception honest. Test code is checked too.
+
+## How to fix
+
+```rust
+#[expect(clippy::too_many_arguments, reason = "mirrors the C API one to one")]
+```
+
+## Configure
+
+```toml
+[lints.allow-without-reason]
+level = "deny"
+reason = "why this project wants it at this level"
+```
+
+Allow one finding in the code with `// spirit-level: allow(allow-without-reason) <reason>` ([waivers](../waivers.md)).

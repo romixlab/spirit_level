@@ -43,3 +43,11 @@ reason = "crates in a cycle cannot be built or tested apart"
 [lints.core-crate-deps]
 level = "warn"
 reason = "a _core crate holds shared types and drags nothing in"
+
+[lints.panic-in-library]
+level = "warn"
+reason = "a library returns errors; its caller decides what is fatal"
+
+[lints.cli-subprocess]
+level = "deny"
+reason = "components call each other as libraries, not through their CLIs"

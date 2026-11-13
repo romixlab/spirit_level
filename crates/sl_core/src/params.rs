@@ -97,22 +97,33 @@ impl fmt::Display for ParamValue {
     }
 }
 
+/// A lint reading a parameter it did not declare, or as another kind: a bug in the lint, caught by its fixtures
+/// (the configuration has checked every value against the declaration)
+// spirit-level: allow(panic-in-library) the configuration guarantees declared parameters of the declared kind; anything else is a bug in the lint
+fn misuse(name: &str, what: &str, got: Option<&ParamValue>) -> ! {
+    match got {
+        Some(v) => panic!("parameter {name} is not {what}: {v}"),
+        None => panic!("parameter {name} is not {what}"),
+    }
+}
+
 /// The parameters of one lint, every declared one present (defaults filled in by the configuration)
 #[derive(Clone, Debug, Default, PartialEq, Serialize)]
 pub struct Params(pub BTreeMap<String, ParamValue>);
 
 impl Params {
     fn get(&self, name: &str) -> &ParamValue {
-        self.0
-            .get(name)
-            .unwrap_or_else(|| panic!("parameter {name} is not declared by the lint"))
+        match self.0.get(name) {
+            Some(v) => v,
+            None => misuse(name, "declared by the lint", None),
+        }
     }
 
     /// An integer parameter; panics when the lint did not declare it (a bug in the lint, caught by its tests)
     pub fn int(&self, name: &str) -> i64 {
         match self.get(name) {
             ParamValue::Int(v) => *v,
-            other => panic!("parameter {name} is not an integer: {other}"),
+            other => misuse(name, "an integer", Some(other)),
         }
     }
 
@@ -121,7 +132,7 @@ impl Params {
         match self.get(name) {
             ParamValue::Int(v) => *v as f64,
             ParamValue::Float(v) => *v,
-            other => panic!("parameter {name} is not a number: {other}"),
+            other => misuse(name, "a number", Some(other)),
         }
     }
 
@@ -129,7 +140,7 @@ impl Params {
     pub fn bool(&self, name: &str) -> bool {
         match self.get(name) {
             ParamValue::Bool(v) => *v,
-            other => panic!("parameter {name} is not a boolean: {other}"),
+            other => misuse(name, "a boolean", Some(other)),
         }
     }
 
@@ -137,7 +148,7 @@ impl Params {
     pub fn str(&self, name: &str) -> &str {
         match self.get(name) {
             ParamValue::Str(v) => v,
-            other => panic!("parameter {name} is not a string: {other}"),
+            other => misuse(name, "a string", Some(other)),
         }
     }
 
@@ -145,7 +156,7 @@ impl Params {
     pub fn list(&self, name: &str) -> &[String] {
         match self.get(name) {
             ParamValue::StrList(v) => v,
-            other => panic!("parameter {name} is not a list: {other}"),
+            other => misuse(name, "a list", Some(other)),
         }
     }
 }

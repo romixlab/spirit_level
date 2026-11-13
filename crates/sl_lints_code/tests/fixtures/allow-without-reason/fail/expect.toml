@@ -1,0 +1,8 @@
+
+[[finding]]
+at = "src/lib.rs:2"
+contains = "#[allow(dead_code)]"
+
+[[finding]]
+at = "src/lib.rs:6"
+contains = "#[expect(unused)]"

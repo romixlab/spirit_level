@@ -29,7 +29,9 @@ nav = [
     ] },
     { "Lints" = [
         "lints/index.md",
+        "lints/allow-without-reason.md",
         "lints/changelog-unreleased.md",
+        "lints/cli-subprocess.md",
         "lints/core-crate-deps.md",
         "lints/core-crate-types.md",
         "lints/crate-cycles.md",
@@ -42,6 +44,7 @@ nav = [
         "lints/edition-latest.md",
         "lints/external-form.md",
         "lints/feature-docs.md",
+        "lints/float-determinism.md",
         "lints/forbidden-closure.md",
         "lints/function-complexity.md",
         "lints/function-lines.md",
@@ -58,9 +61,12 @@ nav = [
         "lints/no-sys-crates.md",
         "lints/package-description.md",
         "lints/package-license.md",
+        "lints/panic-in-library.md",
         "lints/path-outside-workspace.md",
+        "lints/print-in-library.md",
         "lints/profile-defaults.md",
         "lints/publish-false.md",
+        "lints/random-state-hash.md",
         "lints/readme-per-crate.md",
         "lints/repo-files.md",
         "lints/rust-version-set.md",
@@ -69,6 +75,7 @@ nav = [
         "lints/test-lines.md",
         "lints/third-party-placement.md",
         "lints/thread-local-state.md",
+        "lints/todo-macros.md",
         "lints/toolchain-pinned.md",
         "lints/unsafe-allow-list.md",
         "lints/waiver-invalid.md",
@@ -79,6 +86,8 @@ nav = [
     ] },
 ]
 # spirit-level:book-nav-end
+
+
 
 
 

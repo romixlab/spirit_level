@@ -2,6 +2,18 @@
 
 Every lint, grouped by category, with its level in each shipped tier (`off`: the tier does not enable it). A project changes any of them in its `spirit_level.toml` ([configuration](../configuration.md)).
 
+## code
+
+| Lint | Rule | small | small-workspace | medium | big |
+|---|---|---|---|---|---|
+| [allow-without-reason](allow-without-reason.md) | every allow or expect of a lint says why | warn | warn | warn | deny |
+| [cli-subprocess](cli-subprocess.md) | workspace crates call each other as libraries, never by running the workspace's own binaries | off | off | deny | deny |
+| [float-determinism](float-determinism.md) | deterministic crates compute float transcendentals through libm | off | off | off | deny |
+| [panic-in-library](panic-in-library.md) | library code returns errors instead of panicking | off | off | warn | warn |
+| [print-in-library](print-in-library.md) | library code does not print | warn | warn | warn | warn |
+| [random-state-hash](random-state-hash.md) | deterministic crates use no randomly seeded hash maps | off | off | off | deny |
+| [todo-macros](todo-macros.md) | no todo!() or unimplemented!() outside tests | warn | warn | warn | deny |
+
 ## dependencies
 
 | Lint | Rule | small | small-workspace | medium | big |

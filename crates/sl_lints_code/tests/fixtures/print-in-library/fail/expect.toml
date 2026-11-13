@@ -1,0 +1,8 @@
+
+[[finding]]
+at = "src/lib.rs:2"
+contains = "println!"
+
+[[finding]]
+at = "src/lib.rs:2"
+contains = "dbg!"

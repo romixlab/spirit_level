@@ -1,0 +1,12 @@
+
+[[finding]]
+at = "src/lib.rs:2"
+contains = ".unwrap() in library code (3 in fx)"
+
+[[finding]]
+at = "src/lib.rs:3"
+contains = ".expect()"
+
+[[finding]]
+at = "src/lib.rs:4"
+contains = "panic!"

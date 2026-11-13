@@ -87,3 +87,19 @@ reason = "the crate table is generated from the manifests and the map, never wri
 [lints.unsafe-allow-list]
 level = "deny"
 reason = "unsafe is forbidden except in the crates the map lists"
+
+[lints.todo-macros]
+level = "deny"
+reason = "no stop-gaps: a todo!() is a panic waiting in shipped code"
+
+[lints.allow-without-reason]
+level = "deny"
+reason = "an exception to a lint says why, or it outlives its reason"
+
+[lints.float-determinism]
+level = "deny"
+reason = "crates the map marks deterministic compute the same bits on every platform"
+
+[lints.random-state-hash]
+level = "deny"
+reason = "crates the map marks deterministic iterate in the same order every run"
