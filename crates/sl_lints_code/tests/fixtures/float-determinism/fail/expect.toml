@@ -2,7 +2,9 @@
 [[finding]]
 at = "src/lib.rs:2"
 contains = ".sin()"
+confidence = "estimate"
 
 [[finding]]
 at = "src/lib.rs:2"
 contains = ".powf()"
+confidence = "estimate"
