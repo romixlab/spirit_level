@@ -1,0 +1,27 @@
+[package]
+name = "sl_firmware"
+description = "spirit_level's model of bare-metal firmware crates: cargo configuration, build script, memory.x, bedrock_fw.json, source facts, the linked ELF with frames and calls"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[features]
+# writing synthetic ELFs from a TOML description, for fixtures
+synth = []
+
+[dependencies]
+gimli.workspace = true
+object.workspace = true
+proc-macro2.workspace = true
+quote.workspace = true
+rustc-demangle.workspace = true
+serde_json.workspace = true
+sl_core.workspace = true
+sl_model.workspace = true
+syn.workspace = true
+
+[lints]
+workspace = true

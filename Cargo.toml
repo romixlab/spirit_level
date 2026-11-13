@@ -43,6 +43,11 @@ syn = { version = "3", default-features = false, features = [
   "extra-traits",
 ] }
 toml_edit = { version = "0.25", default-features = false, features = ["parse", "display"] }
+# sl_firmware (the linked ELF; synthetic fixture ELFs with `write`):
+gimli = { version = "0.32", default-features = false, features = ["read", "std"] }
+object = { version = "0.38", default-features = false, features = ["read_core", "elf", "std"] }
+quote = { version = "1", default-features = false }
+rustc-demangle = { version = "0.1", default-features = false }
 
 # workspace crates:
 sl_analysis = { path = "crates/sl_analysis" }
@@ -50,9 +55,11 @@ sl_book = { path = "crates/sl_book" }
 sl_config = { path = "crates/sl_config" }
 sl_core = { path = "crates/sl_core" }
 sl_engine = { path = "crates/sl_engine" }
+sl_firmware = { path = "crates/sl_firmware" }
 sl_lints_ai = { path = "crates/sl_lints_ai" }
 sl_lints_code = { path = "crates/sl_lints_code" }
 sl_lints_dead = { path = "crates/sl_lints_dead" }
+sl_lints_embedded = { path = "crates/sl_lints_embedded" }
 sl_lints_errors = { path = "crates/sl_lints_errors" }
 sl_lints_graph = { path = "crates/sl_lints_graph" }
 sl_lints_manifest = { path = "crates/sl_lints_manifest" }
