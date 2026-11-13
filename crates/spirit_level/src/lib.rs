@@ -3,7 +3,7 @@
 //! ```no_run
 //! let opts = spirit_level::Options::new(sl_core::Date::today_utc());
 //! match spirit_level::check(std::path::Path::new("."), &opts) {
-//!     Ok(report) => println!("{} findings", report.diagnostics.len()),
+//!     Ok((_project, report)) => println!("{} findings", report.diagnostics.len()),
 //!     Err(e) => eprintln!("{e}"),
 //! }
 //! ```
