@@ -14,7 +14,7 @@ lint!(META, "cfg-5", "cfg", "the HAL's chip feature names the part on the board"
 pub(crate) const NEEDS: &[FwNeed] = &[FwNeed::Chip];
 
 
-/// STM32 only for now: embassy-stm32's chip feature is the chip name, lower-case, exactly as `bedrock_fw.json`
+/// STM32 parts only, as in bedrock_lint: embassy-stm32's chip feature is the chip name, lower-case, exactly as `bedrock_fw.json`
 /// names it (`STM32G0B1RE` → `stm32g0b1re`)
 pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
     let Some(chip) = fw.chip() else {

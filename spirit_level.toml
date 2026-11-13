@@ -23,6 +23,12 @@ crates = ["sl_testkit"]
 level = "allow"
 reason = "a test harness reports a failed fixture by panicking, as assert! does"
 
+[[exceptions]]
+lint = "stop-gap-comments"
+crates = ["sl_lints_embedded"]
+phrases = ["for now", "hack", "shim", "quick fix", "temporary fix", "temporary solution", "temporary workaround", "temporary hack", "temporary code", "temporary implementation", "temporary patch", "is temporary", "temporarily disabled", "fix later", "refactor later", "clean up later"]
+reason = "the errata checks quote errata sheets, whose fix field is called workaround"
+
 [map.layers.core]
 desc = "Types only: lint metadata, levels, parameters, diagnostics"
 allow = []
