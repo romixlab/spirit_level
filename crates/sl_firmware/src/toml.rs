@@ -51,7 +51,11 @@ impl TomlExt for TomlFile {
     }
 
     fn targets(&self) -> Vec<(String, &dyn TableLike)> {
-        fn flatten<'v>(prefix: &str, t: &'v dyn TableLike, out: &mut Vec<(String, &'v dyn TableLike)>) {
+        fn flatten<'v>(
+            prefix: &str,
+            t: &'v dyn TableLike,
+            out: &mut Vec<(String, &'v dyn TableLike)>,
+        ) {
             for (k, v) in t.iter() {
                 let Some(sub) = v.as_table_like() else {
                     continue;

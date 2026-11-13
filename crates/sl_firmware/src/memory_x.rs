@@ -5,7 +5,6 @@
 //! `l`), with expressions of numbers (`0x0800_0000` is not valid in a linker script, `512K`, `1M`), `+ - *`,
 //! parentheses and `ORIGIN(R)` / `LENGTH(R)` of a region above. A region whose expressions can't be read is left out.
 
-
 /// One region of `MEMORY`
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Region {

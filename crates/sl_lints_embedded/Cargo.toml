@@ -1,0 +1,26 @@
+[package]
+name = "sl_lints_embedded"
+description = "spirit_level lints on bare-metal firmware: executors, interrupts, DMA, stack, memory, size, faults, boot, power, flash, pins, clocks, errata, USB, host input, logging, counters, build configuration (embedded_bedrock's bedrock_lint checks)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+proc-macro2.workspace = true
+quote.workspace = true
+serde_json.workspace = true
+sl_analysis.workspace = true
+sl_core.workspace = true
+sl_firmware.workspace = true
+sl_model.workspace = true
+syn.workspace = true
+
+[dev-dependencies]
+sl_firmware = { workspace = true, features = ["synth"] }
+sl_testkit.workspace = true
+
+[lints]
+workspace = true

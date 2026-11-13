@@ -181,7 +181,8 @@ impl<'p> Firmware<'p> {
                         .iter()
                         .any(|(k, n)| *k == TargetKind::Bin && stem.as_deref() == Some(n.as_str()))
                 });
-                let elf = named.or_else(|| (crates.len() == 1 && elfs.len() == 1).then(|| &elfs[0]));
+                let elf =
+                    named.or_else(|| (crates.len() == 1 && elfs.len() == 1).then(|| &elfs[0]));
                 Firmware::load(project, pkg, elf.map(PathBuf::as_path))
             })
             .collect()
@@ -210,7 +211,8 @@ impl<'p> Firmware<'p> {
             .and_then(
                 |file| match serde_json::from_str::<serde_json::Value>(&file.text) {
                     Ok(json) => {
-                        let s = |a: &str, b: &str| json.get(a)?.get(b)?.as_str().map(str::to_string);
+                        let s =
+                            |a: &str, b: &str| json.get(a)?.get(b)?.as_str().map(str::to_string);
                         Some(BedrockFw {
                             chip: s("answers", "chip").map(|c| Chip::new(&c)),
                             framework: s("answers", "framework"),
@@ -284,8 +286,12 @@ impl<'p> Firmware<'p> {
         self.dependencies().iter().find_map(|d| {
             let chip_feature = match d.package() {
                 "embassy-stm32" | "stm32-metapac" => |f: &str| f.starts_with("stm32"),
-                "embassy-rp" | "rp-pac" => |f: &str| f.starts_with("rp2040") || f.starts_with("rp235"),
-                "embassy-nrf" | "nrf-pac" => |f: &str| f.starts_with("nrf5") || f.starts_with("nrf9"),
+                "embassy-rp" | "rp-pac" => {
+                    |f: &str| f.starts_with("rp2040") || f.starts_with("rp235")
+                }
+                "embassy-nrf" | "nrf-pac" => {
+                    |f: &str| f.starts_with("nrf5") || f.starts_with("nrf9")
+                }
                 _ => return None,
             };
             d.features()
@@ -444,13 +450,14 @@ pub fn is_firmware(project: &Project, pkg: &Package) -> bool {
     }
     let mut notes = Vec::new();
     let bare_metal = cargo_configs(&root, &dir, &mut notes).iter().any(|c| {
-        c.lookup(&["build", "target"]).is_some_and(|t| match t.as_value() {
-            Some(sl_model::toml_edit::Value::String(s)) => s.value().contains("-none"),
-            Some(sl_model::toml_edit::Value::Array(a)) => {
-                a.iter().any(|t| t.as_str().is_some_and(|t| t.contains("-none")))
-            }
-            _ => false,
-        })
+        c.lookup(&["build", "target"])
+            .is_some_and(|t| match t.as_value() {
+                Some(sl_model::toml_edit::Value::String(s)) => s.value().contains("-none"),
+                Some(sl_model::toml_edit::Value::Array(a)) => a
+                    .iter()
+                    .any(|t| t.as_str().is_some_and(|t| t.contains("-none"))),
+                _ => false,
+            })
     });
     bare_metal
         || project.sources(pkg).iter().any(|f| {
@@ -459,8 +466,7 @@ pub fn is_firmware(project: &Project, pkg: &Package) -> bool {
                 && f.in_package != "src/lib.rs"
                 && f.ast().is_ok_and(|ast| {
                     ast.attrs.iter().any(|a| {
-                        a.path().is_ident("no_std")
-                            && matches!(a.style, syn::AttrStyle::Inner(_))
+                        a.path().is_ident("no_std") && matches!(a.style, syn::AttrStyle::Inner(_))
                     })
                 })
         })
@@ -489,7 +495,12 @@ fn cargo_configs(root: &Path, dir: &Path, notes: &mut Vec<Note>) -> Vec<TomlFile
 }
 
 /// The `src/` files of the crate and of its path dependencies inside the project, parsed
-fn sources(project: &Project, package: &Package, root: &Path, notes: &mut Vec<Note>) -> Vec<SourceFile> {
+fn sources(
+    project: &Project,
+    package: &Package,
+    root: &Path,
+    notes: &mut Vec<Note>,
+) -> Vec<SourceFile> {
     let mut out = Vec::new();
     let mut add = |files: &[sl_model::SourceFile], notes: &mut Vec<Note>| {
         for f in files.iter().filter(|f| f.kind == FileKind::Src) {
@@ -533,7 +544,10 @@ fn sources(project: &Project, package: &Package, root: &Path, notes: &mut Vec<No
                 .iter()
                 .filter_map(|p| {
                     let rel = rel_path(root, p);
-                    let in_package = rel.strip_prefix(&format!("{path}/")).unwrap_or(&rel).to_string();
+                    let in_package = rel
+                        .strip_prefix(&format!("{path}/"))
+                        .unwrap_or(&rel)
+                        .to_string();
                     sl_model::SourceFile::read(root, &rel, &d.name, &in_package).ok()
                 })
                 .collect();
@@ -573,7 +587,8 @@ pub fn rel_path(base: &Path, p: &Path) -> String {
     let base: Vec<_> = base.components().collect();
     let target: Vec<_> = p.components().collect();
     let common = base.iter().zip(&target).take_while(|(a, b)| a == b).count();
-    let mut parts: Vec<String> = std::iter::repeat_n("..".to_string(), base.len() - common).collect();
+    let mut parts: Vec<String> =
+        std::iter::repeat_n("..".to_string(), base.len() - common).collect();
     parts.extend(
         target[common..]
             .iter()
@@ -612,7 +627,10 @@ mod tests {
     #[test]
     fn relative_paths() {
         let d = Path::new("/r/fw/app");
-        assert_eq!(rel_path(d, Path::new("/r/fw/app/src/main.rs")), "src/main.rs");
+        assert_eq!(
+            rel_path(d, Path::new("/r/fw/app/src/main.rs")),
+            "src/main.rs"
+        );
         assert_eq!(
             rel_path(d, Path::new("/r/.cargo/config.toml")),
             "../../.cargo/config.toml"

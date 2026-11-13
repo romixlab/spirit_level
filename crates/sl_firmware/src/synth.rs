@@ -242,7 +242,11 @@ pub fn write(spec: &Spec) -> Result<Vec<u8>, String> {
             })
             .collect::<Result<_, _>>()?;
         let sec = f.section.clone().unwrap_or_else(|| ".text".into());
-        code.push((sec, f.addr, crate::thumb::encode::function(f.addr, f.frame, &calls)));
+        code.push((
+            sec,
+            f.addr,
+            crate::thumb::encode::function(f.addr, f.frame, &calls),
+        ));
     }
     struct Sec {
         name: String,

@@ -1,0 +1,21 @@
+## Why
+
+`cnt`'s proc-macro crate and its runtime crate present at different versions (a `^` or `~` range instead of an exact `=x.y.z` pin keeping them locked together).
+
+The macro generates code that calls into the runtime's own layout and ABI for a given version; if Cargo's resolver picks different versions for the two (easy to happen across a workspace with several dependents), the generated code and the runtime it calls into can silently disagree about the counter buffer's layout.
+
+## Example
+
+Noted directly in `cnt`'s own documentation as the reason both crates are versioned and released together rather than independently.
+
+## How to fix
+
+Pin both crates with `=x.y.z` to the same version everywhere they're depended on; bump them together, never independently.
+
+## How it is checked
+
+`cfg easy`: both `cnt` and `cnt-macros` (or however the pair is split) must be pinned to the exact same version with `=x.y.z` in every `Cargo.toml` that depends on them.
+
+## Source
+
+Ported from embedded_bedrock's firmware check catalogue, `CNT-3` (`book/checks.md`, detail in `book/checks/cnt.md`). Found on: cnt.

@@ -5,9 +5,9 @@
 
 use super::Region;
 use super::thumb;
-use sl_core::Span;
 use object::elf;
 use object::read::elf::{FileHeader, ProgramHeader, SectionHeader, Sym};
+use sl_core::Span;
 use std::collections::{BTreeMap, HashMap};
 use std::path::{Path, PathBuf};
 

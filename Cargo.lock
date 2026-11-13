@@ -1063,6 +1063,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "sl_lints_embedded"
+version = "0.1.0"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "serde_json",
+ "sl_analysis",
+ "sl_core",
+ "sl_firmware",
+ "sl_model",
+ "sl_testkit",
+ "syn",
+]
+
+[[package]]
 name = "sl_lints_manifest"
 version = "0.1.3"
 dependencies = [
