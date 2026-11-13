@@ -215,38 +215,7 @@ impl Elf {
             });
         }
 
-        let mut symbols = Vec::new();
-        if let Ok(st) = table.symbols(endian, data, elf::SHT_SYMTAB) {
-            for sym in st.iter() {
-                let raw = String::from_utf8_lossy(sym.name(endian, st.strings()).unwrap_or(b""))
-                    .into_owned();
-                if raw.is_empty() || raw.starts_with('$') {
-                    continue;
-                }
-                let kind = match sym.st_type() {
-                    elf::STT_FUNC => SymKind::Func,
-                    elf::STT_OBJECT => SymKind::Object,
-                    elf::STT_SECTION | elf::STT_FILE => continue,
-                    _ => SymKind::Other,
-                };
-                let mut addr: u64 = sym.st_value(endian).into();
-                if kind == SymKind::Func && machine == Machine::Arm {
-                    addr &= !1;
-                }
-                let shndx = sym.st_shndx(endian) as usize;
-                let section = by_index.get(&shndx).map(|&i| sections[i].name.clone());
-                symbols.push(Symbol {
-                    name: demangle(&raw),
-                    raw,
-                    addr,
-                    size: sym.st_size(endian).into(),
-                    kind,
-                    section,
-                });
-            }
-        }
-        symbols.sort_by(|a, b| (a.addr, &a.raw).cmp(&(b.addr, &b.raw)));
-        symbols.dedup_by(|a, b| a.addr == b.addr && a.raw == b.raw);
+        let symbols = read_symbols(data, &table, endian, machine, &by_index, &sections);
 
         let mut out = Elf {
             rel,
@@ -512,4 +481,49 @@ mod tests {
         );
         assert_eq!(super::demangle("_stack_start"), "_stack_start");
     }
+}
+
+/// The symbol table, sorted by address and name: functions and objects, without mapping (`$t`) and file symbols;
+/// Thumb function addresses without their low bit
+fn read_symbols(
+    data: &[u8],
+    table: &object::read::elf::SectionTable<'_, elf::FileHeader32<object::Endianness>>,
+    endian: object::Endianness,
+    machine: Machine,
+    by_index: &BTreeMap<usize, usize>,
+    sections: &[Section],
+) -> Vec<Symbol> {
+    let mut symbols = Vec::new();
+    if let Ok(st) = table.symbols(endian, data, elf::SHT_SYMTAB) {
+        for sym in st.iter() {
+            let raw =
+                String::from_utf8_lossy(sym.name(endian, st.strings()).unwrap_or(b"")).into_owned();
+            if raw.is_empty() || raw.starts_with('$') {
+                continue;
+            }
+            let kind = match sym.st_type() {
+                elf::STT_FUNC => SymKind::Func,
+                elf::STT_OBJECT => SymKind::Object,
+                elf::STT_SECTION | elf::STT_FILE => continue,
+                _ => SymKind::Other,
+            };
+            let mut addr: u64 = sym.st_value(endian).into();
+            if kind == SymKind::Func && machine == Machine::Arm {
+                addr &= !1;
+            }
+            let shndx = sym.st_shndx(endian) as usize;
+            let section = by_index.get(&shndx).map(|&i| sections[i].name.clone());
+            symbols.push(Symbol {
+                name: demangle(&raw),
+                raw,
+                addr,
+                size: sym.st_size(endian).into(),
+                kind,
+                section,
+            });
+        }
+    }
+    symbols.sort_by(|a, b| (a.addr, &a.raw).cmp(&(b.addr, &b.raw)));
+    symbols.dedup_by(|a, b| a.addr == b.addr && a.raw == b.raw);
+    symbols
 }

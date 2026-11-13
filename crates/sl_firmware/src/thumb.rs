@@ -110,116 +110,155 @@ pub fn read(addr: u64, code: &[u8], literal: impl Fn(u64) -> Option<u32>) -> Cod
     out
 }
 
+/// What one instruction of a prologue says
+enum Step {
+    /// Go on with the next instruction
+    Next,
+    /// The frame is known (or, `None`, the prologue is not one that can be read)
+    Done(Option<u32>),
+    /// A branch or a return: the prologue is over
+    End,
+}
+
+/// What a prologue has done so far
+#[derive(Default)]
+struct Prologue {
+    /// Bytes pushed
+    total: u32,
+    /// Whether anything was pushed
+    seen: bool,
+    /// Registers loaded with a constant
+    consts: [Option<u32>; 16],
+}
+
+impl Prologue {
+    /// A 32-bit instruction
+    fn wide(&mut self, pc: u64, h1: u16, h2: u16, literal: &impl Fn(u64) -> Option<u32>) -> Step {
+        // push.w {reglist} (stmdb sp!, {..})
+        if h1 == 0xE92D {
+            self.total += 4 * (h2 & 0xDFFF).count_ones();
+            self.seen = true;
+        // str.w rT, [sp, #-4]!
+        } else if h1 == 0xF84D && h2 & 0x0FFF == 0x0D04 {
+            self.total += 4;
+            self.seen = true;
+        // vpush {d..} / {s..}: imm8 words
+        } else if (h1 & 0xFFBF) == 0xED2D && (h2 & 0x0E00) == 0x0A00 {
+            self.total += 4 * (h2 & 0xFF) as u32;
+            self.seen = true;
+        // sub.w sp, sp, #const (T3)
+        } else if (h1 & 0xFBFF) == 0xF1AD && (h2 & 0x8F00) == 0x0D00 {
+            let v = expand_imm(
+                ((h1 >> 10) & 1) as u32,
+                ((h2 >> 12) & 7) as u32,
+                (h2 & 0xFF) as u32,
+            );
+            return Step::Done(Some(self.total + v));
+        // subw sp, sp, #imm12 (T4)
+        } else if (h1 & 0xFBFF) == 0xF2AD && (h2 & 0x8F00) == 0x0D00 {
+            let v = (((h1 >> 10) & 1) as u32) << 11
+                | (((h2 >> 12) & 7) as u32) << 8
+                | (h2 & 0xFF) as u32;
+            return Step::Done(Some(self.total + v));
+        // sub.w sp, sp, rM (T2 register, no shift)
+        } else if h1 == 0xEBAD && (h2 & 0xFFF0) == 0x0D00 {
+            let rm = (h2 & 0xF) as usize;
+            return Step::Done(self.consts[rm].map(|v| self.total + v));
+        // movw rD, #imm16
+        } else if (h1 & 0xFBF0) == 0xF240 && h2 & 0x8000 == 0 {
+            let rd = ((h2 >> 8) & 0xF) as usize;
+            let v = ((h1 & 0xF) as u32) << 12
+                | (((h1 >> 10) & 1) as u32) << 11
+                | (((h2 >> 12) & 7) as u32) << 8
+                | (h2 & 0xFF) as u32;
+            self.consts[rd] = Some(v);
+        // movt rD, #imm16
+        } else if (h1 & 0xFBF0) == 0xF2C0 && h2 & 0x8000 == 0 {
+            let rd = ((h2 >> 8) & 0xF) as usize;
+            let v = ((h1 & 0xF) as u32) << 12
+                | (((h1 >> 10) & 1) as u32) << 11
+                | (((h2 >> 12) & 7) as u32) << 8
+                | (h2 & 0xFF) as u32;
+            self.consts[rd] = self.consts[rd].map(|lo| (lo & 0xFFFF) | (v << 16));
+        // ldr.w rT, [pc, #imm12]
+        } else if (h1 & 0xFF7F) == 0xF85F {
+            let rt = ((h2 >> 12) & 0xF) as usize;
+            let off = (h2 & 0xFFF) as i64;
+            let base = ((pc + 4) & !3) as i64;
+            let at = if h1 & 0x80 != 0 {
+                base + off
+            } else {
+                base - off
+            };
+            self.consts[rt] = literal(at as u64);
+        } else if branch_target(pc, h1, h2).is_some() {
+            return Step::End;
+        }
+        Step::Next
+    }
+
+    /// A 16-bit instruction
+    fn narrow(&mut self, pc: u64, h1: u16, literal: &impl Fn(u64) -> Option<u32>) -> Step {
+        match h1 {
+            // push {reglist[, lr]}
+            h if h & 0xFE00 == 0xB400 => {
+                self.total += 4 * (h & 0xFF).count_ones() + 4 * ((h >> 8) & 1) as u32;
+                self.seen = true;
+            }
+            // sub sp, #imm7*4
+            h if h & 0xFF80 == 0xB080 => {
+                return Step::Done(Some(self.total + 4 * (h & 0x7F) as u32));
+            }
+            // ldr rT, [pc, #imm8*4]
+            h if h & 0xF800 == 0x4800 => {
+                let rt = ((h >> 8) & 7) as usize;
+                let at = ((pc + 4) & !3) + 4 * (h & 0xFF) as u64;
+                self.consts[rt] = literal(at);
+            }
+            // movs rD, #imm8
+            h if h & 0xF800 == 0x2000 => {
+                self.consts[((h >> 8) & 7) as usize] = Some((h & 0xFF) as u32)
+            }
+            // add sp, rM: the constant is negative (the frame)
+            h if h & 0xFF87 == 0x4485 => {
+                let rm = ((h >> 3) & 0xF) as usize;
+                return Step::Done(self.consts[rm].map(|v| self.total + v.wrapping_neg()));
+            }
+            // b, bx, blx, a conditional branch, pop: the prologue is over
+            h if h & 0xF800 == 0xE000
+                || h & 0xFF00 == 0x4700
+                || h & 0xF000 == 0xD000
+                || h & 0xFE00 == 0xBC00 =>
+            {
+                return Step::End;
+            }
+            _ => {}
+        }
+        Step::Next
+    }
+}
+
 fn prologue(addr: u64, code: &[u8], literal: &impl Fn(u64) -> Option<u32>) -> Option<u32> {
-    let mut total: u32 = 0;
-    let mut seen = false;
-    // registers loaded with a constant: (register, value)
-    let mut consts: [Option<u32>; 16] = [None; 16];
+    let mut p = Prologue::default();
     let mut i = 0;
     while i < PROLOGUE * 2 {
         let h1 = hw(code, i)?;
         let pc = addr + i as u64;
-        if is_wide(h1) {
+        let step = if is_wide(h1) {
             let h2 = hw(code, i + 2)?;
             i += 4;
-            // push.w {reglist} (stmdb sp!, {..})
-            if h1 == 0xE92D {
-                total += 4 * (h2 & 0xDFFF).count_ones();
-                seen = true;
-            // str.w rT, [sp, #-4]!
-            } else if h1 == 0xF84D && h2 & 0x0FFF == 0x0D04 {
-                total += 4;
-                seen = true;
-            // vpush {d..} / {s..}: imm8 words
-            } else if (h1 & 0xFFBF) == 0xED2D && (h2 & 0x0E00) == 0x0A00 {
-                total += 4 * (h2 & 0xFF) as u32;
-                seen = true;
-            // sub.w sp, sp, #const (T3)
-            } else if (h1 & 0xFBFF) == 0xF1AD && (h2 & 0x8F00) == 0x0D00 {
-                let v = expand_imm(
-                    ((h1 >> 10) & 1) as u32,
-                    ((h2 >> 12) & 7) as u32,
-                    (h2 & 0xFF) as u32,
-                );
-                return Some(total + v);
-            // subw sp, sp, #imm12 (T4)
-            } else if (h1 & 0xFBFF) == 0xF2AD && (h2 & 0x8F00) == 0x0D00 {
-                let v = (((h1 >> 10) & 1) as u32) << 11
-                    | (((h2 >> 12) & 7) as u32) << 8
-                    | (h2 & 0xFF) as u32;
-                return Some(total + v);
-            // sub.w sp, sp, rM (T2 register, no shift)
-            } else if h1 == 0xEBAD && (h2 & 0xFFF0) == 0x0D00 {
-                let rm = (h2 & 0xF) as usize;
-                return consts[rm].map(|v| total + v);
-            // movw rD, #imm16
-            } else if (h1 & 0xFBF0) == 0xF240 && h2 & 0x8000 == 0 {
-                let rd = ((h2 >> 8) & 0xF) as usize;
-                let v = ((h1 & 0xF) as u32) << 12
-                    | (((h1 >> 10) & 1) as u32) << 11
-                    | (((h2 >> 12) & 7) as u32) << 8
-                    | (h2 & 0xFF) as u32;
-                consts[rd] = Some(v);
-            // movt rD, #imm16
-            } else if (h1 & 0xFBF0) == 0xF2C0 && h2 & 0x8000 == 0 {
-                let rd = ((h2 >> 8) & 0xF) as usize;
-                let v = ((h1 & 0xF) as u32) << 12
-                    | (((h1 >> 10) & 1) as u32) << 11
-                    | (((h2 >> 12) & 7) as u32) << 8
-                    | (h2 & 0xFF) as u32;
-                consts[rd] = consts[rd].map(|lo| (lo & 0xFFFF) | (v << 16));
-            // ldr.w rT, [pc, #imm12]
-            } else if (h1 & 0xFF7F) == 0xF85F {
-                let rt = ((h2 >> 12) & 0xF) as usize;
-                let off = (h2 & 0xFFF) as i64;
-                let base = ((pc + 4) & !3) as i64;
-                let at = if h1 & 0x80 != 0 {
-                    base + off
-                } else {
-                    base - off
-                };
-                consts[rt] = literal(at as u64);
-            } else if branch_target(pc, h1, h2).is_some() {
-                break;
-            }
+            p.wide(pc, h1, h2, literal)
         } else {
             i += 2;
-            match h1 {
-                // push {reglist[, lr]}
-                h if h & 0xFE00 == 0xB400 => {
-                    total += 4 * (h & 0xFF).count_ones() + 4 * ((h >> 8) & 1) as u32;
-                    seen = true;
-                }
-                // sub sp, #imm7*4
-                h if h & 0xFF80 == 0xB080 => return Some(total + 4 * (h & 0x7F) as u32),
-                // ldr rT, [pc, #imm8*4]
-                h if h & 0xF800 == 0x4800 => {
-                    let rt = ((h >> 8) & 7) as usize;
-                    let at = ((pc + 4) & !3) + 4 * (h & 0xFF) as u64;
-                    consts[rt] = literal(at);
-                }
-                // movs rD, #imm8
-                h if h & 0xF800 == 0x2000 => {
-                    consts[((h >> 8) & 7) as usize] = Some((h & 0xFF) as u32)
-                }
-                // add sp, rM: the constant is negative (the frame)
-                h if h & 0xFF87 == 0x4485 => {
-                    let rm = ((h >> 3) & 0xF) as usize;
-                    return consts[rm].map(|v| total + v.wrapping_neg());
-                }
-                // b, bx, blx, a conditional branch, pop: the prologue is over
-                h if h & 0xF800 == 0xE000
-                    || h & 0xFF00 == 0x4700
-                    || h & 0xF000 == 0xD000
-                    || h & 0xFE00 == 0xBC00 =>
-                {
-                    break;
-                }
-                _ => {}
-            }
+            p.narrow(pc, h1, literal)
+        };
+        match step {
+            Step::Next => {}
+            Step::Done(frame) => return frame,
+            Step::End => break,
         }
     }
-    seen.then_some(total)
+    p.seen.then_some(p.total)
 }
 
 /// Thumb encodings for the synthetic ELFs of the tests: a function with a prologue of `frame` bytes that calls
