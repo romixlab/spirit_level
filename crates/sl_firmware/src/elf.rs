@@ -1,5 +1,5 @@
 //! The linked ELF: sections with their load address, LOAD segments, symbols (demangled), and for Arm Thumb code
-//! the frame each function's prologue sets up and the functions it calls ([`thumb`](super::thumb)).
+//! the frame each function's prologue sets up and the functions it calls ([`thumb`]).
 //!
 //! Read with `object`'s low-level ELF parser; only 32-bit ELFs (every chip the template knows).
 

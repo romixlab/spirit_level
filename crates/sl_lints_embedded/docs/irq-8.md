@@ -2,7 +2,7 @@
 
 A `DefaultHandler` that doesn't record which IRQ number actually fired, or that tries to log from inside itself.
 
-An interrupt landing on a vector nothing expects (a mis-configured peripheral, a stray enable left on, hardware the board doesn't have asserting a line) is exactly the kind of thing worth knowing about after the fact; a `DefaultHandler` that doesn't capture the IRQ number throws that information away, and one that logs risks nesting into whatever caused the stray interrupt in the first place (`flt-2`).
+An interrupt landing on a vector nothing expects (a misconfigured peripheral, a stray enable left on, hardware the board doesn't have asserting a line) is exactly the kind of thing worth knowing about after the fact; a `DefaultHandler` that doesn't capture the IRQ number throws that information away, and one that logs risks nesting into whatever caused the stray interrupt in the first place (`flt-2`).
 
 ## Example
 

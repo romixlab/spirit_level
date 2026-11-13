@@ -1,7 +1,7 @@
 //! What the elf checks read from Arm Thumb code without a full disassembler: the stack frame a function's prologue
 //! sets up, and the functions it calls with `bl` (and tail-calls with `b.w`).
 //!
-//! The prologue is read until the first branch, at most [`PROLOGUE`] halfwords: `push` / `push.w` / `str.w ..,
+//! The prologue is read until the first branch, at most 32 halfwords: `push` / `push.w` / `str.w ..,
 //! [sp, #-4]!` / `vpush`, then `sub sp, #imm`, `sub.w` / `subw sp, sp, #imm`, or a literal load (`ldr rN, [pc, #]`,
 //! `movw` / `movt`) followed by `add sp, rN` / `sub.w sp, sp, rN` for frames too large for an immediate. Calls are
 //! every `bl` in the function's bytes and every `b` / `b.w` that leaves it (a tail call), decoded linearly: a literal pool in the middle of a function can read as an
