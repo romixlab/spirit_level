@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | off |  |
 | [ai](../tiers/ai.md) | `warn` | short sentences are read once and understood |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

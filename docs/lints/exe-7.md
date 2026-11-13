@@ -1,0 +1,52 @@
+# exe-7
+
+**Rule:** A loop that drains a queue in a shared task is bounded and yields.
+
+| | |
+|---|---|
+| Category | [exe](index.md#exe) |
+| Source | spirit_level |
+| Fix | by hand |
+
+## Level per tier
+
+| Tier | Level | Reason |
+|---|---|---|
+| [small](../tiers/small.md) | off |  |
+| [small-workspace](../tiers/small-workspace.md) | off |  |
+| [medium](../tiers/medium.md) | off |  |
+| [big](../tiers/big.md) | off |  |
+| [ai](../tiers/ai.md) | off |  |
+| [embedded](../tiers/embedded.md) | `warn` | bedrock warning: Loop in a shared task that works until a queue is empty (or logs in a loop) without a bound and a yield: above the input rate it never ends and starves the executor |
+
+## Why
+
+A loop in a task on a shared (thread) executor that keeps going "until a queue is empty" or logs every iteration of a batch, with no bound on how many iterations it can take and no `yield_now()`/await between them.
+
+Below the input rate the loop behaves; above it, it never reaches its own exit condition before more work arrives, and since the thread executor is cooperative, every other task on it starves for as long as the loop runs — not a crash, just everything else on that executor going quiet.
+
+## Example
+
+Typec_dongle's `uart_pump` task (FW-42) and `log_flood` (FW-27, 62 ms in one call) both drained their queues this way; the fix bounds the number of items taken per poll and yields in between.
+
+## How to fix
+
+Cap how much one poll drains (a fixed batch size) and `.await` a yield between batches so other tasks get a turn.
+
+## How it is checked
+
+From the firmware model (`mid`): a loop with no static bound on iteration count and no await inside its body, inside a task that also isn't the sole task on its executor.
+
+## Source
+
+Ported from embedded_bedrock's firmware check catalogue, `EXE-7` (`book/checks.md`, detail in `book/checks/exe.md`). Found on: typec_dongle FW-42 uart_pump; FW-27 log_flood (62 ms in one go).
+
+## Configure
+
+```toml
+[lints.exe-7]
+level = "deny"
+reason = "why this project wants it at this level"
+```
+
+Allow one finding in the code with `// spirit-level: allow(exe-7) <reason>` ([waivers](../waivers.md)).

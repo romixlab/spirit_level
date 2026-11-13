@@ -9,3 +9,4 @@ A tier is a TOML file of lints shipped with spirit_level. Each size tier extends
 | [medium](medium.md) | A medium workspace: internal crates unpublished, MSRV declared, toolchain pinned, dependency rules strict |
 | [big](big.md) | A big workspace: a crate map with layers checked edge by edge, size limits with expiring exceptions, strict conformity |
 | [ai](ai.md) | Code and docs written with AI agents: agent files, terse output, AI-isms, stop-gap smells, agent-config hygiene |
+| [embedded](embedded.md) | Bare-metal firmware: executors, interrupts, DMA, stack, memory, size, faults, boot, power, flash, pins, clocks, errata, USB, host input, logging, counters, build configuration |

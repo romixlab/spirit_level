@@ -18,6 +18,7 @@
 | [medium](../tiers/medium.md) | `warn` | the subject is what one-line logs and reviews show |
 | [big](../tiers/big.md) | `warn` | the subject is what one-line logs and reviews show |
 | [ai](../tiers/ai.md) | `deny` | the subject is what one-line logs and reviews show |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

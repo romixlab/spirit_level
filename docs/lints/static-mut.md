@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | `deny` | global mutable state with no synchronisation; there is always a better owner |
 | [big](../tiers/big.md) | `deny` | global mutable state with no synchronisation; there is always a better owner |
 | [ai](../tiers/ai.md) | off |  |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Why
 

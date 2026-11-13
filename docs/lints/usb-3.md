@@ -1,0 +1,50 @@
+# usb-3
+
+**Rule:** Bulk endpoints on a hot path are double-buffered.
+
+| | |
+|---|---|
+| Category | [usb](index.md#usb) |
+| Source | spirit_level |
+| Fix | by hand |
+
+## Level per tier
+
+| Tier | Level | Reason |
+|---|---|---|
+| [small](../tiers/small.md) | off |  |
+| [small-workspace](../tiers/small-workspace.md) | off |  |
+| [medium](../tiers/medium.md) | off |  |
+| [big](../tiers/big.md) | off |  |
+| [ai](../tiers/ai.md) | off |  |
+| [embedded](../tiers/embedded.md) | `warn` | bedrock suggestion, reported without failing the run: Single-buffered bulk endpoints on a hot path behind a hub TT (G0 usb_v4: 500 vs 947 kB/s) |
+
+## Why
+
+A single-buffered bulk endpoint can't accept (or supply) the next packet while firmware is still handling the previous one, so there is dead time on the wire between packets; through a hub's Transaction Translator (TT) that dead time is far more expensive than directly on the host's own root port, because the TT serializes Full-Speed traffic from multiple downstream devices.
+
+## Example
+
+Typec_dongle's WireWeaver USB throughput (FW-24, on the G0's `usb_v4` peripheral) went from 373 to 664-676 kB/s host→device purely from switching to double-buffered bulk endpoints (`embassy-rs/embassy#7275`), alongside `opt-level = 3` and a protocol fast path — nearly double, from firmware-side buffering changes alone, with the same wire protocol and the same host.
+
+## How to fix
+
+Double-buffer (or use more than one buffer per direction) any bulk endpoint on a path that matters for throughput, especially one a hub TT sits in front of; chip: STM32 `usb_v4` parts (G0, among others) need this explicitly since the peripheral itself only gives one buffer per endpoint direction unless the double-buffer feature is used.
+
+## How it is checked
+
+Src easy — whether an endpoint is constructed with single or double buffering is a static property of the driver call, chip: STM32 `usb_v4`.
+
+## Source
+
+Ported from embedded_bedrock's firmware check catalogue, `USB-3` (`book/checks.md`, detail in `book/checks/usb.md`). Found on: typec_dongle FW-24.
+
+## Configure
+
+```toml
+[lints.usb-3]
+level = "deny"
+reason = "why this project wants it at this level"
+```
+
+Allow one finding in the code with `// spirit-level: allow(usb-3) <reason>` ([waivers](../waivers.md)).

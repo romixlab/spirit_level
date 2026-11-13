@@ -18,6 +18,7 @@
 | [medium](../tiers/medium.md) | `deny` | a vulnerable dependency is updated, or its advisory ignored with a reason in deny.toml |
 | [big](../tiers/big.md) | `deny` | a vulnerable dependency is updated, or its advisory ignored with a reason in deny.toml |
 | [ai](../tiers/ai.md) | off |  |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

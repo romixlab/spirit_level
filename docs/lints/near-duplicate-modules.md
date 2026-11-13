@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | off |  |
 | [ai](../tiers/ai.md) | `deny` | a rewrite that keeps the old module is not finished |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

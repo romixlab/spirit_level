@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | off |  |
 | [ai](../tiers/ai.md) | `deny` | two copies of the rules drift apart |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

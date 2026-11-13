@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | `warn` | test code builds and links too |
 | [ai](../tiers/ai.md) | off |  |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

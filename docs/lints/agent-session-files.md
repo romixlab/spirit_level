@@ -18,6 +18,7 @@
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | off |  |
 | [ai](../tiers/ai.md) | `deny` | transcripts and per-person agent files hold private context and secrets |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

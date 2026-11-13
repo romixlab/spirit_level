@@ -18,6 +18,7 @@
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | `deny` | heavy dependencies sit in one crate each |
 | [ai](../tiers/ai.md) | off |  |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Why
 

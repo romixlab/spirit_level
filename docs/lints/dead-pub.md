@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | `warn` | rustc can't see pub items no other crate uses; in a big workspace they pile up (candidates, never fail) |
 | [ai](../tiers/ai.md) | off |  |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

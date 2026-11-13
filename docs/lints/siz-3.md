@@ -1,0 +1,52 @@
+# siz-3
+
+**Rule:** No per-package opt-level beside lto = "fat".
+
+| | |
+|---|---|
+| Category | [siz](index.md#siz) |
+| Source | spirit_level |
+| Fix | by hand |
+
+## Level per tier
+
+| Tier | Level | Reason |
+|---|---|---|
+| [small](../tiers/small.md) | off |  |
+| [small-workspace](../tiers/small-workspace.md) | off |  |
+| [medium](../tiers/medium.md) | off |  |
+| [big](../tiers/big.md) | off |  |
+| [ai](../tiers/ai.md) | off |  |
+| [embedded](../tiers/embedded.md) | `warn` | bedrock suggestion, reported without failing the run: Per-package `opt-level` together with `lto = "fat"`: the override does nothing |
+
+## Why
+
+A `[profile.release.package.<name>]` override of `opt-level` in a workspace that also sets `lto = "fat"` on the top-level profile.
+
+Fat LTO re-optimises the whole program as one unit after per-crate compilation, discarding the per-package `opt-level` the override asked for; the override costs nothing but also does nothing, which is the quiet failure mode here — not a bug, just wasted Cargo.toml and a false sense of control over size.
+
+## Example
+
+Typec_dongle FW-57: a per-package override that looked deliberate turned out to have no effect once fat LTO was already on.
+
+## How to fix
+
+Drop the override (fat LTO already re-optimises everything), or switch to `lto = "thin"`/no LTO if the per-package control is actually needed.
+
+## How it is checked
+
+`cfg easy`: a per-package `opt-level` override present alongside `lto = "fat"` in the same profile.
+
+## Source
+
+Ported from embedded_bedrock's firmware check catalogue, `SIZ-3` (`book/checks.md`, detail in `book/checks/siz.md`). Found on: typec_dongle FW-57.
+
+## Configure
+
+```toml
+[lints.siz-3]
+level = "deny"
+reason = "why this project wants it at this level"
+```
+
+Allow one finding in the code with `// spirit-level: allow(siz-3) <reason>` ([waivers](../waivers.md)).

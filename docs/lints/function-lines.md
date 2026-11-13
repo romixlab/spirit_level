@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | `warn` | a function longer than a screen is changed without being read whole |
 | [big](../tiers/big.md) | `warn` | a function longer than a screen is changed without being read whole |
 | [ai](../tiers/ai.md) | off |  |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | `warn` | split a crate before it passes ~20,000 lines: one crate is one serial compile step |
 | [big](../tiers/big.md) | `warn` | split a crate before it passes ~20,000 lines: one crate is one serial compile step |
 | [ai](../tiers/ai.md) | off |  |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

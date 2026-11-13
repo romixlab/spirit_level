@@ -18,6 +18,7 @@
 | [medium](../tiers/medium.md) | `warn` | a misspelled identifier is copied to every call site; typos has almost no false positives |
 | [big](../tiers/big.md) | `deny` | names are searched across hundreds of crates; a misspelling hides from every search |
 | [ai](../tiers/ai.md) | off |  |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Why
 

@@ -18,6 +18,7 @@
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | off |  |
 | [ai](../tiers/ai.md) | `warn` | commit messages follow the prose rules of the docs |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

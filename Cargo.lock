@@ -332,6 +332,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "fallible-iterator"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2acce4a10f12dc2fb14a218589d4f1f62ef011b2d0cc4b3cb1bba8e94da14649"
+
+[[package]]
 name = "fastrand"
 version = "2.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -396,6 +402,16 @@ dependencies = [
  "cfg-if",
  "libc",
  "r-efi 6.0.0",
+]
+
+[[package]]
+name = "gimli"
+version = "0.32.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e629b9b98ef3dd8afe6ca2bd0f89306cec16d43d907889945bc5d6687f2f13c7"
+dependencies = [
+ "fallible-iterator",
+ "stable_deref_trait",
 ]
 
 [[package]]
@@ -747,6 +763,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ca2b420f638f07fe83056b55ea190bb815f609ec5a35e7017884a10f78839c9e"
 
 [[package]]
+name = "object"
+version = "0.38.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "271638cd5fa9cca89c4c304675ca658efc4e64a66c716b7cfe1afb4b9611dbbc"
+dependencies = [
+ "memchr",
+]
+
+[[package]]
 name = "once_cell"
 version = "1.21.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -848,6 +873,12 @@ dependencies = [
  "crossbeam-deque",
  "crossbeam-utils",
 ]
+
+[[package]]
+name = "rustc-demangle"
+version = "0.1.28"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b74b56ffa8bb2830709a538c2cbcae9aa062db0d2a42563bfb09bdaae44020eb"
 
 [[package]]
 name = "rustix"
@@ -1005,6 +1036,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "sl_firmware"
+version = "0.1.3"
+dependencies = [
+ "gimli",
+ "object",
+ "proc-macro2",
+ "quote",
+ "rustc-demangle",
+ "serde_json",
+ "sl_core",
+ "sl_model",
+ "syn 3.0.10",
+]
+
+[[package]]
 name = "sl_lints_ai"
 version = "0.1.3"
 dependencies = [
@@ -1040,6 +1086,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "sl_lints_embedded"
+version = "0.1.3"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "serde_json",
+ "sl_analysis",
+ "sl_core",
+ "sl_firmware",
+ "sl_model",
+ "sl_testkit",
+ "syn 3.0.10",
+]
+
+[[package]]
 name = "sl_lints_errors"
 version = "0.1.3"
 dependencies = [
@@ -1060,21 +1121,6 @@ dependencies = [
  "sl_model",
  "sl_testkit",
  "syn 3.0.10",
-]
-
-[[package]]
-name = "sl_lints_embedded"
-version = "0.1.0"
-dependencies = [
- "proc-macro2",
- "quote",
- "serde_json",
- "sl_analysis",
- "sl_core",
- "sl_firmware",
- "sl_model",
- "sl_testkit",
- "syn",
 ]
 
 [[package]]
@@ -1342,6 +1388,7 @@ dependencies = [
  "sl_lints_ai",
  "sl_lints_code",
  "sl_lints_dead",
+ "sl_lints_embedded",
  "sl_lints_errors",
  "sl_lints_graph",
  "sl_lints_manifest",
@@ -1379,6 +1426,7 @@ dependencies = [
  "sl_config",
  "sl_core",
  "sl_engine",
+ "sl_firmware",
  "sl_model",
  "sl_report",
  "sl_tools",

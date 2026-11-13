@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | `warn` | a module cycle holding most of a crate can't be split into crates; cut it while it is small |
 | [big](../tiers/big.md) | `warn` | a module cycle holding most of a crate can't be split into crates; cut it while it is small |
 | [ai](../tiers/ai.md) | off |  |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

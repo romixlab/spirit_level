@@ -18,6 +18,7 @@
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | `deny` | some crates must never end up in a binary, however far away they arrive |
 | [ai](../tiers/ai.md) | off |  |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Why
 

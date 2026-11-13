@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | `deny` | one version per dependency per workspace, written once in [workspace.dependencies] |
 | [big](../tiers/big.md) | `deny` | one version per dependency per workspace, written once in [workspace.dependencies] |
 | [ai](../tiers/ai.md) | off |  |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

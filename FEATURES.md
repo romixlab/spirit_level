@@ -27,7 +27,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 ## TIER - shipped tiers
 
 - ✅ `TIER-1` small, small-workspace, medium, big.
-- 📋 `TIER-2` embedded: every bedrock_lint check (port of embedded_bedrock's bedrock_lint).
+- ✅ `TIER-2` embedded: every bedrock_lint check (port of embedded_bedrock's bedrock_lint): `sl_firmware`, `sl_lints_embedded`, `--elf`, migration page.
 - ✅ `TIER-3` ai: agent files, terse output, AI-isms, stop-gap smells, agent-config hygiene; stands beside the size tiers.
 
 ## MAN - manifest and repo lints

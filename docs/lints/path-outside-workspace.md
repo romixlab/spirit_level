@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | `deny` | a path into a sibling checkout builds differently on every PC |
 | [big](../tiers/big.md) | `deny` | a path into a sibling checkout builds differently on every PC |
 | [ai](../tiers/ai.md) | off |  |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Why
 

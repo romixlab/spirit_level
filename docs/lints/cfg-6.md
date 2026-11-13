@@ -1,0 +1,50 @@
+# cfg-6
+
+**Rule:** Thumbv6m firmware that needs compare-and-swap uses portable-atomic with critical-section.
+
+| | |
+|---|---|
+| Category | [cfg](index.md#cfg) |
+| Source | spirit_level |
+| Fix | by hand |
+
+## Level per tier
+
+| Tier | Level | Reason |
+|---|---|---|
+| [small](../tiers/small.md) | off |  |
+| [small-workspace](../tiers/small-workspace.md) | off |  |
+| [medium](../tiers/medium.md) | off |  |
+| [big](../tiers/big.md) | off |  |
+| [ai](../tiers/ai.md) | off |  |
+| [embedded](../tiers/embedded.md) | `warn` | bedrock warning: thumbv6m without `portable-atomic` + `critical-section` where a crate needs CAS (`static_cell`) |
+
+## Why
+
+Cortex-M0/M0+ (`thumbv6m`) has no compare-and-swap instruction. Crates that need CAS for a lock-free `static` (`static_cell`'s `StaticCell`, and others) either don't build on thumbv6m at all, or silently need the caller to turn on `portable-atomic`'s `critical-section` backend (a CAS emulated with a critical section) — and a workspace that forgets that feature either fails to build for the real target, or links in a `portable-atomic` that panics at the first CAS.
+
+## Example
+
+Mcan's P2 (G0 support) row: the crate "builds on thumbv7em only" by default, and "on the real target (thumbv6m), `static_cell` needs CAS, so it only works if the user enables `portable-atomic/critical-section`" — `g0,embassy` builds were broken until that feature was wired through (fixed alongside mcan's I1).
+
+## How to fix
+
+Any workspace targeting an M0/M0+ part that depends on a crate needing CAS turns on `portable-atomic/critical-section` (or the crate's own re-export of it) explicitly in that target's feature set; don't rely on another crate in the tree happening to enable it.
+
+## How it is checked
+
+Check: cfg easy, chip: M0+ — a lint checks that `portable-atomic` is in the dependency tree with `critical-section` enabled whenever the target is thumbv6m and a CAS-needing crate (`static_cell`, ...) is present.
+
+## Source
+
+Ported from embedded_bedrock's firmware check catalogue, `CFG-6` (`book/checks.md`, detail in `book/checks/cfg.md`). Found on: mcan P2.
+
+## Configure
+
+```toml
+[lints.cfg-6]
+level = "deny"
+reason = "why this project wants it at this level"
+```
+
+Allow one finding in the code with `// spirit-level: allow(cfg-6) <reason>` ([waivers](../waivers.md)).

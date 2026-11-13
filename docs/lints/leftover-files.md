@@ -18,6 +18,7 @@
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | off |  |
 | [ai](../tiers/ai.md) | `deny` | merge, editor and scratch leftovers and session notes do not belong in history |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

@@ -21,6 +21,7 @@ Result first, then only what the reader must decide or do. Bullets for lists, ta
 | `sl_core` | core | types: `LintMeta`, `Level`, params, `Diagnostic`, dates, globs |
 | `sl_model` | model | the project: cargo metadata, manifests (toml_edit), sources (syn), line counts |
 | `sl_config` | model | `spirit_level.toml` and tiers: extends, overrides, exceptions, expiries, the crate map |
+| `sl_firmware` | model | firmware crates: cargo config, build.rs, memory.x, bedrock_fw.json, source facts, the linked ELF |
 | `sl_analysis` | analysis | the `Analysis` trait, `Context`, the `lint!` macro, syntax helpers |
 | `sl_lints_*` | lints | one crate per analysis family; each lint's docs in `docs/<id>.md`, fixtures in `tests/fixtures/<id>/` |
 | `sl_engine` | engine | runs analyses, needs, levels, exceptions, waivers, fixes; its own lints `waiver-*` |
@@ -36,7 +37,7 @@ The map in `spirit_level.toml` is the source of truth for layers; `spirit-level 
 
 1. Declare it with `lint!(STATIC, "id", "category", "rule as a statement", params: [...], needs: [...], fix: None|Exact)` in its analysis crate, add it to the crate's `LINTS`.
 2. Write `docs/<id>.md`: `## Why`, an example where it helps, `## How to fix`.
-3. Add `tests/fixtures/<id>/pass/` and `fail/` (a cargo project with `[workspace]` in its `Cargo.toml`, and `expect.toml`). Text-pattern lints add false-positive cases to `pass/`. `BLESS=1 cargo test -p <crate> --test fixtures` writes `expect.toml`; read it before committing.
+3. Add `tests/fixtures/<id>/pass/` and `fail/` (a cargo project with `[workspace]` in its `Cargo.toml`, and `expect.toml`; `project = "..."` runs one shared under `tests/projects/`). Text-pattern lints add false-positive cases to `pass/`. `BLESS=1 cargo test -p <crate> --test fixtures` writes `expect.toml`; read it before committing.
 4. Enable it in a tier file with a level and a reason.
 5. `just book` regenerates the pages; `just lint` fails while they are stale.
 

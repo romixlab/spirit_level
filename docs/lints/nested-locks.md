@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | `warn` | two locks at once need one lock order everywhere |
 | [big](../tiers/big.md) | `warn` | two locks at once need one lock order everywhere |
 | [ai](../tiers/ai.md) | off |  |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Why
 

@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | off |  |
 | [ai](../tiers/ai.md) | `warn` | an entry says what changed for the user; the diff already shows the files |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

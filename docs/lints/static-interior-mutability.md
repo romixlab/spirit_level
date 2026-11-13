@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | `warn` | every piece of mutable state has one owner; a global lock says why |
 | [big](../tiers/big.md) | `deny` | every piece of mutable state has one owner; a global lock says why on the item |
 | [ai](../tiers/ai.md) | off |  |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

@@ -1,0 +1,59 @@
+# siz-5
+
+**Rule:** Core::fmt stays out of the firmware.
+
+| | |
+|---|---|
+| Category | [siz](index.md#siz) |
+| Source | spirit_level |
+| Fix | by hand |
+
+## Level per tier
+
+| Tier | Level | Reason |
+|---|---|---|
+| [small](../tiers/small.md) | off |  |
+| [small-workspace](../tiers/small-workspace.md) | off |  |
+| [medium](../tiers/medium.md) | off |  |
+| [big](../tiers/big.md) | off |  |
+| [ai](../tiers/ai.md) | off |  |
+| [embedded](../tiers/embedded.md) | `warn` | bedrock suggestion, reported without failing the run: `core::fmt` pulled in: `Result::unwrap` / `expect` (through `&dyn Debug`), `Debug2Format`, a panic handler that formats `PanicInfo` (4-5 KiB) |
+
+## Parameters
+
+| Name | Type | Default | Meaning |
+|---|---|---|---|
+| `fmt-bytes` | integer | `1024` | bytes of core::fmt code from which it is reported |
+
+## Why
+
+`Result::unwrap`/`.expect(...)` (which formats through `&dyn Debug` on panic), `defmt::Debug2Format`, or a panic handler that formats the full `PanicInfo`, each of which pulls in `core::fmt`'s formatting machinery (4-5 KiB) even when nothing else in the firmware needs it.
+
+`core::fmt` is sized once it's reachable at all, regardless of how rarely the formatting path actually runs; on a size-constrained build this fixed cost for an error path nobody wants to see output from in production is often not worth paying.
+
+## Example
+
+An internal `fw-size-2026-10-19` measurement found exactly this pulling in formatting code on a build that otherwise avoided it everywhere else.
+
+## How to fix
+
+Replace `unwrap`/`expect` with explicit error handling or `unwrap_or`-style defaults on hot/size-critical paths; keep a panic handler that records raw data (`flt-2`) instead of formatting `PanicInfo`.
+
+## How it is checked
+
+`src easy` (the syntactic pattern: `unwrap`/`expect`/`Debug2Format` call sites) plus `elf easy` (confirm `core::fmt` symbols are actually present/absent in the linked output).
+
+## Source
+
+Ported from embedded_bedrock's firmware check catalogue, `SIZ-5` (`book/checks.md`, detail in `book/checks/siz.md`). Found on: internal fw-size measurement 2026-10-19.
+
+## Configure
+
+```toml
+[lints.siz-5]
+level = "deny"
+fmt-bytes = 1024
+reason = "why this project wants it at this level"
+```
+
+Allow one finding in the code with `// spirit-level: allow(siz-5) <reason>` ([waivers](../waivers.md)).

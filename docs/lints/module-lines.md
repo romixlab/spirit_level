@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | `warn` | a file of thousands of lines holds several subjects and collects every edit |
 | [big](../tiers/big.md) | `warn` | a file of thousands of lines holds several subjects and collects every edit |
 | [ai](../tiers/ai.md) | off |  |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

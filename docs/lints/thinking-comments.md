@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | off |  |
 | [ai](../tiers/ai.md) | `deny` | a comment holds the conclusion, not the reasoning that led to it |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

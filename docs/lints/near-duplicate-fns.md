@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | off |  |
 | [ai](../tiers/ai.md) | `warn` | a rewrite that keeps the old function leaves two copies to fix |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

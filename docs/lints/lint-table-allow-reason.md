@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | off |  |
 | [ai](../tiers/ai.md) | `deny` | a lint allowed for a whole crate in Cargo.toml says why |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Why
 

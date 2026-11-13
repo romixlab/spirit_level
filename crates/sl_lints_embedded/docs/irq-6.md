@@ -4,6 +4,22 @@ Code that disables interrupts, calls into something else that also disables and 
 
 Hand-rolled disable/enable pairs don't nest: an inner `enable()` turns interrupts back on unconditionally, even while an outer section is still relying on them staying off, reopening exactly the race the outer section existed to prevent.
 
+## Example
+
+A helper that turns interrupts off and on by hand is called inside a critical section; its `enable` turns them on again while the outer section still counts on them being off:
+
+```rust
+fn only_disables() {
+    cortex_m::interrupt::disable();
+}
+
+fn inner() {
+    cortex_m::interrupt::disable();
+    // ...
+    unsafe { cortex_m::interrupt::enable() }; // also ends the caller's section
+}
+```
+
 ## How to fix
 
 Use `critical_section::with(|cs| { ... })` for every critical section instead of manual disable/enable pairs.

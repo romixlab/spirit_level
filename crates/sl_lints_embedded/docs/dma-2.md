@@ -4,6 +4,17 @@ D-cache enabled on a Cortex-M7 part with DMA buffers placed in ordinary cacheabl
 
 The CPU and the DMA engine don't share a cache; the CPU can read stale cached data after DMA has written fresh bytes underneath it, or DMA can read stale RAM while the CPU's dirty cache lines haven't been written back yet. Both look like corrupted or stale data that comes and goes with cache pressure.
 
+## Example
+
+A Cortex-M7 firmware turns the D-cache on while a DMA channel moves data through ordinary RAM, with no cache maintenance and no non-cacheable MPU region:
+
+```rust
+fn setup(p: Peripherals, cp: &mut Cp) {
+    let _dma = p.DMA1_CH0;
+    cp.SCB.enable_dcache(&mut cp.CPUID); // DMA buffers in cacheable RAM from here on
+}
+```
+
 ## How to fix
 
 Put DMA buffers in an MPU region marked non-cacheable, or call the HAL's cache clean/invalidate for the buffer's address range immediately before/after the transfer.

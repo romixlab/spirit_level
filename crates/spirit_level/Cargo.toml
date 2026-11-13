@@ -15,6 +15,7 @@ sl_core.workspace = true
 sl_engine.workspace = true
 sl_lints_ai.workspace = true
 sl_lints_code.workspace = true
+sl_lints_embedded.workspace = true
 sl_lints_graph.workspace = true
 sl_lints_dead.workspace = true
 sl_lints_errors.workspace = true

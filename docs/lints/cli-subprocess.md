@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | `deny` | components call each other as libraries, not through their CLIs |
 | [big](../tiers/big.md) | `deny` | components call each other as libraries, not through their CLIs |
 | [ai](../tiers/ai.md) | off |  |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Why
 

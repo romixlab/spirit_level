@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | `warn` | _macros and _derive mean proc macros and nothing else |
 | [big](../tiers/big.md) | `warn` | _macros and _derive mean proc macros and nothing else |
 | [ai](../tiers/ai.md) | off |  |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Why
 

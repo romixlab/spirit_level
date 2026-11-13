@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | `warn` | new code starts on the current edition |
 | [big](../tiers/big.md) | `warn` | new code starts on the current edition |
 | [ai](../tiers/ai.md) | off |  |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

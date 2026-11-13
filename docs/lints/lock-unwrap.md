@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | `warn` | the count of lock().unwrap() per crate shows where shared state concentrates |
 | [big](../tiers/big.md) | `warn` | the count of lock().unwrap() per crate shows where shared state concentrates |
 | [ai](../tiers/ai.md) | off |  |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

@@ -1,0 +1,51 @@
+# perf-3
+
+**Rule:** RAM functions are #[inline(never)].
+
+| | |
+|---|---|
+| Category | [perf](index.md#perf) |
+| Source | spirit_level |
+| Fix | by hand |
+| Needs | the firmware's linked ELF (`--elf`) |
+
+## Level per tier
+
+| Tier | Level | Reason |
+|---|---|---|
+| [small](../tiers/small.md) | off |  |
+| [small-workspace](../tiers/small-workspace.md) | off |  |
+| [medium](../tiers/medium.md) | off |  |
+| [big](../tiers/big.md) | off |  |
+| [ai](../tiers/ai.md) | off |  |
+| [embedded](../tiers/embedded.md) | `warn` | bedrock warning: RAM function (`#[link_section = ".data.*"]`) without `#[inline(never)]`: LTO inlines it back into flash |
+
+## Why
+
+Placing a hot function's code in RAM (`#[link_section = ".data.*"]`, copied there by the runtime's data initialization) only avoids flash wait states if the function's code actually stays where it was placed. Under LTO, a small function with only call sites in flash-resident code gets inlined straight back into its callers — the `.data` copy exists, nothing calls it, and the flash-resident inlined copy is what actually runs.
+
+## Example
+
+`wire_weaver`'s `ww_lz4` crate (used by typec_dongle's FW-42 UART RX compression, which runs the encoder "in RAM through ww_lz4's `ram`") marks every hot function with `#[cfg_attr(all(feature = "ram", target_os = "none"), unsafe(link_section = ".data.ww_lz4"), inline(never))]` — the `inline(never)` is load-bearing, not decoration: without it LTO would inline the function back into its flash-resident caller and the RAM placement would do nothing. The crate's own doc comment gives the payoff: "no flash wait states, about 30% fewer cycles than from flash on an STM32G0 at 64 MHz (1.5 KiB of RAM)."
+
+## How to fix
+
+Pair every `#[link_section = ".data.*"]` RAM-function attribute with `#[inline(never)]` on the same function, so LTO can't undo the placement by inlining it into a flash-resident caller.
+
+## How it is checked
+
+Check: src easy + elf easy — `src`: grep for `link_section = ".data` without an accompanying `inline(never)` on the same item; `elf`: confirm in the disassembly that the `.data` copy is actually reached by a `bl`/`blx` from a caller, not dead weight next to an inlined duplicate in `.text`.
+
+## Source
+
+Ported from embedded_bedrock's firmware check catalogue, `PERF-3` (`book/checks.md`, detail in `book/checks/perf.md`). Found on: typec_dongle FW-42.
+
+## Configure
+
+```toml
+[lints.perf-3]
+level = "deny"
+reason = "why this project wants it at this level"
+```
+
+Allow one finding in the code with `// spirit-level: allow(perf-3) <reason>` ([waivers](../waivers.md)).

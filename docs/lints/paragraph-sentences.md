@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | off |  |
 | [ai](../tiers/ai.md) | `warn` | result first, then what the reader must do; more facts are a list |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

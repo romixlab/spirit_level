@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | `warn` | split debug info and an incremental deploy profile: measured large build-time wins |
 | [big](../tiers/big.md) | `warn` | split debug info and an incremental deploy profile: measured large build-time wins |
 | [ai](../tiers/ai.md) | off |  |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | `warn` | printing is the binary's choice |
 | [big](../tiers/big.md) | `warn` | printing is the binary's choice |
 | [ai](../tiers/ai.md) | off |  |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

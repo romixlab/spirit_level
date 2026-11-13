@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | off |  |
 | [ai](../tiers/ai.md) | `deny` | git keeps the old code; commented-out code is a decision not taken |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

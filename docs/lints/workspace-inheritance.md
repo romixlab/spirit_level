@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | `deny` | edition, rust-version, licence and repository are declared once in [workspace.package] |
 | [big](../tiers/big.md) | `deny` | edition, rust-version, licence and repository are declared once in [workspace.package] |
 | [ai](../tiers/ai.md) | off |  |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

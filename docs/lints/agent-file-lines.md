@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | `warn` | agents read AGENTS.md whole every session; a long one is skimmed, not followed |
 | [big](../tiers/big.md) | `warn` | agents read AGENTS.md whole every session; a long one is skimmed, not followed |
 | [ai](../tiers/ai.md) | `deny` | agents read the file whole every session; a long one is skimmed, not followed |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

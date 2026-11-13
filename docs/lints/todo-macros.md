@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | `warn` | no stop-gaps: a todo!() is a panic waiting in shipped code |
 | [big](../tiers/big.md) | `deny` | no stop-gaps: a todo!() is a panic waiting in shipped code |
 | [ai](../tiers/ai.md) | `deny` | todo!() and unimplemented!() are stop-gaps that compile |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Why
 

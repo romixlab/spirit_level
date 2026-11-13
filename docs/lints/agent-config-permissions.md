@@ -18,6 +18,7 @@
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | off |  |
 | [ai](../tiers/ai.md) | `deny` | committed settings apply to every agent; a blanket grant lets any of them run anything |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

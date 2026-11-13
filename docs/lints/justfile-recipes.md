@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | `warn` | every repo answers to the same recipes: default, test, lint, install, deploy |
 | [big](../tiers/big.md) | `warn` | every repo answers to the same recipes: default, test, lint, install, deploy |
 | [ai](../tiers/ai.md) | off |  |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

@@ -18,6 +18,7 @@
 | [medium](../tiers/medium.md) | `deny` | pure-Rust crates only: no bundled C, no -sys bindings without a written reason |
 | [big](../tiers/big.md) | `deny` | pure-Rust crates only: no bundled C, no -sys bindings without a written reason |
 | [ai](../tiers/ai.md) | off |  |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

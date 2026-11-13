@@ -18,6 +18,7 @@
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | off |  |
 | [ai](../tiers/ai.md) | `deny` | a committed key is public to every reader and stays in history |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | `deny` | no stop-gaps: a TODO or a 'for now' names its tracker id or goes |
 | [ai](../tiers/ai.md) | `deny` | a TODO or a 'for now' marks a path the final design throws away; tracked work names its id |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

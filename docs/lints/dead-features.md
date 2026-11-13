@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | off |  |
 | [ai](../tiers/ai.md) | `warn` | a feature that enables nothing and gates nothing is left over |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

@@ -28,6 +28,7 @@ spirit_level.workspace = true
 
 [dev-dependencies]
 serde_json.workspace = true
+sl_firmware = { workspace = true, features = ["synth"] }
 
 [features]
 # the hakari lints run (links hakari)

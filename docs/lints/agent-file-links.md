@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | off |  |
 | [ai](../tiers/ai.md) | `deny` | an agent that follows a dead link guesses or stops |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

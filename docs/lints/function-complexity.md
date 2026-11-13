@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | `warn` | more paths than can be tested or held in one's head |
 | [big](../tiers/big.md) | `warn` | more paths than can be tested or held in one's head |
 | [ai](../tiers/ai.md) | off |  |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

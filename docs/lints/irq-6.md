@@ -1,0 +1,64 @@
+# irq-6
+
+**Rule:** Interrupts are disabled through critical sections, never nested by hand.
+
+| | |
+|---|---|
+| Category | [irq](index.md#irq) |
+| Source | spirit_level |
+| Fix | by hand |
+
+## Level per tier
+
+| Tier | Level | Reason |
+|---|---|---|
+| [small](../tiers/small.md) | off |  |
+| [small-workspace](../tiers/small-workspace.md) | off |  |
+| [medium](../tiers/medium.md) | off |  |
+| [big](../tiers/big.md) | off |  |
+| [ai](../tiers/ai.md) | off |  |
+| [embedded](../tiers/embedded.md) | `warn` | bedrock warning: Nested disable / enable of interrupts by hand: an inner enable turns them on under an outer section; use `critical_section::with` |
+
+## Why
+
+Code that disables interrupts, calls into something else that also disables and later re-enables them, and ends up with interrupts turned back on while the outer section still expected them off.
+
+Hand-rolled disable/enable pairs don't nest: an inner `enable()` turns interrupts back on unconditionally, even while an outer section is still relying on them staying off, reopening exactly the race the outer section existed to prevent.
+
+## Example
+
+A helper that turns interrupts off and on by hand is called inside a critical section; its `enable` turns them on again while the outer section still counts on them being off:
+
+```rust
+fn only_disables() {
+    cortex_m::interrupt::disable();
+}
+
+fn inner() {
+    cortex_m::interrupt::disable();
+    // ...
+    unsafe { cortex_m::interrupt::enable() }; // also ends the caller's section
+}
+```
+
+## How to fix
+
+Use `critical_section::with(|cs| { ... })` for every critical section instead of manual disable/enable pairs.
+
+## How it is checked
+
+`src easy`: a pattern match for interrupt enable/disable calls that aren't going through `critical_section::with` (which nests correctly by construction).
+
+## Source
+
+Ported from embedded_bedrock's firmware check catalogue, `IRQ-6` (`book/checks.md`, detail in `book/checks/irq.md`). Found on: notion.
+
+## Configure
+
+```toml
+[lints.irq-6]
+level = "deny"
+reason = "why this project wants it at this level"
+```
+
+Allow one finding in the code with `// spirit-level: allow(irq-6) <reason>` ([waivers](../waivers.md)).

@@ -4,6 +4,17 @@ No brown-out reset threshold configured (or no programmable voltage detector set
 
 Without a brown-out level matched to the real supply, a sagging rail runs the MCU below the voltage its flash and peripherals are specified for instead of resetting it; the failure that follows (a flash write that doesn't take, a peripheral that misbehaves) looks unrelated to power at all, because nothing flagged the sag as the cause.
 
+## Example
+
+A firmware counts brown-out resets but never sets a brown-out reset level or the voltage detector, so it runs on through a sagging supply until it corrupts flash:
+
+```rust
+let p = embassy_stm32::init(Default::default());
+if last_reset() == ResetCause::Brownout {
+    cnt!(brownouts: u32);
+}
+```
+
 ## How to fix
 
 Set the brown-out threshold (option bytes, or PVD) to a level safely above the board's minimum operating voltage, not left at the chip's factory default if that doesn't match the board.

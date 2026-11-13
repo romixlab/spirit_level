@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | `warn` | a CHANGELOG is a list: one short line per change |
 | [big](../tiers/big.md) | `warn` | a CHANGELOG is a list: one short line per change |
 | [ai](../tiers/ai.md) | `deny` | a CHANGELOG is a list: one line per change |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

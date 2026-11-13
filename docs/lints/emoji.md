@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | off |  |
 | [ai](../tiers/ai.md) | `warn` | emoji do not grep, diff or render the same everywhere |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

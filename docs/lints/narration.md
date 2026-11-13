@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | off |  |
 | [ai](../tiers/ai.md) | `deny` | docs and comments state facts, not the conversation that produced them |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

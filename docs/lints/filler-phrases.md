@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | off |  |
 | [ai](../tiers/ai.md) | `deny` | filler adds words and no meaning |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

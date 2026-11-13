@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | `warn` | a flat error enum grows a variant per failure and loses the source errors; wrap them by layer |
 | [big](../tiers/big.md) | `warn` | a flat error enum grows a variant per failure and loses the source errors; wrap them by layer |
 | [ai](../tiers/ai.md) | off |  |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

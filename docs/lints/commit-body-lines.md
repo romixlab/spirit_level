@@ -18,6 +18,7 @@
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | off |  |
 | [ai](../tiers/ai.md) | `warn` | a body holds why, not a retelling of the diff |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

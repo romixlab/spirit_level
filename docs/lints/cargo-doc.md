@@ -18,6 +18,7 @@
 | [medium](../tiers/medium.md) | `deny` | the docs of internal crates are the map of the code; they build without a warning |
 | [big](../tiers/big.md) | `deny` | the docs of internal crates are the map of the code; they build without a warning |
 | [ai](../tiers/ai.md) | off |  |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 

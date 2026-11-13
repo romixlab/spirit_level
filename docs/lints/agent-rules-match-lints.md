@@ -17,6 +17,7 @@
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | `warn` | limits AGENTS.md states are the limits the lints check |
 | [ai](../tiers/ai.md) | `deny` | a stated limit the lints check differently teaches agents a rule the repo does not hold |
+| [embedded](../tiers/embedded.md) | off |  |
 
 ## Parameters
 
