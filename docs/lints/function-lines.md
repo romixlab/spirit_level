@@ -16,6 +16,7 @@
 | [small-workspace](../tiers/small-workspace.md) | `warn` | a function longer than a screen is changed without being read whole |
 | [medium](../tiers/medium.md) | `warn` | a function longer than a screen is changed without being read whole |
 | [big](../tiers/big.md) | `warn` | a function longer than a screen is changed without being read whole |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Parameters
 

@@ -17,6 +17,7 @@
 | [small-workspace](../tiers/small-workspace.md) | off |  |
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | `deny` | layers are declared and checked edge by edge; move a crate, never reorder layers |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Why
 

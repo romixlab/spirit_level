@@ -16,6 +16,7 @@
 | [small-workspace](../tiers/small-workspace.md) | `deny` | every crate of a workspace says what it is and what it may depend on |
 | [medium](../tiers/medium.md) | `deny` | every crate of a workspace says what it is and what it may depend on |
 | [big](../tiers/big.md) | `deny` | every crate of a workspace says what it is and what it may depend on |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Parameters
 

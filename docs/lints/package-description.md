@@ -16,6 +16,7 @@
 | [small-workspace](../tiers/small-workspace.md) | `warn` | the crate's one-line description is written once, in Cargo.toml; tables and READMEs are made from it |
 | [medium](../tiers/medium.md) | `warn` | the crate's one-line description is written once, in Cargo.toml; tables and READMEs are made from it |
 | [big](../tiers/big.md) | `deny` | the generated crate table and READMEs are made from it |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Why
 

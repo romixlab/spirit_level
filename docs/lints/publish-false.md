@@ -16,6 +16,7 @@
 | [small-workspace](../tiers/small-workspace.md) | off |  |
 | [medium](../tiers/medium.md) | `warn` | internal crates are a build unit, not an API; only listed crates are published |
 | [big](../tiers/big.md) | `warn` | internal crates are a build unit, not an API; only listed crates are published |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Parameters
 

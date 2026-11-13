@@ -16,6 +16,7 @@
 | [small-workspace](../tiers/small-workspace.md) | `warn` | a waiver that allows nothing is left over from changed code |
 | [medium](../tiers/medium.md) | `warn` | a waiver that allows nothing is left over from changed code |
 | [big](../tiers/big.md) | `deny` | every waiver allows something, or it goes |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Why
 

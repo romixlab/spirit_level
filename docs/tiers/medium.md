@@ -10,9 +10,12 @@ Use it with `extends = "medium"` in `spirit_level.toml`.
 
 | Lint | Level | Reason | Set in |
 |---|---|---|---|
+| [agent-file-lines](../lints/agent-file-lines.md) | `warn` | agents read AGENTS.md whole every session; a long one is skimmed, not followed | small |
 | [allow-without-reason](../lints/allow-without-reason.md) | `warn` | an exception to a lint says why, or it outlives its reason | small |
+| [changelog-entry-length](../lints/changelog-entry-length.md) | `warn` | a CHANGELOG is a list: one short line per change | small |
 | [changelog-unreleased](../lints/changelog-unreleased.md) | `warn` | work lands under [Unreleased]; the release step turns it into a version section | small |
 | [cli-subprocess](../lints/cli-subprocess.md) | `deny` | components call each other as libraries, not through their CLIs | medium |
+| [commit-subject-length](../lints/commit-subject-length.md) | `warn` | the subject is what one-line logs and reviews show | medium |
 | [core-crate-deps](../lints/core-crate-deps.md) | `warn` | a _core crate holds shared types and drags nothing in | medium |
 | [crate-cycles](../lints/crate-cycles.md) | `deny` | crates in a cycle cannot be built or tested apart | medium |
 | [crate-dir-name](../lints/crate-dir-name.md) | `warn` | flat crates/<name>: the folder is the crate | small-workspace |
@@ -108,4 +111,8 @@ reason = "a library returns errors; its caller decides what is fatal"
 [lints.cli-subprocess]
 level = "deny"
 reason = "components call each other as libraries, not through their CLIs"
+
+[lints.commit-subject-length]
+level = "warn"
+reason = "the subject is what one-line logs and reviews show"
 ```

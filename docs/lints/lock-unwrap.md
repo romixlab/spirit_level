@@ -16,6 +16,7 @@
 | [small-workspace](../tiers/small-workspace.md) | off |  |
 | [medium](../tiers/medium.md) | `warn` | the count of lock().unwrap() per crate shows where shared state concentrates |
 | [big](../tiers/big.md) | `warn` | the count of lock().unwrap() per crate shows where shared state concentrates |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Parameters
 

@@ -16,6 +16,7 @@
 | [small-workspace](../tiers/small-workspace.md) | off |  |
 | [medium](../tiers/medium.md) | `warn` | a _core crate holds shared types and drags nothing in |
 | [big](../tiers/big.md) | `deny` | a _core crate holds shared types and drags nothing in |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Parameters
 

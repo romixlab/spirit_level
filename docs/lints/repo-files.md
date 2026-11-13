@@ -16,6 +16,7 @@
 | [small-workspace](../tiers/small-workspace.md) | `warn` | every work repo carries README, AGENTS, CLAUDE, FEATURES and CHANGELOG |
 | [medium](../tiers/medium.md) | `warn` | every work repo carries README, AGENTS, CLAUDE, FEATURES and CHANGELOG |
 | [big](../tiers/big.md) | `warn` | every work repo carries README, AGENTS, CLAUDE, FEATURES and CHANGELOG |
+| [ai](../tiers/ai.md) | `deny` | AGENTS.md holds the rules every agent reads; CLAUDE.md points to it |
 
 ## Parameters
 

@@ -93,3 +93,11 @@ reason = "an exception to a lint says why, or it outlives its reason"
 [lints.print-in-library]
 level = "warn"
 reason = "printing is the binary's choice"
+
+[lints.changelog-entry-length]
+level = "warn"
+reason = "a CHANGELOG is a list: one short line per change"
+
+[lints.agent-file-lines]
+level = "warn"
+reason = "agents read AGENTS.md whole every session; a long one is skimmed, not followed"

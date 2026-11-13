@@ -16,6 +16,7 @@
 | [small-workspace](../tiers/small-workspace.md) | `warn` | crates in a cycle cannot be built or tested apart |
 | [medium](../tiers/medium.md) | `deny` | crates in a cycle cannot be built or tested apart |
 | [big](../tiers/big.md) | `deny` | crates in a cycle cannot be built or tested apart |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Why
 

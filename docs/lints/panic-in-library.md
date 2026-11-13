@@ -16,6 +16,7 @@
 | [small-workspace](../tiers/small-workspace.md) | off |  |
 | [medium](../tiers/medium.md) | `warn` | a library returns errors; its caller decides what is fatal |
 | [big](../tiers/big.md) | `warn` | a library returns errors; its caller decides what is fatal |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Parameters
 

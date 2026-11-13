@@ -16,6 +16,7 @@
 | [small-workspace](../tiers/small-workspace.md) | `warn` | flat crates/<name>: the folder is the crate |
 | [medium](../tiers/medium.md) | `warn` | flat crates/<name>: the folder is the crate |
 | [big](../tiers/big.md) | `warn` | flat crates/<name>: the folder is the crate |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Why
 

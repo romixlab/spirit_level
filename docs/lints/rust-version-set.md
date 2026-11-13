@@ -16,6 +16,7 @@
 | [small-workspace](../tiers/small-workspace.md) | off |  |
 | [medium](../tiers/medium.md) | `warn` | the MSRV is declared so it can be checked |
 | [big](../tiers/big.md) | `deny` | the MSRV is declared so it can be checked |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Why
 

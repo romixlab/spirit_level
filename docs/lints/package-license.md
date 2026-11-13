@@ -16,6 +16,7 @@
 | [small-workspace](../tiers/small-workspace.md) | `warn` | a crate without a licence cannot be reused or published |
 | [medium](../tiers/medium.md) | `warn` | a crate without a licence cannot be reused or published |
 | [big](../tiers/big.md) | `warn` | a crate without a licence cannot be reused or published |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Why
 

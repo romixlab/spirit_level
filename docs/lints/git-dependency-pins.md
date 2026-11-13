@@ -16,6 +16,7 @@
 | [small-workspace](../tiers/small-workspace.md) | `warn` | git dependencies follow a branch; Cargo.lock fixes the commit |
 | [medium](../tiers/medium.md) | `deny` | git dependencies follow a branch; a pin hides a break until it is old |
 | [big](../tiers/big.md) | `deny` | git dependencies follow a branch; a pin hides a break until it is old |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Parameters
 

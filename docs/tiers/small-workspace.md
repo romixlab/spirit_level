@@ -10,7 +10,9 @@ Use it with `extends = "small-workspace"` in `spirit_level.toml`.
 
 | Lint | Level | Reason | Set in |
 |---|---|---|---|
+| [agent-file-lines](../lints/agent-file-lines.md) | `warn` | agents read AGENTS.md whole every session; a long one is skimmed, not followed | small |
 | [allow-without-reason](../lints/allow-without-reason.md) | `warn` | an exception to a lint says why, or it outlives its reason | small |
+| [changelog-entry-length](../lints/changelog-entry-length.md) | `warn` | a CHANGELOG is a list: one short line per change | small |
 | [changelog-unreleased](../lints/changelog-unreleased.md) | `warn` | work lands under [Unreleased]; the release step turns it into a version section | small |
 | [crate-cycles](../lints/crate-cycles.md) | `warn` | crates in a cycle cannot be built or tested apart | small-workspace |
 | [crate-dir-name](../lints/crate-dir-name.md) | `warn` | flat crates/<name>: the folder is the crate | small-workspace |

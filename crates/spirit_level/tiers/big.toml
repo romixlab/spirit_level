@@ -103,3 +103,11 @@ reason = "crates the map marks deterministic compute the same bits on every plat
 [lints.random-state-hash]
 level = "deny"
 reason = "crates the map marks deterministic iterate in the same order every run"
+
+[lints.stop-gap-comments]
+level = "deny"
+reason = "no stop-gaps: a TODO or a 'for now' names its tracker id or goes"
+
+[lints.agent-rules-match-lints]
+level = "warn"
+reason = "limits AGENTS.md states are the limits the lints check"

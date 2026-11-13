@@ -5,6 +5,10 @@
 ### Added
 
 - Licence files (MIT, Apache-2.0), `CONTRIBUTING.md` with dependency policy.
+- Prose lints: CHANGELOG, commit and AGENTS.md limits, sentence and paragraph length (PROSE-1).
+- Prose lints: filler, narration, emoji, restating comments; agent files link and match the lints (PROSE-2).
+- Stop-gap and agent-hygiene lints: markers, commented-out code, near-duplicates, secrets, transcripts (AI-1).
+- Tier `ai` beside the size tiers: `extends = ["medium", "ai"]` (TIER-3).
 
 ## [0.1.0] - 2026-11-13
 

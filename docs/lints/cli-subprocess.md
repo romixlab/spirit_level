@@ -16,6 +16,7 @@
 | [small-workspace](../tiers/small-workspace.md) | off |  |
 | [medium](../tiers/medium.md) | `deny` | components call each other as libraries, not through their CLIs |
 | [big](../tiers/big.md) | `deny` | components call each other as libraries, not through their CLIs |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Why
 

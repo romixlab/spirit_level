@@ -16,6 +16,7 @@
 | [small-workspace](../tiers/small-workspace.md) | `deny` | every crate inherits [workspace.lints], so one table is the policy |
 | [medium](../tiers/medium.md) | `deny` | every crate inherits [workspace.lints], so one table is the policy |
 | [big](../tiers/big.md) | `deny` | every crate inherits [workspace.lints], so one table is the policy |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Why
 

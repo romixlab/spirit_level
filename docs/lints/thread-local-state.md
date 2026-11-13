@@ -16,6 +16,7 @@
 | [small-workspace](../tiers/small-workspace.md) | `warn` | thread-local state is a hidden side channel between functions |
 | [medium](../tiers/medium.md) | `warn` | thread-local state is a hidden side channel between functions |
 | [big](../tiers/big.md) | `warn` | thread-local state is a hidden side channel between functions |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Parameters
 

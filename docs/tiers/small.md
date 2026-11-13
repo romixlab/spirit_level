@@ -8,7 +8,9 @@ Use it with `extends = "small"` in `spirit_level.toml`.
 
 | Lint | Level | Reason | Set in |
 |---|---|---|---|
+| [agent-file-lines](../lints/agent-file-lines.md) | `warn` | agents read AGENTS.md whole every session; a long one is skimmed, not followed | small |
 | [allow-without-reason](../lints/allow-without-reason.md) | `warn` | an exception to a lint says why, or it outlives its reason | small |
+| [changelog-entry-length](../lints/changelog-entry-length.md) | `warn` | a CHANGELOG is a list: one short line per change | small |
 | [changelog-unreleased](../lints/changelog-unreleased.md) | `warn` | work lands under [Unreleased]; the release step turns it into a version section | small |
 | [crate-docs](../lints/crate-docs.md) | `warn` | rustdoc's front page of the crate is its crate-level docs | small |
 | [default-features-off](../lints/default-features-off.md) | `warn` | dependencies are added with default-features = false and only the features in use | small |
@@ -130,4 +132,12 @@ reason = "an exception to a lint says why, or it outlives its reason"
 [lints.print-in-library]
 level = "warn"
 reason = "printing is the binary's choice"
+
+[lints.changelog-entry-length]
+level = "warn"
+reason = "a CHANGELOG is a list: one short line per change"
+
+[lints.agent-file-lines]
+level = "warn"
+reason = "agents read AGENTS.md whole every session; a long one is skimmed, not followed"
 ```

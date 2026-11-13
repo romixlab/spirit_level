@@ -16,6 +16,7 @@
 | [small-workspace](../tiers/small-workspace.md) | `warn` | work lands under [Unreleased]; the release step turns it into a version section |
 | [medium](../tiers/medium.md) | `warn` | work lands under [Unreleased]; the release step turns it into a version section |
 | [big](../tiers/big.md) | `warn` | work lands under [Unreleased]; the release step turns it into a version section |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Why
 

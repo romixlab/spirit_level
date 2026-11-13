@@ -51,3 +51,7 @@ reason = "a library returns errors; its caller decides what is fatal"
 [lints.cli-subprocess]
 level = "deny"
 reason = "components call each other as libraries, not through their CLIs"
+
+[lints.commit-subject-length]
+level = "warn"
+reason = "the subject is what one-line logs and reviews show"

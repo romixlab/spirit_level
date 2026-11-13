@@ -16,6 +16,7 @@
 | [small-workspace](../tiers/small-workspace.md) | `warn` | dependencies are added with default-features = false and only the features in use |
 | [medium](../tiers/medium.md) | `warn` | dependencies are added with default-features = false and only the features in use |
 | [big](../tiers/big.md) | `deny` | feature creep in a big graph costs every build |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Parameters
 

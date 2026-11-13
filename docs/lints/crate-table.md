@@ -16,6 +16,7 @@
 | [small-workspace](../tiers/small-workspace.md) | off |  |
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | `deny` | the crate table is generated from the manifests and the map, never written by hand |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Parameters
 

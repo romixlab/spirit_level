@@ -16,6 +16,7 @@
 | [small-workspace](../tiers/small-workspace.md) | `warn` | rustdoc's front page of the crate is its crate-level docs |
 | [medium](../tiers/medium.md) | `warn` | rustdoc's front page of the crate is its crate-level docs |
 | [big](../tiers/big.md) | `deny` | rustdoc's front page of the crate is its crate-level docs |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Why
 

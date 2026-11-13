@@ -16,6 +16,7 @@
 | [small-workspace](../tiers/small-workspace.md) | `warn` | one version per dependency per workspace, written once in [workspace.dependencies] |
 | [medium](../tiers/medium.md) | `deny` | one version per dependency per workspace, written once in [workspace.dependencies] |
 | [big](../tiers/big.md) | `deny` | one version per dependency per workspace, written once in [workspace.dependencies] |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Parameters
 

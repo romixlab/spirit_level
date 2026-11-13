@@ -17,6 +17,7 @@
 | [small-workspace](../tiers/small-workspace.md) | off |  |
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | `deny` | the crate map is the source of truth: every crate in it, nothing gone |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Why
 

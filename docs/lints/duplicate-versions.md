@@ -17,6 +17,7 @@
 | [small-workspace](../tiers/small-workspace.md) | `warn` | two versions of a crate double its build time and split its types |
 | [medium](../tiers/medium.md) | `warn` | two versions of a crate double its build time and split its types |
 | [big](../tiers/big.md) | `deny` | two versions of a crate double its build time and split its types |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Parameters
 

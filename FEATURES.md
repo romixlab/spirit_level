@@ -28,7 +28,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 
 - ✅ `TIER-1` small, small-workspace, medium, big.
 - 📋 `TIER-2` embedded: every bedrock_lint check (port of embedded_bedrock's bedrock_lint).
-- 📋 `TIER-3` ai: agent files, terse output, AI-isms, stop-gap smells, agent-config hygiene.
+- ✅ `TIER-3` ai: agent files, terse output, AI-isms, stop-gap smells, agent-config hygiene; stands beside the size tiers.
 
 ## MAN - manifest and repo lints
 
@@ -53,7 +53,12 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 
 ## PROSE - prose and agent text
 
-- 📋 `PROSE-1` Terse-output limits: CHANGELOG entries, commit subjects, AGENTS.md length, filler phrases.
+- ✅ `PROSE-1` Terse-output limits: CHANGELOG entries, commit subjects and bodies, AGENTS.md length, sentences, paragraphs (`sl_lints_prose`).
+- ✅ `PROSE-2` AI-isms and agent files: filler, narration, stream-of-thought, emoji, restating comments, diff descriptions; CLAUDE.md pointer, links, stated limits match the lints.
+
+## AI - code written with agents
+
+- ✅ `AI-1` Stop-gap comments, commented-out code, lint-table allows without reason, near-duplicate fns and modules, dead features, leftover files, agent-config secrets, permissions and transcripts (`sl_lints_ai`).
 
 ## TOOL - external tools
 

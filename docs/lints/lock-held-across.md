@@ -16,6 +16,7 @@
 | [small-workspace](../tiers/small-workspace.md) | `warn` | a guard across .await or I/O stalls every other caller for as long as the slowest peer |
 | [medium](../tiers/medium.md) | `warn` | a guard across .await or I/O stalls every other caller for as long as the slowest peer |
 | [big](../tiers/big.md) | `deny` | a guard across .await or I/O stalls every other caller for as long as the slowest peer |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Parameters
 

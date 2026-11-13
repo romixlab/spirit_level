@@ -16,6 +16,7 @@
 | [small-workspace](../tiers/small-workspace.md) | `warn` | two locks at once need one lock order everywhere |
 | [medium](../tiers/medium.md) | `warn` | two locks at once need one lock order everywhere |
 | [big](../tiers/big.md) | `warn` | two locks at once need one lock order everywhere |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Why
 

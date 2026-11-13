@@ -16,6 +16,7 @@
 | [small-workspace](../tiers/small-workspace.md) | off |  |
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | `deny` | _core crates hold only types: no I/O, threads or runtimes |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Parameters
 

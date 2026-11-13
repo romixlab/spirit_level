@@ -16,6 +16,7 @@
 | [small-workspace](../tiers/small-workspace.md) | off |  |
 | [medium](../tiers/medium.md) | `warn` | every PC and the gate build with the same compiler |
 | [big](../tiers/big.md) | `deny` | every PC and the gate build with the same compiler |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Why
 

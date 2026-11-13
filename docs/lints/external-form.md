@@ -17,6 +17,7 @@
 | [small-workspace](../tiers/small-workspace.md) | off |  |
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | `deny` | outside projects come by git on a branch, listed once, used where their role allows |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Why
 

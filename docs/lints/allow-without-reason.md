@@ -16,6 +16,7 @@
 | [small-workspace](../tiers/small-workspace.md) | `warn` | an exception to a lint says why, or it outlives its reason |
 | [medium](../tiers/medium.md) | `warn` | an exception to a lint says why, or it outlives its reason |
 | [big](../tiers/big.md) | `deny` | an exception to a lint says why, or it outlives its reason |
+| [ai](../tiers/ai.md) | `deny` | an allowed lint says why, so it can be turned back on |
 
 ## Why
 

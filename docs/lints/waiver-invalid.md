@@ -16,6 +16,7 @@
 | [small-workspace](../tiers/small-workspace.md) | `deny` | a waiver without a reason, for an unknown lint, or expired hides a finding without saying why |
 | [medium](../tiers/medium.md) | `deny` | a waiver without a reason, for an unknown lint, or expired hides a finding without saying why |
 | [big](../tiers/big.md) | `deny` | a waiver without a reason, for an unknown lint, or expired hides a finding without saying why |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Why
 

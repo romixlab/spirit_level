@@ -1,0 +1,64 @@
+# restating-comments
+
+**Rule:** A comment says what the code cannot.
+
+| | |
+|---|---|
+| Category | [prose](index.md#prose) |
+| Source | spirit_level |
+| Fix | by hand |
+
+## Level per tier
+
+| Tier | Level | Reason |
+|---|---|---|
+| [small](../tiers/small.md) | off |  |
+| [small-workspace](../tiers/small-workspace.md) | off |  |
+| [medium](../tiers/medium.md) | off |  |
+| [big](../tiers/big.md) | off |  |
+| [ai](../tiers/ai.md) | `warn` | a comment says what the code cannot |
+
+## Parameters
+
+| Name | Type | Default | Meaning |
+|---|---|---|---|
+| `min-overlap` | number | `0.75` | share of the comment's content words found in the next line from which it restates it |
+| `min-words` | integer | `2` | content words a comment needs to be judged |
+| `max-words` | integer | `8` | comments with more content words are not judged |
+
+## Why
+
+A comment that says what the next line says doubles the text and drifts when the code changes. Comments are for what the code cannot say: why, the unit, the invariant, the source of a number.
+
+The measure, per single-line `//` comment directly above a code line:
+
+1. The comment's content words: words of two or more characters, stopwords (`the`, `a`, `to`, `of`, `this`, ...) dropped, `snake_case` and `CamelCase` split, lowercased, a plural or `-ed`/`-ing` ending removed.
+2. The code's words: the identifiers of the next line split the same way, plus words for its operators and keywords (`+=` gives increment, increase, add; `new` gives create, new, make; `return`, `push`, `len`, `clone`, `for`, `if`).
+3. The overlap: the share of the comment's content words found among the code's words.
+
+A comment with between `min-words` and `max-words` content words and an overlap of at least `min-overlap` is reported, with the overlap as its metric.
+
+```rust
+// increment the counter          <- overlap 100%: increment (+=), counter
+counter += 1;
+
+// the PLL needs 2 ms to lock     <- overlap 25%: passes
+delay_ms(2);
+```
+
+## How to fix
+
+Delete the comment, or replace it with what the code does not show.
+
+## Configure
+
+```toml
+[lints.restating-comments]
+level = "deny"
+min-overlap = 0.75
+min-words = 2
+max-words = 8
+reason = "why this project wants it at this level"
+```
+
+Allow one finding in the code with `// spirit-level: allow(restating-comments) <reason>` ([waivers](../waivers.md)).

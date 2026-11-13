@@ -1,0 +1,54 @@
+# claude-md-duplicate
+
+**Rule:** CLAUDE.md points to AGENTS.md instead of copying it.
+
+| | |
+|---|---|
+| Category | [agents](index.md#agents) |
+| Source | spirit_level |
+| Fix | by hand |
+
+## Level per tier
+
+| Tier | Level | Reason |
+|---|---|---|
+| [small](../tiers/small.md) | off |  |
+| [small-workspace](../tiers/small-workspace.md) | off |  |
+| [medium](../tiers/medium.md) | off |  |
+| [big](../tiers/big.md) | off |  |
+| [ai](../tiers/ai.md) | `deny` | two copies of the rules drift apart |
+
+## Parameters
+
+| Name | Type | Default | Meaning |
+|---|---|---|---|
+| `file` | string | `"CLAUDE.md"` | the tool-specific agent file |
+| `agents` | string | `"AGENTS.md"` | the file that holds the rules |
+| `max-shared` | number | `0.3` | share of the file's lines that may also be in the rules file |
+
+## Why
+
+`CLAUDE.md` (or another tool's file) and `AGENTS.md` hold the same rules for different tools. Two copies drift apart: one gets the new rule, the other keeps the old. The tool-specific file should import the shared one.
+
+The rule reports `file` when it does not mention `agents`, or when at least `max-shared` of its lines also stand in `agents`. Lines are compared trimmed, lowercased, with spaces collapsed; lines with fewer than 12 letters and digits (headings, rules) are not compared.
+
+```markdown
+@AGENTS.md
+```
+
+## How to fix
+
+Make `CLAUDE.md` the one line `@AGENTS.md`, with only what is specific to that tool below it.
+
+## Configure
+
+```toml
+[lints.claude-md-duplicate]
+level = "deny"
+file = "CLAUDE.md"
+agents = "AGENTS.md"
+max-shared = 0.3
+reason = "why this project wants it at this level"
+```
+
+Allow one finding in the code with `// spirit-level: allow(claude-md-duplicate) <reason>` ([waivers](../waivers.md)).

@@ -16,6 +16,7 @@
 | [small-workspace](../tiers/small-workspace.md) | `warn` | printing is the binary's choice |
 | [medium](../tiers/medium.md) | `warn` | printing is the binary's choice |
 | [big](../tiers/big.md) | `warn` | printing is the binary's choice |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Parameters
 

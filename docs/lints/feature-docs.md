@@ -16,6 +16,7 @@
 | [small-workspace](../tiers/small-workspace.md) | off |  |
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | `warn` | a feature without a comment cannot be chosen by a reader |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Parameters
 

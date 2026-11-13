@@ -16,6 +16,7 @@
 | [small-workspace](../tiers/small-workspace.md) | `warn` | _macros and _derive mean proc macros and nothing else |
 | [medium](../tiers/medium.md) | `warn` | _macros and _derive mean proc macros and nothing else |
 | [big](../tiers/big.md) | `warn` | _macros and _derive mean proc macros and nothing else |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Why
 

@@ -16,6 +16,7 @@
 | [small-workspace](../tiers/small-workspace.md) | `warn` | no stop-gaps: a todo!() is a panic waiting in shipped code |
 | [medium](../tiers/medium.md) | `warn` | no stop-gaps: a todo!() is a panic waiting in shipped code |
 | [big](../tiers/big.md) | `deny` | no stop-gaps: a todo!() is a panic waiting in shipped code |
+| [ai](../tiers/ai.md) | `deny` | todo!() and unimplemented!() are stop-gaps that compile |
 
 ## Why
 

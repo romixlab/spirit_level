@@ -10,9 +10,13 @@ Use it with `extends = "big"` in `spirit_level.toml`.
 
 | Lint | Level | Reason | Set in |
 |---|---|---|---|
+| [agent-file-lines](../lints/agent-file-lines.md) | `warn` | agents read AGENTS.md whole every session; a long one is skimmed, not followed | small |
+| [agent-rules-match-lints](../lints/agent-rules-match-lints.md) | `warn` | limits AGENTS.md states are the limits the lints check | big |
 | [allow-without-reason](../lints/allow-without-reason.md) | `deny` | an exception to a lint says why, or it outlives its reason | big |
+| [changelog-entry-length](../lints/changelog-entry-length.md) | `warn` | a CHANGELOG is a list: one short line per change | small |
 | [changelog-unreleased](../lints/changelog-unreleased.md) | `warn` | work lands under [Unreleased]; the release step turns it into a version section | small |
 | [cli-subprocess](../lints/cli-subprocess.md) | `deny` | components call each other as libraries, not through their CLIs | medium |
+| [commit-subject-length](../lints/commit-subject-length.md) | `warn` | the subject is what one-line logs and reviews show | medium |
 | [core-crate-deps](../lints/core-crate-deps.md) | `deny` | a _core crate holds shared types and drags nothing in | big |
 | [core-crate-types](../lints/core-crate-types.md) | `deny` | _core crates hold only types: no I/O, threads or runtimes | big |
 | [crate-cycles](../lints/crate-cycles.md) | `deny` | crates in a cycle cannot be built or tested apart | medium |
@@ -53,6 +57,7 @@ Use it with `extends = "big"` in `spirit_level.toml`.
 | [rust-version-set](../lints/rust-version-set.md) | `deny` | the MSRV is declared so it can be checked | big |
 | [static-interior-mutability](../lints/static-interior-mutability.md) | `deny` | every piece of mutable state has one owner; a global lock says why on the item | big |
 | [static-mut](../lints/static-mut.md) | `deny` | global mutable state with no synchronisation; there is always a better owner | small |
+| [stop-gap-comments](../lints/stop-gap-comments.md) | `deny` | no stop-gaps: a TODO or a 'for now' names its tracker id or goes | big |
 | [test-lines](../lints/test-lines.md) | `warn` | test code builds and links too | big |
 | [third-party-placement](../lints/third-party-placement.md) | `deny` | heavy dependencies sit in one crate each | big |
 | [thread-local-state](../lints/thread-local-state.md) | `warn` | thread-local state is a hidden side channel between functions | small-workspace |
@@ -173,4 +178,12 @@ reason = "crates the map marks deterministic compute the same bits on every plat
 [lints.random-state-hash]
 level = "deny"
 reason = "crates the map marks deterministic iterate in the same order every run"
+
+[lints.stop-gap-comments]
+level = "deny"
+reason = "no stop-gaps: a TODO or a 'for now' names its tracker id or goes"
+
+[lints.agent-rules-match-lints]
+level = "warn"
+reason = "limits AGENTS.md states are the limits the lints check"
 ```

@@ -16,6 +16,7 @@
 | [small-workspace](../tiers/small-workspace.md) | off |  |
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | `warn` | recipes call programs; logic lives in Rust where it is tested |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Parameters
 

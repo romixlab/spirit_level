@@ -16,6 +16,7 @@
 | [small-workspace](../tiers/small-workspace.md) | off |  |
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | `deny` | crates the map marks deterministic compute the same bits on every platform |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Parameters
 
