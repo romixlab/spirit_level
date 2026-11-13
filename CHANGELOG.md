@@ -8,6 +8,7 @@
 - Cargo checks: MSRV build, no_std and wasm builds of map crates, cargo doc warnings (TOOL-1).
 - `spirit-level tools list|install`: pinned tool versions built into a cache keyed on rustc (TOOL-1).
 - `spirit-level tools install --needed`: tools, toolchains and targets the enabled lints need (TOOL-1).
+- Tool fixtures run offline against vendored crates; advisory-database cases run with `SPIRIT_LEVEL_NETWORK=1` (TOOL-1).
 - Book page External tools: library or executable per tool, link cost, commands and lint mapping (TOOL-1).
 
 ## [0.1.2] - 2026-11-13

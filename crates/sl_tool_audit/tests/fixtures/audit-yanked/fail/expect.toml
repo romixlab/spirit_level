@@ -1,3 +1,4 @@
+network = true
 [[finding]]
 at = "Cargo.lock:13"
 

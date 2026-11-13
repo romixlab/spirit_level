@@ -17,6 +17,39 @@ Every lint, grouped by category, with its level in each shipped tier (`off`: the
 |---|---|---|---|---|---|---|
 | [pub-surface](pub-surface.md) | a library's public surface stays small for its size | off | off | off | warn | off |
 
+## audit
+
+| Lint | Rule | small | small-workspace | medium | big | ai |
+|---|---|---|---|---|---|---|
+| [audit-unmaintained](audit-unmaintained.md) | no dependency is marked unmaintained or replaced in the RustSec database | off | off | off | off | off |
+| [audit-unsound](audit-unsound.md) | no dependency is marked unsound in the RustSec database | off | off | off | off | off |
+| [audit-vulnerabilities](audit-vulnerabilities.md) | no dependency has a published security vulnerability | off | off | off | off | off |
+| [audit-yanked](audit-yanked.md) | Cargo.lock holds no yanked version | off | off | off | off | off |
+
+## build
+
+| Lint | Rule | small | small-workspace | medium | big | ai |
+|---|---|---|---|---|---|---|
+| [cargo-doc](cargo-doc.md) | cargo doc builds the workspace's documentation without a warning | warn | warn | deny | deny | off |
+| [cargo-msrv](cargo-msrv.md) | every crate builds with the toolchain of its declared rust-version | off | off | warn | deny | off |
+| [cargo-no-std](cargo-no-std.md) | every crate the map marks no_std builds for targets without std | off | off | off | deny | off |
+| [cargo-wasm](cargo-wasm.md) | every crate the map marks wasm builds for wasm32-unknown-unknown | off | off | off | deny | off |
+
+## clippy
+
+| Lint | Rule | small | small-workspace | medium | big | ai |
+|---|---|---|---|---|---|---|
+| [clippy-build](clippy-build.md) | the workspace builds under clippy without compiler errors or warnings | off | off | off | off | off |
+| [clippy-cargo](clippy-cargo.md) | no finding of the cargo-group clippy lints the project turned on | off | off | off | off | off |
+| [clippy-complexity](clippy-complexity.md) | no finding of clippy's complexity group: simple things done simply | off | off | off | off | off |
+| [clippy-correctness](clippy-correctness.md) | no finding of clippy's correctness group: code that is outright wrong | off | off | off | off | off |
+| [clippy-nursery](clippy-nursery.md) | no finding of the nursery clippy lints the project turned on | off | off | off | off | off |
+| [clippy-pedantic](clippy-pedantic.md) | no finding of the pedantic clippy lints the project turned on | off | off | off | off | off |
+| [clippy-perf](clippy-perf.md) | no finding of clippy's perf group: no needlessly slow code | off | off | off | off | off |
+| [clippy-restriction](clippy-restriction.md) | no finding of the restriction clippy lints the project turned on | off | off | off | off | off |
+| [clippy-style](clippy-style.md) | no finding of clippy's style group: code written the idiomatic way | off | off | off | off | off |
+| [clippy-suspicious](clippy-suspicious.md) | no finding of clippy's suspicious group: code that is most likely wrong | off | off | off | off | off |
+
 ## code
 
 | Lint | Rule | small | small-workspace | medium | big | ai |
@@ -43,6 +76,15 @@ Every lint, grouped by category, with its level in each shipped tier (`off`: the
 |---|---|---|---|---|---|---|
 | [dead-pub](dead-pub.md) | public items of workspace libraries are used outside their crate | off | off | off | warn | off |
 
+## deny
+
+| Lint | Rule | small | small-workspace | medium | big | ai |
+|---|---|---|---|---|---|---|
+| [deny-advisories](deny-advisories.md) | no dependency has a security advisory, is unmaintained, unsound or yanked | warn | warn | deny | deny | off |
+| [deny-bans](deny-bans.md) | the dependency graph holds no banned crate and no duplicate deny.toml refuses | off | off | off | deny | off |
+| [deny-licenses](deny-licenses.md) | every crate's licence is one deny.toml allows | off | off | warn | deny | off |
+| [deny-sources](deny-sources.md) | every crate comes from a registry or git source deny.toml allows | off | off | off | deny | off |
+
 ## dependencies
 
 | Lint | Rule | small | small-workspace | medium | big | ai |
@@ -59,6 +101,12 @@ Every lint, grouped by category, with its level in each shipped tier (`off`: the
 |---|---|---|---|---|---|---|
 | [error-enum-growth](error-enum-growth.md) | a big error enum wraps the errors it comes from instead of listing every failure flat | off | off | warn | warn | off |
 
+## geiger
+
+| Lint | Rule | small | small-workspace | medium | big | ai |
+|---|---|---|---|---|---|---|
+| [geiger-unsafe-deps](geiger-unsafe-deps.md) | every dependency that uses unsafe code is one the project accepted | off | off | off | off | off |
+
 ## graph
 
 | Lint | Rule | small | small-workspace | medium | big | ai |
@@ -74,6 +122,13 @@ Every lint, grouped by category, with its level in each shipped tier (`off`: the
 | [third-party-placement](third-party-placement.md) | heavy third-party crates are used only by the crates the map names | off | off | off | deny | off |
 | [unsafe-allow-list](unsafe-allow-list.md) | unsafe code is forbidden except in the crates the map marks unsafe | off | off | off | deny | off |
 
+## hakari
+
+| Lint | Rule | small | small-workspace | medium | big | ai |
+|---|---|---|---|---|---|---|
+| [hakari-generate](hakari-generate.md) | the workspace-hack package's dependencies are the ones hakari computes | off | off | off | warn | off |
+| [hakari-manage-deps](hakari-manage-deps.md) | every member hakari manages depends on the workspace-hack package, and no other | off | off | off | warn | off |
+
 ## hygiene
 
 | Lint | Rule | small | small-workspace | medium | big | ai |
@@ -82,6 +137,12 @@ Every lint, grouped by category, with its level in each shipped tier (`off`: the
 | [agent-config-secrets](agent-config-secrets.md) | committed agent configuration holds no secrets | off | off | off | off | deny |
 | [agent-session-files](agent-session-files.md) | no agent transcripts or per-person agent files are committed | off | off | off | off | deny |
 | [leftover-files](leftover-files.md) | no merge, patch, editor or scratch leftovers are committed | off | off | off | off | deny |
+
+## machete
+
+| Lint | Rule | small | small-workspace | medium | big | ai |
+|---|---|---|---|---|---|---|
+| [machete-unused-deps](machete-unused-deps.md) | no crate declares a dependency its sources never use | warn | warn | warn | deny | off |
 
 ## manifest
 
@@ -121,6 +182,25 @@ Every lint, grouped by category, with its level in each shipped tier (`off`: the
 | [repo-files](repo-files.md) | the repo carries its rule files | warn | warn | warn | warn | deny |
 | [toolchain-pinned](toolchain-pinned.md) | the repo pins its toolchain in rust-toolchain.toml | off | off | warn | deny | off |
 
+## rustfmt
+
+| Lint | Rule | small | small-workspace | medium | big | ai |
+|---|---|---|---|---|---|---|
+| [rustfmt-unformatted](rustfmt-unformatted.md) | every Rust file is formatted the way cargo fmt writes it | off | off | off | off | off |
+
+## semver
+
+| Lint | Rule | small | small-workspace | medium | big | ai |
+|---|---|---|---|---|---|---|
+| [semver-checks-breaking](semver-checks-breaking.md) | a stable crate changes its public API only with the version bump the change needs | off | off | off | deny | off |
+
+## shear
+
+| Lint | Rule | small | small-workspace | medium | big | ai |
+|---|---|---|---|---|---|---|
+| [shear-misplaced-deps](shear-misplaced-deps.md) | a dependency only tests use is a dev-dependency | off | off | off | off | off |
+| [shear-unused-deps](shear-unused-deps.md) | no crate declares a dependency it never uses, and every workspace dependency is used | off | off | off | off | off |
+
 ## size
 
 | Lint | Rule | small | small-workspace | medium | big | ai |
@@ -158,6 +238,24 @@ Every lint, grouped by category, with its level in each shipped tier (`off`: the
 | Lint | Rule | small | small-workspace | medium | big | ai |
 |---|---|---|---|---|---|---|
 | [module-graph-scc](module-graph-scc.md) | no module cycle holds most of a crate's code | off | off | warn | warn | off |
+
+## taplo
+
+| Lint | Rule | small | small-workspace | medium | big | ai |
+|---|---|---|---|---|---|---|
+| [taplo-fmt](taplo-fmt.md) | every TOML file parses and is formatted as taplo writes it | off | warn | warn | deny | off |
+
+## typos
+
+| Lint | Rule | small | small-workspace | medium | big | ai |
+|---|---|---|---|---|---|---|
+| [typos-misspelling](typos-misspelling.md) | no misspelled word in code, comments, docs or file names | warn | warn | warn | deny | off |
+
+## udeps
+
+| Lint | Rule | small | small-workspace | medium | big | ai |
+|---|---|---|---|---|---|---|
+| [udeps-unused-deps](udeps-unused-deps.md) | no crate declares a dependency the compiler never loads | off | off | off | off | off |
 
 ## waivers
 

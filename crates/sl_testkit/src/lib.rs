@@ -28,6 +28,26 @@ pub fn check_tools(analysis: &dyn Analysis, dir: &Path) {
 /// The needs whose absence skips a tool fixture
 const SKIPPABLE: &[&str] = &["tool:", "nightly", "toolchain:", "target:", "feature:"];
 
+/// How a case that needs the network is skipped, unless SPIRIT_LEVEL_NETWORK is set
+const NETWORK_SKIP: &str =
+    "needs the network (`network = true` in expect.toml; SPIRIT_LEVEL_NETWORK=1 runs it)";
+
+/// The crates.io packages tool fixtures depend on, as a cargo directory source: every other tool case builds
+/// offline against it, so no test touches the network
+const VENDOR: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/vendor");
+
+/// Points a copied case's crates.io dependencies at [`VENDOR`], offline
+fn vendor_config(case: &Path) -> std::io::Result<()> {
+    let dir = case.join(".cargo");
+    std::fs::create_dir_all(&dir)?;
+    let mut text = std::fs::read_to_string(dir.join("config.toml")).unwrap_or_default();
+    let _ = write!(
+        text,
+        "\n[source.crates-io]\nreplace-with = \"sl-testkit-vendor\"\n\n[source.sl-testkit-vendor]\ndirectory = {VENDOR:?}\n\n[net]\noffline = true\n"
+    );
+    std::fs::write(dir.join("config.toml"), text)
+}
+
 fn check_impl(analysis: &dyn Analysis, dir: &Path, tools: bool) {
     let mut problems = String::new();
     let mut skipped = Vec::new();
@@ -82,11 +102,14 @@ fn check_impl(analysis: &dyn Analysis, dir: &Path, tools: bool) {
     for s in &skipped {
         eprintln!("skipped: {s}"); // spirit-level: allow(print-in-library) a skipped case is shown on stderr, as the test runner shows it
     }
-    if !skipped.is_empty() && std::env::var_os("SPIRIT_LEVEL_REQUIRE_TOOLS").is_some() {
+    let missing_tools = skipped
+        .iter()
+        .filter(|s| !s.ends_with(NETWORK_SKIP))
+        .count();
+    if missing_tools > 0 && std::env::var_os("SPIRIT_LEVEL_REQUIRE_TOOLS").is_some() {
         let _ = writeln!(
             problems,
-            "{} cases skipped while SPIRIT_LEVEL_REQUIRE_TOOLS is set",
-            skipped.len()
+            "{missing_tools} cases skipped while SPIRIT_LEVEL_REQUIRE_TOOLS is set"
         );
     }
     assert!(problems.is_empty(), "fixture problems:\n{problems}");
@@ -173,8 +196,16 @@ fn run_case(
         .parse()
         .map_err(|e| format!("expect.toml: {e}"))?;
     let today = Date::parse(TODAY).expect("date");
+    let network = expect.get("network").and_then(toml_edit::Item::as_bool) == Some(true);
+    if network && std::env::var_os("SPIRIT_LEVEL_NETWORK").is_none() {
+        return Ok(Some(NETWORK_SKIP.to_string()));
+    }
     let copied = if tools {
-        Some(copy_case(analysis.name(), id, case)?)
+        let dest = copy_case(analysis.name(), id, case)?;
+        if !network {
+            vendor_config(&dest).map_err(|e| format!("vendor config: {e}"))?;
+        }
+        Some(dest)
     } else {
         None
     };
@@ -249,6 +280,9 @@ fn run_case(
     }
     if std::env::var_os("BLESS").is_some() {
         let mut out = String::new();
+        if network {
+            out.push_str("network = true\n");
+        }
         if let Some(p) = expect.get("params") {
             let _ = writeln!(out, "params = {}\n", p.to_string().trim());
         }

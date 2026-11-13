@@ -12,6 +12,7 @@ Working name. Private for now.
 | [`sl_core`](crates/sl_core) | core | spirit_level's shared types: lint metadata, levels, parameters, diagnostics, spans, fixes, dates and globs |
 | [`sl_config`](crates/sl_config) | model | spirit_level's configuration format: tiers, extends, lint levels, parameters, reasons, expiries, scoped exceptions and the crate map |
 | [`sl_model`](crates/sl_model) | model | spirit_level's project model: cargo metadata, manifests with spans, Rust sources parsed with syn, line counts |
+| [`sl_tools`](crates/sl_tools) | model | External tools for spirit_level's adapters: the pinned versions, the build cache, finding and running a tool, cargo's JSON messages |
 | [`sl_analysis`](crates/sl_analysis) | analysis | The one trait every spirit_level analysis implements, its run context, and syntax helpers shared by the source analyses |
 | [`sl_lints_ai`](crates/sl_lints_ai) | lints | spirit_level lints for code written with agents: stop-gap comments, commented-out code, near-duplicate functions, dead features, committed agent secrets and transcripts |
 | [`sl_lints_code`](crates/sl_lints_code) | lints | spirit_level source lints: todo!() and unimplemented!(), panics and prints in library code, allow without reason, float and hashing determinism, calls of the workspace's own CLIs |
@@ -24,6 +25,19 @@ Working name. Private for now.
 | [`sl_lints_size`](crates/sl_lints_size) | lints | spirit_level size lints: god crates, modules and functions by code lines, test code size, cyclomatic complexity |
 | [`sl_lints_state`](crates/sl_lints_state) | lints | spirit_level shared-state lints from the fewer-locks rule: statics with interior mutability, static mut, thread-local state, lock().unwrap() counts, guards held across await or I/O, nested locks |
 | [`sl_lints_surface`](crates/sl_lints_surface) | lints | spirit_level lints on a library's public surface: public items reachable from the root per 1000 code lines |
+| [`sl_tool_audit`](crates/sl_tool_audit) | lints | spirit_level adapter of cargo-audit: vulnerable, unmaintained, unsound and yanked dependencies from the RustSec database |
+| [`sl_tool_cargo`](crates/sl_tool_cargo) | lints | spirit_level checks driven by cargo: the MSRV build, no_std and wasm builds of the map's crates, cargo doc without warnings |
+| [`sl_tool_clippy`](crates/sl_tool_clippy) | lints | spirit_level adapter of clippy: runs cargo clippy, reads its JSON messages, one lint per clippy group |
+| [`sl_tool_deny`](crates/sl_tool_deny) | lints | spirit_level adapter of cargo-deny: advisories, bans, licences and sources, one lint per check |
+| [`sl_tool_geiger`](crates/sl_tool_geiger) | lints | spirit_level adapter of geiger, linked: dependencies that use unsafe code, counted in their sources |
+| [`sl_tool_hakari`](crates/sl_tool_hakari) | lints | spirit_level adapter of hakari, linked: the workspace-hack package is up to date and every member depends on it |
+| [`sl_tool_machete`](crates/sl_tool_machete) | lints | spirit_level adapter of cargo-machete: unused dependencies, found fast by searching the sources |
+| [`sl_tool_rustfmt`](crates/sl_tool_rustfmt) | lints | spirit_level adapter of rustfmt: every Rust file is formatted the way cargo fmt writes it |
+| [`sl_tool_semver`](crates/sl_tool_semver) | lints | spirit_level adapter of cargo-semver-checks: stable crates change their API only with the version bump it needs |
+| [`sl_tool_shear`](crates/sl_tool_shear) | lints | spirit_level adapter of cargo-shear: unused and misplaced dependencies, also unused workspace entries |
+| [`sl_tool_taplo`](crates/sl_tool_taplo) | lints | spirit_level adapter of taplo: every TOML file is formatted as taplo writes it, with the formatted file as a fix |
+| [`sl_tool_typos`](crates/sl_tool_typos) | lints | spirit_level adapter of typos: misspelled words in code, comments and docs, with the correction as a fix |
+| [`sl_tool_udeps`](crates/sl_tool_udeps) | lints | spirit_level adapter of cargo-udeps: dependencies the compiler never loaded, on nightly |
 | [`sl_engine`](crates/sl_engine) | engine | spirit_level's engine: picks the analyses a configuration enables, checks their needs, runs them, applies levels, exceptions and waivers, and applies exact fixes |
 | [`sl_report`](crates/sl_report) | engine | spirit_level's report output: coloured text for people, a stable JSON document for CI and agents |
 | [`sl_book`](crates/sl_book) | app | Generates spirit_level's book pages (one per lint, one per tier, the indexes and the nav) from the lints' own metadata and the shipped tiers |

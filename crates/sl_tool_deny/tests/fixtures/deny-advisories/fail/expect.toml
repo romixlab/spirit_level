@@ -1,5 +1,5 @@
+network = true
 params = { fetch = false }
 
 [[finding]]
 at = "Cargo.lock:13"
-

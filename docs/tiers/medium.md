@@ -12,6 +12,8 @@ Use it with `extends = "medium"` in `spirit_level.toml`.
 |---|---|---|---|
 | [agent-file-lines](../lints/agent-file-lines.md) | `warn` | agents read AGENTS.md whole every session; a long one is skimmed, not followed | small |
 | [allow-without-reason](../lints/allow-without-reason.md) | `warn` | an exception to a lint says why, or it outlives its reason | small |
+| [cargo-doc](../lints/cargo-doc.md) | `deny` | the docs of internal crates are the map of the code; they build without a warning | medium |
+| [cargo-msrv](../lints/cargo-msrv.md) | `warn` | the declared rust-version is built, so it stays true | medium |
 | [changelog-entry-length](../lints/changelog-entry-length.md) | `warn` | a CHANGELOG is a list: one short line per change | small |
 | [changelog-unreleased](../lints/changelog-unreleased.md) | `warn` | work lands under [Unreleased]; the release step turns it into a version section | small |
 | [cli-subprocess](../lints/cli-subprocess.md) | `deny` | components call each other as libraries, not through their CLIs | medium |
@@ -22,6 +24,8 @@ Use it with `extends = "medium"` in `spirit_level.toml`.
 | [crate-docs](../lints/crate-docs.md) | `warn` | rustdoc's front page of the crate is its crate-level docs | small |
 | [crate-lines](../lints/crate-lines.md) | `warn` | split a crate before it passes ~20,000 lines: one crate is one serial compile step | medium |
 | [default-features-off](../lints/default-features-off.md) | `warn` | dependencies are added with default-features = false and only the features in use | small |
+| [deny-advisories](../lints/deny-advisories.md) | `deny` | a vulnerable dependency is updated, or its advisory ignored with a reason in deny.toml | medium |
+| [deny-licenses](../lints/deny-licenses.md) | `warn` | every linked licence is one the project accepts, listed once in deny.toml | medium |
 | [duplicate-versions](../lints/duplicate-versions.md) | `warn` | two versions of a crate double its build time and split its types | small-workspace |
 | [edition-latest](../lints/edition-latest.md) | `warn` | new code starts on the current edition | small |
 | [error-enum-growth](../lints/error-enum-growth.md) | `warn` | a flat error enum grows a variant per failure and loses the source errors; wrap them by layer | medium |
@@ -31,6 +35,7 @@ Use it with `extends = "medium"` in `spirit_level.toml`.
 | [justfile-recipes](../lints/justfile-recipes.md) | `warn` | every repo answers to the same recipes: default, test, lint, install, deploy | small |
 | [lock-held-across](../lints/lock-held-across.md) | `warn` | a guard across .await or I/O stalls every other caller for as long as the slowest peer | small |
 | [lock-unwrap](../lints/lock-unwrap.md) | `warn` | the count of lock().unwrap() per crate shows where shared state concentrates | medium |
+| [machete-unused-deps](../lints/machete-unused-deps.md) | `warn` | an unused dependency costs build time, audit and lockfile churn for nothing | small |
 | [macro-crate-suffix](../lints/macro-crate-suffix.md) | `warn` | _macros and _derive mean proc macros and nothing else | small-workspace |
 | [module-graph-scc](../lints/module-graph-scc.md) | `warn` | a module cycle holding most of a crate can't be split into crates; cut it while it is small | medium |
 | [module-lines](../lints/module-lines.md) | `warn` | a file of thousands of lines holds several subjects and collects every edit | medium |
@@ -48,9 +53,11 @@ Use it with `extends = "medium"` in `spirit_level.toml`.
 | [rust-version-set](../lints/rust-version-set.md) | `warn` | the MSRV is declared so it can be checked | medium |
 | [static-interior-mutability](../lints/static-interior-mutability.md) | `warn` | every piece of mutable state has one owner; a global lock says why | small |
 | [static-mut](../lints/static-mut.md) | `deny` | global mutable state with no synchronisation; there is always a better owner | small |
+| [taplo-fmt](../lints/taplo-fmt.md) | `warn` | manifests are edited by people and by tools; one TOML formatting keeps their diffs about the change | small-workspace |
 | [thread-local-state](../lints/thread-local-state.md) | `warn` | thread-local state is a hidden side channel between functions | small-workspace |
 | [todo-macros](../lints/todo-macros.md) | `warn` | no stop-gaps: a todo!() is a panic waiting in shipped code | small |
 | [toolchain-pinned](../lints/toolchain-pinned.md) | `warn` | every PC and the gate build with the same compiler | medium |
+| [typos-misspelling](../lints/typos-misspelling.md) | `warn` | a misspelled identifier is copied to every call site; typos has almost no false positives | small |
 | [waiver-invalid](../lints/waiver-invalid.md) | `deny` | a waiver without a reason, for an unknown lint, or expired hides a finding without saying why | small |
 | [waiver-unused](../lints/waiver-unused.md) | `warn` | a waiver that allows nothing is left over from changed code | small |
 | [workspace-dependencies](../lints/workspace-dependencies.md) | `deny` | one version per dependency per workspace, written once in [workspace.dependencies] | medium |
@@ -126,4 +133,20 @@ reason = "a module cycle holding most of a crate can't be split into crates; cut
 [lints.error-enum-growth]
 level = "warn"
 reason = "a flat error enum grows a variant per failure and loses the source errors; wrap them by layer"
+
+[lints.deny-advisories]
+level = "deny"
+reason = "a vulnerable dependency is updated, or its advisory ignored with a reason in deny.toml"
+
+[lints.deny-licenses]
+level = "warn"
+reason = "every linked licence is one the project accepts, listed once in deny.toml"
+
+[lints.cargo-msrv]
+level = "warn"
+reason = "the declared rust-version is built, so it stays true"
+
+[lints.cargo-doc]
+level = "deny"
+reason = "the docs of internal crates are the map of the code; they build without a warning"
 ```
