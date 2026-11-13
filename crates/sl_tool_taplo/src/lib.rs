@@ -12,7 +12,7 @@ use sl_analysis::{Analysis, Context, lint};
 use sl_core::{Diagnostic, Edit, Fix, LintMeta, Need, Span};
 use std::path::Path;
 
-lint!(TAPLO_FMT, "taplo-fmt", "taplo", "every TOML file parses and is formatted as taplo writes it",
+lint!(TAPLO_FMT, "X0031", "taplo-fmt", "taplo", "every TOML file parses and is formatted as taplo writes it",
     tool: ("taplo", Executable), params: [], needs: [Need::Tool("taplo")], fix: Exact);
 
 /// The taplo analysis

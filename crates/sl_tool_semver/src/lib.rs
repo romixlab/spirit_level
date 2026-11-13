@@ -10,7 +10,7 @@ use sl_analysis::{Analysis, Context, lint};
 use sl_core::{Diagnostic, LintMeta, Need, Span};
 use std::path::Path;
 
-lint!(SEMVER_CHECKS_BREAKING, "semver-checks-breaking", "semver", "a stable crate changes its public API only with the version bump the change needs",
+lint!(SEMVER_CHECKS_BREAKING, "X0028", "semver-checks-breaking", "semver", "a stable crate changes its public API only with the version bump the change needs",
     tool: ("cargo-semver-checks", Executable),
     params: [("packages", StrList, "[]", "the crates to check; empty: the crate map's stable crates, without a map the published ones"),
              ("baseline-rev", Str, "\"\"", "a git revision to compare with instead of the latest release on crates.io"),

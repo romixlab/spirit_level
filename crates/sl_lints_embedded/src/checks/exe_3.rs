@@ -6,7 +6,7 @@ use sl_core::Params;
 use sl_core::{Confidence, Diagnostic};
 use sl_firmware::Firmware;
 
-lint!(META, "exe-3", "exe", "an interrupt executor's priority is set before it is started",
+lint!(META, "F0034", "exe-3", "exe", "an interrupt executor's priority is set before it is started",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

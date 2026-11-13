@@ -10,7 +10,7 @@ The thread executor runs tasks cooperatively: once any task is polled, every oth
 
 ## How to fix
 
-Move the deadline task to its own `InterruptExecutor` on an unused, correctly prioritised vector ([`exe-3`](exe-3.md), [`exe-4`](exe-4.md), [`exe-5`](exe-5.md)) — on typec_dongle, `TIM7_LPTIM2` at priority 1.
+Move the deadline task to its own `InterruptExecutor` on an unused, correctly prioritised vector ([`exe-3`](F0034.md), [`exe-4`](F0035.md), [`exe-5`](F0036.md)) — on typec_dongle, `TIM7_LPTIM2` at priority 1.
 
 ## How it is checked
 

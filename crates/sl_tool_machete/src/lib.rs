@@ -6,7 +6,7 @@
 use sl_analysis::{Analysis, Context, lint};
 use sl_core::{Diagnostic, LintMeta, Need, Span};
 
-lint!(MACHETE_UNUSED_DEPS, "machete-unused-deps", "machete", "no crate declares a dependency its sources never use",
+lint!(MACHETE_UNUSED_DEPS, "X0026", "machete-unused-deps", "machete", "no crate declares a dependency its sources never use",
     tool: ("cargo-machete", Executable), params: [], needs: [Need::Tool("cargo-machete")], fix: None);
 
 /// The cargo-machete analysis

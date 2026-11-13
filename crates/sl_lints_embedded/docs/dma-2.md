@@ -21,7 +21,7 @@ Put DMA buffers in an MPU region marked non-cacheable, or call the HAL's cache c
 
 ## How it is checked
 
-`src mid`, chip M7 only: the template's generated `main.rs` leaves D-cache commented out for exactly this reason (see [stm32-notes.md](../../firmware_template_skill/references/stm32-notes.md) "H7 caches"); a firmware that turns it on needs either an MPU non-cacheable region over every DMA buffer or explicit clean/invalidate calls around every transfer.
+`src mid`, chip M7 only: the template's generated `main.rs` leaves D-cache commented out for exactly this reason (see embedded_bedrock's `firmware_template_skill/references/stm32-notes.md` "H7 caches"); a firmware that turns it on needs either an MPU non-cacheable region over every DMA buffer or explicit clean/invalidate calls around every transfer.
 
 ## Source
 

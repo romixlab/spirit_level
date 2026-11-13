@@ -7,7 +7,7 @@ use sl_core::{Diagnostic, Span};
 use sl_firmware::Firmware;
 use sl_firmware::TomlExt;
 
-lint!(META, "cfg-2", "cfg", "F0/G0/L0 firmware is flashed by a runner that halts the core first",
+lint!(META, "F0005", "cfg-2", "cfg", "F0/G0/L0 firmware is flashed by a runner that halts the core first",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

@@ -9,7 +9,7 @@ use sl_firmware::Firmware;
 use sl_firmware::elf::CallDepths;
 use sl_firmware::elf::bytes;
 
-lint!(META, "stk-6", "stk", "every stack frame stays within its budget and the deepest call chain within the stack",
+lint!(META, "F0096", "stk-6", "stk", "every stack frame stays within its budget and the deepest call chain within the stack",
     params: [("frame", Int, "2048", "bytes of one function's stack frame above which it is reported")], needs: [Need::Elf], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

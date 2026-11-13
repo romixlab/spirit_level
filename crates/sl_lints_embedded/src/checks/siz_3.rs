@@ -9,7 +9,7 @@ use sl_firmware::Firmware;
 use sl_firmware::TomlExt;
 use sl_model::TomlFile;
 
-lint!(META, "siz-3", "siz", "no per-package opt-level beside lto = \"fat\"",
+lint!(META, "F0087", "siz-3", "siz", "no per-package opt-level beside lto = \"fat\"",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

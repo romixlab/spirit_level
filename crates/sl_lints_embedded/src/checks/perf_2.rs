@@ -7,7 +7,7 @@ use sl_core::Params;
 use sl_core::{Confidence, Diagnostic};
 use sl_firmware::Firmware;
 
-lint!(META, "perf-2", "perf", "hot paths on cores without 64-bit maths avoid it, and float formatting",
+lint!(META, "F0074", "perf-2", "perf", "hot paths on cores without 64-bit maths avoid it, and float formatting",
     params: [], needs: [Need::Elf], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

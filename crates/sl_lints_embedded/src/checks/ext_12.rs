@@ -7,7 +7,7 @@ use sl_core::Diagnostic;
 use sl_firmware::Firmware;
 use sl_firmware::scan;
 
-lint!(META, "ext-12", "ext", "an RCC enable is read back before the peripheral's first access",
+lint!(META, "F0041", "ext-12", "ext", "an RCC enable is read back before the peripheral's first access",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

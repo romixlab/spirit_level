@@ -8,7 +8,7 @@ use serde_json::Value;
 use sl_analysis::{Analysis, Context, lint};
 use sl_core::{Diagnostic, LintMeta, Need, Span};
 
-lint!(UDEPS_UNUSED_DEPS, "udeps-unused-deps", "udeps", "no crate declares a dependency the compiler never loads",
+lint!(UDEPS_UNUSED_DEPS, "X0033", "udeps-unused-deps", "udeps", "no crate declares a dependency the compiler never loads",
     tool: ("cargo-udeps", Executable), params: [], needs: [Need::Tool("cargo-udeps"), Need::Nightly], fix: None);
 
 /// The cargo-udeps analysis

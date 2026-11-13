@@ -6,7 +6,7 @@ The DMA engine doesn't fault on an unreachable address the way the CPU would —
 
 ## Example
 
-Vb135's PLAT-5: a buffer placed in DTCM for a master that can't reach it there on H7, where `main_ram` defaults to AXISRAM for exactly this reason (see [memory-layout.md](../../firmware_template_skill/references/memory-layout.md) "RAM").
+Vb135's PLAT-5: a buffer placed in DTCM for a master that can't reach it there on H7, where `main_ram` defaults to AXISRAM for exactly this reason (see embedded_bedrock's `firmware_template_skill/references/memory-layout.md` "RAM").
 
 ## How to fix
 

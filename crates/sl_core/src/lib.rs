@@ -1,6 +1,6 @@
 //! The types every spirit_level crate shares.
 //!
-//! - [`LintMeta`]: what a lint is (id, category, summary, documentation, parameters, needs, fix kind, source);
+//! - [`LintMeta`]: what a lint is (code, id, category, summary, documentation, parameters, needs, fix kind, source);
 //!   every lint declares one as a `static`, and the book, `explain` and the configuration checks read it.
 //! - [`Level`], [`ParamSpec`], [`ParamValue`], [`Params`]: how a lint is configured.
 //! - [`Diagnostic`], [`Span`], [`Metric`], [`Fix`]: what a lint reports.
@@ -15,5 +15,5 @@ pub mod params;
 
 pub use date::{Date, Expiry, Version};
 pub use diagnostic::{Confidence, Diagnostic, Edit, Fix, Metric, Span};
-pub use meta::{FixKind, Level, LintMeta, Need, Source, ToolUse};
+pub use meta::{CODE_GROUPS, FixKind, Level, LintMeta, Need, Source, ToolUse, valid_code};
 pub use params::{ParamKind, ParamSpec, ParamValue, Params};

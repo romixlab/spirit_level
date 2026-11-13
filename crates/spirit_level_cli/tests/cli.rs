@@ -193,7 +193,17 @@ fn explain_lints_tiers_init() {
         ],
     );
     let o = run(&p.0, &["explain", "workspace-lints"]);
-    assert!(text(&o).starts_with("# workspace-lints"), "{}", text(&o));
+    assert!(
+        text(&o).starts_with("# M0024 workspace-lints"),
+        "{}",
+        text(&o)
+    );
+    let o = run(&p.0, &["explain", "M0024"]);
+    assert!(
+        text(&o).starts_with("# M0024 workspace-lints"),
+        "{}",
+        text(&o)
+    );
     let o = run(&p.0, &["lints"]);
     assert!(text(&o).contains("crate-lines"));
     let o = run(&p.0, &["tiers"]);

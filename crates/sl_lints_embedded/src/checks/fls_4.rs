@@ -7,7 +7,7 @@ use sl_core::Diagnostic;
 use sl_firmware::Firmware;
 use sl_firmware::scan;
 
-lint!(META, "fls-4", "fls", "the image in flash is checked by a periodic CRC, and ECC is on where the part has it",
+lint!(META, "F0047", "fls-4", "fls", "the image in flash is checked by a periodic CRC, and ECC is on where the part has it",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

@@ -6,7 +6,7 @@ This isn't a general DMA-vs-polling preference; it's a documented silicon bug wh
 
 ## Example
 
-ES0548 §2.17.1 on the STM32G0's UCPD: a TX underflow is followed by a `TXHRST` that corrupts the *next* CRC, not just the current frame; the template's `--can`/PD code paths already route this through DMA — see [errata.md](../../firmware_template_skill/references/errata.md).
+ES0548 §2.17.1 on the STM32G0's UCPD: a TX underflow is followed by a `TXHRST` that corrupts the *next* CRC, not just the current frame; the template's `--can`/PD code paths already route this through DMA — see embedded_bedrock's `firmware_template_skill/references/errata.md`.
 
 ## How to fix
 

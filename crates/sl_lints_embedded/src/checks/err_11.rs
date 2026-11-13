@@ -7,7 +7,7 @@ use sl_core::Diagnostic;
 use sl_firmware::Firmware;
 use sl_firmware::scan;
 
-lint!(META, "err-11", "err", "the silicon revision is read from a source that tells every revision apart",
+lint!(META, "F0021", "err-11", "err", "the silicon revision is read from a source that tells every revision apart",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

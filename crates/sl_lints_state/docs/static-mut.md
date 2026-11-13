@@ -4,4 +4,4 @@
 
 ## How to fix
 
-A counter or a flag is an atomic. Anything else gets one owner (see [static-interior-mutability](static-interior-mutability.md)).
+A counter or a flag is an atomic. Anything else gets one owner (see [static-interior-mutability](T0004.md)).

@@ -7,7 +7,7 @@ use sl_core::Diagnostic;
 use sl_firmware::Firmware;
 use sl_firmware::scan;
 
-lint!(META, "pwr-3", "pwr", "the backup domain is reset at boot when nothing keeps state there",
+lint!(META, "F0084", "pwr-3", "pwr", "the backup domain is reset at boot when nothing keeps state there",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

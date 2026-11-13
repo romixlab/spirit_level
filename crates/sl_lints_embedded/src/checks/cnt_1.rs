@@ -10,7 +10,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use syn::Expr;
 use syn::spanned::Spanned;
 
-lint!(META, "cnt-1", "cnt", "every error branch counts what happened with cnt!",
+lint!(META, "F0013", "cnt-1", "cnt", "every error branch counts what happened with cnt!",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

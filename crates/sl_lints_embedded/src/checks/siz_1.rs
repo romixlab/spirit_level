@@ -8,7 +8,7 @@ use sl_core::Diagnostic;
 use sl_firmware::Firmware;
 use sl_firmware::elf::bytes;
 
-lint!(META, "siz-1", "siz", "flash and RAM regions stay under a fill limit",
+lint!(META, "F0086", "siz-1", "siz", "flash and RAM regions stay under a fill limit",
     params: [("region-percent", Int, "90", "percent of a memory.x region in use above which it is reported")], needs: [Need::Elf], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

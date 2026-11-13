@@ -7,7 +7,7 @@ use sl_core::Diagnostic;
 use sl_firmware::Firmware;
 use sl_firmware::scan;
 
-lint!(META, "clk-5", "clk", "USB has an exact 48 MHz clock",
+lint!(META, "F0012", "clk-5", "clk", "USB has an exact 48 MHz clock",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

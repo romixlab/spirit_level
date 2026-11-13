@@ -40,6 +40,7 @@ sl_tool_udeps.workspace = true
 sl_tool_audit.workspace = true
 sl_tool_shear.workspace = true
 sl_tool_semver.workspace = true
+toml_edit.workspace = true
 
 [features]
 # links hakari: hakari-generate and hakari-manage-deps run (70+ crates)

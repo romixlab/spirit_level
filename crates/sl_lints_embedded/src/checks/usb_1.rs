@@ -7,7 +7,7 @@ use sl_core::Diagnostic;
 use sl_firmware::Firmware;
 use sl_firmware::scan;
 
-lint!(META, "usb-1", "usb", "high-speed bulk endpoints have 512-byte packets and bIntervals in range",
+lint!(META, "F0097", "usb-1", "usb", "high-speed bulk endpoints have 512-byte packets and bIntervals in range",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

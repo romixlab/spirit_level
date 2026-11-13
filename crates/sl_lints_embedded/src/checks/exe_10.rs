@@ -6,7 +6,7 @@ use sl_core::Params;
 use sl_core::{Diagnostic, Span};
 use sl_firmware::Firmware;
 
-lint!(META, "exe-10", "exe", "one crate provides the executor and its pender",
+lint!(META, "F0030", "exe-10", "exe", "one crate provides the executor and its pender",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

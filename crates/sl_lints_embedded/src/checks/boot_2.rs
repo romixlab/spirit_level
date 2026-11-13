@@ -8,7 +8,7 @@ use sl_firmware::Firmware;
 use sl_firmware::scan::{self, Node};
 use syn::Expr;
 
-lint!(META, "boot-2", "boot", "the H7 supply configuration is read back, never written blind",
+lint!(META, "F0003", "boot-2", "boot", "the H7 supply configuration is read back, never written blind",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

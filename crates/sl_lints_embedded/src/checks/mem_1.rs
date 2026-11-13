@@ -7,7 +7,7 @@ use super::memx::regions;
 use sl_core::{Diagnostic, Span};
 use sl_firmware::Firmware;
 
-lint!(META, "mem-1", "mem", "the FLASH region of memory.x leaves out the regions kept for other uses",
+lint!(META, "F0067", "mem-1", "mem", "the FLASH region of memory.x leaves out the regions kept for other uses",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

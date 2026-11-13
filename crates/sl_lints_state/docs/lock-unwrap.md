@@ -6,4 +6,4 @@ The lint counts `.lock()`, `.read()` and `.write()` with no arguments followed b
 
 ## How to fix
 
-Give the state one owner (see [static-interior-mutability](static-interior-mutability.md)). Locks that stay are taken through one small helper that decides what poison means (recover with `into_inner`, or fail with a message), so the count goes to zero.
+Give the state one owner (see [static-interior-mutability](T0004.md)). Locks that stay are taken through one small helper that decides what poison means (recover with `into_inner`, or fail with a message), so the count goes to zero.

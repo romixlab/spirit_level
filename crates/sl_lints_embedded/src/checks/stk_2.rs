@@ -8,7 +8,7 @@ use sl_firmware::Firmware;
 use sl_firmware::TomlExt;
 use sl_firmware::build_script::KNOWN_KEYS;
 
-lint!(META, "stk-2", "stk", "build.rs prints only directives Cargo knows",
+lint!(META, "F0092", "stk-2", "stk", "build.rs prints only directives Cargo knows",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

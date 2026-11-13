@@ -9,27 +9,27 @@ use sl_core::{Diagnostic, LintMeta, Need};
 use sl_tools::cargo_json::{self, Message};
 use std::collections::BTreeMap;
 
-lint!(CLIPPY_BUILD, "clippy-build", "clippy", "the workspace builds under clippy without compiler errors or warnings",
+lint!(CLIPPY_BUILD, "X0009", "clippy-build", "clippy", "the workspace builds under clippy without compiler errors or warnings",
     tool: ("clippy", Executable),
     params: [("args", StrList, "[\"--workspace\", \"--all-targets\"]", "arguments to `cargo clippy` (packages, targets, features); every clippy lint reads them")],
     needs: [Need::Tool("clippy")], fix: None);
-lint!(CLIPPY_CORRECTNESS, "clippy-correctness", "clippy", "no finding of clippy's correctness group: code that is outright wrong",
+lint!(CLIPPY_CORRECTNESS, "X0012", "clippy-correctness", "clippy", "no finding of clippy's correctness group: code that is outright wrong",
     tool: ("clippy", Executable), params: [], needs: [Need::Tool("clippy")], fix: None);
-lint!(CLIPPY_SUSPICIOUS, "clippy-suspicious", "clippy", "no finding of clippy's suspicious group: code that is most likely wrong",
+lint!(CLIPPY_SUSPICIOUS, "X0018", "clippy-suspicious", "clippy", "no finding of clippy's suspicious group: code that is most likely wrong",
     tool: ("clippy", Executable), params: [], needs: [Need::Tool("clippy")], fix: None);
-lint!(CLIPPY_STYLE, "clippy-style", "clippy", "no finding of clippy's style group: code written the idiomatic way",
+lint!(CLIPPY_STYLE, "X0017", "clippy-style", "clippy", "no finding of clippy's style group: code written the idiomatic way",
     tool: ("clippy", Executable), params: [], needs: [Need::Tool("clippy")], fix: None);
-lint!(CLIPPY_COMPLEXITY, "clippy-complexity", "clippy", "no finding of clippy's complexity group: simple things done simply",
+lint!(CLIPPY_COMPLEXITY, "X0011", "clippy-complexity", "clippy", "no finding of clippy's complexity group: simple things done simply",
     tool: ("clippy", Executable), params: [], needs: [Need::Tool("clippy")], fix: None);
-lint!(CLIPPY_PERF, "clippy-perf", "clippy", "no finding of clippy's perf group: no needlessly slow code",
+lint!(CLIPPY_PERF, "X0015", "clippy-perf", "clippy", "no finding of clippy's perf group: no needlessly slow code",
     tool: ("clippy", Executable), params: [], needs: [Need::Tool("clippy")], fix: None);
-lint!(CLIPPY_PEDANTIC, "clippy-pedantic", "clippy", "no finding of the pedantic clippy lints the project turned on",
+lint!(CLIPPY_PEDANTIC, "X0014", "clippy-pedantic", "clippy", "no finding of the pedantic clippy lints the project turned on",
     tool: ("clippy", Executable), params: [], needs: [Need::Tool("clippy")], fix: None);
-lint!(CLIPPY_NURSERY, "clippy-nursery", "clippy", "no finding of the nursery clippy lints the project turned on",
+lint!(CLIPPY_NURSERY, "X0013", "clippy-nursery", "clippy", "no finding of the nursery clippy lints the project turned on",
     tool: ("clippy", Executable), params: [], needs: [Need::Tool("clippy")], fix: None);
-lint!(CLIPPY_CARGO, "clippy-cargo", "clippy", "no finding of the cargo-group clippy lints the project turned on",
+lint!(CLIPPY_CARGO, "X0010", "clippy-cargo", "clippy", "no finding of the cargo-group clippy lints the project turned on",
     tool: ("clippy", Executable), params: [], needs: [Need::Tool("clippy")], fix: None);
-lint!(CLIPPY_RESTRICTION, "clippy-restriction", "clippy", "no finding of the restriction clippy lints the project turned on",
+lint!(CLIPPY_RESTRICTION, "X0016", "clippy-restriction", "clippy", "no finding of the restriction clippy lints the project turned on",
     tool: ("clippy", Executable), params: [], needs: [Need::Tool("clippy")], fix: None);
 
 /// The clippy analysis
@@ -145,9 +145,15 @@ fn diagnostic(
         _ => "fix the code the compiler points at".to_string(),
     });
     let code = m.code.as_deref().unwrap_or(&m.level);
+    // clippy's own lint (`clippy::needless_return`), or rustc's (`unused_variables`, `E0308`)
+    let rule = match code.strip_prefix("clippy::") {
+        Some(name) => format!("clippy:{name}"),
+        None => format!("rustc:{code}"),
+    };
     let mut d = Diagnostic::new(lint, m.item(), format!("{}: {code}", m.message))
         .span(span)
-        .help(help);
+        .help(help)
+        .rule(rule);
     if let Some(p) = m.package(cx.project) {
         d = d.krate(&p.name);
     }

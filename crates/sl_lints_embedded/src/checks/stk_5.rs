@@ -8,7 +8,7 @@ use sl_core::{Confidence, Diagnostic, Span};
 use sl_firmware::Firmware;
 use sl_firmware::elf::bytes;
 
-lint!(META, "stk-5", "stk", "big state is built in place, not by value and moved into a static",
+lint!(META, "F0095", "stk-5", "stk", "big state is built in place, not by value and moved into a static",
     params: [("move-frame", Int, "1024", "bytes of frame from which a function that moves a value into a static is reported")], needs: [Need::Elf], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

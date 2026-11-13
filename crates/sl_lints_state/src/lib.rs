@@ -8,25 +8,25 @@ use sl_core::{Confidence, Diagnostic, LintMeta, Span};
 use sl_model::FileKind;
 use syn::visit::Visit;
 
-lint!(STATIC_INTERIOR_MUTABILITY, "static-interior-mutability", "state",
+lint!(STATIC_INTERIOR_MUTABILITY, "T0004", "static-interior-mutability", "state",
     "a static with interior mutability has one owner, or a reason why a global lock is right",
     params: [
         ("types", StrList, "[\"Mutex\", \"RwLock\", \"RefCell\", \"Cell\", \"UnsafeCell\", \"OnceCell\", \"DashMap\", \"ArcSwap\", \"ReentrantMutex\"]", "type names that make a static mutable"),
         ("atomics", Bool, "false", "also report statics of atomic types (counters and flags are usually fine)"),
     ],
     needs: [], fix: None);
-lint!(STATIC_MUT, "static-mut", "state", "no static mut",
+lint!(STATIC_MUT, "T0005", "static-mut", "state", "no static mut",
     params: [], needs: [], fix: None);
-lint!(THREAD_LOCAL_STATE, "thread-local-state", "state", "thread_local! state has one owner, or a reason",
+lint!(THREAD_LOCAL_STATE, "T0006", "thread-local-state", "state", "thread_local! state has one owner, or a reason",
     params: [("types", StrList, "[\"Cell\", \"RefCell\", \"Mutex\", \"RwLock\", \"UnsafeCell\", \"OnceCell\"]", "type names that make a thread-local mutable")],
     needs: [], fix: None);
-lint!(LOCK_UNWRAP, "lock-unwrap", "state", "a crate keeps its lock().unwrap() calls under a limit",
+lint!(LOCK_UNWRAP, "T0002", "lock-unwrap", "state", "a crate keeps its lock().unwrap() calls under a limit",
     params: [("max", Int, "0", "calls allowed per crate before it is reported")],
     needs: [], fix: None);
-lint!(LOCK_HELD_ACROSS, "lock-held-across", "state", "no lock guard is held across an .await or an I/O call",
+lint!(LOCK_HELD_ACROSS, "T0001", "lock-held-across", "state", "no lock guard is held across an .await or an I/O call",
     params: [("io", StrList, "[\"File\", \"fs\", \"Command\", \"TcpStream\", \"UdpSocket\", \"UnixStream\", \"write_all\", \"read_to_end\", \"read_to_string\", \"flush\", \"sync_all\", \"output\", \"spawn\", \"send\", \"recv\", \"block_on\", \"sleep\"]", "path segments and method names counted as I/O")],
     needs: [], fix: None);
-lint!(NESTED_LOCKS, "nested-locks", "state", "no second lock is taken while a guard is alive",
+lint!(NESTED_LOCKS, "T0003", "nested-locks", "state", "no second lock is taken while a guard is alive",
     params: [], needs: [], fix: None);
 
 /// The shared-state analysis

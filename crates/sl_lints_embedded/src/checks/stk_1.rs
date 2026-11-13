@@ -9,7 +9,7 @@ use sl_model::toml_edit::Item;
 use sl_firmware::TomlExt;
 use sl_model::TomlFile;
 
-lint!(META, "stk-1", "stk", "flip-link is the linker",
+lint!(META, "F0091", "stk-1", "stk", "flip-link is the linker",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

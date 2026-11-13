@@ -7,7 +7,7 @@ use super::memx::regions;
 use sl_core::{Confidence, Diagnostic, Span};
 use sl_firmware::Firmware;
 
-lint!(META, "mem-7", "mem", "embassy-boot partition symbols are offsets from the flash origin",
+lint!(META, "F0073", "mem-7", "mem", "embassy-boot partition symbols are offsets from the flash origin",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

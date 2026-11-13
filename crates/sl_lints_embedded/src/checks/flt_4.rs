@@ -8,7 +8,7 @@ use sl_core::{Confidence, Diagnostic};
 use sl_firmware::Firmware;
 use sl_firmware::scan;
 
-lint!(META, "flt-4", "flt", "UsageFault, MemManage and BusFault have handlers and are enabled where the core has them",
+lint!(META, "F0051", "flt-4", "flt", "UsageFault, MemManage and BusFault have handlers and are enabled where the core has them",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

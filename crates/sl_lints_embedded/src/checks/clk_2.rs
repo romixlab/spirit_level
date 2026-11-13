@@ -7,7 +7,7 @@ use sl_core::Params;
 use sl_core::{Diagnostic, Span};
 use sl_firmware::Firmware;
 
-lint!(META, "clk-2", "clk", "the embassy time driver names a timer that nothing else uses",
+lint!(META, "F0010", "clk-2", "clk", "the embassy time driver names a timer that nothing else uses",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

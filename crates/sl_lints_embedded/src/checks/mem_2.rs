@@ -6,7 +6,7 @@ use sl_core::Params;
 use sl_core::{Diagnostic, Span};
 use sl_firmware::Firmware;
 
-lint!(META, "mem-2", "mem", "extra RAM sections end without a tail ALIGN or symbol",
+lint!(META, "F0070", "mem-2", "mem", "extra RAM sections end without a tail ALIGN or symbol",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

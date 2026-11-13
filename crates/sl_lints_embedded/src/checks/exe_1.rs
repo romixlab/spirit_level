@@ -8,7 +8,7 @@ use sl_core::{Confidence, Diagnostic};
 use sl_firmware::Firmware;
 use sl_firmware::context::{Context, Exec, FnBody, bodies};
 
-lint!(META, "exe-1", "exe", "a task with a hard answer deadline runs on its own executor, not beside bulk work on the thread executor",
+lint!(META, "F0029", "exe-1", "exe", "a task with a hard answer deadline runs on its own executor, not beside bulk work on the thread executor",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

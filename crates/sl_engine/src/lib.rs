@@ -14,6 +14,7 @@ use std::time::Instant;
 
 /// `waiver-invalid`: built into the engine
 pub static WAIVER_INVALID: LintMeta = LintMeta {
+    code: "C0012",
     id: "waiver-invalid",
     category: "waivers",
     summary: "a waiver comment names known lints, gives a reason and has not expired",
@@ -26,6 +27,7 @@ pub static WAIVER_INVALID: LintMeta = LintMeta {
 
 /// `waiver-unused`: built into the engine
 pub static WAIVER_UNUSED: LintMeta = LintMeta {
+    code: "C0013",
     id: "waiver-unused",
     category: "waivers",
     summary: "every waiver comment allows a finding",
@@ -42,7 +44,7 @@ pub static ENGINE_LINTS: &[&LintMeta] = &[&WAIVER_INVALID, &WAIVER_UNUSED];
 /// What to run
 #[derive(Clone, Debug)]
 pub struct RunOptions {
-    /// Only these lint ids or categories; empty for every enabled lint
+    /// Only these lint ids, codes or categories; empty for every enabled lint
     pub only: Vec<String>,
     /// Today
     pub today: Date,
@@ -57,6 +59,8 @@ pub struct RunOptions {
 pub struct NotRun {
     /// The lint
     pub lint: String,
+    /// Its code
+    pub code: String,
     /// Its configured level
     pub level: Level,
     /// The missing need (`resolve`, `map`, `tool:cargo-deny`)
@@ -176,9 +180,15 @@ pub fn run(
     analyses: &[&dyn Analysis],
     opts: &RunOptions,
 ) -> Report {
-    let selected = |m: &LintMeta| {
-        opts.only.is_empty() || opts.only.iter().any(|o| o == m.id || o == m.category)
+    let lints = all_lints(analyses);
+    let code_of = |id: &str| {
+        lints
+            .iter()
+            .find(|m| m.id == id)
+            .map_or_else(String::new, |m| m.code.to_string())
     };
+    let selected =
+        |m: &LintMeta| opts.only.is_empty() || opts.only.iter().any(|o| m.is(o) || o == m.category);
     let mut diagnostics = Vec::new();
     let mut not_run = Vec::new();
     let mut ran = Vec::new();
@@ -196,6 +206,7 @@ pub fn run(
             {
                 Some((need, reason)) => not_run.push(NotRun {
                     lint: m.id.to_string(),
+                    code: m.code.to_string(),
                     level: config.lint(m.id).level,
                     need: need.name(),
                     reason,
@@ -218,6 +229,7 @@ pub fn run(
         );
         not_run.extend(out.skipped.into_iter().map(|s| NotRun {
             level: config.lint(&s.lint).level,
+            code: code_of(&s.lint),
             lint: s.lint,
             need: s.need,
             reason: s.reason,
@@ -241,10 +253,9 @@ pub fn run(
     }
 
     // source waivers
-    let known: BTreeSet<&str> = all_lints(analyses).iter().map(|m| m.id).collect();
     let (waivers, problems) = waiver::collect(
         project,
-        &|id| known.contains(id),
+        &|name| lints.iter().find(|m| m.is(name)).map(|m| m.id),
         opts.today,
         project.version,
     );
@@ -301,6 +312,9 @@ pub fn run(
         diagnostics.push(d);
     }
 
+    for d in &mut diagnostics {
+        d.code = code_of(&d.lint);
+    }
     diagnostics.sort_by(|a, b| {
         (b.level, &a.lint, a.primary(), &a.item).cmp(&(a.level, &b.lint, b.primary(), &b.item))
     });

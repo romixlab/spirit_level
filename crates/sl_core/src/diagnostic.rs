@@ -17,7 +17,9 @@ pub enum Confidence {
     Candidate,
 }
 
-/// A place in the project, relative to the project root (`crates/foo/src/lib.rs`)
+/// A place in the project, relative to the project root (`crates/foo/src/lib.rs`): a whole file, a line, or a
+/// range from a line and column to an end line and column. Lines and columns are 1-based; a column counts
+/// characters.
 #[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct Span {
     /// Path relative to the project root, with `/`
@@ -27,9 +29,12 @@ pub struct Span {
     /// 1-based column, 0 when unknown
     #[serde(default)]
     pub column: u32,
-    /// The last line of a span over several lines (0: one line)
+    /// The last line of a span over several lines (0: the span ends on `line`)
     #[serde(default, skip_serializing_if = "is_zero")]
     pub end_line: u32,
+    /// The column after the span's last character on its last line (0: unknown, to the end of the line)
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub end_column: u32,
     /// What is there
     #[serde(default, skip_serializing_if = "String::is_empty")]
     pub label: String,
@@ -47,6 +52,7 @@ impl Span {
             line,
             column: 0,
             end_line: 0,
+            end_column: 0,
             label: String::new(),
         }
     }
@@ -69,6 +75,20 @@ impl Span {
     pub fn to(mut self, end_line: u32) -> Span {
         self.end_line = end_line;
         self
+    }
+
+    /// From `start` to `end`, each a line and column, the end column after the last character
+    pub fn range(file: impl Into<String>, start: (u32, u32), end: (u32, u32)) -> Span {
+        Span {
+            end_line: end.0,
+            end_column: end.1,
+            ..Span::at(file, start.0, start.1)
+        }
+    }
+
+    /// The last line of the span
+    pub fn last_line(&self) -> u32 {
+        self.end_line.max(self.line)
     }
 }
 
@@ -121,6 +141,12 @@ pub struct Fix {
 pub struct Diagnostic {
     /// The lint's id
     pub lint: String,
+    /// The lint's code (`S0001`); the engine sets it from the lint's metadata
+    #[serde(default)]
+    pub code: String,
+    /// The external tool's own rule behind an adapter's finding (`clippy:needless_return`, `deny:banned`)
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rule: Option<String>,
     /// The level it is reported at, after the configuration and its overrides
     pub level: Level,
     /// How sure it is
@@ -154,6 +180,8 @@ impl Diagnostic {
     pub fn new(lint: &str, item: impl Into<String>, message: impl Into<String>) -> Diagnostic {
         Diagnostic {
             lint: lint.to_string(),
+            code: String::new(),
+            rule: None,
             level: Level::Warn,
             confidence: Confidence::Certain,
             message: message.into(),
@@ -177,6 +205,20 @@ impl Diagnostic {
     pub fn help(mut self, help: impl Into<String>) -> Diagnostic {
         self.help = Some(help.into());
         self
+    }
+
+    /// Names the external tool's own rule (`clippy:needless_return`)
+    pub fn rule(mut self, rule: impl Into<String>) -> Diagnostic {
+        self.rule = Some(rule.into());
+        self
+    }
+
+    /// The code shown for it: the lint's code, or `X-<tool>:<rule>` for an adapter's finding with its own rule
+    pub fn shown_code(&self) -> String {
+        match &self.rule {
+            Some(r) => format!("{}-{r}", self.code.get(..1).unwrap_or("X")),
+            None => self.code.clone(),
+        }
     }
 
     /// Names the crate it concerns

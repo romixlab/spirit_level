@@ -10,7 +10,7 @@ use sl_firmware::{Firmware, Loc};
 use syn::Expr;
 use syn::spanned::Spanned;
 
-lint!(META, "exe-2", "exe", "tasks on an interrupt executor and interrupt handlers never block",
+lint!(META, "F0033", "exe-2", "exe", "tasks on an interrupt executor and interrupt handlers never block",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

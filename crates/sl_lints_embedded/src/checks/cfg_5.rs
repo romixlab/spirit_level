@@ -7,7 +7,7 @@ use sl_core::Diagnostic;
 use sl_core::Span;
 use sl_firmware::Firmware;
 
-lint!(META, "cfg-5", "cfg", "the HAL's chip feature names the part on the board",
+lint!(META, "F0007", "cfg-5", "cfg", "the HAL's chip feature names the part on the board",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

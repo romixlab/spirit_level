@@ -10,7 +10,7 @@ use sl_firmware::scan::{self, FnItem, Node};
 use std::collections::BTreeMap;
 use syn::Expr;
 
-lint!(META, "pin-2", "pin", "the board is put in its safe state first thing after the HAL init",
+lint!(META, "F0078", "pin-2", "pin", "the board is put in its safe state first thing after the HAL init",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

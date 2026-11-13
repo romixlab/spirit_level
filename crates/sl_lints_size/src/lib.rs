@@ -5,19 +5,19 @@ use sl_analysis::{Analysis, Context, lint};
 use sl_core::{Diagnostic, LintMeta, Span};
 use sl_model::{FileKind, LineCount, count_lines};
 
-lint!(CRATE_LINES, "crate-lines", "size", "a crate's src/ stays under its line limit",
+lint!(CRATE_LINES, "S0001", "crate-lines", "size", "a crate's src/ stays under its line limit",
     params: [("max-lines", Int, "20000", "code lines in src/ above which a crate is reported")],
     needs: [], fix: None);
-lint!(TEST_LINES, "test-lines", "size", "a crate's test code stays under its line limit",
+lint!(TEST_LINES, "S0005", "test-lines", "size", "a crate's test code stays under its line limit",
     params: [("max-lines", Int, "20000", "code lines in tests/, benches/ and examples/ above which a crate is reported")],
     needs: [], fix: None);
-lint!(MODULE_LINES, "module-lines", "size", "a source file stays under its line limit",
+lint!(MODULE_LINES, "S0004", "module-lines", "size", "a source file stays under its line limit",
     params: [("max-lines", Int, "2000", "code lines of one file above which it is reported")],
     needs: [], fix: None);
-lint!(FUNCTION_LINES, "function-lines", "size", "a function stays under its line limit",
+lint!(FUNCTION_LINES, "S0003", "function-lines", "size", "a function stays under its line limit",
     params: [("max-lines", Int, "150", "code lines of one function above which it is reported")],
     needs: [], fix: None);
-lint!(FUNCTION_COMPLEXITY, "function-complexity", "size", "a function's cyclomatic complexity stays under its limit",
+lint!(FUNCTION_COMPLEXITY, "S0002", "function-complexity", "size", "a function's cyclomatic complexity stays under its limit",
     params: [("max", Int, "25", "the highest complexity allowed")],
     needs: [], fix: None);
 

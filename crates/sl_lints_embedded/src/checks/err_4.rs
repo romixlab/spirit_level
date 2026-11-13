@@ -8,7 +8,7 @@ use sl_firmware::Firmware;
 use sl_firmware::scan::{self, Node};
 use syn::Expr;
 
-lint!(META, "err-4", "err", "FDCAN edge filtering and dedicated Tx buffers stay off",
+lint!(META, "F0024", "err-4", "err", "FDCAN edge filtering and dedicated Tx buffers stay off",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

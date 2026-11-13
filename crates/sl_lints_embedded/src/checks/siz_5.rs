@@ -9,7 +9,7 @@ use sl_firmware::elf::{SymKind, Symbol, bytes};
 use sl_firmware::scan::{self, Node};
 use syn::Expr;
 
-lint!(META, "siz-5", "siz", "core::fmt stays out of the firmware",
+lint!(META, "F0089", "siz-5", "siz", "core::fmt stays out of the firmware",
     params: [("fmt-bytes", Int, "1024", "bytes of core::fmt code from which it is reported")], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

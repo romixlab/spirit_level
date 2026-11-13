@@ -6,7 +6,7 @@ use sl_core::Params;
 use sl_core::{Confidence, Diagnostic, Span};
 use sl_firmware::Firmware;
 
-lint!(META, "mem-12", "mem", "a firmware with defmt links with -Tdefmt.x",
+lint!(META, "F0069", "mem-12", "mem", "a firmware with defmt links with -Tdefmt.x",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

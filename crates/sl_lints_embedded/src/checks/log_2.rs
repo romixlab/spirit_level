@@ -7,7 +7,7 @@ use sl_core::{Diagnostic, Span};
 use sl_firmware::Firmware;
 use sl_firmware::TomlExt;
 
-lint!(META, "log-2", "log", "DEFMT_RTT_BUFFER_SIZE and DEFMT_LOG are set in .cargo/config.toml",
+lint!(META, "F0066", "log-2", "log", "DEFMT_RTT_BUFFER_SIZE and DEFMT_LOG are set in .cargo/config.toml",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

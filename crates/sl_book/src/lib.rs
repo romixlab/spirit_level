@@ -54,7 +54,7 @@ pub fn pages() -> Result<BTreeMap<String, String>, String> {
     let tiers = tier_levels()?;
     let mut out = BTreeMap::new();
     for m in &lints {
-        out.insert(format!("lints/{}.md", m.id), lint_page(m, &tiers));
+        out.insert(format!("lints/{}.md", m.code), lint_page(m, &tiers));
     }
     out.insert("lints/index.md".into(), lints_index(&lints, &tiers));
     for ((name, text), (_, c)) in spirit_level::TIERS.iter().zip(&tiers) {
@@ -91,12 +91,15 @@ fn cell(s: &str) -> String {
     s.replace('|', "\\|").replace('\n', " ")
 }
 
-/// One lint's page
+/// One lint's page, named after its code; the id is an anchor at the top, so `<code>.md#<id>` finds it too
 pub fn lint_page(m: &LintMeta, tiers: &[(&str, Config)]) -> String {
     let mut s = String::new();
-    let _ = writeln!(s, "# {}\n", m.id);
+    let _ = writeln!(s, "# {} {} {{ #{} }}\n", m.code, m.id, m.code);
+    let _ = writeln!(s, "<a id=\"{}\"></a>\n", m.id);
     let _ = writeln!(s, "**Rule:** {}.\n", capital(m.summary));
     let _ = writeln!(s, "| | |\n|---|---|");
+    let _ = writeln!(s, "| Code | `{}` (stable, never reused) |", m.code);
+    let _ = writeln!(s, "| Id | `{}` |", m.id);
     let _ = writeln!(s, "| Category | [{0}](index.md#{0}) |", m.category);
     let _ = writeln!(s, "| Source | {} |", source(m));
     let _ = writeln!(
@@ -155,10 +158,17 @@ pub fn lint_page(m: &LintMeta, tiers: &[(&str, Config)]) -> String {
     );
     let _ = writeln!(
         s,
-        "\nAllow one finding in the code with `// spirit-level: allow({}) <reason>` ([waivers](../waivers.md)).",
-        m.id
+        "\nAllow one finding in the code with `// spirit-level: allow({}) <reason>` ([waivers](../waivers.md)); the code works there too, as in `[lints.{}]`.",
+        m.id, m.code
     );
     s
+}
+
+/// One lint's page for the terminal (`spl explain`): the book page without its anchors
+pub fn lint_text(m: &LintMeta, tiers: &[(&str, Config)]) -> String {
+    lint_page(m, tiers)
+        .replacen(&format!(" {{ #{} }}", m.code), "", 1)
+        .replacen(&format!("<a id=\"{}\"></a>\n\n", m.id), "", 1)
 }
 
 fn capital(s: &str) -> String {
@@ -170,7 +180,7 @@ fn capital(s: &str) -> String {
 
 fn lints_index(lints: &[&LintMeta], tiers: &[(&str, Config)]) -> String {
     let mut s = String::from(
-        "# Lints\n\nEvery lint, grouped by category, with its level in each shipped tier (`off`: the tier does not enable it). A project changes any of them in its `spirit_level.toml` ([configuration](../configuration.md)).\n",
+        "# Lints\n\nEvery lint, grouped by category, with its stable code and its level in each shipped tier (`off`: the tier does not enable it). A project changes any of them in its `spirit_level.toml` ([configuration](../configuration.md)).\n",
     );
     let mut cats: BTreeMap<&str, Vec<&LintMeta>> = BTreeMap::new();
     for m in lints {
@@ -178,17 +188,22 @@ fn lints_index(lints: &[&LintMeta], tiers: &[(&str, Config)]) -> String {
     }
     for (cat, ms) in cats {
         let _ = writeln!(s, "\n## {cat}\n");
-        let mut head = String::from("| Lint | Rule |");
-        let mut sep = String::from("|---|---|");
+        let mut head = String::from("| Code | Lint | Rule |");
+        let mut sep = String::from("|---|---|---|");
         for (n, _) in tiers {
             let _ = write!(head, " {n} |");
             sep.push_str("---|");
         }
         let _ = writeln!(s, "{head}\n{sep}");
         let mut ms = ms;
-        ms.sort_by_key(|m| m.id);
+        ms.sort_by_key(|m| m.code);
         for m in ms {
-            let mut row = format!("| [{0}]({0}.md) | {1} |", m.id, cell(m.summary));
+            let mut row = format!(
+                "| [{0}]({0}.md) | [{1}]({0}.md) | {2} |",
+                m.code,
+                m.id,
+                cell(m.summary)
+            );
             for (_, c) in tiers {
                 let l = c.lint(m.id).level;
                 let _ = write!(
@@ -225,10 +240,10 @@ fn tier_page(name: &str, text: &str, c: &Config, lints: &[&LintMeta]) -> String 
     );
     let _ = writeln!(
         s,
-        "## Lints enabled (with what it extends)\n\n| Lint | Level | Reason | Set in |\n|---|---|---|---|"
+        "## Lints enabled (with what it extends)\n\n| Code | Lint | Level | Reason | Set in |\n|---|---|---|---|---|"
     );
     let mut ids: Vec<&LintMeta> = lints.to_vec();
-    ids.sort_by_key(|m| m.id);
+    ids.sort_by_key(|m| m.code);
     for m in ids {
         let l = c.lint(m.id);
         if l.level == Level::Allow {
@@ -239,7 +254,8 @@ fn tier_page(name: &str, text: &str, c: &Config, lints: &[&LintMeta]) -> String 
         });
         let _ = writeln!(
             s,
-            "| [{0}](../lints/{0}.md) | `{1}` | {2} | {3} |",
+            "| [{0}](../lints/{0}.md) | {1} | `{2}` | {3} | {4} |",
+            m.code,
             m.id,
             l.level,
             cell(&l.reason),
@@ -278,10 +294,10 @@ pub fn nav() -> String {
         s,
         "    ] }},\n    {{ \"Lints\" = [\n        \"lints/index.md\","
     );
-    let mut ids: Vec<&str> = spirit_level::lints().iter().map(|m| m.id).collect();
-    ids.sort();
-    for id in ids {
-        let _ = writeln!(s, "        \"lints/{id}.md\",");
+    let mut codes: Vec<&str> = spirit_level::lints().iter().map(|m| m.code).collect();
+    codes.sort();
+    for code in codes {
+        let _ = writeln!(s, "        \"lints/{code}.md\",");
     }
     let _ = writeln!(s, "    ] }},\n]\n{NAV_END}");
     s

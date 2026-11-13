@@ -10,7 +10,7 @@ use sl_firmware::Firmware;
 use sl_firmware::context::bodies;
 use syn::Expr;
 
-lint!(META, "dma-6", "dma", "where an erratum asks for DMA, the code uses DMA instead of polling",
+lint!(META, "F0019", "dma-6", "dma", "where an erratum asks for DMA, the code uses DMA instead of polling",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

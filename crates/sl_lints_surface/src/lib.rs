@@ -9,7 +9,7 @@ use sl_core::{Diagnostic, LintMeta, Span};
 use std::collections::{BTreeMap, BTreeSet};
 use syn::{ImplItem, Item, Visibility};
 
-lint!(PUB_SURFACE, "pub-surface", "api", "a library's public surface stays small for its size",
+lint!(PUB_SURFACE, "C0001", "pub-surface", "api", "a library's public surface stays small for its size",
     params: [
         ("max-per-kloc", Float, "50", "public items per 1000 code lines above which a library is reported"),
         ("min-lines", Int, "2000", "libraries with fewer code lines are not checked"),

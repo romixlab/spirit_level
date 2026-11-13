@@ -10,7 +10,7 @@ use sl_firmware::{Firmware, HandlerKind, Loc};
 use syn::Expr;
 use syn::spanned::Spanned;
 
-lint!(META, "irq-5", "irq", "every routed interrupt line is enabled and has a handler bound",
+lint!(META, "F0062", "irq-5", "irq", "every routed interrupt line is enabled and has a handler bound",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

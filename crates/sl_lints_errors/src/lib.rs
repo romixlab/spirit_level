@@ -7,7 +7,7 @@ use sl_model::FileKind;
 use std::collections::BTreeSet;
 use syn::visit::Visit;
 
-lint!(ERROR_ENUM_GROWTH, "error-enum-growth", "errors", "a big error enum wraps the errors it comes from instead of listing every failure flat",
+lint!(ERROR_ENUM_GROWTH, "C0010", "error-enum-growth", "errors", "a big error enum wraps the errors it comes from instead of listing every failure flat",
     params: [("max-variants", Int, "12", "variants a flat error enum may have")],
     needs: [], fix: None);
 

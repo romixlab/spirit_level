@@ -10,7 +10,7 @@ use sl_firmware::context::bodies;
 use syn::spanned::Spanned;
 use syn::{Expr, ExprLit, ExprUnary, Lit, UnOp};
 
-lint!(META, "irq-1", "irq", "interrupt handlers clear exactly the flags they handled",
+lint!(META, "F0059", "irq-1", "irq", "interrupt handlers clear exactly the flags they handled",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

@@ -7,7 +7,7 @@ use sl_core::Diagnostic;
 use sl_firmware::Firmware;
 use sl_firmware::scan;
 
-lint!(META, "pwr-1", "pwr", "a brown-out reset level or voltage detector fits the board's supply",
+lint!(META, "F0083", "pwr-1", "pwr", "a brown-out reset level or voltage detector fits the board's supply",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

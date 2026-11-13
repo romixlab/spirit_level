@@ -8,7 +8,7 @@ use sl_firmware::Firmware;
 use sl_firmware::scan::{self, Node};
 use syn::Expr;
 
-lint!(META, "err-5", "err", "FDCAN one-shot mode retransmits after a lost arbitration",
+lint!(META, "F0025", "err-5", "err", "FDCAN one-shot mode retransmits after a lost arbitration",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

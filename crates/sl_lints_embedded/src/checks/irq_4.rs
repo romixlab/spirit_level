@@ -6,7 +6,7 @@ use sl_core::Params;
 use sl_core::{Confidence, Diagnostic};
 use sl_firmware::Firmware;
 
-lint!(META, "irq-4", "irq", "no driver disables a shared interrupt vector that other drivers use",
+lint!(META, "F0061", "irq-4", "irq", "no driver disables a shared interrupt vector that other drivers use",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

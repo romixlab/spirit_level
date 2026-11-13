@@ -9,7 +9,7 @@ use sl_firmware::Firmware;
 use sl_firmware::scan;
 use std::collections::BTreeMap;
 
-lint!(META, "pin-6", "pin", "every pin has one owner",
+lint!(META, "F0080", "pin-6", "pin", "every pin has one owner",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

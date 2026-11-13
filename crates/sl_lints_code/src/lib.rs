@@ -7,31 +7,31 @@ use sl_model::{FileKind, Package, SourceFile};
 use syn::spanned::Spanned;
 use syn::visit::Visit;
 
-lint!(TODO_MACROS, "todo-macros", "code", "no todo!() or unimplemented!() outside tests",
+lint!(TODO_MACROS, "C0008", "todo-macros", "code", "no todo!() or unimplemented!() outside tests",
     params: [], needs: [], fix: None);
-lint!(PANIC_IN_LIBRARY, "panic-in-library", "code", "library code returns errors instead of panicking",
+lint!(PANIC_IN_LIBRARY, "C0005", "panic-in-library", "code", "library code returns errors instead of panicking",
     params: [
         ("methods", StrList, "[\"unwrap\", \"expect\"]", "methods that panic on None or Err"),
         ("macros", StrList, "[\"panic\", \"unreachable\"]", "macros that panic"),
         ("max", Int, "0", "panicking calls allowed per crate before each is reported"),
     ],
     needs: [], fix: None);
-lint!(PRINT_IN_LIBRARY, "print-in-library", "code", "library code does not print",
+lint!(PRINT_IN_LIBRARY, "C0006", "print-in-library", "code", "library code does not print",
     params: [("macros", StrList, "[\"println\", \"eprintln\", \"print\", \"eprint\", \"dbg\"]", "macros that print")],
     needs: [], fix: None);
-lint!(ALLOW_WITHOUT_REASON, "allow-without-reason", "code", "every allow or expect of a lint says why",
+lint!(ALLOW_WITHOUT_REASON, "C0002", "allow-without-reason", "code", "every allow or expect of a lint says why",
     params: [], needs: [], fix: None);
-lint!(FLOAT_DETERMINISM, "float-determinism", "code", "deterministic crates compute float transcendentals through libm",
+lint!(FLOAT_DETERMINISM, "C0004", "float-determinism", "code", "deterministic crates compute float transcendentals through libm",
     params: [
         ("methods", StrList, "[\"sin\", \"cos\", \"tan\", \"asin\", \"acos\", \"atan\", \"atan2\", \"sinh\", \"cosh\", \"tanh\", \"asinh\", \"acosh\", \"atanh\", \"exp\", \"exp2\", \"exp_m1\", \"ln\", \"log\", \"log2\", \"log10\", \"ln_1p\", \"powf\", \"powi\", \"cbrt\", \"hypot\", \"sin_cos\", \"mul_add\"]", "float methods whose precision is unspecified"),
         ("also", StrList, "[]", "crates held to it besides those the map marks deterministic"),
         ("replacement", Str, "\"libm\"", "what to call instead, named in the message"),
     ],
     needs: [], fix: None);
-lint!(RANDOM_STATE_HASH, "random-state-hash", "code", "deterministic crates use no randomly seeded hash maps",
+lint!(RANDOM_STATE_HASH, "C0007", "random-state-hash", "code", "deterministic crates use no randomly seeded hash maps",
     params: [("also", StrList, "[]", "crates held to it besides those the map marks deterministic")],
     needs: [], fix: None);
-lint!(CLI_SUBPROCESS, "cli-subprocess", "code", "workspace crates call each other as libraries, never by running the workspace's own binaries",
+lint!(CLI_SUBPROCESS, "C0003", "cli-subprocess", "code", "workspace crates call each other as libraries, never by running the workspace's own binaries",
     params: [], needs: [], fix: None);
 
 /// The source analysis

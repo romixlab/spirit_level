@@ -2,7 +2,30 @@
 
 ## Text
 
-For people: one block per finding with its level, lint id, place, message, measurement, help and fix; then the lints that did not run and why; then a summary line. Colour is off when the output is not a terminal or `NO_COLOR` is set. `--show-allowed` also lists findings allowed by waivers and exceptions; `--timings` shows the time of each analysis.
+For people, findings are grouped by lint, denied groups first, then warnings, each by count:
+
+```text
+deny M0024 workspace-lints ×28: the root declares [workspace.lints] and every member inherits them
+  --> crates/tpm_base/Cargo.toml:1:1
+   |
+ 1 | [package]
+   | ^^^^^^^^^ tpm_base does not inherit the workspace lints
+ 2 | name = "tpm_base"
+   |
+  = help: add `[lints]` with `workspace = true` to its Cargo.toml
+  crates/tpm_base/Cargo.toml        tpm_base does not inherit the workspace lints
+  crates/tpm_browse/Cargo.toml      tpm_browse does not inherit the workspace lints
+  ... up to 5 places
+  +23 more: `spl check --all` lists them (explain: `spl explain M0024`)
+```
+
+- **Header:** level, code, id, count and the lint's rule.
+- **Excerpt:** the first place's source, with 2 lines of context and its exact range marked with the finding's message. `--excerpts N` shows N per group; `0` turns them off.
+- **Places:** up to 5, then how many more and the command that lists them. `--all` lists every place.
+- **`--group-by crate|file`** groups by crate or file instead of lint.
+- **Summary** last: the result, how many lints ran, and the counts.
+
+Colour is off when the output is not a terminal, with `NO_COLOR`, or with `--color never`. `--show-allowed` also lists findings allowed by waivers and exceptions; `--timings` shows the time of each analysis.
 
 ## JSON
 
@@ -16,6 +39,7 @@ For people: one block per finding with its level, lint id, place, message, measu
   "diagnostics": [
     {
       "lint": "crate-lines",
+      "code": "S0001",
       "level": "warn",
       "confidence": "certain",
       "message": "foo has 23412 code lines in src/",
@@ -27,12 +51,12 @@ For people: one block per finding with its level, lint id, place, message, measu
     }
   ],
   "ran": ["crate-lines", "..."],
-  "not_run": [{ "lint": "deny-licenses", "level": "deny", "need": "tool:cargo-deny", "reason": "..." }],
+  "not_run": [{ "lint": "deny-licenses", "code": "X0021", "level": "deny", "need": "tool:cargo-deny", "reason": "..." }],
   "timings": [{ "analysis": "size", "ms": 41 }]
 }
 ```
 
-`allowed` (the reason) and `fix` (the edits) appear on a finding when they apply. Configuration errors print `{"schema": "spirit_level.config-errors/1", "errors": [{"file", "line", "message"}]}`.
+JSON is complete and ungrouped: every finding, whatever `--all` and `--group-by` say. A span may carry `end_line` and `end_column` (the column after its last character); the text view reads the file for its excerpt, JSON carries no source. `rule` names an adapter's tool rule (`"clippy:needless_return"`). `allowed` (the reason) and `fix` (the edits) appear on a finding when they apply. Configuration errors print `{"schema": "spirit_level.config-errors/1", "errors": [{"file", "line", "message"}]}`.
 
 ## Confidence
 

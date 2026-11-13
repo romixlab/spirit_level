@@ -9,7 +9,7 @@ use sl_firmware::Firmware;
 use sl_firmware::context::bodies;
 use syn::Expr;
 
-lint!(META, "irq-2", "irq", "write-1-to-clear flags are cleared with a write, not modify()",
+lint!(META, "F0060", "irq-2", "irq", "write-1-to-clear flags are cleared with a write, not modify()",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

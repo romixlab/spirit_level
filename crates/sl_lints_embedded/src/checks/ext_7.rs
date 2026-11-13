@@ -8,7 +8,7 @@ use sl_firmware::scan::{self, Node};
 use sl_firmware::{Firmware, Loc};
 use syn::{BinOp, Expr};
 
-lint!(META, "ext-7", "ext", "register fields are range-checked before they are encoded",
+lint!(META, "F0043", "ext-7", "ext", "register fields are range-checked before they are encoded",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

@@ -10,7 +10,7 @@ use sl_firmware::context::bodies;
 use syn::Expr;
 use syn::visit::Visit;
 
-lint!(META, "exe-8", "exe", "a request handler answers without waiting on a bus or a slow peripheral",
+lint!(META, "F0039", "exe-8", "exe", "a request handler answers without waiting on a bus or a slow peripheral",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

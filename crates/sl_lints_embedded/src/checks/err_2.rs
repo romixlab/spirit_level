@@ -7,7 +7,7 @@ use sl_core::{Confidence, Diagnostic, Span};
 use sl_firmware::Firmware;
 use sl_firmware::scan;
 
-lint!(META, "err-2", "err", "every register poke for an erratum quotes the erratum next to it",
+lint!(META, "F0022", "err-2", "err", "every register poke for an erratum quotes the erratum next to it",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

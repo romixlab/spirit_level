@@ -8,7 +8,7 @@ use sl_core::Diagnostic;
 use sl_firmware::Firmware;
 use sl_firmware::scan;
 
-lint!(META, "fls-2", "fls", "the flash peripheral has one owner",
+lint!(META, "F0045", "fls-2", "fls", "the flash peripheral has one owner",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

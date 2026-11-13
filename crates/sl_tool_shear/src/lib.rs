@@ -9,9 +9,9 @@ use serde_json::Value;
 use sl_analysis::{Analysis, Context, lint};
 use sl_core::{Diagnostic, LintMeta, Need, Span};
 
-lint!(SHEAR_UNUSED_DEPS, "shear-unused-deps", "shear", "no crate declares a dependency it never uses, and every workspace dependency is used",
+lint!(SHEAR_UNUSED_DEPS, "X0030", "shear-unused-deps", "shear", "no crate declares a dependency it never uses, and every workspace dependency is used",
     tool: ("cargo-shear", Executable), params: [], needs: [Need::Tool("cargo-shear")], fix: None);
-lint!(SHEAR_MISPLACED_DEPS, "shear-misplaced-deps", "shear", "a dependency only tests use is a dev-dependency",
+lint!(SHEAR_MISPLACED_DEPS, "X0029", "shear-misplaced-deps", "shear", "a dependency only tests use is a dev-dependency",
     tool: ("cargo-shear", Executable), params: [], needs: [Need::Tool("cargo-shear")], fix: None);
 
 /// The cargo-shear analysis

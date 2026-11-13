@@ -10,7 +10,7 @@ use sl_firmware::context::bodies;
 use syn::Expr;
 use syn::spanned::Spanned;
 
-lint!(META, "exe-7", "exe", "a loop that drains a queue in a shared task is bounded and yields",
+lint!(META, "F0038", "exe-7", "exe", "a loop that drains a queue in a shared task is bounded and yields",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

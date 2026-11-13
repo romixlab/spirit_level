@@ -10,7 +10,7 @@ use sl_firmware::context::bodies;
 use syn::Expr;
 use syn::spanned::Spanned;
 
-lint!(META, "exe-13", "exe", "a ring-buffered reader in a loop batches its reads",
+lint!(META, "F0032", "exe-13", "exe", "a ring-buffered reader in a loop batches its reads",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

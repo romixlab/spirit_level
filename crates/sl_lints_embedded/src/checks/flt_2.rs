@@ -10,7 +10,7 @@ use sl_firmware::scan::{self, Node};
 use syn::Expr;
 use syn::spanned::Spanned;
 
-lint!(META, "flt-2", "flt", "HardFault and DefaultHandler do nothing that can panic or log",
+lint!(META, "F0049", "flt-2", "flt", "HardFault and DefaultHandler do nothing that can panic or log",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

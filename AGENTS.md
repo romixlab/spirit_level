@@ -35,7 +35,7 @@ The map in `spirit_level.toml` is the source of truth for layers; `spl check` en
 
 ## 4. Adding a lint
 
-1. Declare it with `lint!(STATIC, "id", "category", "rule as a statement", params: [...], needs: [...], fix: None|Exact)` in its analysis crate, add it to the crate's `LINTS`.
+1. Declare it with `lint!(STATIC, "CODE", "id", "category", "rule as a statement", params: [...], needs: [...], fix: None|Exact)` in its analysis crate, add it to the crate's `LINTS`. CODE is the group's next free number (`spl codes`); add its row to `crates/spirit_level/codes.toml`. A code never changes; a removed lint's row stays, `status = "retired"`.
 2. Write `docs/<id>.md`: `## Why`, an example where it helps, `## How to fix`.
 3. Add `tests/fixtures/<id>/pass/` and `fail/` (a cargo project with `[workspace]` in its `Cargo.toml`, and `expect.toml`; `project = "..."` runs one shared under `tests/projects/`). Text-pattern lints add false-positive cases to `pass/`. `BLESS=1 cargo test -p <crate> --test fixtures` writes `expect.toml`; read it before committing.
 4. Enable it in a tier file with a level and a reason.

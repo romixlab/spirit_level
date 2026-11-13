@@ -7,7 +7,7 @@ use super::host::{self, EventKind};
 use sl_core::Diagnostic;
 use sl_firmware::Firmware;
 
-lint!(META, "host-1", "host", "nothing reachable from host input can panic",
+lint!(META, "F0056", "host-1", "host", "nothing reachable from host input can panic",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

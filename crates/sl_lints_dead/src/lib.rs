@@ -6,7 +6,7 @@ mod pub_items;
 use sl_analysis::{Analysis, Context, lint};
 use sl_core::LintMeta;
 
-lint!(DEAD_PUB, "dead-pub", "dead-code", "public items of workspace libraries are used outside their crate",
+lint!(DEAD_PUB, "C0009", "dead-pub", "dead-code", "public items of workspace libraries are used outside their crate",
     params: [
         ("count-tests", Bool, "false", "uses in test code (tests/, benches/, examples/, #[cfg(test)]) of other crates count"),
         ("skip", StrList, "[]", "library crates whose public API is meant for users outside the workspace"),

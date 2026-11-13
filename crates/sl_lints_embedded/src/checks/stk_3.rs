@@ -8,7 +8,7 @@ use sl_core::Diagnostic;
 use sl_firmware::Firmware;
 use sl_firmware::elf::bytes;
 
-lint!(META, "stk-3", "stk", "the stack sits below .data and .bss and is not empty",
+lint!(META, "F0093", "stk-3", "stk", "the stack sits below .data and .bss and is not empty",
     params: [], needs: [Need::Elf], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

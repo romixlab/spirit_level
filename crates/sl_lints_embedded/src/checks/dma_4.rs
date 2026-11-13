@@ -9,7 +9,7 @@ use sl_firmware::Firmware;
 use sl_firmware::context::{FnBody, bodies};
 use syn::Expr;
 
-lint!(META, "dma-4", "dma", "every DMA ring consumer counts its overruns",
+lint!(META, "F0018", "dma-4", "dma", "every DMA ring consumer counts its overruns",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

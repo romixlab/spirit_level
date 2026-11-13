@@ -9,7 +9,7 @@ use sl_model::toml_edit::Item;
 use sl_firmware::TomlExt;
 use sl_model::TomlFile;
 
-lint!(META, "siz-4", "siz", "the release profile sets codegen-units = 1, lto, panic = \"abort\" and a measured opt-level",
+lint!(META, "F0088", "siz-4", "siz", "the release profile sets codegen-units = 1, lto, panic = \"abort\" and a measured opt-level",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

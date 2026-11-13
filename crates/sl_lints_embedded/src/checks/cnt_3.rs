@@ -7,7 +7,7 @@ use sl_core::{Diagnostic, Span};
 use sl_model::toml_edit::Item;
 use sl_firmware::{Dependency, Firmware};
 
-lint!(META, "cnt-3", "cnt", "a proc-macro crate and its runtime crate are pinned to the same exact version",
+lint!(META, "F0015", "cnt-3", "cnt", "a proc-macro crate and its runtime crate are pinned to the same exact version",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

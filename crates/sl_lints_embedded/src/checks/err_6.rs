@@ -8,7 +8,7 @@ use sl_firmware::Firmware;
 use sl_firmware::scan::{self, Node};
 use syn::Expr;
 
-lint!(META, "err-6", "err", "RP2350 A2 pads with a pull-down enable their input only for the read",
+lint!(META, "F0026", "err-6", "err", "RP2350 A2 pads with a pull-down enable their input only for the read",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

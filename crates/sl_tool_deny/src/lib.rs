@@ -10,15 +10,15 @@ use serde_json::Value;
 use sl_analysis::{Analysis, Context, lint};
 use sl_core::{Diagnostic, LintMeta, Need, Span};
 
-lint!(DENY_ADVISORIES, "deny-advisories", "deny", "no dependency has a security advisory, is unmaintained, unsound or yanked",
+lint!(DENY_ADVISORIES, "X0019", "deny-advisories", "deny", "no dependency has a security advisory, is unmaintained, unsound or yanked",
     tool: ("cargo-deny", Executable),
     params: [("fetch", Bool, "true", "update the advisory database first; false checks against the local copy (`--offline`)")],
     needs: [Need::Tool("cargo-deny")], fix: None);
-lint!(DENY_BANS, "deny-bans", "deny", "the dependency graph holds no banned crate and no duplicate deny.toml refuses",
+lint!(DENY_BANS, "X0020", "deny-bans", "deny", "the dependency graph holds no banned crate and no duplicate deny.toml refuses",
     tool: ("cargo-deny", Executable), params: [], needs: [Need::Tool("cargo-deny")], fix: None);
-lint!(DENY_LICENSES, "deny-licenses", "deny", "every crate's licence is one deny.toml allows",
+lint!(DENY_LICENSES, "X0021", "deny-licenses", "deny", "every crate's licence is one deny.toml allows",
     tool: ("cargo-deny", Executable), params: [], needs: [Need::Tool("cargo-deny")], fix: None);
-lint!(DENY_SOURCES, "deny-sources", "deny", "every crate comes from a registry or git source deny.toml allows",
+lint!(DENY_SOURCES, "X0022", "deny-sources", "deny", "every crate comes from a registry or git source deny.toml allows",
     tool: ("cargo-deny", Executable), params: [], needs: [Need::Tool("cargo-deny")], fix: None);
 
 /// The cargo-deny analysis
@@ -220,7 +220,8 @@ impl Finding {
         };
         let mut d = Diagnostic::new(lint, self.item(), msg)
             .span(span)
-            .help(help);
+            .help(help)
+            .rule(format!("deny:{}", self.code));
         if let Some(r) = &self.root
             && p.package(r).is_some()
         {

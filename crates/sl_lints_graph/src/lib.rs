@@ -12,35 +12,35 @@ use std::collections::{BTreeMap, BTreeSet};
 
 pub use scc::strongly_connected;
 
-lint!(MAP_COMPLETE, "map-complete", "graph", "the crate map and the workspace list the same crates",
+lint!(MAP_COMPLETE, "G0008", "map-complete", "graph", "the crate map and the workspace list the same crates",
     params: [], needs: [Need::Map], fix: None);
-lint!(LAYER_EDGES, "layer-edges", "graph", "every dependency edge between workspace crates is allowed by the map",
+lint!(LAYER_EDGES, "G0007", "layer-edges", "graph", "every dependency edge between workspace crates is allowed by the map",
     params: [], needs: [Need::Map], fix: None);
-lint!(FORBIDDEN_CLOSURE, "forbidden-closure", "graph", "a crate never reaches the crates the map forbids it, directly or through others",
+lint!(FORBIDDEN_CLOSURE, "G0006", "forbidden-closure", "graph", "a crate never reaches the crates the map forbids it, directly or through others",
     params: [], needs: [Need::Map, Need::Resolve], fix: None);
-lint!(EXTERNAL_FORM, "external-form", "graph", "crates of other projects come by git as the map lists them, used only where their role allows",
+lint!(EXTERNAL_FORM, "G0005", "external-form", "graph", "crates of other projects come by git as the map lists them, used only where their role allows",
     params: [], needs: [Need::Map], fix: None);
-lint!(THIRD_PARTY_PLACEMENT, "third-party-placement", "graph", "heavy third-party crates are used only by the crates the map names",
+lint!(THIRD_PARTY_PLACEMENT, "G0009", "third-party-placement", "graph", "heavy third-party crates are used only by the crates the map names",
     params: [], needs: [Need::Map], fix: None);
-lint!(CORE_CRATE_DEPS, "core-crate-deps", "graph", "a _core crate depends only on other _core crates, the allowed layers and listed vocabulary crates",
+lint!(CORE_CRATE_DEPS, "G0001", "core-crate-deps", "graph", "a _core crate depends only on other _core crates, the allowed layers and listed vocabulary crates",
     params: [
         ("suffix", Str, "\"_core\"", "the name suffix of type-only crates"),
         ("layers", StrList, "[]", "map layers a _core crate may depend on besides other _core crates"),
         ("vocabulary", StrList, "[\"serde\", \"serde_derive\", \"thiserror\"]", "third-party crates a _core crate may use"),
     ],
     needs: [], fix: None);
-lint!(CORE_CRATE_TYPES, "core-crate-types", "graph", "a _core crate holds types: no I/O, no threads, no async runtime",
+lint!(CORE_CRATE_TYPES, "G0002", "core-crate-types", "graph", "a _core crate holds types: no I/O, no threads, no async runtime",
     params: [
         ("suffix", Str, "\"_core\"", "the name suffix of type-only crates"),
         ("io", StrList, "[\"std::fs\", \"std::net\", \"std::process\", \"std::thread\", \"std::env\", \"tokio\", \"async_std\", \"smol\", \"reqwest\", \"ureq\"]", "path prefixes that count as I/O"),
     ],
     needs: [], fix: None);
-lint!(CRATE_CYCLES, "crate-cycles", "graph", "workspace crates form no cycle, dev-dependencies included",
+lint!(CRATE_CYCLES, "G0003", "crate-cycles", "graph", "workspace crates form no cycle, dev-dependencies included",
     params: [], needs: [], fix: None);
-lint!(CRATE_TABLE, "crate-table", "graph", "the crate table in the README is the one generated from the manifests and the map",
+lint!(CRATE_TABLE, "G0004", "crate-table", "graph", "the crate table in the README is the one generated from the manifests and the map",
     params: [("file", Str, "\"README.md\"", "the file holding the table between its markers")],
     needs: [], fix: Exact);
-lint!(UNSAFE_ALLOW_LIST, "unsafe-allow-list", "graph", "unsafe code is forbidden except in the crates the map marks unsafe",
+lint!(UNSAFE_ALLOW_LIST, "G0010", "unsafe-allow-list", "graph", "unsafe code is forbidden except in the crates the map marks unsafe",
     params: [], needs: [Need::Map], fix: None);
 
 /// The graph analysis

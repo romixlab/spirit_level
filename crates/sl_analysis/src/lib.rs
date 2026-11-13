@@ -175,10 +175,11 @@ impl<'a> Context<'a> {
     }
 }
 
-/// Declares a native lint's `static LintMeta`, its documentation read from `docs/<id>.md` of the calling crate
+/// Declares a native lint's `static LintMeta`, its documentation read from `docs/<id>.md` of the calling crate.
+/// The code comes first; it is the lint's row in `crates/spirit_level/codes.toml`.
 ///
 /// ```ignore
-/// sl_analysis::lint!(CRATE_LINES, "crate-lines", "size", "a crate's src/ stays under its line limit",
+/// sl_analysis::lint!(CRATE_LINES, "S0001", "crate-lines", "size", "a crate's src/ stays under its line limit",
 ///     params: [("max-lines", Int, "20000", "code lines above which a crate is reported")],
 ///     needs: [], fix: None);
 /// ```
@@ -186,16 +187,17 @@ impl<'a> Context<'a> {
 /// An adapter of an external tool names the tool and how it is used after the summary:
 ///
 /// ```ignore
-/// sl_analysis::lint!(DENY_BANS, "deny-bans", "tools", "no banned crate, no duplicate version deny.toml refuses",
+/// sl_analysis::lint!(DENY_BANS, "X0020", "deny-bans", "tools", "no banned crate, no duplicate version deny.toml refuses",
 ///     tool: ("cargo-deny", Executable), params: [], needs: [Need::Tool("cargo-deny")], fix: None);
 /// ```
 #[macro_export]
 macro_rules! lint {
-    ($name:ident, $id:literal, $cat:literal, $summary:literal, tool: ($tool:literal, $use:ident),
+    ($name:ident, $code:literal, $id:literal, $cat:literal, $summary:literal, tool: ($tool:literal, $use:ident),
      params: [$(($p:literal, $k:ident, $d:literal, $doc:literal)),* $(,)?],
      needs: [$($need:expr),* $(,)?], fix: $fix:ident) => {
-        #[doc = concat!("`", $id, "`: ", $summary)]
+        #[doc = concat!("`", $code, "` `", $id, "`: ", $summary)]
         pub static $name: $crate::reexport::LintMeta = $crate::reexport::LintMeta {
+            code: $code,
             id: $id,
             category: $cat,
             summary: $summary,
@@ -214,11 +216,12 @@ macro_rules! lint {
             },
         };
     };
-    ($name:ident, $id:literal, $cat:literal, $summary:literal,
+    ($name:ident, $code:literal, $id:literal, $cat:literal, $summary:literal,
      params: [$(($p:literal, $k:ident, $d:literal, $doc:literal)),* $(,)?],
      needs: [$($need:expr),* $(,)?], fix: $fix:ident) => {
-        #[doc = concat!("`", $id, "`: ", $summary)]
+        #[doc = concat!("`", $code, "` `", $id, "`: ", $summary)]
         pub static $name: $crate::reexport::LintMeta = $crate::reexport::LintMeta {
+            code: $code,
             id: $id,
             category: $cat,
             summary: $summary,

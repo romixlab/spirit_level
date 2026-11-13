@@ -9,7 +9,7 @@
 use sl_analysis::{Analysis, Context, lint};
 use sl_core::{LintMeta, Need};
 
-lint!(GEIGER_UNSAFE_DEPS, "geiger-unsafe-deps", "geiger", "every dependency that uses unsafe code is one the project accepted",
+lint!(GEIGER_UNSAFE_DEPS, "X0023", "geiger-unsafe-deps", "geiger", "every dependency that uses unsafe code is one the project accepted",
     tool: ("geiger", Library),
     params: [("allow", StrList, "[]", "dependencies accepted with their unsafe code"),
              ("max-uses", Int, "0", "unsafe uses a dependency may have without being reported")],

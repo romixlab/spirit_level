@@ -7,7 +7,7 @@ use sl_analysis::{Analysis, Context, lint};
 use sl_core::{Diagnostic, LintMeta, Need, Span};
 use std::path::Path;
 
-lint!(RUSTFMT_UNFORMATTED, "rustfmt-unformatted", "rustfmt", "every Rust file is formatted the way cargo fmt writes it",
+lint!(RUSTFMT_UNFORMATTED, "X0027", "rustfmt-unformatted", "rustfmt", "every Rust file is formatted the way cargo fmt writes it",
     tool: ("rustfmt", Executable), params: [], needs: [Need::Tool("rustfmt")], fix: None);
 
 /// The rustfmt analysis

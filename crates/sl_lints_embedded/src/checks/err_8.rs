@@ -7,7 +7,7 @@ use sl_core::{Confidence, Diagnostic};
 use sl_firmware::Firmware;
 use sl_firmware::scan;
 
-lint!(META, "err-8", "err", "G0 ADC calibration waits two ADC clocks after the disable",
+lint!(META, "F0028", "err-8", "err", "G0 ADC calibration waits two ADC clocks after the disable",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

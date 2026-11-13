@@ -11,9 +11,9 @@
 use sl_analysis::{Analysis, Context, lint};
 use sl_core::{LintMeta, Need};
 
-lint!(HAKARI_GENERATE, "hakari-generate", "hakari", "the workspace-hack package's dependencies are the ones hakari computes",
+lint!(HAKARI_GENERATE, "X0024", "hakari-generate", "hakari", "the workspace-hack package's dependencies are the ones hakari computes",
     tool: ("hakari", Library), params: [], needs: [Need::Resolve], fix: Exact);
-lint!(HAKARI_MANAGE_DEPS, "hakari-manage-deps", "hakari", "every member hakari manages depends on the workspace-hack package, and no other",
+lint!(HAKARI_MANAGE_DEPS, "X0025", "hakari-manage-deps", "hakari", "every member hakari manages depends on the workspace-hack package, and no other",
     tool: ("hakari", Library), params: [], needs: [Need::Resolve], fix: None);
 
 /// The hakari analysis

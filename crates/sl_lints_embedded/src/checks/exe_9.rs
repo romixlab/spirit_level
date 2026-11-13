@@ -6,7 +6,7 @@ use sl_core::Params;
 use sl_core::{Confidence, Diagnostic};
 use sl_firmware::Firmware;
 
-lint!(META, "exe-9", "exe", "no future that reaches embassy-time is polled with a no-op waker",
+lint!(META, "F0040", "exe-9", "exe", "no future that reaches embassy-time is polled with a no-op waker",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

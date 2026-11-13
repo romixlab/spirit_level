@@ -18,6 +18,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `ENG-4` Exact fixes applied with `--fix`.
 - 📋 `ENG-5` SARIF output.
 - 📋 `ENG-6` Baseline file: compare findings with a committed baseline.
+- ✅ `ENG-9` Stable lint codes (group letter and four digits) in `LintMeta`, the registry `crates/spirit_level/codes.toml`, `spl codes --check`; codes work wherever ids do; adapter findings carry the tool's rule (`X-clippy:needless_return`).
 
 ## CLI - the command
 

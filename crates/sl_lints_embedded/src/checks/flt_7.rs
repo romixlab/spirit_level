@@ -8,7 +8,7 @@ use sl_firmware::Firmware;
 use sl_firmware::scan::{self, Inspect};
 use syn::Expr;
 
-lint!(META, "flt-7", "flt", "a watchdog runs, fed from a bounded loop of the main work",
+lint!(META, "F0053", "flt-7", "flt", "a watchdog runs, fed from a bounded loop of the main work",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

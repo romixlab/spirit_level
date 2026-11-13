@@ -7,7 +7,7 @@ use sl_core::{Diagnostic, Span};
 use sl_firmware::Firmware;
 use sl_firmware::TomlExt;
 
-lint!(META, "cfg-1", "cfg", "every probe-rs runner and recipe names its probe with --probe VID:PID",
+lint!(META, "F0004", "cfg-1", "cfg", "every probe-rs runner and recipe names its probe with --probe VID:PID",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

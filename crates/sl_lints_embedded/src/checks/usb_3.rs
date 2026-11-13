@@ -7,7 +7,7 @@ use sl_core::Diagnostic;
 use sl_firmware::Firmware;
 use sl_firmware::scan;
 
-lint!(META, "usb-3", "usb", "bulk endpoints on a hot path are double-buffered",
+lint!(META, "F0098", "usb-3", "usb", "bulk endpoints on a hot path are double-buffered",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

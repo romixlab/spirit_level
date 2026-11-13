@@ -8,6 +8,8 @@
 //! }
 //! ```
 
+pub mod codes;
+
 use sl_analysis::Analysis;
 use sl_config::{Config, ConfigError, Env};
 use sl_core::{Date, LintMeta, Need};
@@ -82,9 +84,10 @@ pub fn lints() -> Vec<&'static LintMeta> {
     sl_engine::all_lints(&analyses())
 }
 
-/// The lint with this id
-pub fn lint(id: &str) -> Option<&'static LintMeta> {
-    lints().into_iter().find(|m| m.id == id)
+/// The lint with this id or code; an adapter's `X-<tool>:<rule>` names the lint the rule belongs to only once the
+/// tool ran, so here it is not found
+pub fn lint(name: &str) -> Option<&'static LintMeta> {
+    lints().into_iter().find(|m| m.is(name))
 }
 
 /// How to check
@@ -96,7 +99,7 @@ pub struct Options {
     pub config: Option<PathBuf>,
     /// Shipped tiers to use instead of a configuration file
     pub tiers: Vec<String>,
-    /// Only these lints or categories
+    /// Only these lints (ids or codes) or categories
     pub only: Vec<String>,
     /// Linked ELFs of the project's firmware, for the embedded lints that read them
     pub elf: Vec<PathBuf>,
@@ -223,7 +226,7 @@ pub fn check(dir: &Path, opts: &Options) -> Result<(Project, Report), CheckError
     let config = config(&project, opts)?;
     let all = lints();
     for o in &opts.only {
-        if !all.iter().any(|m| m.id == o || m.category == o) {
+        if !all.iter().any(|m| m.is(o) || m.category == o) {
             return Err(CheckError::UnknownOnly(o.clone()));
         }
     }

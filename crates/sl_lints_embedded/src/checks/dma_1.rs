@@ -8,7 +8,7 @@ use sl_core::{Confidence, Diagnostic};
 use sl_firmware::Firmware;
 use sl_firmware::elf::SymKind;
 
-lint!(META, "dma-1", "dma", "DMA buffers sit in memory the DMA master can reach",
+lint!(META, "F0016", "dma-1", "dma", "DMA buffers sit in memory the DMA master can reach",
     params: [], needs: [Need::Elf], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

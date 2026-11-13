@@ -9,7 +9,7 @@ use sl_firmware::Firmware;
 use sl_firmware::scan::{self, Node};
 use syn::spanned::Spanned;
 
-lint!(META, "flt-3", "flt", "bedrock_crash::exc_return!() is the first statement of HardFault",
+lint!(META, "F0050", "flt-3", "flt", "bedrock_crash::exc_return!() is the first statement of HardFault",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

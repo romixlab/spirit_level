@@ -7,7 +7,7 @@ use sl_core::Diagnostic;
 use sl_firmware::Firmware;
 use sl_firmware::scan;
 
-lint!(META, "flt-9", "flt", "the healthy mark is set on the transport in use",
+lint!(META, "F0055", "flt-9", "flt", "the healthy mark is set on the transport in use",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

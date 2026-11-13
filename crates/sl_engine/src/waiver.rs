@@ -44,10 +44,11 @@ pub struct Problem {
     pub message: String,
 }
 
-/// The waivers of every Rust file and manifest of the project, and the problems found reading them
+/// The waivers of every Rust file and manifest of the project, and the problems found reading them. `resolve` turns
+/// a lint's id or code into its id; a waiver keeps the ids.
 pub fn collect(
     project: &Project,
-    known: &dyn Fn(&str) -> bool,
+    resolve: &dyn Fn(&str) -> Option<&'static str>,
     today: Date,
     version: Option<Version>,
 ) -> (Vec<Waiver>, Vec<Problem>) {
@@ -57,7 +58,7 @@ pub fn collect(
         if f.text.contains(MARK) {
             let extents = f.ast().map(extents).unwrap_or_default();
             parse(
-                &f.rel, &f.text, true, &extents, known, today, version, &mut ws, &mut ps,
+                &f.rel, &f.text, true, &extents, resolve, today, version, &mut ws, &mut ps,
             );
         }
     }
@@ -73,7 +74,7 @@ pub fn collect(
                 &t.text,
                 false,
                 &[],
-                known,
+                resolve,
                 today,
                 version,
                 &mut ws,
@@ -93,7 +94,7 @@ fn parse(
     text: &str,
     rust: bool,
     extents: &[(u32, u32)],
-    known: &dyn Fn(&str) -> bool,
+    resolve: &dyn Fn(&str) -> Option<&'static str>,
     today: Date,
     version: Option<Version>,
     ws: &mut Vec<Waiver>,
@@ -135,9 +136,9 @@ fn parse(
             ));
             continue;
         };
-        let lints: Vec<String> = inner[..close]
+        let named: Vec<&str> = inner[..close]
             .split(',')
-            .map(|s| s.trim().to_string())
+            .map(str::trim)
             .filter(|s| !s.is_empty())
             .collect();
         let mut tail = inner[close + 1..].trim();
@@ -152,15 +153,17 @@ fn parse(
             }
             tail = r.trim();
         }
-        if lints.is_empty() {
+        if named.is_empty() {
             ps.push(problem("the waiver names no lint".into()));
             continue;
         }
-        for id in &lints {
-            if !known(id) {
-                ps.push(problem(format!(
-                    "the waiver names {id}, which is not a lint"
-                )));
+        let mut lints = Vec::new();
+        for name in named {
+            match resolve(name) {
+                Some(id) => lints.push(id.to_string()),
+                None => ps.push(problem(format!(
+                    "the waiver names {name}, which is not a lint"
+                ))),
             }
         }
         if tail.is_empty() {
@@ -306,6 +309,14 @@ fn extents(file: &syn::File) -> Vec<(u32, u32)> {
 mod tests {
     use super::*;
 
+    /// The lints the tests know, and one code
+    fn resolve(name: &str) -> Option<&'static str> {
+        ["a", "x", "x-y", "god-function"]
+            .into_iter()
+            .find(|id| *id == name)
+            .or((name == "S0001").then_some("crate-lines"))
+    }
+
     fn run(rel: &str, text: &str) -> (Vec<Waiver>, Vec<Problem>) {
         let rust = rel.ends_with(".rs");
         let ext = if rust {
@@ -319,7 +330,7 @@ mod tests {
             text,
             rust,
             &ext,
-            &|id| id != "nope",
+            &resolve,
             Date::parse("2026-11-13").unwrap(),
             None,
             &mut w,
@@ -371,5 +382,17 @@ mod tests {
         assert!(m[2].contains("expired"));
         assert!(m[3].contains("a waiver reads"));
         assert_eq!(w.len(), 1);
+    }
+
+    #[test]
+    fn a_code_names_its_lint() {
+        let (w, p) = run(
+            "a.rs",
+            "// spirit-level: allow(S0001) big on purpose
+fn f() {}
+",
+        );
+        assert!(p.is_empty(), "{p:?}");
+        assert_eq!(w[0].lints, vec!["crate-lines"]);
     }
 }

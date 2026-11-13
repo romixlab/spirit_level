@@ -14,21 +14,21 @@ use sl_tools::Output;
 use sl_tools::cargo_json::{self, Message};
 use std::collections::BTreeMap;
 
-lint!(CARGO_MSRV, "cargo-msrv", "build", "every crate builds with the toolchain of its declared rust-version",
+lint!(CARGO_MSRV, "X0006", "cargo-msrv", "build", "every crate builds with the toolchain of its declared rust-version",
     tool: ("cargo", Executable),
     params: [("args", StrList, "[]", "more arguments to `cargo check` (features, targets)")],
     needs: [Need::Tool("cargo")], fix: None);
-lint!(CARGO_NO_STD, "cargo-no-std", "build", "every crate the map marks no_std builds for targets without std",
+lint!(CARGO_NO_STD, "X0007", "cargo-no-std", "build", "every crate the map marks no_std builds for targets without std",
     tool: ("cargo", Executable),
     params: [("targets", StrList, "[\"thumbv7em-none-eabihf\"]", "the targets without std each such crate builds for"),
              ("args", StrList, "[\"--no-default-features\"]", "more arguments to `cargo check`")],
     needs: [Need::Tool("cargo"), Need::Map], fix: None);
-lint!(CARGO_WASM, "cargo-wasm", "build", "every crate the map marks wasm builds for wasm32-unknown-unknown",
+lint!(CARGO_WASM, "X0008", "cargo-wasm", "build", "every crate the map marks wasm builds for wasm32-unknown-unknown",
     tool: ("cargo", Executable),
     params: [("target", Str, "\"wasm32-unknown-unknown\"", "the wasm target"),
              ("args", StrList, "[]", "more arguments to `cargo check`")],
     needs: [Need::Tool("cargo"), Need::Map], fix: None);
-lint!(CARGO_DOC, "cargo-doc", "build", "cargo doc builds the workspace's documentation without a warning",
+lint!(CARGO_DOC, "X0005", "cargo-doc", "build", "cargo doc builds the workspace's documentation without a warning",
     tool: ("cargo", Executable),
     params: [("args", StrList, "[\"--workspace\", \"--no-deps\"]", "arguments to `cargo doc`")],
     needs: [Need::Tool("cargo")], fix: None);

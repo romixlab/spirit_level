@@ -270,8 +270,9 @@ impl<'a> Resolver<'a> {
         })
     }
 
-    fn meta(&self, id: &str) -> Option<&'static LintMeta> {
-        self.env.lints.iter().find(|m| m.id == id).copied()
+    /// The lint `name` names: its id or its code
+    fn meta(&self, name: &str) -> Option<&'static LintMeta> {
+        self.env.lints.iter().find(|m| m.is(name)).copied()
     }
 
     /// Applies one extended name: a shipped tier, or a path relative to the extending file's directory
@@ -407,16 +408,17 @@ impl<'a> Resolver<'a> {
     }
 
     fn lints_table(&mut self, mut lints: Reader<'_>, expiring: bool, errs: &mut Vec<ConfigError>) {
-        for id in lints.keys() {
-            let Some(meta) = self.meta(&id) else {
-                lints.touch(&id);
-                errs.push(lints.err(&id, unknown_lint(&id, self.env.lints)));
+        for key in lints.keys() {
+            let Some(meta) = self.meta(&key) else {
+                lints.touch(&key);
+                errs.push(lints.err(&key, unknown_lint(&key, self.env.lints)));
                 continue;
             };
-            let Some(mut t) = lints.table(&id, errs) else {
+            let id = meta.id;
+            let Some(mut t) = lints.table(&key, errs) else {
                 continue;
             };
-            let line = lints.line(&id);
+            let line = lints.line(&key);
             let origin = Origin {
                 file: t.file.rel.clone(),
                 line,
@@ -432,7 +434,7 @@ impl<'a> Resolver<'a> {
             let expires = self.expiry(&mut t, expiring, &format!("the override of {id}"), errs);
             let params = params_of(&mut t, meta, errs);
             t.finish(errs);
-            let Some(s) = self.lints.get_mut(&id) else {
+            let Some(s) = self.lints.get_mut(id) else {
                 continue;
             };
             if level.is_none() && s.origin.is_none() {
@@ -471,6 +473,7 @@ impl<'a> Resolver<'a> {
             }
             return;
         };
+        let lint = meta.id.to_string();
         let crates = t.opt_list("crates", true, errs).unwrap_or_default();
         let paths = t.opt_list("paths", true, errs).unwrap_or_default();
         if crates.is_empty() && paths.is_empty() {

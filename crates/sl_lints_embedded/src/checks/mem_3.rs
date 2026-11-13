@@ -7,7 +7,7 @@ use sl_core::Params;
 use sl_core::{Confidence, Diagnostic};
 use sl_firmware::Firmware;
 
-lint!(META, "mem-3", "mem", "the RAM init and zeroing ranges stay clear of .uninit",
+lint!(META, "F0071", "mem-3", "mem", "the RAM init and zeroing ranges stay clear of .uninit",
     params: [], needs: [Need::Elf], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

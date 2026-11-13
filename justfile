@@ -12,12 +12,13 @@ test-all:
     cargo nextest run --workspace --no-fail-fast
     cargo test --workspace --doc -q
 
-# Format, clippy, spl on itself at the big tier (after installing the tools it needs), book freshness
+# Format, clippy, spl on itself at the big tier (after installing the tools it needs), the lint codes, book freshness
 lint:
     cargo fmt --check
     cargo clippy --workspace --all-targets --all-features -- -D warnings
     cargo run -q -p spirit_level_cli -- tools install --needed
     cargo run -q -p spirit_level_cli -- check
+    cargo run -q -p spirit_level_cli -- codes --check --base main
     cargo run -q -p spirit_level_cli -- book docs --check
 
 # Install every pinned external tool into the tool cache

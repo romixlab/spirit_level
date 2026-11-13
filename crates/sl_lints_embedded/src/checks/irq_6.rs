@@ -10,7 +10,7 @@ use sl_firmware::context::bodies;
 use syn::spanned::Spanned;
 use syn::{Expr, Lit};
 
-lint!(META, "irq-6", "irq", "interrupts are disabled through critical sections, never nested by hand",
+lint!(META, "F0063", "irq-6", "irq", "interrupts are disabled through critical sections, never nested by hand",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

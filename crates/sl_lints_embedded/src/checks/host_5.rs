@@ -7,7 +7,7 @@ use super::host::{self, EventKind, Strength};
 use sl_core::Diagnostic;
 use sl_firmware::Firmware;
 
-lint!(META, "host-5", "host", "truncated and oversized requests are counted and dropped",
+lint!(META, "F0058", "host-5", "host", "truncated and oversized requests are counted and dropped",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

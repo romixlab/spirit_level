@@ -9,7 +9,7 @@ use sl_model::toml_edit::Item;
 use sl_firmware::TomlExt;
 use sl_model::TomlFile;
 
-lint!(META, "cfg-4", "cfg", "every crate is in the tree from one source",
+lint!(META, "F0006", "cfg-4", "cfg", "every crate is in the tree from one source",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

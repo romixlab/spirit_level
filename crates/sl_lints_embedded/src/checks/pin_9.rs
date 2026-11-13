@@ -11,7 +11,7 @@ use quote::ToTokens;
 use syn::spanned::Spanned;
 use syn::visit::{self, Visit};
 
-lint!(META, "pin-9", "pin", "the pin map comes from the board at run time, not from a cargo feature",
+lint!(META, "F0082", "pin-9", "pin", "the pin map comes from the board at run time, not from a cargo feature",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

@@ -7,7 +7,7 @@ use sl_core::Diagnostic;
 use sl_firmware::Firmware;
 use sl_firmware::scan;
 
-lint!(META, "boot-1", "boot", "a firmware entered by a jump detects it and resets once",
+lint!(META, "F0001", "boot-1", "boot", "a firmware entered by a jump detects it and resets once",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

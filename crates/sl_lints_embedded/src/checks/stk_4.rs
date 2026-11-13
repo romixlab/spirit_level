@@ -7,7 +7,7 @@ use sl_core::{Confidence, Diagnostic, Span};
 use sl_firmware::Firmware;
 use sl_firmware::TomlExt;
 
-lint!(META, "stk-4", "stk", "cortex-m-rt paint-stack stays off",
+lint!(META, "F0094", "stk-4", "stk", "cortex-m-rt paint-stack stays off",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

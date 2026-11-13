@@ -9,7 +9,7 @@ use sl_analysis::{Analysis, Context, lint};
 use sl_core::{Confidence, Diagnostic, LintMeta, Span};
 use std::collections::BTreeMap;
 
-lint!(MODULE_GRAPH_SCC, "module-graph-scc", "structure", "no module cycle holds most of a crate's code",
+lint!(MODULE_GRAPH_SCC, "C0011", "module-graph-scc", "structure", "no module cycle holds most of a crate's code",
     params: [
         ("max-share", Float, "0.5", "share of a crate's code lines its biggest module cycle may hold"),
         ("min-lines", Int, "3000", "crates with fewer code lines are not checked"),

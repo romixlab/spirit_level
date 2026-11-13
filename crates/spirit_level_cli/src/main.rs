@@ -44,9 +44,23 @@ enum Cmd {
     Check(CheckArgs),
     /// Show a lint's page: its rule, why, parameters and level in every tier
     Explain {
-        /// The lint id
+        /// The lint: its code (`S0001`, `X-clippy:needless_return`) or its id (`crate-lines`)
         #[arg(add = ArgValueCandidates::new(lint_candidates))]
         lint: String,
+    },
+    /// List every lint code ever given, with its lint id, group and status; `--check` holds the registry to the
+    /// lints (for spirit_level's own `just lint`)
+    #[command(
+        after_help = "Examples:\n  spl codes\n  spl codes --check --base main\n\nA code is never reused or changed; a retired lint keeps its code reserved."
+    )]
+    Codes {
+        /// Check the registry instead of listing it: every lint has its code, no code or id twice
+        #[arg(long)]
+        check: bool,
+        /// With --check: the git revision whose registry every row must still match (rows only go from active to
+        /// retired)
+        #[arg(long, requires = "check", value_name = "REV")]
+        base: Option<String>,
     },
     /// List every lint with its level in each shipped tier
     Lints {
@@ -135,7 +149,14 @@ struct ConfigArgs {
 fn lint_candidates() -> Vec<CompletionCandidate> {
     spirit_level::lints()
         .into_iter()
-        .map(|m| CompletionCandidate::new(m.id).help(Some(m.summary.into())))
+        .flat_map(|m| {
+            [
+                CompletionCandidate::new(m.code)
+                    .help(Some(format!("{}: {}", m.id, m.summary).into())),
+                CompletionCandidate::new(m.id)
+                    .help(Some(format!("{}: {}", m.code, m.summary).into())),
+            ]
+        })
         .collect()
 }
 
@@ -172,6 +193,7 @@ fn run(cli: Cli) -> Result<Exit, String> {
     match cli.cmd {
         Cmd::Check(a) => check(a),
         Cmd::Explain { lint } => explain(lint),
+        Cmd::Codes { check, base } => codes(check, base),
         Cmd::Lints { format } => list_lints(format),
         Cmd::Tiers => tiers(),
         Cmd::Config(a) => show_config(a),
@@ -258,17 +280,81 @@ fn check(a: CheckArgs) -> Result<Exit, String> {
 }
 
 fn explain(lint: String) -> Result<Exit, String> {
+    if spirit_level::lint(&lint).is_none()
+        && let Some((tool, rule)) = lint.strip_prefix("X-").and_then(|r| r.split_once(':'))
+    {
+        return adapter_rule(tool, rule);
+    }
     let m = spirit_level::lint(&lint)
         .ok_or_else(|| format!("no lint {lint} (`spl lints` lists them)"))?;
     let tiers = sl_book::tier_levels()?;
-    print!("{}", sl_book::lint_page(m, &tiers));
+    print!("{}", sl_book::lint_text(m, &tiers));
     Ok(Exit::OK)
+}
+
+/// `spl explain X-<tool>:<rule>`: the tool's own rule, and the adapter lints that report it
+fn adapter_rule(tool: &str, rule: &str) -> Result<Exit, String> {
+    let lints: Vec<&sl_core::LintMeta> = spirit_level::lints()
+        .into_iter()
+        .filter(|m| {
+            matches!(m.source, sl_core::Source::Tool { .. })
+                && m.id.starts_with(&format!("{tool}-"))
+        })
+        .collect();
+    if lints.is_empty() {
+        return Err(format!("no adapter of {tool} (`spl lints` lists them)"));
+    }
+    println!(
+        "# X-{tool}:{rule}\n\n{tool}'s own rule `{rule}`, reported through the {tool} adapter. Its level is the level of the adapter lint the rule falls under:\n"
+    );
+    for m in lints {
+        println!("- {} {}: {}", m.code, m.id, m.summary);
+    }
+    Ok(Exit::OK)
+}
+
+fn codes(check: bool, base: Option<String>) -> Result<Exit, String> {
+    use spirit_level::codes;
+    if !check {
+        for r in codes::rows() {
+            println!("{} {:28} {:9} {}", r.code, r.id, r.group, r.status.name());
+        }
+        return Ok(Exit::OK);
+    }
+    let base_text = match &base {
+        None => None,
+        Some(rev) => {
+            let out = std::process::Command::new("git")
+                .args(["show", &format!("{rev}:crates/spirit_level/codes.toml")])
+                .output()
+                .map_err(|e| format!("--base {rev}: cannot run git: {e}"))?;
+            if out.status.success() {
+                Some(String::from_utf8_lossy(&out.stdout).into_owned())
+            } else {
+                eprint!("codes.toml is not in {rev} yet: nothing to compare with\n");
+                None
+            }
+        }
+    };
+    let problems = codes::check(
+        &spirit_level::lints(),
+        codes::REGISTRY,
+        base_text.as_deref(),
+    );
+    for p in &problems {
+        vc_ui::eprint_error(TOOL, &format!("codes.toml: {p}"));
+    }
+    Ok(if problems.is_empty() {
+        Exit::OK
+    } else {
+        Exit::FAILURE
+    })
 }
 
 fn list_lints(format: Format) -> Result<Exit, String> {
     let tiers = sl_book::tier_levels()?;
     let mut lints = spirit_level::lints();
-    lints.sort_by_key(|m| (m.category, m.id));
+    lints.sort_by_key(|m| m.code);
     match format {
         Format::Json => {
             let v: Vec<serde_json::Value> = lints
@@ -278,7 +364,7 @@ fn list_lints(format: Format) -> Result<Exit, String> {
                         .iter()
                         .map(|(n, c)| (n.to_string(), c.lint(m.id).level.name().into()))
                         .collect();
-                    serde_json::json!({"id": m.id, "category": m.category, "summary": m.summary, "levels": levels, "meta": m})
+                    serde_json::json!({"code": m.code, "id": m.id, "category": m.category, "summary": m.summary, "levels": levels, "meta": m})
                 })
                 .collect();
             println!("{}", serde_json::to_string_pretty(&v).unwrap_or_default());
@@ -286,7 +372,7 @@ fn list_lints(format: Format) -> Result<Exit, String> {
         Format::Text => {
             let w = lints.iter().map(|m| m.id.len()).max().unwrap_or(10);
             let names: Vec<String> = tiers.iter().map(|(n, _)| format!("{n:>6}")).collect();
-            println!("{:w$}  {}  rule", "lint", names.join(" "));
+            println!("code   {:w$}  {}  rule", "lint", names.join(" "));
             for m in &lints {
                 let lv: Vec<String> = tiers
                     .iter()
@@ -296,7 +382,7 @@ fn list_lints(format: Format) -> Result<Exit, String> {
                         format!("{s:>width$}", width = n.len().max(6))
                     })
                     .collect();
-                println!("{:w$}  {}  {}", m.id, lv.join(" "), m.summary);
+                println!("{}  {:w$}  {}  {}", m.code, m.id, lv.join(" "), m.summary);
             }
         }
     }

@@ -2,6 +2,7 @@ use super::*;
 use sl_core::{FixKind, ParamSpec, Source};
 
 static A: LintMeta = LintMeta {
+    code: "S0001",
     id: "crate-lines",
     category: "size",
     summary: "s",
@@ -25,6 +26,7 @@ static A: LintMeta = LintMeta {
     source: Source::Native,
 };
 static B: LintMeta = LintMeta {
+    code: "M0011",
     id: "readme-per-crate",
     category: "manifest",
     summary: "s",
@@ -74,6 +76,13 @@ fn load(text: &str) -> Result<Config, Vec<ConfigError>> {
 
 fn messages(r: Result<Config, Vec<ConfigError>>) -> Vec<String> {
     r.unwrap_err().iter().map(ToString::to_string).collect()
+}
+
+#[test]
+fn a_code_names_its_lint() {
+    let c = load("extends = \"big\"\n[lints.S0001]\nwarn-above = 100\nreason = \"small repo\"\n\n[[exceptions]]\nlint = \"M0011\"\ncrates = [\"a\"]\nlevel = \"warn\"\nreason = \"r\"\n").unwrap();
+    assert_eq!(c.lint("crate-lines").params.int("warn-above"), 100);
+    assert_eq!(c.exceptions[0].lint, "readme-per-crate");
 }
 
 #[test]

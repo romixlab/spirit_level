@@ -8,7 +8,7 @@ use sl_firmware::Firmware;
 use sl_firmware::scan;
 use syn::Expr;
 
-lint!(META, "ext-4", "ext", "external chip registers are written from shadow copies, not read-modify-write",
+lint!(META, "F0042", "ext-4", "ext", "external chip registers are written from shadow copies, not read-modify-write",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

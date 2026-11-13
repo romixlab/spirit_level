@@ -8,7 +8,7 @@ use sl_firmware::Firmware;
 use sl_firmware::scan::{self, Node};
 use syn::Expr;
 
-lint!(META, "err-7", "err", "RP2350 ROM reboots use a delay and only the allowed FRCE_OFF bits",
+lint!(META, "F0027", "err-7", "err", "RP2350 ROM reboots use a delay and only the allowed FRCE_OFF bits",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

@@ -9,7 +9,7 @@ use sl_firmware::context::{Context, Reach};
 use sl_firmware::{Facts, StaticUse};
 use std::collections::BTreeMap;
 
-lint!(META, "exe-6", "exe", "state shared between an interrupt executor and thread mode sits behind a critical-section mutex",
+lint!(META, "F0037", "exe-6", "exe", "state shared between an interrupt executor and thread mode sits behind a critical-section mutex",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

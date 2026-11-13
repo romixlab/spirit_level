@@ -7,7 +7,7 @@ use sl_core::Diagnostic;
 use sl_firmware::Firmware;
 use sl_firmware::scan;
 
-lint!(META, "clk-3", "clk", "the clock security system watches HSE and LSE, with a handler",
+lint!(META, "F0011", "clk-3", "clk", "the clock security system watches HSE and LSE, with a handler",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

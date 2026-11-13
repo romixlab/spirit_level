@@ -9,7 +9,7 @@ use sl_firmware::{Firmware, Loc};
 use std::collections::BTreeSet;
 use syn::Expr;
 
-lint!(META, "fls-3", "fls", "RP flash is erased and written from core 0 with nothing else reading flash",
+lint!(META, "F0046", "fls-3", "fls", "RP flash is erased and written from core 0 with nothing else reading flash",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

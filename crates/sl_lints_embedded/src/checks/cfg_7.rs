@@ -6,7 +6,7 @@ use sl_core::Params;
 use sl_core::{Confidence, Diagnostic, Span};
 use sl_firmware::Firmware;
 
-lint!(META, "cfg-7", "cfg", "the build info carries the git SHA and a dirty flag",
+lint!(META, "F0009", "cfg-7", "cfg", "the build info carries the git SHA and a dirty flag",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

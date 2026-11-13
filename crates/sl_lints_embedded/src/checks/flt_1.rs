@@ -9,7 +9,7 @@ use sl_firmware::Firmware;
 use sl_firmware::scan::{self, Node};
 use syn::Expr;
 
-lint!(META, "flt-1", "flt", "the HardFault handler records the crash and resets instead of spinning",
+lint!(META, "F0048", "flt-1", "flt", "the HardFault handler records the crash and resets instead of spinning",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

@@ -109,6 +109,8 @@ impl Need {
 /// Everything known about one lint, declared once as a `static` beside its code
 #[derive(Debug, Serialize)]
 pub struct LintMeta {
+    /// Stable code: the group's letter and four digits (`S0001`), never reused or changed ([`valid_code`])
+    pub code: &'static str,
     /// Stable id in kebab-case (`crate-lines`); tool lints are prefixed by their tool (`clippy`, `deny`)
     pub id: &'static str,
     /// The group it is listed under in the book (`manifest`, `graph`, `size`, `code`, `state`, `tools`, ...)
@@ -132,6 +134,37 @@ impl LintMeta {
     pub fn param(&self, name: &str) -> Option<&ParamSpec> {
         self.params.iter().find(|p| p.name == name)
     }
+
+    /// Whether `name` is this lint's id or its code
+    pub fn is(&self, name: &str) -> bool {
+        self.id == name || self.code == name
+    }
+}
+
+/// The groups of lint codes: the letter a code starts with, and the group's name
+pub const CODE_GROUPS: &[(char, &str)] = &[
+    ('M', "manifest"),
+    ('S', "size"),
+    ('T', "state"),
+    ('G', "graph"),
+    ('C', "code"),
+    ('P', "prose"),
+    ('A', "ai"),
+    ('F', "firmware"),
+    ('X', "external"),
+];
+
+/// The group a code belongs to, when it is a valid code: a group letter and four digits, not `0000`
+pub fn valid_code(code: &str) -> Option<&'static str> {
+    let mut c = code.chars();
+    let letter = c.next()?;
+    let digits = c.as_str();
+    (digits.len() == 4 && digits.bytes().all(|b| b.is_ascii_digit()) && digits != "0000")
+        .then_some(())?;
+    CODE_GROUPS
+        .iter()
+        .find(|(l, _)| *l == letter)
+        .map(|(_, name)| *name)
 }
 
 /// Keys of a lint's table that are not parameters; no lint may declare a parameter of these names
@@ -161,6 +194,16 @@ mod tests {
         assert!(!valid_id("-a"));
         assert!(!valid_id("a-"));
         assert!(!valid_id("a_b"));
+    }
+
+    #[test]
+    fn codes() {
+        assert_eq!(valid_code("S0001"), Some("size"));
+        assert_eq!(valid_code("X0033"), Some("external"));
+        assert_eq!(valid_code("S0000"), None);
+        assert_eq!(valid_code("Q0001"), None);
+        assert_eq!(valid_code("S001"), None);
+        assert_eq!(valid_code("S00a1"), None);
     }
 
     #[test]

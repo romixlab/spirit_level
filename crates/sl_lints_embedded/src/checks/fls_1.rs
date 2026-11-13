@@ -7,7 +7,7 @@ use sl_core::Diagnostic;
 use sl_firmware::Firmware;
 use sl_firmware::scan;
 
-lint!(META, "fls-1", "fls", "flash a power cut can tear is read through ECC-aware access on parts with flash ECC",
+lint!(META, "F0044", "fls-1", "fls", "flash a power cut can tear is read through ECC-aware access on parts with flash ECC",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

@@ -10,7 +10,7 @@ use sl_firmware::context::bodies;
 use syn::Expr;
 use syn::spanned::Spanned;
 
-lint!(META, "dma-2", "dma", "DMA buffers in cacheable RAM are cleaned and invalidated, or not cacheable",
+lint!(META, "F0017", "dma-2", "dma", "DMA buffers in cacheable RAM are cleaned and invalidated, or not cacheable",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

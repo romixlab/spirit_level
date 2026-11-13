@@ -29,6 +29,7 @@ expires = "v0.4.0"
 - **Expiries:** a date (expired from that day on) or a release (expired once the project's version, from `[workspace.package]` or `[package]`, reaches it). An expired override or exception is an error: fix what it allowed and remove it, or renew it with a new reason and expiry.
 - **Exceptions** apply to findings about the listed crates or whose file matches a path pattern (`*` within a segment, `**` across segments). They change the level, parameters, or both. Their parameters apply to the crates they name.
 - **Unknown keys fail.** A typo in a key, a lint id or a tier name stops the run with the file and line, before any lint runs.
+- **Codes or ids.** A lint is named by its id or its code: `[lints.S0001]` is `[lints.crate-lines]`, in exceptions (`lint = "S0001"`), waivers and `--only` too.
 
 ## Seeing the result
 

@@ -8,7 +8,7 @@ use sl_analysis::{Analysis, Context, lint};
 use sl_core::{Diagnostic, LintMeta, Params, Span};
 use sl_firmware::Firmware;
 
-lint!(FIRMWARE_READABLE, "firmware-readable", "embedded", "every file of a firmware crate that the embedded lints read can be read",
+lint!(FIRMWARE_READABLE, "F0020", "firmware-readable", "embedded", "every file of a firmware crate that the embedded lints read can be read",
     params: [], needs: [], fix: None);
 
 /// What a check needs from one firmware crate; a crate without it is not checked by that lint

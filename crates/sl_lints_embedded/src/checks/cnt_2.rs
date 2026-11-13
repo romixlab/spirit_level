@@ -8,7 +8,7 @@ use sl_firmware::Firmware;
 use sl_firmware::scan::{self, Node};
 use syn::Expr;
 
-lint!(META, "cnt-2", "cnt", "counter buffers an interrupt updates are never borrowed mutably or read unaligned",
+lint!(META, "F0014", "cnt-2", "cnt", "counter buffers an interrupt updates are never borrowed mutably or read unaligned",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

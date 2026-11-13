@@ -7,7 +7,7 @@ use super::host::{self, EventKind, Strength};
 use sl_core::Diagnostic;
 use sl_firmware::Firmware;
 
-lint!(META, "host-3", "host", "unknown enum values from the host are refused, not mapped to a default",
+lint!(META, "F0057", "host-3", "host", "unknown enum values from the host are refused, not mapped to a default",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

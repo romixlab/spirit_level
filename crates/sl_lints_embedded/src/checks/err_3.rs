@@ -7,7 +7,7 @@ use sl_core::Params;
 use sl_core::{Confidence, Diagnostic};
 use sl_firmware::Firmware;
 
-lint!(META, "err-3", "err", "flash prefetch is off where code crosses into bank 2 on G0B0/G0B1/G0C1",
+lint!(META, "F0023", "err-3", "err", "flash prefetch is off where code crosses into bank 2 on G0B0/G0B1/G0C1",
     params: [], needs: [Need::Elf], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

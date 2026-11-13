@@ -6,7 +6,7 @@ use sl_core::Params;
 use sl_core::{Confidence, Diagnostic};
 use sl_firmware::Firmware;
 
-lint!(META, "exe-5", "exe", "an interrupt executor uses a vector no driver binds and no used peripheral raises",
+lint!(META, "F0036", "exe-5", "exe", "an interrupt executor uses a vector no driver binds and no used peripheral raises",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

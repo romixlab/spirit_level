@@ -10,7 +10,7 @@ use sl_firmware::context::{Context, Exec, FnBody, bodies};
 use sl_firmware::{ExecutorStart, Facts, Firmware, Loc};
 use std::collections::BTreeSet;
 
-lint!(META, "exe-4", "exe", "an interrupt executor runs below the interrupts that wake its tasks",
+lint!(META, "F0035", "exe-4", "exe", "an interrupt executor runs below the interrupts that wake its tasks",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

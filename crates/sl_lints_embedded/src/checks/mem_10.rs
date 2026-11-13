@@ -8,7 +8,7 @@ use sl_core::Diagnostic;
 use sl_firmware::Firmware;
 use sl_firmware::elf::SymKind;
 
-lint!(META, "mem-10", "mem", "no LOAD segment is writable and executable, and .rodata holds nothing writable",
+lint!(META, "F0068", "mem-10", "mem", "no LOAD segment is writable and executable, and .rodata holds nothing writable",
     params: [], needs: [Need::Elf], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

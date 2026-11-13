@@ -8,7 +8,7 @@ use sl_core::Diagnostic;
 use sl_firmware::Firmware;
 use sl_firmware::elf::{SymKind, bytes};
 
-lint!(META, "siz-6", "siz", "no large .data initializer",
+lint!(META, "F0090", "siz-6", "siz", "no large .data initializer",
     params: [("data-init", Int, "1024", "bytes of a .data initializer from which it is reported")], needs: [Need::Elf], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

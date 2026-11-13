@@ -1,6 +1,6 @@
 ## Why
 
-rustc's `dead_code` lint stops at the crate boundary: a `pub` item reachable from a library's root may be used by any other crate, so rustc never reports it. In a workspace that is the common case. An item made `pub` for one caller stays when the caller goes, and the library carries code nobody runs, tests for it, and docs for it. Its public surface only grows (see [pub-surface](pub-surface.md)).
+rustc's `dead_code` lint stops at the crate boundary: a `pub` item reachable from a library's root may be used by any other crate, so rustc never reports it. In a workspace that is the common case. An item made `pub` for one caller stays when the caller goes, and the library carries code nobody runs, tests for it, and docs for it. Its public surface only grows (see [pub-surface](C0001.md)).
 
 This lint closes the gap for workspace libraries: it reports public items that no other crate of the workspace names.
 

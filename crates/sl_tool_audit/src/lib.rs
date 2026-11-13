@@ -8,15 +8,15 @@ use serde_json::Value;
 use sl_analysis::{Analysis, Context, lint};
 use sl_core::{Diagnostic, LintMeta, Need, Span};
 
-lint!(AUDIT_VULNERABILITIES, "audit-vulnerabilities", "audit", "no dependency has a published security vulnerability",
+lint!(AUDIT_VULNERABILITIES, "X0003", "audit-vulnerabilities", "audit", "no dependency has a published security vulnerability",
     tool: ("cargo-audit", Executable),
     params: [("fetch", Bool, "true", "update the advisory database first; false checks against the local copy (`--no-fetch`); every audit lint reads it")],
     needs: [Need::Tool("cargo-audit")], fix: None);
-lint!(AUDIT_UNMAINTAINED, "audit-unmaintained", "audit", "no dependency is marked unmaintained or replaced in the RustSec database",
+lint!(AUDIT_UNMAINTAINED, "X0001", "audit-unmaintained", "audit", "no dependency is marked unmaintained or replaced in the RustSec database",
     tool: ("cargo-audit", Executable), params: [], needs: [Need::Tool("cargo-audit")], fix: None);
-lint!(AUDIT_UNSOUND, "audit-unsound", "audit", "no dependency is marked unsound in the RustSec database",
+lint!(AUDIT_UNSOUND, "X0002", "audit-unsound", "audit", "no dependency is marked unsound in the RustSec database",
     tool: ("cargo-audit", Executable), params: [], needs: [Need::Tool("cargo-audit")], fix: None);
-lint!(AUDIT_YANKED, "audit-yanked", "audit", "Cargo.lock holds no yanked version",
+lint!(AUDIT_YANKED, "X0004", "audit-yanked", "audit", "Cargo.lock holds no yanked version",
     tool: ("cargo-audit", Executable), params: [], needs: [Need::Tool("cargo-audit")], fix: None);
 
 /// The cargo-audit analysis

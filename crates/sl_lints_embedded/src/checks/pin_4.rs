@@ -9,7 +9,7 @@ use sl_firmware::Firmware;
 use sl_firmware::scan::{self, Node};
 use syn::Expr;
 
-lint!(META, "pin-4", "pin", "peripheral pins stay on their function while the peripheral is enabled",
+lint!(META, "F0079", "pin-4", "pin", "peripheral pins stay on their function while the peripheral is enabled",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

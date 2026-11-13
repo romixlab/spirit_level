@@ -6,7 +6,7 @@ use sl_core::Params;
 use sl_core::Diagnostic;
 use sl_firmware::Firmware;
 
-lint!(META, "exe-12", "exe", "every async fn awaits something",
+lint!(META, "F0031", "exe-12", "exe", "every async fn awaits something",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

@@ -7,7 +7,7 @@ use sl_core::{Confidence, Diagnostic};
 use sl_firmware::Firmware;
 use sl_firmware::scan;
 
-lint!(META, "pin-8", "pin", "unused pins are analog or pulled, never floating inputs",
+lint!(META, "F0081", "pin-8", "pin", "unused pins are analog or pulled, never floating inputs",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

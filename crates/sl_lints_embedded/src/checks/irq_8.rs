@@ -11,7 +11,7 @@ use syn::Token;
 use syn::punctuated::Punctuated;
 use syn::visit::Visit;
 
-lint!(META, "irq-8", "irq", "the default interrupt handler records which IRQ fired",
+lint!(META, "F0064", "irq-8", "irq", "the default interrupt handler records which IRQ fired",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

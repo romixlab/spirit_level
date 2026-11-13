@@ -8,7 +8,7 @@ use sl_firmware::Firmware;
 use sl_firmware::scan::{self, Node};
 use syn::Expr;
 
-lint!(META, "pwr-4", "pwr", "a firmware that keeps state in the backup domain never changes the RTC clock source",
+lint!(META, "F0085", "pwr-4", "pwr", "a firmware that keeps state in the backup domain never changes the RTC clock source",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

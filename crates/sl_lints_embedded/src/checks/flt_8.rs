@@ -7,7 +7,7 @@ use sl_core::Diagnostic;
 use sl_firmware::Firmware;
 use sl_firmware::scan;
 
-lint!(META, "flt-8", "flt", "a boot-loop rescue falls back to the ROM bootloader after repeated unhealthy boots",
+lint!(META, "F0054", "flt-8", "flt", "a boot-loop rescue falls back to the ROM bootloader after repeated unhealthy boots",
     params: [], needs: [], fix: None);
 
 /// What the check needs from a firmware crate; a crate without it is not checked

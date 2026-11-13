@@ -23,6 +23,6 @@ warn[pub-surface] tpm_base offers 690 public items in 11475 code lines, 60 per 1
 
 ## How to fix
 
-- Make what only the crate uses `pub(crate)`: [dead-pub](dead-pub.md) lists the public items no other crate names.
+- Make what only the crate uses `pub(crate)`: [dead-pub](C0009.md) lists the public items no other crate names.
 - Keep modules private and re-export from the root only the items users need.
 - Move a group of items that other crates do use into a crate of its own, with a surface made for them.
