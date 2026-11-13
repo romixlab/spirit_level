@@ -24,19 +24,7 @@ pub(crate) const NEEDS: &[FwNeed] = &[FwNeed::Sources];
 /// outside the entry point are a candidate. Whether the order is the board's safe one stays a review question.
 pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
     let fns = scan::functions(fw);
-    let mut builds_outputs: BTreeMap<String, bool> = BTreeMap::new();
-    for f in &fns {
-        let b = builds_output(f);
-        // by `Type::name` for methods, by name for functions (a name defined twice counts when both build)
-        let key = match f.self_ty_name() {
-            Some(t) => format!("{t}::{}", f.name()),
-            None => f.name(),
-        };
-        builds_outputs
-            .entry(key)
-            .and_modify(|v| *v &= b)
-            .or_insert(b);
-    }
+    let builds_outputs = output_builders(&fns);
     let any_output = builds_outputs.values().any(|b| *b);
     if !any_output {
         return Vec::new();
@@ -49,46 +37,7 @@ pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
         let mut after_init = false;
         let mut setup = false;
         for stmt in &f.block.stmts {
-            let mut is_init = false;
-            let mut is_setup = false;
-            let mut slow: Option<(proc_macro2::Span, &'static str)> = None;
-            each_stmt(stmt, |n| match n {
-                Node::Expr(e @ Expr::Call(_)) => {
-                    let name = scan::call_name(e).unwrap_or_default();
-                    let last = name.rsplit("::").next().unwrap_or("");
-                    let last_two = name.rsplitn(3, "::").take(2).collect::<Vec<_>>();
-                    let typed = (last_two.len() == 2)
-                        .then(|| format!("{}::{}", last_two[1], last_two[0]));
-                    if last == "init" && name.contains("::") {
-                        is_init = true;
-                    }
-                    if pin::driver_new(e).is_some_and(|t| t != "Input" && t != "ExtiInput")
-                        || builds_outputs.get(last).copied().unwrap_or(false)
-                        || typed
-                            .is_some_and(|t| builds_outputs.get(&t).copied().unwrap_or(false))
-                    {
-                        is_setup = true;
-                    }
-                    if slow.is_none()
-                        && (name.ends_with("Builder::new") || name.contains("UsbDevice"))
-                    {
-                        slow = Some((scan::head_span(e), "USB device"));
-                    }
-                }
-                Node::Expr(e @ Expr::MethodCall(m)) => {
-                    let name = m.method.to_string();
-                    if builds_outputs.get(&name).copied().unwrap_or(false) {
-                        is_setup = true;
-                    }
-                    if slow.is_none() && (name == "spawn" || name == "must_spawn") {
-                        slow = Some((scan::head_span(e), "spawn"));
-                    }
-                }
-                Node::Expr(Expr::Await(a)) if slow.is_none() => {
-                    slow = Some((a.await_token.span, ".await"));
-                }
-                _ => {}
-            });
+            let Stmt { is_init, is_setup, slow } = classify(stmt, &builds_outputs);
             if is_init {
                 after_init = true;
                 continue;
@@ -150,4 +99,80 @@ fn builds_output(f: &FnItem<'_>) -> bool {
         }
     });
     b
+}
+
+/// Whether each function of the source builds an output driver: by `Type::name` for methods, by name for
+/// functions (a name defined twice counts when both build)
+fn output_builders(fns: &[FnItem<'_>]) -> BTreeMap<String, bool> {
+    let mut builds_outputs: BTreeMap<String, bool> = BTreeMap::new();
+    for f in fns {
+        let b = builds_output(f);
+        let key = match f.self_ty_name() {
+            Some(t) => format!("{t}::{}", f.name()),
+            None => f.name(),
+        };
+        builds_outputs
+            .entry(key)
+            .and_modify(|v| *v &= b)
+            .or_insert(b);
+    }
+    builds_outputs
+}
+
+/// What one statement of the entry point does
+struct Stmt {
+    /// The HAL init
+    is_init: bool,
+    /// Pin setup: an output driver built, or a function called that builds one
+    is_setup: bool,
+    /// Something slow, where and what
+    slow: Option<(proc_macro2::Span, &'static str)>,
+}
+
+fn classify(stmt: &syn::Stmt, builds_outputs: &BTreeMap<String, bool>) -> Stmt {
+    let mut is_init = false;
+    let mut is_setup = false;
+    let mut slow: Option<(proc_macro2::Span, &'static str)> = None;
+    each_stmt(stmt, |n| match n {
+        Node::Expr(e @ Expr::Call(_)) => {
+            let name = scan::call_name(e).unwrap_or_default();
+            let last = name.rsplit("::").next().unwrap_or("");
+            let last_two = name.rsplitn(3, "::").take(2).collect::<Vec<_>>();
+            let typed = (last_two.len() == 2)
+                .then(|| format!("{}::{}", last_two[1], last_two[0]));
+            if last == "init" && name.contains("::") {
+                is_init = true;
+            }
+            if pin::driver_new(e).is_some_and(|t| t != "Input" && t != "ExtiInput")
+                || builds_outputs.get(last).copied().unwrap_or(false)
+                || typed
+                    .is_some_and(|t| builds_outputs.get(&t).copied().unwrap_or(false))
+            {
+                is_setup = true;
+            }
+            if slow.is_none()
+                && (name.ends_with("Builder::new") || name.contains("UsbDevice"))
+            {
+                slow = Some((scan::head_span(e), "USB device"));
+            }
+        }
+        Node::Expr(e @ Expr::MethodCall(m)) => {
+            let name = m.method.to_string();
+            if builds_outputs.get(&name).copied().unwrap_or(false) {
+                is_setup = true;
+            }
+            if slow.is_none() && (name == "spawn" || name == "must_spawn") {
+                slow = Some((scan::head_span(e), "spawn"));
+            }
+        }
+        Node::Expr(Expr::Await(a)) if slow.is_none() => {
+            slow = Some((a.await_token.span, ".await"));
+        }
+        _ => {}
+    });
+    Stmt {
+        is_init,
+        is_setup,
+        slow,
+    }
 }

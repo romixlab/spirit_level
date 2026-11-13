@@ -5,8 +5,9 @@ use sl_analysis::lint;
 use sl_core::Params;
 use super::util::{priority_level, walk_exprs};
 use sl_core::{Confidence, Diagnostic};
-use sl_firmware::context::{Context, Exec, bodies};
-use sl_firmware::{Firmware, Loc};
+use sl_firmware::context::{Context, Exec, FnBody, bodies};
+
+use sl_firmware::{ExecutorStart, Facts, Firmware, Loc};
 use std::collections::BTreeSet;
 
 lint!(META, "exe-4", "exe", "an interrupt executor runs below the interrupts that wake its tasks",
@@ -39,19 +40,7 @@ pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
         .dependencies()
         .iter()
         .any(|d| d.package() == "embassy-time");
-    // `config.time_interrupt_priority = Priority::P2`
-    let mut time_level: Option<(u32, Loc)> = None;
-    for b in &bodies {
-        walk_exprs(b.block, &mut |e| {
-            if let syn::Expr::Assign(a) = e
-                && let syn::Expr::Field(f) = &*a.left
-                && matches!(&f.member, syn::Member::Named(n) if n == "time_interrupt_priority")
-                && let Some(l) = priority_level(&super::util::text(&*a.right))
-            {
-                time_level = Some((l, b.loc(syn::spanned::Spanned::span(&*a.left))));
-            }
-        });
-    }
+    let time_level = time_interrupt_level(&bodies);
     let mut out = Vec::new();
     for s in &facts.executor_starts {
         let sets: Vec<_> = facts.priorities_of(&s.vector).collect();
@@ -65,62 +54,8 @@ pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
         let Some(level) = priority_level(&set.priority) else {
             continue;
         };
-        // what the executor's tasks are handed and name
-        let mut used: BTreeSet<String> = BTreeSet::new();
-        let mut roots = Vec::new();
-        for (task, execs) in &cx.task_execs {
-            for (e, spawn) in execs {
-                if !matches!(e, Exec::Interrupt { executor, .. } if *executor == s.executor) {
-                    continue;
-                }
-                if let Some(caller) = facts.function(&spawn.in_fn) {
-                    for c in caller
-                        .calls
-                        .iter()
-                        .filter(|c| c.name.rsplit("::").next() == Some(task))
-                    {
-                        used.extend(c.args.iter().cloned());
-                    }
-                }
-                if let Some(i) = facts.functions.iter().position(|f| f.name == *task) {
-                    roots.push(i);
-                }
-            }
-        }
-        let reach = cx.reach(&roots);
-        for p in &facts.peripherals {
-            if reach.keys().any(|&i| facts.functions[i].path == p.in_fn) {
-                used.insert(p.name.clone());
-            }
-        }
-        let mut wakers = Vec::new();
-        let mut seen = BTreeSet::new();
-        for b in &facts.bindings {
-            if b.vector == s.vector || !seen.insert(b.vector.clone()) {
-                continue;
-            }
-            let own = facts
-                .priorities_of(&b.vector)
-                .find_map(|p| priority_level(&p.priority).map(|l| (l, p.loc.clone())));
-            let (l, set_at) = match own {
-                Some((l, at)) => (l, Some(at)),
-                None => (0, None),
-            };
-            let names = super::exe_5::vector_peripherals(&b.vector);
-            let in_handlers: Vec<String> = b
-                .handlers
-                .split(|c: char| !(c.is_ascii_alphanumeric() || c == '_'))
-                .filter(|w| sl_firmware::is_upper_name(w))
-                .map(str::to_string)
-                .collect();
-            wakers.push(Waker {
-                name: b.vector.clone(),
-                level: l,
-                set_at,
-                at: b.loc.clone(),
-                used: names.iter().chain(&in_handlers).any(|n| used.contains(n)),
-            });
-        }
+        let used = used_by_tasks(facts, &cx, s);
+        let mut wakers = binding_wakers(facts, &s.vector, &used);
         if uses_time {
             let (l, at) = match &time_level {
                 Some((l, at)) => (*l, Some(at.clone())),
@@ -181,4 +116,86 @@ pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
         out.push(f);
     }
     out
+}
+
+/// `config.time_interrupt_priority = Priority::P2`: the level and where it is set
+fn time_interrupt_level(bodies: &[FnBody<'_>]) -> Option<(u32, Loc)> {
+    let mut time_level = None;
+    for b in bodies {
+        walk_exprs(b.block, &mut |e| {
+            if let syn::Expr::Assign(a) = e
+                && let syn::Expr::Field(f) = &*a.left
+                && matches!(&f.member, syn::Member::Named(n) if n == "time_interrupt_priority")
+                && let Some(l) = priority_level(&super::util::text(&*a.right))
+            {
+                time_level = Some((l, b.loc(syn::spanned::Spanned::span(&*a.left))));
+            }
+        });
+    }
+    time_level
+}
+
+/// What the tasks of the executor started at `s` are handed and name
+fn used_by_tasks(facts: &Facts, cx: &Context<'_>, s: &ExecutorStart) -> BTreeSet<String> {
+    let mut used: BTreeSet<String> = BTreeSet::new();
+    let mut roots = Vec::new();
+    for (task, execs) in &cx.task_execs {
+        for (e, spawn) in execs {
+            if !matches!(e, Exec::Interrupt { executor, .. } if *executor == s.executor) {
+                continue;
+            }
+            if let Some(caller) = facts.function(&spawn.in_fn) {
+                for c in caller
+                    .calls
+                    .iter()
+                    .filter(|c| c.name.rsplit("::").next() == Some(task))
+                {
+                    used.extend(c.args.iter().cloned());
+                }
+            }
+            if let Some(i) = facts.functions.iter().position(|f| f.name == *task) {
+                roots.push(i);
+            }
+        }
+    }
+    let reach = cx.reach(&roots);
+    for p in &facts.peripherals {
+        if reach.keys().any(|&i| facts.functions[i].path == p.in_fn) {
+            used.insert(p.name.clone());
+        }
+    }
+    used
+}
+
+/// Every bound vector other than `own`, with its level and whether the executor's tasks use its peripheral
+fn binding_wakers(facts: &Facts, own: &str, used: &BTreeSet<String>) -> Vec<Waker> {
+    let mut wakers = Vec::new();
+    let mut seen = BTreeSet::new();
+    for b in &facts.bindings {
+        if b.vector == own || !seen.insert(b.vector.clone()) {
+            continue;
+        }
+        let own = facts
+            .priorities_of(&b.vector)
+            .find_map(|p| priority_level(&p.priority).map(|l| (l, p.loc.clone())));
+        let (l, set_at) = match own {
+            Some((l, at)) => (l, Some(at)),
+            None => (0, None),
+        };
+        let names = super::exe_5::vector_peripherals(&b.vector);
+        let in_handlers: Vec<String> = b
+            .handlers
+            .split(|c: char| !(c.is_ascii_alphanumeric() || c == '_'))
+            .filter(|w| sl_firmware::is_upper_name(w))
+            .map(str::to_string)
+            .collect();
+        wakers.push(Waker {
+            name: b.vector.clone(),
+            level: l,
+            set_at,
+            at: b.loc.clone(),
+            used: names.iter().chain(&in_handlers).any(|n| used.contains(n)),
+        });
+    }
+    wakers
 }

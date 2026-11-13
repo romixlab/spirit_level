@@ -719,6 +719,184 @@ fn refuses(body: &Expr) -> bool {
     .any(|w| t.contains(w))
 }
 
+/// The expressions `Inspect::enter` handles, one method each
+impl Walk<'_> {
+    fn on_match(&mut self, m: &syn::ExprMatch) {
+        let o = self.origin(&m.expr);
+        self.tainted_matches.push(o.is_some());
+        let Some(o) = o else { return };
+        for arm in &m.arms {
+            self.taint_pat(&arm.pat, &o);
+        }
+        // host-3: a catch-all that maps an unknown value to something instead of refusing it
+        let others_literal = m.arms.iter().any(|a| {
+            matches!(&a.pat, syn::Pat::Lit(_) | syn::Pat::Path(_) | syn::Pat::Range(_))
+                || matches!(&a.pat, syn::Pat::Or(or) if or.cases.iter().all(|c| matches!(c, syn::Pat::Lit(_) | syn::Pat::Path(_))))
+        });
+        for arm in m.arms.iter().filter(|_| o.direct) {
+            let catch_all = match &arm.pat {
+                syn::Pat::Wild(_) => true,
+                syn::Pat::Ident(i) if i.subpat.is_none() => {
+                    !scan::idents(&arm.body).contains(&i.ident.to_string())
+                }
+                _ => false,
+            };
+            // a counted fallback is a choice someone made and can see
+            // a guarded arm is a `Pat::Guard`, never a catch-all
+            if catch_all && others_literal && !refuses(&arm.body) && !scan::counts(&arm.body) {
+                self.event(EventKind::Default, arm.pat.span(), &arm.pat, o.clone());
+            }
+        }
+        // host-5: `None => return ..` / `Err(_) => return ..` of a lookup on a host value
+        for arm in &m.arms {
+            let t = scan::text(&arm.pat);
+            if t == "None" || t.starts_with("Err") {
+                self.guard(arm.pat.span(), &arm.pat, &arm.body, o.clone());
+            }
+        }
+    }
+
+    fn on_if(&mut self, i: &syn::ExprIf) {
+        use syn::BinOp::*;
+        let is_cmp = |e: &Expr| {
+            let mut c = false;
+            scan::each_in(e, |n| {
+                if let Node::Expr(Expr::Binary(b)) = n
+                    && matches!(b.op, Lt(_) | Le(_) | Gt(_) | Ge(_))
+                {
+                    c = true;
+                }
+            });
+            c
+        };
+        if !matches!(&*i.cond, Expr::Let(_))
+            && is_cmp(&i.cond)
+            && let Some(o) = self.origin(&i.cond)
+        {
+            let body = Expr::Block(syn::ExprBlock {
+                attrs: Vec::new(),
+                label: None,
+                block: i.then_branch.clone(),
+            });
+            self.guard(i.cond.span(), &i.cond, &body, o);
+        }
+    }
+
+    fn on_method_call(&mut self, m: &syn::ExprMethodCall, e: &Expr) {
+        let method = m.method.to_string();
+        match method.as_str() {
+            "unwrap" | "expect" => self.unwrap_on(&m.receiver, m.method.span(), e),
+            "unwrap_or" | "unwrap_or_default" | "unwrap_or_else" => {
+                // host-3: `Mode::try_from(v).unwrap_or(Mode::Off)`
+                // a string or buffer that does not fit is a truncation, not an unknown variant
+                if let Expr::Call(c) = &*m.receiver
+                    && let Some(n) = scan::call_name(&m.receiver)
+                    && !n.contains("String")
+                    && !n.contains("Vec")
+                    && [
+                        "try_from",
+                        "from_repr",
+                        "from_u8",
+                        "from_u16",
+                        "from_u32",
+                        "from_bits",
+                        "n",
+                    ]
+                    .contains(&n.rsplit("::").next().unwrap_or(""))
+                    && let Some(o) = c.args.iter().find_map(|a| self.origin(a))
+                    && o.direct
+                {
+                    self.event(EventKind::Default, m.method.span(), e, o);
+                } else if let Expr::MethodCall(inner) = &*m.receiver
+                    && inner.method == "try_into"
+                    && let Some(o) = self.origin(&inner.receiver)
+                    && o.direct
+                {
+                    self.event(EventKind::Default, m.method.span(), e, o);
+                }
+            }
+            _ => {}
+        }
+        if let Some(o) = self.origin(&m.receiver) {
+            for a in &m.args {
+                if let Expr::Closure(c) = a {
+                    for p in &c.inputs {
+                        self.taint_pat(p, &o);
+                    }
+                }
+            }
+        }
+        let args: Vec<&Expr> = m.args.iter().collect();
+        let kind = if matches!(&*m.receiver, Expr::Path(p) if p.path.is_ident("self")) {
+            CallKind::SelfMethod
+        } else {
+            CallKind::Method
+        };
+        self.call(method, kind, &args);
+    }
+
+    fn on_call(&mut self, c: &syn::ExprCall) {
+        if let Expr::Path(p) = &*c.func {
+            let segs = &p.path.segments;
+            let q = (segs.len() >= 2).then(|| segs[segs.len() - 2].ident.to_string());
+            let name = p
+                .path
+                .segments
+                .last()
+                .map(|s| s.ident.to_string())
+                .unwrap_or_default();
+            let args: Vec<&Expr> = c.args.iter().collect();
+            self.call(name, CallKind::Path(q), &args);
+        }
+    }
+
+    fn on_index(&mut self, i: &syn::ExprIndex, e: &Expr) {
+        if matches!(&*i.index, Expr::Range(r) if r.start.is_none() && r.end.is_none()) {
+            return;
+        }
+        let o = self.origin(&i.index).or_else(|| self.origin(&i.expr));
+        // `index_chain[0]`: the chain has the API's depth, checked by the dispatcher
+        if let Some(o) = o
+            && (o.sure || !matches!(&*i.index, Expr::Lit(_)))
+        {
+            let s = if self.is_guarded(&i.index) || self.is_guarded(&i.expr) {
+                Strength::Candidate
+            } else {
+                Strength::Certain
+            };
+            self.panic("index", s, i.bracket_token.span.open(), e, o);
+        }
+    }
+
+    fn on_binary(&mut self, b: &syn::ExprBinary, e: &Expr) {
+        use syn::BinOp::*;
+        match b.op {
+            Div(_) | Rem(_) | DivAssign(_) | RemAssign(_) => {
+                if let Some(o) = self.origin(&b.right) {
+                    let s = if self.is_guarded(&b.right) || matches!(&*b.right, Expr::Lit(_)) {
+                        Strength::Candidate
+                    } else {
+                        Strength::Certain
+                    };
+                    self.panic("divide", s, b.op.span(), e, o);
+                }
+            }
+            Add(_) | Sub(_) | Mul(_) | Shl(_) | Shr(_) | AddAssign(_) | SubAssign(_)
+            | MulAssign(_) | ShlAssign(_) | ShrAssign(_) => {
+                if let Some(o) = self.origin(&b.left).or_else(|| self.origin(&b.right)) {
+                    let s = if self.overflow_checks && !self.is_guarded(e) {
+                        Strength::Estimate
+                    } else {
+                        Strength::Candidate
+                    };
+                    self.panic("overflow", s, b.op.span(), e, o);
+                }
+            }
+            _ => {}
+        }
+    }
+}
+
 impl Inspect for Walk<'_> {
     fn local(&mut self, l: &syn::Local) {
         let Some(init) = &l.init else { return };
@@ -737,7 +915,6 @@ impl Inspect for Walk<'_> {
     }
 
     fn enter(&mut self, e: &Expr) {
-        use syn::BinOp::*;
         match e {
             Expr::Let(l) => {
                 if let Some(o) = self.origin(&l.expr) {
@@ -756,175 +933,12 @@ impl Inspect for Walk<'_> {
                     self.tainted.insert(id.to_string(), o);
                 }
             }
-            Expr::Match(m) => {
-                let o = self.origin(&m.expr);
-                self.tainted_matches.push(o.is_some());
-                let Some(o) = o else { return };
-                for arm in &m.arms {
-                    self.taint_pat(&arm.pat, &o);
-                }
-                // host-3: a catch-all that maps an unknown value to something instead of refusing it
-                let others_literal = m.arms.iter().any(|a| {
-                    matches!(&a.pat, syn::Pat::Lit(_) | syn::Pat::Path(_) | syn::Pat::Range(_))
-                        || matches!(&a.pat, syn::Pat::Or(or) if or.cases.iter().all(|c| matches!(c, syn::Pat::Lit(_) | syn::Pat::Path(_))))
-                });
-                for arm in m.arms.iter().filter(|_| o.direct) {
-                    let catch_all = match &arm.pat {
-                        syn::Pat::Wild(_) => true,
-                        syn::Pat::Ident(i) if i.subpat.is_none() => {
-                            !scan::idents(&arm.body).contains(&i.ident.to_string())
-                        }
-                        _ => false,
-                    };
-                    // a counted fallback is a choice someone made and can see
-                    // a guarded arm is a `Pat::Guard`, never a catch-all
-                    if catch_all
-                        && others_literal
-                        && !refuses(&arm.body)
-                        && !scan::counts(&arm.body)
-                    {
-                        self.event(EventKind::Default, arm.pat.span(), &arm.pat, o.clone());
-                    }
-                }
-                // host-5: `None => return ..` / `Err(_) => return ..` of a lookup on a host value
-                for arm in &m.arms {
-                    let t = scan::text(&arm.pat);
-                    if t == "None" || t.starts_with("Err") {
-                        self.guard(arm.pat.span(), &arm.pat, &arm.body, o.clone());
-                    }
-                }
-            }
-            Expr::If(i) => {
-                let is_cmp = |e: &Expr| {
-                    let mut c = false;
-                    scan::each_in(e, |n| {
-                        if let Node::Expr(Expr::Binary(b)) = n
-                            && matches!(b.op, Lt(_) | Le(_) | Gt(_) | Ge(_))
-                        {
-                            c = true;
-                        }
-                    });
-                    c
-                };
-                if !matches!(&*i.cond, Expr::Let(_))
-                    && is_cmp(&i.cond)
-                    && let Some(o) = self.origin(&i.cond)
-                {
-                    let body = Expr::Block(syn::ExprBlock {
-                        attrs: Vec::new(),
-                        label: None,
-                        block: i.then_branch.clone(),
-                    });
-                    self.guard(i.cond.span(), &i.cond, &body, o);
-                }
-            }
-            Expr::MethodCall(m) => {
-                let method = m.method.to_string();
-                match method.as_str() {
-                    "unwrap" | "expect" => self.unwrap_on(&m.receiver, m.method.span(), e),
-                    "unwrap_or" | "unwrap_or_default" | "unwrap_or_else" => {
-                        // host-3: `Mode::try_from(v).unwrap_or(Mode::Off)`
-                        // a string or buffer that does not fit is a truncation, not an unknown variant
-                        if let Expr::Call(c) = &*m.receiver
-                            && let Some(n) = scan::call_name(&m.receiver)
-                            && !n.contains("String")
-                            && !n.contains("Vec")
-                            && [
-                                "try_from",
-                                "from_repr",
-                                "from_u8",
-                                "from_u16",
-                                "from_u32",
-                                "from_bits",
-                                "n",
-                            ]
-                            .contains(&n.rsplit("::").next().unwrap_or(""))
-                            && let Some(o) = c.args.iter().find_map(|a| self.origin(a))
-                            && o.direct
-                        {
-                            self.event(EventKind::Default, m.method.span(), e, o);
-                        } else if let Expr::MethodCall(inner) = &*m.receiver
-                            && inner.method == "try_into"
-                            && let Some(o) = self.origin(&inner.receiver)
-                            && o.direct
-                        {
-                            self.event(EventKind::Default, m.method.span(), e, o);
-                        }
-                    }
-                    _ => {}
-                }
-                if let Some(o) = self.origin(&m.receiver) {
-                    for a in &m.args {
-                        if let Expr::Closure(c) = a {
-                            for p in &c.inputs {
-                                self.taint_pat(p, &o);
-                            }
-                        }
-                    }
-                }
-                let args: Vec<&Expr> = m.args.iter().collect();
-                let kind = if matches!(&*m.receiver, Expr::Path(p) if p.path.is_ident("self")) {
-                    CallKind::SelfMethod
-                } else {
-                    CallKind::Method
-                };
-                self.call(method, kind, &args);
-            }
-            Expr::Call(c) => {
-                if let Expr::Path(p) = &*c.func {
-                    let segs = &p.path.segments;
-                    let q = (segs.len() >= 2).then(|| segs[segs.len() - 2].ident.to_string());
-                    let name = p
-                        .path
-                        .segments
-                        .last()
-                        .map(|s| s.ident.to_string())
-                        .unwrap_or_default();
-                    let args: Vec<&Expr> = c.args.iter().collect();
-                    self.call(name, CallKind::Path(q), &args);
-                }
-            }
-            Expr::Index(i) => {
-                if matches!(&*i.index, Expr::Range(r) if r.start.is_none() && r.end.is_none()) {
-                    return;
-                }
-                let o = self.origin(&i.index).or_else(|| self.origin(&i.expr));
-                // `index_chain[0]`: the chain has the API's depth, checked by the dispatcher
-                if let Some(o) = o
-                    && (o.sure || !matches!(&*i.index, Expr::Lit(_)))
-                {
-                    let s = if self.is_guarded(&i.index) || self.is_guarded(&i.expr) {
-                        Strength::Candidate
-                    } else {
-                        Strength::Certain
-                    };
-                    self.panic("index", s, i.bracket_token.span.open(), e, o);
-                }
-            }
-            Expr::Binary(b) => match b.op {
-                Div(_) | Rem(_) | DivAssign(_) | RemAssign(_) => {
-                    if let Some(o) = self.origin(&b.right) {
-                        let s = if self.is_guarded(&b.right) || matches!(&*b.right, Expr::Lit(_)) {
-                            Strength::Candidate
-                        } else {
-                            Strength::Certain
-                        };
-                        self.panic("divide", s, b.op.span(), e, o);
-                    }
-                }
-                Add(_) | Sub(_) | Mul(_) | Shl(_) | Shr(_) | AddAssign(_) | SubAssign(_)
-                | MulAssign(_) | ShlAssign(_) | ShrAssign(_) => {
-                    if let Some(o) = self.origin(&b.left).or_else(|| self.origin(&b.right)) {
-                        let s = if self.overflow_checks && !self.is_guarded(e) {
-                            Strength::Estimate
-                        } else {
-                            Strength::Candidate
-                        };
-                        self.panic("overflow", s, b.op.span(), e, o);
-                    }
-                }
-                _ => {}
-            },
+            Expr::Match(m) => self.on_match(m),
+            Expr::If(i) => self.on_if(i),
+            Expr::MethodCall(m) => self.on_method_call(m, e),
+            Expr::Call(c) => self.on_call(c),
+            Expr::Index(i) => self.on_index(i, e),
+            Expr::Binary(b) => self.on_binary(b, e),
             _ => {}
         }
     }
