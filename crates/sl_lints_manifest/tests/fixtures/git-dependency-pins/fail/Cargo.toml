@@ -1,0 +1,14 @@
+[package]
+name = "fx"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.88"
+description = "fixture"
+license = "MIT"
+publish = false
+
+[dependencies]
+serde = { git = "https://example.org/serde", tag = "v1", default-features = false }
+rand = { git = "https://example.org/rand", rev = "abc123" }
+
+[workspace]

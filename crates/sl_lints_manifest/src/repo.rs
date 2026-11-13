@@ -101,10 +101,11 @@ pub(crate) fn run(cx: &Context<'_>) {
             if skip.iter().any(|s| s == k) {
                 continue;
             }
+            let text = &pkg.manifest.text;
             let documented = t
                 .key(k)
                 .and_then(|key| key.leaf_decor().prefix())
-                .and_then(|r| r.as_str())
+                .and_then(|r| r.as_str().or_else(|| r.span().and_then(|sp| text.get(sp))))
                 .is_some_and(|s| s.contains('#'));
             if !documented {
                 cx.emit(

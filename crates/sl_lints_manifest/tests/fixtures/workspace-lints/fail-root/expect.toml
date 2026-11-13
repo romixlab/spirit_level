@@ -1,0 +1,9 @@
+[[finding]]
+at = "Cargo.toml:1"
+
+[[finding]]
+at = "crates/fx_a/Cargo.toml"
+
+[[finding]]
+at = "crates/fx_b/Cargo.toml"
+

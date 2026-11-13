@@ -57,6 +57,9 @@ fn run_case(analysis: &dyn Analysis, id: &str, case: &Path) -> Result<(), String
     let expect_text = std::fs::read_to_string(&expect_path).unwrap_or_default();
     let expect: toml_edit::DocumentMut = expect_text.parse().map_err(|e| format!("expect.toml: {e}"))?;
     let today = Date::parse(TODAY).expect("date");
+    // a case whose project sits in `project/` can keep things beside it (a sibling checkout)
+    let case_dir = case;
+    let case = &if case.join("project").is_dir() { case.join("project") } else { case.to_path_buf() };
     let project = Project::load(case).map_err(|e| e.to_string())?;
     let analyses: [&dyn Analysis; 1] = [analysis];
     let lints = all_lints(&analyses);
@@ -81,7 +84,7 @@ fn run_case(analysis: &dyn Analysis, id: &str, case: &Path) -> Result<(), String
             "sl_testkit_{}_{}_{}.toml",
             std::process::id(),
             id,
-            case.file_name().unwrap().to_string_lossy()
+            case_dir.file_name().unwrap().to_string_lossy()
         ));
         std::fs::write(&tmp, text).map_err(|e| e.to_string())?;
         let c = Config::load(case, Some(&tmp), &env);

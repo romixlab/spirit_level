@@ -1,0 +1,32 @@
+# list
+default:
+    @just --list
+
+test *flags:
+    cargo nextest run {{flags}}
+
+lint:
+    cargo clippy -- -D warnings
+
+install:
+    cargo install --path .
+
+deploy:
+    git pull --ff-only
+    just install
+
+release:
+    #!/usr/bin/env bash
+    set -e
+    echo hi
+
+long:
+    echo 0
+    echo 1
+    echo 2
+    echo 3
+    echo 4
+    echo 5
+    echo 6
+    echo 7
+    echo 8

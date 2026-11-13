@@ -1,0 +1,17 @@
+[package]
+name = "fx"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.88"
+description = "fixture"
+license = "MIT"
+publish = false
+
+[workspace]
+
+[profile.dev]
+split-debuginfo = "unpacked"
+
+[profile.deploy]
+inherits = "release"
+incremental = true

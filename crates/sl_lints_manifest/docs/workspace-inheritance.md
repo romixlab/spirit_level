@@ -1,0 +1,24 @@
+## Why
+
+Edition, rust-version, licence and repository are the same for every crate of a workspace. Declared once in `[workspace.package]` and inherited, they cannot drift apart, and a change is one line.
+
+## Example
+
+```toml
+# root Cargo.toml
+[workspace.package]
+edition = "2024"
+rust-version = "1.88"
+license = "MIT OR Apache-2.0"
+
+# crates/foo/Cargo.toml
+[package]
+name = "foo"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+```
+
+## How to fix
+
+`spirit-level check --fix` rewrites `key = "..."` into `key.workspace = true`, or adds the line after `name` when the key is missing. A key missing from `[workspace.package]` itself is added by hand. The keys checked are the parameter `keys`.
