@@ -19,9 +19,13 @@ pub use words::*;
 /// A function or method with its body
 #[derive(Clone)]
 pub struct FnItem<'a> {
+    /// The file it is in
     pub file: &'a SourceFile,
+    /// Its attributes
     pub attrs: &'a [syn::Attribute],
+    /// Its signature
     pub sig: &'a syn::Signature,
+    /// Its body
     pub block: &'a syn::Block,
     /// The `impl` type it is a method of (`ServerState`)
     pub self_ty: Option<&'a syn::Type>,
@@ -32,6 +36,7 @@ pub struct FnItem<'a> {
 }
 
 impl<'a> FnItem<'a> {
+    /// The function's own name
     pub fn name(&self) -> String {
         self.sig.ident.to_string()
     }
@@ -52,6 +57,7 @@ impl<'a> FnItem<'a> {
         self.self_ty.map(type_name)
     }
 
+    /// Where its name is written
     pub fn loc(&self) -> Loc {
         loc(self.file, self.sig.ident.span())
     }
@@ -75,6 +81,7 @@ impl<'a> FnItem<'a> {
             .collect()
     }
 
+    /// Whether it takes `self`
     pub fn has_self(&self) -> bool {
         self.sig.receiver().is_some()
     }
@@ -165,7 +172,9 @@ fn is_test(attrs: &[syn::Attribute]) -> bool {
 /// An identifier of the code, where it is written
 #[derive(Clone, Debug)]
 pub struct CodeIdent {
+    /// The identifier
     pub name: String,
+    /// Where it is written
     pub loc: Loc,
 }
 
@@ -350,7 +359,9 @@ struct Each<F: FnMut(Node<'_>)>(F);
 
 /// What [`each`] hands out
 pub enum Node<'n> {
+    /// An expression
     Expr(&'n Expr),
+    /// A macro call: its name and the macro
     Macro(&'n str, &'n syn::Macro),
 }
 

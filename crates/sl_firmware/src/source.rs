@@ -20,7 +20,9 @@ pub struct SourceFile {
     pub krate: String,
     /// Module path inside the crate from the file's place (`sd::task`); inline `mod` blocks add to it
     pub module: String,
+    /// The source text
     pub text: String,
+    /// The parsed syntax tree
     pub ast: syn::File,
 }
 
@@ -37,12 +39,16 @@ impl std::fmt::Debug for SourceFile {
 /// A place in the source
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Loc {
+    /// The file, relative to the firmware crate directory
     pub file: String,
+    /// 1-based line
     pub line: u32,
+    /// 1-based column
     pub column: u32,
 }
 
 impl Loc {
+    /// The start of a span in a file
     pub fn of(file: &str, span: proc_macro2::Span) -> Loc {
         let s = span.start();
         Loc {
@@ -52,6 +58,7 @@ impl Loc {
         }
     }
 
+    /// As a diagnostic span
     pub fn span(&self) -> sl_core::Span {
         sl_core::Span::at(&self.file, self.line, self.column)
     }
@@ -60,25 +67,32 @@ impl Loc {
 /// `#[embassy_executor::task]`
 #[derive(Clone, Debug)]
 pub struct Task {
+    /// The function name
     pub name: String,
     /// `crate::module::name`
     pub path: String,
+    /// Where the name is written
     pub loc: Loc,
     /// `pool_size = N`, as written
     pub pool_size: Option<String>,
+    /// Declared `async`
     pub is_async: bool,
 }
 
 /// An entry point: `#[embassy_executor::main]`, `#[entry]`
 #[derive(Clone, Debug)]
 pub struct Entry {
+    /// The function name
     pub name: String,
+    /// `crate::module::name`
     pub path: String,
     /// The attribute as written (`embassy_executor::main(executor = "...")`)
     pub attr: String,
+    /// Where the name is written
     pub loc: Loc,
 }
 
+/// What attribute binds a handler
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum HandlerKind {
     /// `#[interrupt]`: a device vector
@@ -90,10 +104,13 @@ pub enum HandlerKind {
 /// A function bound to a vector by attribute
 #[derive(Clone, Debug)]
 pub struct Handler {
+    /// Interrupt or exception
     pub kind: HandlerKind,
     /// The function name, which is the vector's
     pub name: String,
+    /// `crate::module::name`
     pub path: String,
+    /// Where the name is written
     pub loc: Loc,
 }
 
@@ -106,18 +123,24 @@ pub struct Binding {
     pub vector: String,
     /// The handlers as written
     pub handlers: String,
+    /// Where the line is
     pub loc: Loc,
 }
 
 /// A `static` item
 #[derive(Clone, Debug)]
 pub struct Static {
+    /// The static's name
     pub name: String,
+    /// `crate::module::NAME`
     pub path: String,
     /// The type as written, tokens joined by spaces
     pub ty: String,
+    /// The initializer as written
     pub init: String,
+    /// Declared `static mut`
     pub mutable: bool,
+    /// Where the name is written
     pub loc: Loc,
 }
 
@@ -133,6 +156,7 @@ impl Static {
         .find(|m| self.ty.contains(m))
     }
 
+    /// Whether its type or initializer names an `InterruptExecutor`
     pub fn is_interrupt_executor(&self) -> bool {
         self.ty.contains("InterruptExecutor") || self.init.contains("InterruptExecutor")
     }
@@ -149,6 +173,7 @@ pub struct ExecutorStart {
     pub spawner: Option<String>,
     /// The function it is called in
     pub in_fn: String,
+    /// Where the call is
     pub loc: Loc,
 }
 
@@ -159,7 +184,9 @@ pub struct PrioritySet {
     pub vector: String,
     /// The priority as written (`Priority::P1`)
     pub priority: String,
+    /// The function it is called in
     pub in_fn: String,
+    /// Where the call is
     pub loc: Loc,
 }
 
@@ -172,7 +199,9 @@ pub struct Spawn {
     pub task: String,
     /// The task's path as written (`led::led_task`)
     pub task_path: String,
+    /// The function it is called in
     pub in_fn: String,
+    /// Where the call is
     pub loc: Loc,
 }
 
@@ -186,13 +215,16 @@ pub struct Call {
     pub args: Vec<String>,
     /// A method call on `self`
     pub on_self: bool,
+    /// Where the call is
     pub loc: Loc,
 }
 
 /// A static named in a function's body (`STATE.lock(..)`, `&mut BUF`)
 #[derive(Clone, Debug)]
 pub struct StaticUse {
+    /// The static's name
     pub name: String,
+    /// Where it is named
     pub loc: Loc,
 }
 
@@ -201,13 +233,17 @@ pub struct StaticUse {
 pub struct Function {
     /// `crate::module::name`, `crate::module::Type::method`
     pub path: String,
+    /// The function name
     pub name: String,
+    /// Declared `async`
     pub is_async: bool,
+    /// Where the name is written
     pub loc: Loc,
     /// The attributes' paths (`embassy_executor::task`, `inline`)
     pub attrs: Vec<String>,
     /// The parameters' names in order, `self` for a receiver, empty for a pattern
     pub params: Vec<String>,
+    /// The calls its body makes
     pub calls: Vec<Call>,
     /// The statics of the source it names
     pub statics: Vec<StaticUse>,
@@ -219,27 +255,41 @@ pub struct Function {
 /// (`peripherals::DMA1_CH1`)
 #[derive(Clone, Debug)]
 pub struct PeripheralUse {
+    /// The peripheral (`TIM7`)
     pub name: String,
+    /// The function it is named in
     pub in_fn: String,
+    /// Where it is named
     pub loc: Loc,
 }
 
 /// Everything drawn from the source
 #[derive(Clone, Debug, Default)]
 pub struct Facts {
+    /// Executor tasks
     pub tasks: Vec<Task>,
+    /// Entry points
     pub entries: Vec<Entry>,
+    /// Interrupt and exception handlers
     pub handlers: Vec<Handler>,
+    /// `bind_interrupts!` lines
     pub bindings: Vec<Binding>,
+    /// `static` items
     pub statics: Vec<Static>,
+    /// Interrupt executor starts
     pub executor_starts: Vec<ExecutorStart>,
+    /// Priority calls
     pub priorities: Vec<PrioritySet>,
+    /// Task spawns
     pub spawns: Vec<Spawn>,
+    /// Every function and method
     pub functions: Vec<Function>,
+    /// Peripheral uses
     pub peripherals: Vec<PeripheralUse>,
 }
 
 impl Facts {
+    /// Draws the facts from the parsed files
     pub fn extract(files: &[SourceFile]) -> Facts {
         let mut facts = Facts::default();
         // statics first: whether `X.start(..)` starts an interrupt executor depends on X's type
@@ -267,10 +317,12 @@ impl Facts {
         self.priorities.iter().filter(move |p| p.vector == vector)
     }
 
+    /// The function with this path
     pub fn function(&self, path: &str) -> Option<&Function> {
         self.functions.iter().find(|f| f.path == path)
     }
 
+    /// The task with this name
     pub fn task(&self, name: &str) -> Option<&Task> {
         self.tasks.iter().find(|t| t.name == name)
     }
@@ -797,6 +849,7 @@ pub fn is_upper_name(s: &str) -> bool {
             .all(|c| c.is_ascii_uppercase() || c.is_ascii_digit() || c == '_')
 }
 
+/// A path as written, segments joined by `::`
 pub fn path_text(p: &syn::Path) -> String {
     p.segments
         .iter()
@@ -904,6 +957,7 @@ fn pat_name(p: &syn::Pat) -> Option<String> {
     }
 }
 
+/// A type's last path segment
 pub fn type_name(t: &syn::Type) -> String {
     match t {
         syn::Type::Path(p) => p

@@ -16,7 +16,9 @@ use syn::{Expr, Lit};
 /// An identifier of the source and where it is
 #[derive(Clone, Debug)]
 pub struct Word {
+    /// The identifier
     pub text: String,
+    /// Where it is written
     pub loc: Loc,
 }
 
@@ -161,7 +163,9 @@ pub struct MethodCall {
     pub name: String,
     /// The receiver as written (`r.cr()`, `w`)
     pub receiver: String,
+    /// The arguments
     pub args: Vec<Expr>,
+    /// Where the method name is written
     pub loc: Loc,
 }
 
