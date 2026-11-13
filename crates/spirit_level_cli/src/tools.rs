@@ -1,6 +1,5 @@
 //! `spl tools`: where each pinned tool is found, and installing the pinned versions
 
-use anstream::{eprint, println};
 use clap::Subcommand;
 use clap_complete::engine::{ArgValueCandidates, CompletionCandidate};
 use std::path::{Path, PathBuf};
@@ -59,7 +58,7 @@ fn list() -> Result<vc_ui::Exit, String> {
         let nightly = if p.nightly { " (nightly)" } else { "" };
         println!("{:20} {:10} {at}{nightly}", p.name, p.version());
     }
-    Ok(vc_ui::Exit::OK)
+    Ok(vc_ui::Exit::SUCCESS)
 }
 
 fn install(tool: Option<String>, path: PathBuf) -> Result<vc_ui::Exit, String> {
@@ -96,7 +95,7 @@ fn install_needed(path: PathBuf) -> Result<vc_ui::Exit, String> {
             Ok(()) => println!("{what}: installed"),
             Err(e) => {
                 failed += 1;
-                eprint!("{what}: {e}\n");
+                eprintln!("{what}: {e}");
             }
         }
     }
@@ -107,7 +106,7 @@ fn failed_if(failed: bool) -> vc_ui::Exit {
     if failed {
         vc_ui::Exit::FAILURE
     } else {
-        vc_ui::Exit::OK
+        vc_ui::Exit::SUCCESS
     }
 }
 
@@ -116,13 +115,13 @@ fn install_pins(pins: &[&sl_tools::Pin], path: &Path) -> usize {
     let cache = sl_tools::Cache::from_env();
     let mut failed = 0;
     for p in pins {
-        eprint!("{} {}\n", p.name, p.version());
+        eprintln!("{} {}", p.name, p.version());
         match cache.install(p, path) {
             Ok((exe, true)) => println!("{}: cached {}", p.name, exe.display()),
             Ok((exe, false)) => println!("{}: installed {}", p.name, exe.display()),
             Err(e) => {
                 failed += 1;
-                eprint!("{}: {e}\n", p.name);
+                eprintln!("{}: {e}", p.name);
             }
         }
     }

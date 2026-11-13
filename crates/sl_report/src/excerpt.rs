@@ -5,6 +5,7 @@ use annotate_snippets::renderer::DecorStyle;
 use annotate_snippets::{AnnotationKind, Group, Level, Renderer, Snippet};
 use sl_core::Span;
 use std::path::Path;
+use vc_ui::Paint;
 
 /// Lines shown above and below the span
 const CONTEXT: u32 = 2;
@@ -12,7 +13,7 @@ const CONTEXT: u32 = 2;
 /// The excerpt of `span` under `root`, the range marked and labelled; None when the span names no line or the
 /// file cannot be read. A span over several lines is marked on its first line, to the end of it, and the label
 /// says where it ends.
-pub fn render(root: &Path, span: &Span, label: &str, deny: bool) -> Option<String> {
+pub fn render(root: &Path, span: &Span, label: &str, deny: bool, paint: Paint) -> Option<String> {
     if span.line == 0 {
         return None;
     }
@@ -61,11 +62,12 @@ pub fn render(root: &Path, span: &Span, label: &str, deny: bool) -> Option<Strin
                     .label(label.as_str()),
             ),
     )];
-    Some(
+    let renderer = if paint.is_on() {
         Renderer::styled()
-            .decor_style(DecorStyle::Ascii)
-            .render(&report),
-    )
+    } else {
+        Renderer::plain()
+    };
+    Some(renderer.decor_style(DecorStyle::Ascii).render(&report))
 }
 
 /// The byte offset in `line` of a 1-based character column; `default` for column 0
@@ -88,7 +90,7 @@ mod tests {
     use super::*;
 
     fn plain(s: &str) -> String {
-        anstream::adapter::strip_str(s).to_string()
+        vc_ui::strip_ansi(s)
     }
 
     fn scratch(text: &str) -> std::path::PathBuf {
@@ -103,6 +105,15 @@ mod tests {
     }
 
     #[test]
+    fn plain_draws_without_escapes() {
+        let dir = scratch("fn a() {}\n");
+        let s = render(&dir, &Span::new("a.rs", 1), "x", true, Paint::OFF).unwrap();
+        let _ = std::fs::remove_dir_all(&dir);
+        assert!(!s.contains('\u{1b}'), "{s}");
+        assert!(s.contains("1 | fn a() {}"), "{s}");
+    }
+
+    #[test]
     fn marks_the_range_with_context() {
         let dir = scratch("fn a() {}\n// x\n#[allow(dead_code)]\nfn b() {}\n// y\n// z\n");
         let s = render(
@@ -110,6 +121,7 @@ mod tests {
             &Span::range("a.rs", (3, 3), (3, 18)),
             "no reason",
             true,
+            Paint::ON,
         )
         .unwrap();
         let _ = std::fs::remove_dir_all(&dir);
@@ -125,16 +137,41 @@ mod tests {
     #[test]
     fn a_whole_line_and_a_long_span() {
         let dir = scratch("fn a() {\n    let x = 1;\n}\n");
-        let s = render(&dir, &Span::new("a.rs", 2), "here", false).unwrap();
+        let s = render(&dir, &Span::new("a.rs", 2), "here", false, Paint::ON).unwrap();
         assert!(plain(&s).contains("^^^^^^^^^^ here"), "{}", plain(&s));
-        let s = render(&dir, &Span::at("a.rs", 1, 1).to(3), "long", false).unwrap();
+        let s = render(
+            &dir,
+            &Span::at("a.rs", 1, 1).to(3),
+            "long",
+            false,
+            Paint::ON,
+        )
+        .unwrap();
         let _ = std::fs::remove_dir_all(&dir);
         assert!(plain(&s).contains("long (to line 3)"), "{}", plain(&s));
     }
 
     #[test]
     fn nothing_without_a_line_or_a_file() {
-        assert!(render(Path::new("/nonexistent"), &Span::new("a.rs", 1), "x", true).is_none());
-        assert!(render(Path::new("."), &Span::new("Cargo.toml", 0), "x", true).is_none());
+        assert!(
+            render(
+                Path::new("/nonexistent"),
+                &Span::new("a.rs", 1),
+                "x",
+                true,
+                Paint::ON
+            )
+            .is_none()
+        );
+        assert!(
+            render(
+                Path::new("."),
+                &Span::new("Cargo.toml", 0),
+                "x",
+                true,
+                Paint::ON
+            )
+            .is_none()
+        );
     }
 }

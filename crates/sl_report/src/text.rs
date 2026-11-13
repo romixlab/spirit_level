@@ -8,7 +8,7 @@ use sl_engine::Report;
 use std::collections::BTreeMap;
 use std::fmt::Write;
 use std::path::Path;
-use vc_ui::style::{DIM, ERROR, HEADING, HINT, ID, OK, WARN};
+use vc_ui::{DIM, ERR, HEADING, ID, NEXT, OK, Paint, WARN};
 
 /// What the findings are grouped by
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -37,6 +37,8 @@ pub struct TextOptions {
     pub excerpts: usize,
     /// What findings are grouped by
     pub group_by: GroupBy,
+    /// Colour on or off: [`Paint::stdout`] for a report printed on stdout
+    pub paint: Paint,
 }
 
 impl Default for TextOptions {
@@ -48,6 +50,7 @@ impl Default for TextOptions {
             places: 5,
             excerpts: 1,
             group_by: GroupBy::Lint,
+            paint: Paint::OFF,
         }
     }
 }
@@ -71,18 +74,18 @@ impl Kind {
         }
     }
 
-    fn word(self) -> String {
+    fn word(self, p: Paint) -> String {
         let (st, w) = match self {
-            Kind::Deny => (ERROR, "deny"),
+            Kind::Deny => (ERR, "deny"),
             Kind::Warn => (WARN, "warn"),
             Kind::Candidate => (WARN, "candidate"),
             Kind::Allowed => (DIM, "allowed"),
         };
-        format!("{st}{w}{st:#}")
+        p.paint(st, w)
     }
 }
 
-/// The report for people, with ANSI styles (anstream strips them when colour is off). `lints` gives each group
+/// The report for people, coloured as `o.paint` says. `lints` gives each group
 /// header its rule; `root` is where the excerpts' files are read.
 pub fn text(r: &Report, lints: &[&LintMeta], o: TextOptions) -> String {
     let mut s = String::new();
@@ -94,10 +97,11 @@ pub fn text(r: &Report, lints: &[&LintMeta], o: TextOptions) -> String {
     for g in groups(&shown, o.group_by) {
         group(&mut s, &g, lints, Path::new(&r.root), o);
     }
-    not_run(&mut s, r);
+    not_run(&mut s, r, o.paint);
     if o.timings {
         for t in &r.timings {
-            let _ = writeln!(s, "{DIM}  {:>6} ms  {}{DIM:#}", t.ms, t.analysis);
+            let line = format!("  {:>6} ms  {}", t.ms, t.analysis);
+            let _ = writeln!(s, "{}", o.paint.paint(DIM, &line));
         }
     }
     summary(&mut s, r, o);
@@ -159,7 +163,8 @@ fn group(s: &mut String, g: &Grp<'_>, lints: &[&LintMeta], root: &Path, o: TextO
     let first = g.items[0];
     let n = g.items.len();
     let by_lint = o.group_by == GroupBy::Lint;
-    let count = format!("{DIM}×{n}{DIM:#}");
+    let p = o.paint;
+    let count = p.paint(DIM, &format!("×{n}"));
     if by_lint {
         let rule = lints
             .iter()
@@ -167,35 +172,35 @@ fn group(s: &mut String, g: &Grp<'_>, lints: &[&LintMeta], root: &Path, o: TextO
             .map_or("", |m| m.summary);
         let _ = writeln!(
             s,
-            "{} {ID}{}{ID:#} {} {count}: {rule}",
-            g.kind.word(),
-            g.key,
+            "{} {} {} {count}: {rule}",
+            g.kind.word(p),
+            p.paint(ID, &g.key),
             first.lint
         );
     } else {
-        let _ = writeln!(s, "{HEADING}{}{HEADING:#} {count}", g.key);
+        let _ = writeln!(s, "{} {count}", p.paint(HEADING, &g.key));
     }
     // from the first places that point at a line
-    let excerpts = g
-        .items
-        .iter()
-        .filter_map(|d| excerpt::render(root, d.primary()?, &d.message, Kind::of(d) == Kind::Deny));
+    let excerpts = g.items.iter().filter_map(|d| {
+        excerpt::render(root, d.primary()?, &d.message, Kind::of(d) == Kind::Deny, p)
+    });
     for x in excerpts.take(o.excerpts) {
         for l in x.lines() {
             let _ = writeln!(s, "  {l}");
         }
     }
     if by_lint && let Some(h) = &first.help {
-        let _ = writeln!(s, "  {HINT}help:{HINT:#} {h}");
+        let _ = writeln!(s, "  {} {h}", p.paint(NEXT, "help:"));
     }
     let take = if o.all { n } else { o.places.min(n) };
     for d in &g.items[..take] {
-        place(s, d, by_lint);
+        place(s, d, by_lint, p);
     }
     if by_lint && first.confidence == Confidence::Estimate {
         let _ = writeln!(
             s,
-            "  {DIM}(estimates: read without type information){DIM:#}"
+            "  {}",
+            p.paint(DIM, "(estimates: read without type information)")
         );
     }
     let fixes: Vec<&str> = g
@@ -205,7 +210,8 @@ fn group(s: &mut String, g: &Grp<'_>, lints: &[&LintMeta], root: &Path, o: TextO
         .collect();
     if let Some(what) = fixes.first() {
         let fixable = fixes.len();
-        let _ = writeln!(s, "  {DIM}fix (--fix): {what} ({fixable} of {n}){DIM:#}");
+        let line = format!("fix (--fix): {what} ({fixable} of {n})");
+        let _ = writeln!(s, "  {}", p.paint(DIM, &line));
     }
     if take < n {
         let explain = if by_lint {
@@ -213,32 +219,29 @@ fn group(s: &mut String, g: &Grp<'_>, lints: &[&LintMeta], root: &Path, o: TextO
         } else {
             String::new()
         };
-        let _ = writeln!(
-            s,
-            "  {DIM}+{} more: `spl check --all` lists them{explain}{DIM:#}",
-            n - take
-        );
+        let line = format!("+{} more: `spl check --all` lists them{explain}", n - take);
+        let _ = writeln!(s, "  {}", p.paint(DIM, &line));
     }
     s.push('\n');
 }
 
 /// One place of a group: where, the message, the measurement; by crate or file also the level and lint
-fn place(s: &mut String, d: &Diagnostic, by_lint: bool) {
+fn place(s: &mut String, d: &Diagnostic, by_lint: bool, p: Paint) {
     let at = d
         .primary()
         .map_or_else(|| "-".to_string(), ToString::to_string);
     let lead = if by_lint {
         String::new()
     } else {
-        format!("{} {ID}{}{ID:#} ", Kind::of(d).word(), d.shown_code())
+        format!("{} {} ", Kind::of(d).word(p), p.paint(ID, &d.shown_code()))
     };
     let metric = d.metric.as_ref().map_or(String::new(), |m| {
+        let limit = m
+            .limit
+            .map_or(String::new(), |l| format!(", limit {}", num(l)));
         format!(
-            " {DIM}({} {}{}){DIM:#}",
-            m.name,
-            num(m.value),
-            m.limit
-                .map_or(String::new(), |l| format!(", limit {}", num(l)))
+            " {}",
+            p.paint(DIM, &format!("({} {}{limit})", m.name, num(m.value)))
         )
     });
     let _ = writeln!(s, "  {lead}{at}  {}{metric}", d.message);
@@ -248,40 +251,43 @@ fn place(s: &mut String, d: &Diagnostic, by_lint: bool) {
         } else {
             format!(": {}", sp.label)
         };
-        let _ = writeln!(s, "    {DIM}see {sp}{label}{DIM:#}");
+        let _ = writeln!(s, "    {}", p.paint(DIM, &format!("see {sp}{label}")));
     }
     if let Some(a) = &d.allowed {
-        let _ = writeln!(s, "    {DIM}allowed: {a}{DIM:#}");
+        let _ = writeln!(s, "    {}", p.paint(DIM, &format!("allowed: {a}")));
     }
 }
 
-fn not_run(s: &mut String, r: &Report) {
+fn not_run(s: &mut String, r: &Report, p: Paint) {
     if r.not_run.is_empty() {
         return;
     }
-    let _ = writeln!(s, "{HEADING}not run{HEADING:#}");
+    let _ = writeln!(s, "{}", p.paint(HEADING, "not run"));
     for n in &r.not_run {
-        let st = if n.level == Level::Deny { ERROR } else { WARN };
+        let st = if n.level == Level::Deny { ERR } else { WARN };
         let _ = writeln!(
             s,
-            "  {st}{}{st:#} {ID}{}{ID:#} {} needs {}: {}",
-            n.level, n.code, n.lint, n.need, n.reason
+            "  {} {} {} needs {}: {}",
+            p.paint(st, &n.level.to_string()),
+            p.paint(ID, &n.code),
+            n.lint,
+            n.need,
+            n.reason
         );
     }
     s.push('\n');
 }
 
 fn summary(s: &mut String, r: &Report, o: TextOptions) {
+    let p = o.paint;
     let (deny, warn, allowed) = r.counts();
     let mut parts = Vec::new();
     if deny > 0 {
-        parts.push(format!("{ERROR}{deny} denied{ERROR:#}"));
+        parts.push(p.paint(ERR, &format!("{deny} denied")));
     }
     if warn > 0 {
-        parts.push(format!(
-            "{WARN}{warn} warning{}{WARN:#}",
-            if warn == 1 { "" } else { "s" }
-        ));
+        let plural = if warn == 1 { "" } else { "s" };
+        parts.push(p.paint(WARN, &format!("{warn} warning{plural}")));
     }
     if allowed > 0 {
         parts.push(format!(
@@ -297,9 +303,9 @@ fn summary(s: &mut String, r: &Report, o: TextOptions) {
         parts.push(format!("{} not run", r.not_run.len()));
     }
     let head = if r.failing() == 0 && !r.incomplete() {
-        format!("{OK}ok{OK:#}")
+        p.paint(OK, "ok")
     } else {
-        format!("{ERROR}failed{ERROR:#}")
+        p.paint(ERR, "failed")
     };
     let _ = writeln!(
         s,
@@ -354,7 +360,7 @@ mod tests {
     }
 
     fn plain(s: &str) -> String {
-        anstream::adapter::strip_str(s).to_string()
+        vc_ui::strip_ansi(s)
     }
 
     #[test]
@@ -417,10 +423,19 @@ mod tests {
     }
 
     #[test]
-    fn plain_text_has_no_escapes_and_the_styled_one_strips_to_it() {
+    fn colour_off_has_no_escapes_and_colour_on_strips_to_it() {
         let r = report(vec![d("denied", "M0001", Level::Deny, "a/x.rs")]);
-        let styled = text(&r, &[], TextOptions::default());
-        assert!(styled.contains('\u{1b}'));
-        assert!(!plain(&styled).contains('\u{1b}'));
+        let off = text(&r, &[], TextOptions::default());
+        let on = text(
+            &r,
+            &[],
+            TextOptions {
+                paint: Paint::ON,
+                ..TextOptions::default()
+            },
+        );
+        assert!(!off.contains('\u{1b}'));
+        assert!(on.contains('\u{1b}'));
+        assert_eq!(plain(&on), off);
     }
 }

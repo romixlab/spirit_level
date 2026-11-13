@@ -8,22 +8,23 @@ pub use text::{GroupBy, TextOptions, text};
 use sl_config::ConfigError;
 use sl_engine::Report;
 use std::fmt::Write;
-use vc_ui::style::ERROR;
+use vc_ui::{ERR, Paint};
 
 /// The report as JSON
 pub fn json(r: &Report) -> String {
     serde_json::to_string_pretty(r).unwrap_or_else(|e| format!("{{\"error\": \"{e}\"}}"))
 }
 
-/// Configuration errors for people
-pub fn config_errors(errs: &[ConfigError]) -> String {
+/// Configuration errors for people, coloured as `p` says
+pub fn config_errors(errs: &[ConfigError], p: Paint) -> String {
     let mut s = String::new();
     for e in errs {
-        let _ = writeln!(s, "{ERROR}config error{ERROR:#} {e}");
+        let _ = writeln!(s, "{} {e}", p.paint(ERR, "config error"));
     }
     let _ = writeln!(
         s,
-        "{ERROR}failed{ERROR:#}: the configuration has {} error{}; no lint ran",
+        "{}: the configuration has {} error{}; no lint ran",
+        p.paint(ERR, "failed"),
         errs.len(),
         if errs.len() == 1 { "" } else { "s" }
     );

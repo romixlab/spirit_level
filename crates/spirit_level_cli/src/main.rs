@@ -1,12 +1,11 @@
 //! `spl`: a linter for Rust projects of every size. See the README for the commands.
 
-use anstream::{eprint, print, println};
 use clap::{Parser, Subcommand, ValueEnum};
 use clap_complete::engine::{ArgValueCandidates, CompletionCandidate};
 use sl_core::{Date, Level};
 use std::path::PathBuf;
 use std::process::ExitCode;
-use vc_ui::Exit;
+use vc_ui::{Exit, Paint};
 
 mod tools;
 
@@ -15,7 +14,7 @@ const TOOL: &str = "spl";
 /// A denied finding
 const DENIED: Exit = Exit::FAILURE;
 /// A denied lint could not run
-const NOT_RUN: Exit = Exit(3);
+const NOT_RUN: Exit = Exit::category(3, "not_run");
 
 #[derive(Parser)]
 #[command(name = "spl", version = vc_build::version!(), about = "A linter for Rust projects of every size: tiers of lints in TOML, from one crate to a workspace of hundreds")]
@@ -24,7 +23,7 @@ const NOT_RUN: Exit = Exit(3);
 )]
 struct Cli {
     #[command(flatten)]
-    color: vc_ui::ColorArg,
+    color: vc_ui::ColorFlag,
     #[command(subcommand)]
     cmd: Cmd,
 }
@@ -196,16 +195,12 @@ fn today(s: Option<String>) -> Result<Date, String> {
 }
 
 fn main() -> ExitCode {
+    vc_ui::restore_sigpipe();
     vc_complete::complete(<Cli as clap::CommandFactory>::command);
     let cli = Cli::parse();
     cli.color.apply();
-    match run(cli) {
-        Ok(code) => code.into(),
-        Err(e) => {
-            vc_ui::eprint_error(TOOL, &e);
-            Exit::USAGE.into()
-        }
-    }
+    // every error that ends a run is a configuration or usage error (exit 2)
+    vc_ui::finish(TOOL, run(cli), |_| Some(Exit::BAD_ARGS)).into()
 }
 
 fn run(cli: Cli) -> Result<Exit, String> {
@@ -257,10 +252,10 @@ fn check(a: CheckArgs) -> Result<Exit, String> {
         Ok(r) => r,
         Err(spirit_level::CheckError::Config(errs)) => {
             match format {
-                Format::Text => eprint!("{}", sl_report::config_errors(&errs)),
+                Format::Text => eprint!("{}", sl_report::config_errors(&errs, Paint::stderr())),
                 Format::Json => println!("{}", sl_report::config_errors_json(&errs)),
             }
-            return Ok(Exit::USAGE);
+            return Ok(Exit::BAD_ARGS);
         }
         Err(e) => return Err(e.to_string()),
     };
@@ -268,10 +263,10 @@ fn check(a: CheckArgs) -> Result<Exit, String> {
         let applied =
             sl_engine::fix::apply(&project.root, &report.diagnostics).map_err(|e| e.to_string())?;
         for (file, what) in &applied.applied {
-            eprint!("fixed {file}: {what}\n");
+            eprintln!("fixed {file}: {what}");
         }
         for (file, what) in &applied.skipped {
-            eprint!("not fixed (overlaps another fix, run again) {file}: {what}\n");
+            eprintln!("not fixed (overlaps another fix, run again) {file}: {what}");
         }
         if !applied.applied.is_empty() {
             report = spirit_level::check(&path, &opts)
@@ -295,6 +290,7 @@ fn check(a: CheckArgs) -> Result<Exit, String> {
                         GroupByArg::Crate => sl_report::GroupBy::Crate,
                         GroupByArg::File => sl_report::GroupBy::File,
                     },
+                    paint: Paint::stdout(),
                     ..sl_report::TextOptions::default()
                 }
             )
@@ -306,7 +302,7 @@ fn check(a: CheckArgs) -> Result<Exit, String> {
     } else if report.incomplete() {
         NOT_RUN
     } else {
-        Exit::OK
+        Exit::SUCCESS
     })
 }
 
@@ -320,7 +316,7 @@ fn explain(lint: String) -> Result<Exit, String> {
         .ok_or_else(|| format!("no lint {lint} (`spl lints` lists them)"))?;
     let tiers = sl_book::tier_levels()?;
     print!("{}", sl_book::lint_text(m, &tiers));
-    Ok(Exit::OK)
+    Ok(Exit::SUCCESS)
 }
 
 /// `spl explain X-<tool>:<rule>`: the tool's own rule, and the adapter lints that report it
@@ -341,7 +337,7 @@ fn adapter_rule(tool: &str, rule: &str) -> Result<Exit, String> {
     for m in lints {
         println!("- {} {}: {}", m.code, m.id, m.summary);
     }
-    Ok(Exit::OK)
+    Ok(Exit::SUCCESS)
 }
 
 fn codes(check: bool, base: Option<String>) -> Result<Exit, String> {
@@ -350,7 +346,7 @@ fn codes(check: bool, base: Option<String>) -> Result<Exit, String> {
         for r in codes::rows() {
             println!("{} {:28} {:9} {}", r.code, r.id, r.group, r.status.name());
         }
-        return Ok(Exit::OK);
+        return Ok(Exit::SUCCESS);
     }
     let base_text = match &base {
         None => None,
@@ -362,7 +358,7 @@ fn codes(check: bool, base: Option<String>) -> Result<Exit, String> {
             if out.status.success() {
                 Some(String::from_utf8_lossy(&out.stdout).into_owned())
             } else {
-                eprint!("codes.toml is not in {rev} yet: nothing to compare with\n");
+                eprintln!("codes.toml is not in {rev} yet: nothing to compare with");
                 None
             }
         }
@@ -373,10 +369,11 @@ fn codes(check: bool, base: Option<String>) -> Result<Exit, String> {
         base_text.as_deref(),
     );
     for p in &problems {
-        vc_ui::eprint_error(TOOL, &format!("codes.toml: {p}"));
+        let e = Exit::FAILURE.error(format!("codes.toml: {p}"));
+        eprintln!("{}", vc_ui::error_line(TOOL, &e, Paint::stderr()));
     }
     Ok(if problems.is_empty() {
-        Exit::OK
+        Exit::SUCCESS
     } else {
         Exit::FAILURE
     })
@@ -417,14 +414,14 @@ fn list_lints(format: Format) -> Result<Exit, String> {
             }
         }
     }
-    Ok(Exit::OK)
+    Ok(Exit::SUCCESS)
 }
 
 fn tiers() -> Result<Exit, String> {
     for (n, t) in spirit_level::TIERS {
         println!("{n:16} {}", spirit_level::tier_description(t));
     }
-    Ok(Exit::OK)
+    Ok(Exit::SUCCESS)
 }
 
 fn show_config(a: ConfigArgs) -> Result<Exit, String> {
@@ -438,8 +435,8 @@ fn show_config(a: ConfigArgs) -> Result<Exit, String> {
     let c = match spirit_level::config(&project, &opts) {
         Ok(c) => c,
         Err(spirit_level::CheckError::Config(errs)) => {
-            eprint!("{}", sl_report::config_errors(&errs));
-            return Ok(Exit::USAGE);
+            eprint!("{}", sl_report::config_errors(&errs, Paint::stderr()));
+            return Ok(Exit::BAD_ARGS);
         }
         Err(e) => return Err(e.to_string()),
     };
@@ -485,7 +482,7 @@ fn show_config(a: ConfigArgs) -> Result<Exit, String> {
             m.crates.len()
         );
     }
-    Ok(Exit::OK)
+    Ok(Exit::SUCCESS)
 }
 
 fn init(path: PathBuf, tier: Vec<String>) -> Result<Exit, String> {
@@ -514,7 +511,7 @@ fn init(path: PathBuf, tier: Vec<String>) -> Result<Exit, String> {
     );
     std::fs::write(&file, text).map_err(|e| e.to_string())?;
     println!("wrote {}", file.display());
-    Ok(Exit::OK)
+    Ok(Exit::SUCCESS)
 }
 
 fn book(docs: PathBuf, zensical: PathBuf, check: bool) -> Result<Exit, String> {
@@ -525,6 +522,6 @@ fn book(docs: PathBuf, zensical: PathBuf, check: bool) -> Result<Exit, String> {
     Ok(if check && !changed.is_empty() {
         Exit::FAILURE
     } else {
-        Exit::OK
+        Exit::SUCCESS
     })
 }
