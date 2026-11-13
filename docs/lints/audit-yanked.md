@@ -1,0 +1,37 @@
+# audit-yanked
+
+**Rule:** Cargo.lock holds no yanked version.
+
+| | |
+|---|---|
+| Category | [audit](index.md#audit) |
+| Source | cargo-audit (run as an executable) |
+| Fix | by hand |
+| Needs | `cargo-audit` installed |
+
+## Level per tier
+
+| Tier | Level | Reason |
+|---|---|---|
+| [small](../tiers/small.md) | off |  |
+| [small-workspace](../tiers/small-workspace.md) | off |  |
+| [medium](../tiers/medium.md) | off |  |
+| [big](../tiers/big.md) | off |  |
+
+## Why
+
+A yanked version was withdrawn by its authors, usually for a bug. `Cargo.lock` keeps it until it is updated.
+
+## How to fix
+
+`cargo update -p NAME` to a version that is not yanked.
+
+## Configure
+
+```toml
+[lints.audit-yanked]
+level = "deny"
+reason = "why this project wants it at this level"
+```
+
+Allow one finding in the code with `// spirit-level: allow(audit-yanked) <reason>` ([waivers](../waivers.md)).

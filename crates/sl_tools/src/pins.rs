@@ -48,6 +48,7 @@ const TOOLS: &str = include_str!("../tools.toml");
 /// Every pinned tool, in the order of `tools.toml`
 pub fn pins() -> &'static [Pin] {
     static PINS: OnceLock<Vec<Pin>> = OnceLock::new();
+    // spirit-level: allow(panic-in-library) tools.toml is compiled in, and a unit test parses it
     PINS.get_or_init(|| parse(TOOLS).unwrap_or_else(|e| panic!("tools.toml: {e}")))
 }
 

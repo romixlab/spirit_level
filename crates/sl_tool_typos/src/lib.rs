@@ -154,9 +154,9 @@ mod tests {
     #[test]
     fn exact_fix() {
         let t = &parse(include_str!("../tests/samples/typos.jsonl"))[2];
-        let text = "//! A sampel crate with recieve typos.\n";
+        let text = "//! A sampel crate with recieve typos.\n"; // spellchecker:disable-line
         let f = t.fix("src/lib.rs", text, "receive").unwrap();
-        assert_eq!(&text[f.edits[0].start..f.edits[0].end], "recieve");
+        assert_eq!(&text[f.edits[0].start..f.edits[0].end], "recieve"); // spellchecker:disable-line
         // a file changed since typos ran gets no fix
         assert!(t.fix("src/lib.rs", "something else\n", "receive").is_none());
     }

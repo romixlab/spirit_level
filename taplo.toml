@@ -1,0 +1,8 @@
+# taplo, run by spirit-level's taplo-fmt lint
+
+# fixtures are inputs of tests, formatted as each case needs; zensical.toml holds the nav the book generator writes
+exclude = ["crates/*/tests/fixtures/**", "target/**", "zensical.toml"]
+
+[formatting]
+# as wide as the Rust code
+column_width = 120

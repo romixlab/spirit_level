@@ -12,7 +12,6 @@ publish = false
 geiger = { workspace = true, optional = true }
 sl_analysis.workspace = true
 sl_core.workspace = true
-sl_model.workspace = true
 sl_tools.workspace = true
 
 [features]

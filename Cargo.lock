@@ -958,7 +958,6 @@ checksum = "f8fadd59c855ef2080decdef8ff161eb6661b86933c9d82e5ba29dc602a55aba"
 name = "sl_analysis"
 version = "0.1.2"
 dependencies = [
- "proc-macro2",
  "sl_config",
  "sl_core",
  "sl_model",
@@ -1129,7 +1128,6 @@ version = "0.1.2"
 dependencies = [
  "cargo_metadata",
  "proc-macro2",
- "serde_json",
  "sl_core",
  "syn 3.0.10",
  "toml_edit",
@@ -1198,7 +1196,6 @@ dependencies = [
  "serde_json",
  "sl_analysis",
  "sl_core",
- "sl_model",
  "sl_testkit",
  "sl_tools",
 ]
@@ -1210,7 +1207,6 @@ dependencies = [
  "geiger",
  "sl_analysis",
  "sl_core",
- "sl_model",
  "sl_testkit",
  "sl_tool_geiger",
  "sl_tools",
@@ -1227,7 +1223,6 @@ dependencies = [
  "sl_model",
  "sl_testkit",
  "sl_tool_hakari",
- "sl_tools",
 ]
 
 [[package]]
@@ -1236,7 +1231,6 @@ version = "0.1.1"
 dependencies = [
  "sl_analysis",
  "sl_core",
- "sl_model",
  "sl_testkit",
  "sl_tools",
 ]

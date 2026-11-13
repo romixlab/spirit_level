@@ -1,0 +1,42 @@
+# machete-unused-deps
+
+**Rule:** No crate declares a dependency its sources never use.
+
+| | |
+|---|---|
+| Category | [machete](index.md#machete) |
+| Source | cargo-machete (run as an executable) |
+| Fix | by hand |
+| Needs | `cargo-machete` installed |
+
+## Level per tier
+
+| Tier | Level | Reason |
+|---|---|---|
+| [small](../tiers/small.md) | `warn` | an unused dependency costs build time, audit and lockfile churn for nothing |
+| [small-workspace](../tiers/small-workspace.md) | `warn` | an unused dependency costs build time, audit and lockfile churn for nothing |
+| [medium](../tiers/medium.md) | `warn` | an unused dependency costs build time, audit and lockfile churn for nothing |
+| [big](../tiers/big.md) | `deny` | an unused dependency in a big graph costs every build; false positives are listed in the manifest |
+
+## Why
+
+A dependency nobody uses still costs its build time, its audit and its place in the lockfile. cargo-machete finds dependencies whose name never appears in the crate's sources; it is fast and imprecise (a crate used only through a macro or under another name looks unused).
+
+## How to fix
+
+Remove the dependency from the crate's `Cargo.toml`. A false positive is listed in the crate's manifest, so cargo-machete skips it:
+
+```toml
+[package.metadata.cargo-machete]
+ignored = ["prost"]
+```
+
+## Configure
+
+```toml
+[lints.machete-unused-deps]
+level = "deny"
+reason = "why this project wants it at this level"
+```
+
+Allow one finding in the code with `// spirit-level: allow(machete-unused-deps) <reason>` ([waivers](../waivers.md)).

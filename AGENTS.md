@@ -58,7 +58,8 @@ Lint ids are kebab-case and stable. Tool adapters prefix the tool's own ids (`cl
 
 - All in `[workspace.dependencies]`, `default-features = false`, only the features in use.
 - No bundled C, no `-sys` crates with a native build. Check `cargo tree -e normal,build` when adding one.
-- External lint tools sit behind cargo features in their adapter crates, so the default build stays small.
+- External tools: a tool with a usable library on stable Rust is linked behind a cargo feature (`hakari`, `geiger`); the others run as executables, pinned in `crates/sl_tools/tools.toml` ([docs/tools.md](docs/tools.md)).
+- `rayon-core` (with `hakari`) sets `links` only to stay unique in a graph; it builds no C.
 
 ## 7. FEATURES.md and CHANGELOG.md
 
@@ -73,6 +74,7 @@ just            # the recipes
 just test       # nextest; `just test --changed` tests only what changed against main
 just lint       # fmt, clippy -D warnings, spirit-level on itself at the big tier, book freshness
 just book       # regenerate the book's generated pages
+just tools      # install the pinned external tools into the tool cache
 just docs       # serve the book (uv, Zensical)
 just install    # build with the deploy profile, put spirit-level on PATH
 ```

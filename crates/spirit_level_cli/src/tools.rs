@@ -53,8 +53,10 @@ fn list() -> Result<u8, String> {
 
 fn install(tool: Option<String>, path: PathBuf) -> Result<u8, String> {
     let pins: Vec<&sl_tools::Pin> = match &tool {
-        Some(t) => vec![sl_tools::pin(t)
-            .ok_or_else(|| format!("no tool {t} (`spirit-level tools list` names them)"))?],
+        Some(t) => vec![
+            sl_tools::pin(t)
+                .ok_or_else(|| format!("no tool {t} (`spirit-level tools list` names them)"))?,
+        ],
         None => sl_tools::pins().iter().collect(),
     };
     let cache = sl_tools::Cache::from_env();

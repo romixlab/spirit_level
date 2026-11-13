@@ -14,7 +14,6 @@ hakari = { workspace = true, optional = true }
 sl_analysis.workspace = true
 sl_core.workspace = true
 sl_model.workspace = true
-sl_tools.workspace = true
 
 [features]
 # links hakari and guppy, so the lints run (without it they report that they did not run)

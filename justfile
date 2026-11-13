@@ -15,9 +15,13 @@ test-all:
 # Format, clippy, spirit-level on itself at the big tier, book freshness
 lint:
     cargo fmt --check
-    cargo clippy --workspace --all-targets -- -D warnings
+    cargo clippy --workspace --all-targets --all-features -- -D warnings
     cargo run -q -p spirit_level_cli -- check
     cargo run -q -p spirit_level_cli -- book docs --check
+
+# Install the pinned external tools the adapters run into the tool cache
+tools:
+    cargo run -q -p spirit_level_cli -- tools install
 
 # Regenerate the book's generated pages (lints, tiers, nav)
 book:

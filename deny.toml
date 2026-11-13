@@ -1,0 +1,19 @@
+# cargo-deny, run by spirit-level's deny-* lints at the big tier
+
+[graph]
+all-features = true
+
+[licenses]
+allow = ["Apache-2.0", "Apache-2.0 WITH LLVM-exception", "BSD-2-Clause", "MIT", "Unicode-3.0", "Unlicense", "Zlib"]
+
+[bans]
+multiple-versions = "deny"
+# duplicates that only the optional linked adapters (hakari, geiger) bring in
+skip-tree = [
+  { crate = "hakari", reason = "optional `hakari` feature; its graph libraries pin older versions" },
+  { crate = "geiger", reason = "optional `geiger` feature; it parses with syn 2" },
+]
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"

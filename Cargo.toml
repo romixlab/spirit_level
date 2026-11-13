@@ -15,7 +15,16 @@ repository = "https://github.com/romixlab/spirit_level"
 anstream = { version = "1", default-features = false, features = ["auto"] }
 anstyle = { version = "1", default-features = false, features = ["std"] }
 cargo_metadata = { version = "0.23", default-features = false }
-clap = { version = "4", default-features = false, features = ["std", "derive", "help", "usage", "error-context", "color", "suggestions", "env"] }
+clap = { version = "4", default-features = false, features = [
+  "std",
+  "derive",
+  "help",
+  "usage",
+  "error-context",
+  "color",
+  "suggestions",
+  "env",
+] }
 clap_complete = { version = "4", default-features = false, features = ["unstable-dynamic"] }
 # linked tool libraries (features of spirit_level):
 geiger = { version = "0.5", default-features = false }
@@ -25,7 +34,14 @@ proc-macro2 = { version = "1", default-features = false, features = ["span-locat
 serde = { version = "1", default-features = false, features = ["std", "derive"] }
 serde_json = { version = "1", default-features = false, features = ["std"] }
 sha2 = { version = "0.11", default-features = false }
-syn = { version = "3", default-features = false, features = ["full", "visit", "parsing", "printing", "clone-impls", "extra-traits"] }
+syn = { version = "3", default-features = false, features = [
+  "full",
+  "visit",
+  "parsing",
+  "printing",
+  "clone-impls",
+  "extra-traits",
+] }
 toml_edit = { version = "0.25", default-features = false, features = ["parse", "display"] }
 
 # workspace crates:

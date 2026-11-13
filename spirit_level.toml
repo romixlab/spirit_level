@@ -1,6 +1,22 @@
 # spirit_level checks itself at the big tier.
 extends = "big"
 
+[lints.duplicate-versions]
+allow = ["foldhash", "getrandom", "hashbrown", "itertools", "linux-raw-sys", "r-efi", "rustix", "syn", "windows-sys"]
+reason = "second versions come only with the optional linked adapters (features hakari, geiger); deny.toml skips the same trees"
+
+[lints.no-sys-crates]
+allow = ["rayon-core"]
+reason = "rayon-core sets `links` only to keep one copy in a graph; it builds no C (optional hakari feature)"
+
+[lints.hakari-generate]
+level = "allow"
+reason = "a few dozen small crates build fast without a workspace-hack"
+
+[lints.hakari-manage-deps]
+level = "allow"
+reason = "no workspace-hack here (hakari-generate)"
+
 [[exceptions]]
 lint = "panic-in-library"
 crates = ["sl_testkit"]

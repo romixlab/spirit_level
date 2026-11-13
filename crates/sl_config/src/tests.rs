@@ -92,7 +92,7 @@ fn tiers_extend_and_project_overrides() {
 #[test]
 fn unknown_keys_lints_and_params_fail_loudly() {
     let m = messages(load(
-        "extends = \"small\"\nfoo = 1\n[lints.crate-line]\nlevel = \"warn\"\nreason = \"r\"\n[lints.crate-lines]\nlevel = \"warn\"\nreason = \"r\"\nwarn-abov = 3\n",
+        "extends = \"small\"\nfoo = 1\n[lints.crate-line]\nlevel = \"warn\"\nreason = \"r\"\n[lints.crate-lines]\nlevel = \"warn\"\nreason = \"r\"\nwarn-abov = 3\n", // spellchecker:disable-line
     ));
     assert!(m.iter().any(|s| s.contains(":2: unknown key foo")), "{m:?}");
     assert!(
@@ -102,7 +102,7 @@ fn unknown_keys_lints_and_params_fail_loudly() {
     );
     assert!(
         m.iter()
-            .any(|s| s.contains(":9: crate-lines has no parameter warn-abov")),
+            .any(|s| s.contains(":9: crate-lines has no parameter warn-abov")), // spellchecker:disable-line
         "{m:?}"
     );
 }

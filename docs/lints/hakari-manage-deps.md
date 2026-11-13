@@ -1,0 +1,37 @@
+# hakari-manage-deps
+
+**Rule:** Every member hakari manages depends on the workspace-hack package, and no other.
+
+| | |
+|---|---|
+| Category | [hakari](index.md#hakari) |
+| Source | hakari (linked as a library) |
+| Fix | by hand |
+| Needs | the resolved dependency graph (full `cargo metadata`) |
+
+## Level per tier
+
+| Tier | Level | Reason |
+|---|---|---|
+| [small](../tiers/small.md) | off |  |
+| [small-workspace](../tiers/small-workspace.md) | off |  |
+| [medium](../tiers/medium.md) | off |  |
+| [big](../tiers/big.md) | `warn` | the workspace-hack helps only the members that depend on it; warn, as the lint needs the hakari feature |
+
+## Why
+
+The workspace-hack only helps the members that depend on it. hakari decides which members it manages (`.config/hakari.toml`); this lint reports members that miss the dependency, or have it while excluded, like `cargo hakari manage-deps --dry-run`.
+
+## How to fix
+
+`cargo hakari manage-deps` adds and removes the dependency lines.
+
+## Configure
+
+```toml
+[lints.hakari-manage-deps]
+level = "deny"
+reason = "why this project wants it at this level"
+```
+
+Allow one finding in the code with `// spirit-level: allow(hakari-manage-deps) <reason>` ([waivers](../waivers.md)).

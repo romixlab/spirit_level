@@ -1,0 +1,13 @@
+# typos, run by spirit-level's typos-misspelling lint
+
+[files]
+# fixtures and captured tool output carry misspellings on purpose
+extend-exclude = ["crates/*/tests/fixtures/", "crates/*/tests/samples/"]
+
+[default]
+# a line that misspells on purpose (a test of the typos adapter or of "no such parameter") says so
+extend-ignore-re = ["(?Rm)^.*(#|//)\\s*spellchecker:disable-line$"]
+
+[default.extend-words]
+# serde's short name, in the typos-misspelling docs and in code
+ser = "ser"

@@ -80,7 +80,7 @@ fn check_impl(analysis: &dyn Analysis, dir: &Path, tools: bool) {
         }
     }
     for s in &skipped {
-        eprintln!("skipped: {s}");
+        eprintln!("skipped: {s}"); // spirit-level: allow(print-in-library) a skipped case is shown on stderr, as the test runner shows it
     }
     if !skipped.is_empty() && std::env::var_os("SPIRIT_LEVEL_REQUIRE_TOOLS").is_some() {
         let _ = writeln!(
@@ -121,6 +121,43 @@ fn copy_dir(from: &Path, to: &Path, top: bool) -> std::io::Result<()> {
         }
     }
     Ok(())
+}
+
+/// The configuration of a case: its own spirit_level.toml, or the lint at deny with the params of expect.toml
+fn case_config(
+    case: &Path,
+    case_dir: &Path,
+    id: &str,
+    expect: &toml_edit::DocumentMut,
+    env: &Env<'_>,
+) -> Result<Config, String> {
+    let own = case.join(sl_config::FILE);
+    if own.exists() {
+        Config::load(case, None, env)
+    } else {
+        let mut text = format!("[lints.{id}]\nlevel = \"deny\"\nreason = \"fixture\"\n");
+        if let Some(p) = expect.get("params").and_then(|p| p.as_table_like()) {
+            for (k, v) in p.iter() {
+                let _ = writeln!(text, "{k} = {}", v.to_string().trim());
+            }
+        }
+        let tmp = std::env::temp_dir().join(format!(
+            "sl_testkit_{}_{}_{}.toml",
+            std::process::id(),
+            id,
+            case_dir.file_name().unwrap().to_string_lossy()
+        ));
+        std::fs::write(&tmp, text).map_err(|e| e.to_string())?;
+        let c = Config::load(case, Some(&tmp), env);
+        let _ = std::fs::remove_file(&tmp);
+        c
+    }
+    .map_err(|errs| {
+        errs.iter()
+            .map(ToString::to_string)
+            .collect::<Vec<_>>()
+            .join("; ")
+    })
 }
 
 /// Runs one case: Ok(None) when it matches, Ok(Some(reason)) when it was skipped
@@ -166,33 +203,7 @@ fn run_case(
         today,
         version: project.version,
     };
-    let own = case.join(sl_config::FILE);
-    let config = if own.exists() {
-        Config::load(case, None, &env)
-    } else {
-        let mut text = format!("[lints.{id}]\nlevel = \"deny\"\nreason = \"fixture\"\n");
-        if let Some(p) = expect.get("params").and_then(|p| p.as_table_like()) {
-            for (k, v) in p.iter() {
-                let _ = writeln!(text, "{k} = {}", v.to_string().trim());
-            }
-        }
-        let tmp = std::env::temp_dir().join(format!(
-            "sl_testkit_{}_{}_{}.toml",
-            std::process::id(),
-            id,
-            case_dir.file_name().unwrap().to_string_lossy()
-        ));
-        std::fs::write(&tmp, text).map_err(|e| e.to_string())?;
-        let c = Config::load(case, Some(&tmp), &env);
-        let _ = std::fs::remove_file(&tmp);
-        c
-    }
-    .map_err(|errs| {
-        errs.iter()
-            .map(ToString::to_string)
-            .collect::<Vec<_>>()
-            .join("; ")
-    })?;
+    let config = case_config(case, case_dir, id, &expect, &env)?;
     let report = sl_engine::run(
         &project,
         &config,
