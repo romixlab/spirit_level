@@ -5,6 +5,7 @@
 //! use sl_core::{Diagnostic, FixKind, LintMeta, Source};
 //!
 //! static NO_EMPTY: LintMeta = LintMeta {
+//!     code: "M0099",
 //!     id: "no-empty-workspace",
 //!     category: "manifest",
 //!     summary: "a workspace has at least one member",
