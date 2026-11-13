@@ -32,6 +32,7 @@ sl_engine = { path = "crates/sl_engine" }
 sl_lints_code = { path = "crates/sl_lints_code" }
 sl_lints_graph = { path = "crates/sl_lints_graph" }
 sl_lints_manifest = { path = "crates/sl_lints_manifest" }
+sl_lints_prose = { path = "crates/sl_lints_prose" }
 sl_lints_size = { path = "crates/sl_lints_size" }
 sl_lints_state = { path = "crates/sl_lints_state" }
 sl_model = { path = "crates/sl_model" }

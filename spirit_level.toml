@@ -43,6 +43,7 @@ sl_analysis = { layer = "analysis" }
 sl_lints_code = { layer = "lints" }
 sl_lints_graph = { layer = "lints" }
 sl_lints_manifest = { layer = "lints" }
+sl_lints_prose = { layer = "lints" }
 sl_lints_size = { layer = "lints" }
 sl_lints_state = { layer = "lints" }
 sl_engine = { layer = "engine" }

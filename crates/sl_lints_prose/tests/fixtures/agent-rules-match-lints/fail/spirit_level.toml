@@ -1,0 +1,8 @@
+[lints.agent-rules-match-lints]
+level = "deny"
+reason = "fixture"
+
+[lints.changelog-entry-length]
+level = "warn"
+reason = "fixture"
+max-words = 30

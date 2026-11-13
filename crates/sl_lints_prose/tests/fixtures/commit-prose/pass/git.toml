@@ -1,0 +1,5 @@
+[[commit]]
+message = "Lexer: accept raw strings with hashes"
+
+[[commit]]
+message = "Changed default tier to medium\n\nThe outlet is a keynote: no phrase inside words.\n\nCo-Authored-By: A <a@example.org>"

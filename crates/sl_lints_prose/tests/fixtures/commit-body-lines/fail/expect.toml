@@ -1,0 +1,5 @@
+params = { max-lines = 2 }
+
+[[finding]]
+at = "commit:7717c0e3d756:3"
+

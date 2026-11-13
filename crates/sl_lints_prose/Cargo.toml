@@ -1,0 +1,19 @@
+[package]
+name = "sl_lints_prose"
+description = "spirit_level lints on prose: CHANGELOG and commit limits, agent files, filler, narration, emoji, comments that restate the code"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+sl_analysis.workspace = true
+sl_core.workspace = true
+
+[dev-dependencies]
+sl_testkit.workspace = true
+
+[lints]
+workspace = true

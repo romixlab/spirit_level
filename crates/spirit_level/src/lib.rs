@@ -28,6 +28,7 @@ pub static TIERS: &[(&str, &str)] = &[
     ),
     ("medium", include_str!("../tiers/medium.toml")),
     ("big", include_str!("../tiers/big.toml")),
+    ("ai", include_str!("../tiers/ai.toml")),
 ];
 
 /// The text of a shipped tier
@@ -51,6 +52,7 @@ pub fn analyses() -> Vec<&'static dyn Analysis> {
         &sl_lints_state::STATE,
         &sl_lints_graph::GRAPH,
         &sl_lints_code::CODE,
+        &sl_lints_prose::PROSE,
     ]
 }
 

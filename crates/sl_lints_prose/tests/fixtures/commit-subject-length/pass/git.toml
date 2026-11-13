@@ -1,0 +1,5 @@
+[[commit]]
+message = "Lexer: accept raw strings with hashes"
+
+[[commit]]
+message = "Config: include key\n\nA body line that is much longer than sixty characters does not count here."

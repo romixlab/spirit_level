@@ -1,0 +1,77 @@
+# Beside the size tiers: code and docs written with AI agents. Combine it with one: extends = ["medium", "ai"].
+[tier]
+description = "Code and docs written with AI agents: agent files, terse output, AI-isms, stop-gap smells, agent-config hygiene"
+
+# Agent files
+
+[lints.repo-files]
+level = "deny"
+reason = "AGENTS.md holds the rules every agent reads; CLAUDE.md points to it"
+
+[lints.agent-file-lines]
+level = "deny"
+reason = "agents read the file whole every session; a long one is skimmed, not followed"
+
+[lints.claude-md-duplicate]
+level = "deny"
+reason = "two copies of the rules drift apart"
+
+[lints.agent-file-links]
+level = "deny"
+reason = "an agent that follows a dead link guesses or stops"
+
+[lints.agent-rules-match-lints]
+level = "deny"
+reason = "a stated limit the lints check differently teaches agents a rule the repo does not hold"
+
+# Terse output
+
+[lints.changelog-entry-length]
+level = "deny"
+reason = "a CHANGELOG is a list: one line per change"
+
+[lints.changelog-describes-diff]
+level = "warn"
+reason = "an entry says what changed for the user; the diff already shows the files"
+
+[lints.commit-subject-length]
+level = "deny"
+reason = "the subject is what one-line logs and reviews show"
+
+[lints.commit-body-lines]
+level = "warn"
+reason = "a body holds why, not a retelling of the diff"
+
+[lints.commit-prose]
+level = "warn"
+reason = "commit messages follow the prose rules of the docs"
+
+[lints.sentence-words]
+level = "warn"
+reason = "short sentences are read once and understood"
+
+[lints.paragraph-sentences]
+level = "warn"
+reason = "result first, then what the reader must do; more facts are a list"
+
+# AI-isms
+
+[lints.filler-phrases]
+level = "deny"
+reason = "filler adds words and no meaning"
+
+[lints.narration]
+level = "deny"
+reason = "docs and comments state facts, not the conversation that produced them"
+
+[lints.thinking-comments]
+level = "deny"
+reason = "a comment holds the conclusion, not the reasoning that led to it"
+
+[lints.emoji]
+level = "warn"
+reason = "emoji do not grep, diff or render the same everywhere"
+
+[lints.restating-comments]
+level = "warn"
+reason = "a comment says what the code cannot"
