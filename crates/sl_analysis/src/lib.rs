@@ -29,6 +29,7 @@
 //! }
 //! ```
 
+pub mod comments;
 pub mod syntax;
 
 use sl_config::{Config, Map};

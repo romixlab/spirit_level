@@ -79,6 +79,13 @@ fn run_case(analysis: &dyn Analysis, id: &str, case: &Path) -> Result<(), String
     } else {
         case.to_path_buf()
     };
+    // a case with a git.toml runs on a copy made into a git repository with the history it lists
+    let repo = if case_dir.join("git.toml").exists() {
+        Some(GitCase::make(case_dir, case, id)?)
+    } else {
+        None
+    };
+    let case = repo.as_ref().map_or(case.as_path(), |r| r.dir.as_path());
     let project = Project::load(case).map_err(|e| e.to_string())?;
     let analyses: [&dyn Analysis; 1] = [analysis];
     let lints = all_lints(&analyses);
@@ -193,4 +200,103 @@ fn run_case(analysis: &dyn Analysis, id: &str, case: &Path) -> Result<(), String
     } else {
         Err(diff.join("\n    "))
     }
+}
+
+/// A temporary git repository made from a case and its `git.toml`; removed when dropped
+struct GitCase {
+    dir: PathBuf,
+}
+
+impl GitCase {
+    /// Copies `project` into a fresh directory, commits every file but the `untracked` ones on `main`, then
+    /// adds each `[[commit]]` on a branch `work` (empty commits with the given message, or writing `files`)
+    fn make(case_dir: &Path, project: &Path, id: &str) -> Result<GitCase, String> {
+        let spec: toml_edit::DocumentMut = std::fs::read_to_string(case_dir.join("git.toml"))
+            .map_err(|e| format!("git.toml: {e}"))?
+            .parse()
+            .map_err(|e| format!("git.toml: {e}"))?;
+        let dir = std::env::temp_dir().join(format!(
+            "sl_testkit_git_{}_{id}_{}",
+            std::process::id(),
+            case_dir.file_name().unwrap().to_string_lossy()
+        ));
+        let _ = std::fs::remove_dir_all(&dir);
+        copy_dir(project, &dir).map_err(|e| format!("copy: {e}"))?;
+        for f in ["expect.toml", "git.toml"] {
+            let _ = std::fs::remove_file(dir.join(f));
+        }
+        let repo = GitCase { dir };
+        let untracked: Vec<String> = spec
+            .get("untracked")
+            .and_then(|v| v.as_array())
+            .map(|a| {
+                a.iter()
+                    .filter_map(|v| v.as_str().map(str::to_string))
+                    .collect()
+            })
+            .unwrap_or_default();
+        repo.git(&["init", "-q", "-b", "main"])?;
+        repo.git(&["add", "-A"])?;
+        for u in &untracked {
+            repo.git(&["rm", "-q", "--cached", "-r", u])?;
+        }
+        repo.git(&["commit", "-q", "--allow-empty", "-m", "initial"])?;
+        repo.git(&["switch", "-q", "-c", "work"])?;
+        if let Some(commits) = spec.get("commit").and_then(|c| c.as_array_of_tables()) {
+            for c in commits.iter() {
+                let msg = c
+                    .get("message")
+                    .and_then(|m| m.as_str())
+                    .unwrap_or("change");
+                repo.git(&["commit", "-q", "--allow-empty", "-m", msg])?;
+            }
+        }
+        Ok(repo)
+    }
+
+    /// Runs git in the repository with no user or system configuration and fixed identities and dates
+    fn git(&self, args: &[&str]) -> Result<(), String> {
+        let out = std::process::Command::new("git")
+            .args(args)
+            .current_dir(&self.dir)
+            .env("GIT_CONFIG_GLOBAL", "/dev/null")
+            .env("GIT_CONFIG_NOSYSTEM", "1")
+            .env("GIT_AUTHOR_NAME", "fixture")
+            .env("GIT_AUTHOR_EMAIL", "fixture@example.org")
+            .env("GIT_COMMITTER_NAME", "fixture")
+            .env("GIT_COMMITTER_EMAIL", "fixture@example.org")
+            .env("GIT_AUTHOR_DATE", "2026-11-13T12:00:00Z")
+            .env("GIT_COMMITTER_DATE", "2026-11-13T12:00:00Z")
+            .output()
+            .map_err(|e| format!("git: {e}"))?;
+        if out.status.success() {
+            Ok(())
+        } else {
+            Err(format!(
+                "git {}: {}",
+                args.join(" "),
+                String::from_utf8_lossy(&out.stderr).trim()
+            ))
+        }
+    }
+}
+
+impl Drop for GitCase {
+    fn drop(&mut self) {
+        let _ = std::fs::remove_dir_all(&self.dir);
+    }
+}
+
+fn copy_dir(from: &Path, to: &Path) -> std::io::Result<()> {
+    std::fs::create_dir_all(to)?;
+    for e in std::fs::read_dir(from)? {
+        let e = e?;
+        let target = to.join(e.file_name());
+        if e.file_type()?.is_dir() {
+            copy_dir(&e.path(), &target)?;
+        } else {
+            std::fs::copy(e.path(), target)?;
+        }
+    }
+    Ok(())
 }
