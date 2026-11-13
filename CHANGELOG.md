@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.1.3] - 2026-11-13
+
 ### Added
 
 - Tool adapters: clippy, deny, machete, shear, rustfmt, typos, taplo, semver-checks, audit, udeps, hakari, geiger (TOOL-1).
