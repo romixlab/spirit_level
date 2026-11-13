@@ -124,7 +124,11 @@ pub struct Env<'a> {
 
 impl Config {
     /// Reads `spirit_level.toml` at `root` (or `file` when given) and everything it extends
-    pub fn load(root: &Path, file: Option<&Path>, env: &Env<'_>) -> Result<Config, Vec<ConfigError>> {
+    pub fn load(
+        root: &Path,
+        file: Option<&Path>,
+        env: &Env<'_>,
+    ) -> Result<Config, Vec<ConfigError>> {
         let path = file.map_or_else(|| root.join(FILE), Path::to_path_buf);
         let rel = path
             .strip_prefix(root)
@@ -168,7 +172,12 @@ impl Config {
     }
 
     /// The level of a lint for a finding about `krate` at `path`, and the exception that set it
-    pub fn level(&self, id: &str, krate: Option<&str>, path: Option<&str>) -> (Level, Option<&Exception>) {
+    pub fn level(
+        &self,
+        id: &str,
+        krate: Option<&str>,
+        path: Option<&str>,
+    ) -> (Level, Option<&Exception>) {
         let base = self.lint(id).level;
         self.exceptions
             .iter()
@@ -315,10 +324,16 @@ impl<'a> Resolver<'a> {
             Source::File(p, rel) => (
                 p.display().to_string(),
                 rel.clone(),
-                p.parent().map_or_else(|| self.root.clone(), Path::to_path_buf),
+                p.parent()
+                    .map_or_else(|| self.root.clone(), Path::to_path_buf),
                 false,
             ),
-            Source::Tier(n) => (format!("tier:{n}"), format!("tier:{n}"), self.root.clone(), true),
+            Source::Tier(n) => (
+                format!("tier:{n}"),
+                format!("tier:{n}"),
+                self.root.clone(),
+                true,
+            ),
         };
         let file = match TomlFile::parse(rel.clone(), text) {
             Ok(f) => f,
@@ -336,11 +351,9 @@ impl<'a> Resolver<'a> {
         for name in &extends {
             self.extend(name, &at, &dir);
         }
-        if tier {
-            if let Some(mut t) = r.table("tier", &mut errs) {
-                t.opt_str("description", &mut errs);
-                t.finish(&mut errs);
-            }
+        if tier && let Some(mut t) = r.table("tier", &mut errs) {
+            t.opt_str("description", &mut errs);
+            t.finish(&mut errs);
         }
         if let Some(lints) = r.table("lints", &mut errs) {
             self.lints_table(lints, project || !tier, &mut errs);
@@ -354,7 +367,10 @@ impl<'a> Resolver<'a> {
                             self.exception(er, &mut errs);
                         }
                     }
-                    None => errs.push(r.err("exceptions", "exceptions must be an array of tables ([[exceptions]])")),
+                    None => errs.push(r.err(
+                        "exceptions",
+                        "exceptions must be an array of tables ([[exceptions]])",
+                    )),
                 }
             }
             if let Some(m) = r.table("map", &mut errs) {
@@ -362,13 +378,19 @@ impl<'a> Resolver<'a> {
             }
             if let Some(mf) = r.opt_str("map-file", &mut errs) {
                 if self.map.is_some() {
-                    errs.push(r.err("map-file", "give the map either inline ([map]) or as map-file, not both"));
+                    errs.push(r.err(
+                        "map-file",
+                        "give the map either inline ([map]) or as map-file, not both",
+                    ));
                 } else {
                     let path = dir.join(&mf);
                     let mrel = path
                         .strip_prefix(&self.root)
                         .map_or_else(|_| path.display().to_string(), |p| p.display().to_string());
-                    match std::fs::read_to_string(&path).map_err(|e| e.to_string()).and_then(|t| TomlFile::parse(mrel, t)) {
+                    match std::fs::read_to_string(&path)
+                        .map_err(|e| e.to_string())
+                        .and_then(|t| TomlFile::parse(mrel, t))
+                    {
                         Ok(mfile) => {
                             let mr = Reader::new(&mfile, Vec::new(), mfile.root());
                             self.map = Some(Map::read(mr, &mut errs));
@@ -390,7 +412,9 @@ impl<'a> Resolver<'a> {
                 errs.push(lints.err(&id, unknown_lint(&id, self.env.lints)));
                 continue;
             };
-            let Some(mut t) = lints.table(&id, errs) else { continue };
+            let Some(mut t) = lints.table(&id, errs) else {
+                continue;
+            };
             let line = lints.line(&id);
             let origin = Origin {
                 file: t.file.rel.clone(),
@@ -399,7 +423,10 @@ impl<'a> Resolver<'a> {
             let level = level_of(&mut t, errs);
             let reason = t.opt_str("reason", errs).unwrap_or_default();
             if reason.trim().is_empty() {
-                errs.push(t.err("", format!("lints.{id} needs a reason: say why it is set this way")));
+                errs.push(t.err(
+                    "",
+                    format!("lints.{id} needs a reason: say why it is set this way"),
+                ));
             }
             let expires = self.expiry(&mut t, expiring, &format!("the override of {id}"), errs);
             let params = params_of(&mut t, meta, errs);
@@ -444,7 +471,10 @@ impl<'a> Resolver<'a> {
         let crates = t.opt_list("crates", true, errs).unwrap_or_default();
         let paths = t.opt_list("paths", true, errs).unwrap_or_default();
         if crates.is_empty() && paths.is_empty() {
-            errs.push(t.err("lint", format!("the exception for {lint} names no crates and no paths")));
+            errs.push(t.err(
+                "lint",
+                format!("the exception for {lint} names no crates and no paths"),
+            ));
         }
         let level = level_of(&mut t, errs);
         let reason = t.opt_str("reason", errs).unwrap_or_default();
@@ -454,7 +484,10 @@ impl<'a> Resolver<'a> {
         let expires = self.expiry(&mut t, true, &format!("the exception for {lint}"), errs);
         let params = params_of(&mut t, meta, errs);
         if level.is_none() && params.is_empty() {
-            errs.push(t.err("lint", format!("the exception for {lint} changes neither the level nor a parameter")));
+            errs.push(t.err(
+                "lint",
+                format!("the exception for {lint} changes neither the level nor a parameter"),
+            ));
         }
         t.finish(errs);
         self.exceptions.push(Exception {
@@ -469,10 +502,19 @@ impl<'a> Resolver<'a> {
         });
     }
 
-    fn expiry(&self, t: &mut Reader<'_>, check: bool, what: &str, errs: &mut Vec<ConfigError>) -> Option<Expiry> {
+    fn expiry(
+        &self,
+        t: &mut Reader<'_>,
+        check: bool,
+        what: &str,
+        errs: &mut Vec<ConfigError>,
+    ) -> Option<Expiry> {
         let s = t.opt_str("expires", errs)?;
         let Some(e) = Expiry::parse(&s) else {
-            errs.push(t.err("expires", format!("expires = {s:?} is neither a date (2027-01-31) nor a release (v0.5.0)")));
+            errs.push(t.err(
+                "expires",
+                format!("expires = {s:?} is neither a date (2027-01-31) nor a release (v0.5.0)"),
+            ));
             return None;
         };
         if check {
@@ -500,13 +542,20 @@ fn level_of(t: &mut Reader<'_>, errs: &mut Vec<ConfigError>) -> Option<Level> {
     match Level::from_name(&s) {
         Some(l) => Some(l),
         None => {
-            errs.push(t.err("level", format!("level = {s:?}: use \"allow\", \"warn\" or \"deny\"")));
+            errs.push(t.err(
+                "level",
+                format!("level = {s:?}: use \"allow\", \"warn\" or \"deny\""),
+            ));
             None
         }
     }
 }
 
-fn params_of(t: &mut Reader<'_>, meta: &LintMeta, errs: &mut Vec<ConfigError>) -> BTreeMap<String, ParamValue> {
+fn params_of(
+    t: &mut Reader<'_>,
+    meta: &LintMeta,
+    errs: &mut Vec<ConfigError>,
+) -> BTreeMap<String, ParamValue> {
     let mut out = BTreeMap::new();
     for k in t.keys() {
         if sl_core::meta::RESERVED_KEYS.contains(&k.as_str()) {
@@ -520,7 +569,11 @@ fn params_of(t: &mut Reader<'_>, meta: &LintMeta, errs: &mut Vec<ConfigError>) -
                 if known.is_empty() {
                     format!("{} takes no parameters, so {k} is unknown", meta.id)
                 } else {
-                    format!("{} has no parameter {k} (it has: {})", meta.id, known.join(", "))
+                    format!(
+                        "{} has no parameter {k} (it has: {})",
+                        meta.id,
+                        known.join(", ")
+                    )
                 },
             ));
             continue;
@@ -535,7 +588,10 @@ fn params_of(t: &mut Reader<'_>, meta: &LintMeta, errs: &mut Vec<ConfigError>) -
                 };
                 out.insert(k, v);
             }
-            _ => errs.push(t.err(&k, format!("{}.{k} must be a {}", meta.id, spec.kind.name()))),
+            _ => errs.push(t.err(
+                &k,
+                format!("{}.{k} must be a {}", meta.id, spec.kind.name()),
+            )),
         }
     }
     out
@@ -606,7 +662,11 @@ fn distance(a: &str, b: &str) -> usize {
     for (i, ca) in a.chars().enumerate() {
         let mut cur = vec![i + 1];
         for (j, cb) in b.iter().enumerate() {
-            cur.push((prev[j] + usize::from(ca != *cb)).min(prev[j + 1] + 1).min(cur[j] + 1));
+            cur.push(
+                (prev[j] + usize::from(ca != *cb))
+                    .min(prev[j + 1] + 1)
+                    .min(cur[j] + 1),
+            );
         }
         prev = cur;
     }

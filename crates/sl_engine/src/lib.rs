@@ -128,27 +128,35 @@ pub fn all_lints(analyses: &[&dyn Analysis]) -> Vec<&'static LintMeta> {
 }
 
 /// Why a need is missing, or None when it is met
-pub fn missing(need: Need, project: &Project, config: &Config, path: Option<&std::ffi::OsStr>) -> Option<String> {
+pub fn missing(
+    need: Need,
+    project: &Project,
+    config: &Config,
+    path: Option<&std::ffi::OsStr>,
+) -> Option<String> {
     match need {
-        Need::Resolve => project
-            .resolve()
-            .err()
-            .map(|e| format!("the dependency graph could not be resolved (full cargo metadata): {e}")),
+        Need::Resolve => project.resolve().err().map(|e| {
+            format!("the dependency graph could not be resolved (full cargo metadata): {e}")
+        }),
         Need::Map => config.map.is_none().then(|| {
-            "no crate map: add [map] or map-file to spirit_level.toml (see the book's map page)".to_string()
+            "no crate map: add [map] or map-file to spirit_level.toml (see the book's map page)"
+                .to_string()
         }),
         Need::Tool(t) => find_tool(t, path).is_none().then(|| {
-            format!("{t} is not installed: `spirit-level tools install {t}` installs the pinned version")
+            format!(
+                "{t} is not installed: `spirit-level tools install {t}` installs the pinned version"
+            )
         }),
-        Need::Nightly => (!has_nightly()).then(|| {
-            "no nightly toolchain: `rustup toolchain install nightly`".to_string()
-        }),
+        Need::Nightly => (!has_nightly())
+            .then(|| "no nightly toolchain: `rustup toolchain install nightly`".to_string()),
     }
 }
 
 /// An executable on PATH (or in `path`), by name
 pub fn find_tool(name: &str, path: Option<&std::ffi::OsStr>) -> Option<std::path::PathBuf> {
-    let path = path.map(ToOwned::to_owned).or_else(|| std::env::var_os("PATH"))?;
+    let path = path
+        .map(ToOwned::to_owned)
+        .or_else(|| std::env::var_os("PATH"))?;
     std::env::split_paths(&path)
         .map(|d| d.join(name))
         .find(|p| p.is_file())
@@ -162,7 +170,12 @@ fn has_nightly() -> bool {
 }
 
 /// Runs every enabled lint of `analyses` on the project
-pub fn run(project: &Project, config: &Config, analyses: &[&dyn Analysis], opts: &RunOptions) -> Report {
+pub fn run(
+    project: &Project,
+    config: &Config,
+    analyses: &[&dyn Analysis],
+    opts: &RunOptions,
+) -> Report {
     let selected = |m: &LintMeta| {
         opts.only.is_empty() || opts.only.iter().any(|o| o == m.id || o == m.category)
     };
@@ -217,12 +230,20 @@ pub fn run(project: &Project, config: &Config, analyses: &[&dyn Analysis], opts:
 
     // source waivers
     let known: BTreeSet<&str> = all_lints(analyses).iter().map(|m| m.id).collect();
-    let (waivers, problems) = waiver::collect(project, &|id| known.contains(id), opts.today, project.version);
+    let (waivers, problems) = waiver::collect(
+        project,
+        &|id| known.contains(id),
+        opts.today,
+        project.version,
+    );
     let mut used = vec![false; waivers.len()];
     for d in diagnostics.iter_mut().filter(|d| d.allowed.is_none()) {
         let Some(p) = d.primary() else { continue };
         if let Some(i) = waivers.iter().position(|w| {
-            w.file == p.file && p.line >= w.covers.0 && p.line <= w.covers.1 && w.lints.iter().any(|l| *l == d.lint)
+            w.file == p.file
+                && p.line >= w.covers.0
+                && p.line <= w.covers.1
+                && w.lints.contains(&d.lint)
         }) {
             used[i] = true;
             d.allowed = Some(waivers[i].reason.clone());
@@ -234,8 +255,12 @@ pub fn run(project: &Project, config: &Config, analyses: &[&dyn Analysis], opts:
         ran.push("waiver-invalid".into());
         for p in problems {
             engine.push(
-                Diagnostic::new("waiver-invalid", format!("{}:{}", p.file, p.line), p.message)
-                    .span(Span::new(p.file, p.line)),
+                Diagnostic::new(
+                    "waiver-invalid",
+                    format!("{}:{}", p.file, p.line),
+                    p.message,
+                )
+                .span(Span::new(p.file, p.line)),
             );
         }
     }
@@ -248,7 +273,10 @@ pub fn run(project: &Project, config: &Config, analyses: &[&dyn Analysis], opts:
                     Diagnostic::new(
                         "waiver-unused",
                         format!("{}:{}", w.file, w.line),
-                        format!("the waiver of {} allows nothing: remove it", w.lints.join(", ")),
+                        format!(
+                            "the waiver of {} allows nothing: remove it",
+                            w.lints.join(", ")
+                        ),
                     )
                     .span(Span::new(w.file.clone(), w.line)),
                 );

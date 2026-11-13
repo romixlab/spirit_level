@@ -1,0 +1,44 @@
+# package-description
+
+**Rule:** Every crate has a description in its Cargo.toml.
+
+| | |
+|---|---|
+| Category | [manifest](index.md#manifest) |
+| Source | spirit_level |
+| Fix | by hand |
+
+## Level per tier
+
+| Tier | Level | Reason |
+|---|---|---|
+| [small](../tiers/small.md) | `warn` | the crate's one-line description is written once, in Cargo.toml; tables and READMEs are made from it |
+| [small-workspace](../tiers/small-workspace.md) | `warn` | the crate's one-line description is written once, in Cargo.toml; tables and READMEs are made from it |
+| [medium](../tiers/medium.md) | `warn` | the crate's one-line description is written once, in Cargo.toml; tables and READMEs are made from it |
+| [big](../tiers/big.md) | `deny` | the generated crate table and READMEs are made from it |
+
+## Why
+
+A crate's one-line description is written once, in its `Cargo.toml`. The generated crate table, the README of a big workspace and `cargo metadata` consumers all read it from there, so a crate without one shows up as a blank row everywhere.
+
+## Example
+
+```toml
+[package]
+name = "foo_core"
+description = "foo's domain types: ids, units and the error enum, no I/O"
+```
+
+## How to fix
+
+Add `description` under `[package]`: one line saying what the crate is, not how it is built.
+
+## Configure
+
+```toml
+[lints.package-description]
+level = "deny"
+reason = "why this project wants it at this level"
+```
+
+Allow one finding in the code with `// spirit-level: allow(package-description) <reason>` ([waivers](../waivers.md)).

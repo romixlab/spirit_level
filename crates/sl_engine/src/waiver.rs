@@ -45,28 +45,49 @@ pub struct Problem {
 }
 
 /// The waivers of every Rust file and manifest of the project, and the problems found reading them
-pub fn collect(project: &Project, known: &dyn Fn(&str) -> bool, today: Date, version: Option<Version>) -> (Vec<Waiver>, Vec<Problem>) {
+pub fn collect(
+    project: &Project,
+    known: &dyn Fn(&str) -> bool,
+    today: Date,
+    version: Option<Version>,
+) -> (Vec<Waiver>, Vec<Problem>) {
     let mut ws = Vec::new();
     let mut ps = Vec::new();
     for f in project.all_sources() {
         if f.text.contains(MARK) {
             let extents = f.ast().map(extents).unwrap_or_default();
-            parse(&f.rel, &f.text, true, &extents, known, today, version, &mut ws, &mut ps);
+            parse(
+                &f.rel, &f.text, true, &extents, known, today, version, &mut ws, &mut ps,
+            );
         }
     }
-    let mut tomls: Vec<&sl_model::TomlFile> = project.packages.iter().map(|p| &p.manifest).collect();
+    let mut tomls: Vec<&sl_model::TomlFile> =
+        project.packages.iter().map(|p| &p.manifest).collect();
     if !project.packages.iter().any(|p| p.dir.is_empty()) {
         tomls.push(&project.root_manifest);
     }
     for t in tomls {
         if t.text.contains(MARK) {
-            parse(&t.rel, &t.text, false, &[], known, today, version, &mut ws, &mut ps);
+            parse(
+                &t.rel,
+                &t.text,
+                false,
+                &[],
+                known,
+                today,
+                version,
+                &mut ws,
+                &mut ps,
+            );
         }
     }
     (ws, ps)
 }
 
-#[allow(clippy::too_many_arguments, reason = "one internal call site; a struct would only rename the arguments")]
+#[allow(
+    clippy::too_many_arguments,
+    reason = "one internal call site; a struct would only rename the arguments"
+)]
 fn parse(
     rel: &str,
     text: &str,
@@ -83,7 +104,9 @@ fn parse(
     for (i, l) in lines.iter().enumerate() {
         let Some(at) = l.find(MARK) else { continue };
         let before = &l[..at];
-        let Some(cpos) = before.find(comment) else { continue };
+        let Some(cpos) = before.find(comment) else {
+            continue;
+        };
         // a plain comment only: not a doc comment (`///`, `//!`: documentation shows waivers as examples), not
         // inside a string literal, and the marker right after the comment start
         if !before[cpos + comment.len()..].trim().is_empty()
@@ -101,11 +124,15 @@ fn parse(
             message: m,
         };
         let Some(inner) = rest.strip_prefix("allow(") else {
-            ps.push(problem(format!("a waiver reads `{MARK} allow(lint) reason`, found `{rest}`")));
+            ps.push(problem(format!(
+                "a waiver reads `{MARK} allow(lint) reason`, found `{rest}`"
+            )));
             continue;
         };
         let Some(close) = inner.find(')') else {
-            ps.push(problem("the waiver's lint list is not closed with `)`".into()));
+            ps.push(problem(
+                "the waiver's lint list is not closed with `)`".into(),
+            ));
             continue;
         };
         let lints: Vec<String> = inner[..close]
@@ -119,7 +146,9 @@ fn parse(
             let (val, r) = e.split_once(char::is_whitespace).unwrap_or((e, ""));
             match Expiry::parse(val) {
                 Some(x) => expires = Some(x),
-                None => ps.push(problem(format!("expires={val} is neither a date (2027-01-31) nor a release (v0.5.0)"))),
+                None => ps.push(problem(format!(
+                    "expires={val} is neither a date (2027-01-31) nor a release (v0.5.0)"
+                ))),
             }
             tail = r.trim();
         }
@@ -129,11 +158,16 @@ fn parse(
         }
         for id in &lints {
             if !known(id) {
-                ps.push(problem(format!("the waiver names {id}, which is not a lint")));
+                ps.push(problem(format!(
+                    "the waiver names {id}, which is not a lint"
+                )));
             }
         }
         if tail.is_empty() {
-            ps.push(problem(format!("the waiver of {} gives no reason", lints.join(", "))));
+            ps.push(problem(format!(
+                "the waiver of {} gives no reason",
+                lints.join(", ")
+            )));
             continue;
         }
         if let Some(e) = expires
@@ -148,7 +182,10 @@ fn parse(
         let covers = if own_line {
             let next = (i + 1..lines.len()).find(|&j| {
                 let t = lines[j].trim();
-                !(t.is_empty() || t.starts_with(comment) || (rust && t.starts_with("#[")) || (rust && t.starts_with("#![")))
+                !(t.is_empty()
+                    || t.starts_with(comment)
+                    || (rust && t.starts_with("#["))
+                    || (rust && t.starts_with("#![")))
             });
             match next {
                 None => (line, line),
@@ -255,7 +292,17 @@ mod tests {
             Vec::new()
         };
         let (mut w, mut p) = (Vec::new(), Vec::new());
-        parse(rel, text, rust, &ext, &|id| id != "nope", Date::parse("2026-11-13").unwrap(), None, &mut w, &mut p);
+        parse(
+            rel,
+            text,
+            rust,
+            &ext,
+            &|id| id != "nope",
+            Date::parse("2026-11-13").unwrap(),
+            None,
+            &mut w,
+            &mut p,
+        );
         (w, p)
     }
 
@@ -274,7 +321,10 @@ mod tests {
 
     #[test]
     fn toml_waiver_covers_table() {
-        let (w, _) = run("Cargo.toml", "# spirit-level: allow(a) why\n[dependencies]\nx = 1\ny = 2\n[features]\n");
+        let (w, _) = run(
+            "Cargo.toml",
+            "# spirit-level: allow(a) why\n[dependencies]\nx = 1\ny = 2\n[features]\n",
+        );
         assert_eq!(w[0].covers, (2, 4));
     }
 

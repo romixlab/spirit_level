@@ -7,11 +7,20 @@ use sl_core::{Date, Level};
 use std::path::PathBuf;
 use std::process::ExitCode;
 
-const VERSION: &str = concat!(env!("CARGO_PKG_VERSION"), " (", env!("GIT_SHA"), ", commit ", env!("BUILD_TIME"), ")");
+const VERSION: &str = concat!(
+    env!("CARGO_PKG_VERSION"),
+    " (",
+    env!("GIT_SHA"),
+    ", commit ",
+    env!("BUILD_TIME"),
+    ")"
+);
 
 #[derive(Parser)]
 #[command(name = "spirit-level", version = VERSION, about = "A linter for Rust projects of every size: tiers of lints in TOML, from one crate to a workspace of hundreds")]
-#[command(after_help = "Examples:\n  spirit-level check\n  spirit-level check --format json --only crate-lines\n  spirit-level explain workspace-lints\n  spirit-level init --tier small-workspace")]
+#[command(
+    after_help = "Examples:\n  spirit-level check\n  spirit-level check --format json --only crate-lines\n  spirit-level explain workspace-lints\n  spirit-level init --tier small-workspace"
+)]
 struct Cli {
     #[command(subcommand)]
     cmd: Cmd,
@@ -26,7 +35,9 @@ enum Format {
 #[derive(Subcommand)]
 enum Cmd {
     /// Check the project: run every lint its configuration enables
-    #[command(after_help = "Exit codes: 0 clean, 1 a denied finding, 2 a configuration or usage error, 3 a denied lint could not run")]
+    #[command(
+        after_help = "Exit codes: 0 clean, 1 a denied finding, 2 a configuration or usage error, 3 a denied lint could not run"
+    )]
     Check {
         /// The project directory (cargo's search for the workspace root starts here)
         #[arg(default_value = ".")]
@@ -116,7 +127,9 @@ fn lint_candidates() -> Vec<CompletionCandidate> {
 fn tier_candidates() -> Vec<CompletionCandidate> {
     spirit_level::TIERS
         .iter()
-        .map(|(n, t)| CompletionCandidate::new(*n).help(Some(spirit_level::tier_description(t).into())))
+        .map(|(n, t)| {
+            CompletionCandidate::new(*n).help(Some(spirit_level::tier_description(t).into()))
+        })
         .collect()
 }
 
@@ -169,7 +182,8 @@ fn run(cli: Cli) -> Result<u8, String> {
                 Err(e) => return Err(e.to_string()),
             };
             if fix {
-                let applied = sl_engine::fix::apply(&project.root, &report.diagnostics).map_err(|e| e.to_string())?;
+                let applied = sl_engine::fix::apply(&project.root, &report.diagnostics)
+                    .map_err(|e| e.to_string())?;
                 for (file, what) in &applied.applied {
                     eprint!("fixed {file}: {what}\n");
                 }
@@ -177,13 +191,21 @@ fn run(cli: Cli) -> Result<u8, String> {
                     eprint!("not fixed (overlaps another fix, run again) {file}: {what}\n");
                 }
                 if !applied.applied.is_empty() {
-                    report = spirit_level::check(&path, &opts).map_err(|e| e.to_string())?.1;
+                    report = spirit_level::check(&path, &opts)
+                        .map_err(|e| e.to_string())?
+                        .1;
                 }
             }
             match format {
                 Format::Text => print!(
                     "{}",
-                    sl_report::text(&report, sl_report::TextOptions { show_allowed, timings })
+                    sl_report::text(
+                        &report,
+                        sl_report::TextOptions {
+                            show_allowed,
+                            timings
+                        }
+                    )
                 ),
                 Format::Json => println!("{}", sl_report::json(&report)),
             }
@@ -196,7 +218,8 @@ fn run(cli: Cli) -> Result<u8, String> {
             })
         }
         Cmd::Explain { lint } => {
-            let m = spirit_level::lint(&lint).ok_or_else(|| format!("no lint {lint} (`spirit-level lints` lists them)"))?;
+            let m = spirit_level::lint(&lint)
+                .ok_or_else(|| format!("no lint {lint} (`spirit-level lints` lists them)"))?;
             let tiers = sl_book::tier_levels();
             print!("{}", sl_book::lint_page(m, &tiers));
             Ok(0)
@@ -244,7 +267,11 @@ fn run(cli: Cli) -> Result<u8, String> {
             }
             Ok(0)
         }
-        Cmd::Config { path, all, today: t } => {
+        Cmd::Config {
+            path,
+            all,
+            today: t,
+        } => {
             let project = sl_model::Project::load(&path).map_err(|e| e.to_string())?;
             let opts = spirit_level::Options::new(today(t)?);
             let c = match spirit_level::config(&project, &opts) {
@@ -260,27 +287,43 @@ fn run(cli: Cli) -> Result<u8, String> {
                 if l.level == Level::Allow && !all && l.origin.is_none() {
                     continue;
                 }
-                let at = l.origin.as_ref().map_or_else(|| "-".to_string(), ToString::to_string);
-                let exp = l.expires.map_or(String::new(), |e| format!(" (expires {e})"));
+                let at = l
+                    .origin
+                    .as_ref()
+                    .map_or_else(|| "-".to_string(), ToString::to_string);
+                let exp = l
+                    .expires
+                    .map_or(String::new(), |e| format!(" (expires {e})"));
                 println!("{:5} {id:32} {at:28} {}{exp}", l.level.name(), l.reason);
             }
             for e in &c.exceptions {
                 let scope: Vec<String> = e.crates.iter().chain(&e.paths).cloned().collect();
-                let params: Vec<String> = e.params.iter().map(|(k, v)| format!("{k} = {v}")).collect();
+                let params: Vec<String> =
+                    e.params.iter().map(|(k, v)| format!("{k} = {v}")).collect();
                 println!(
                     "exception {} for {}: {}{}{} — {} [{}]{}",
                     e.lint,
                     scope.join(", "),
                     e.level.map_or(String::new(), |l| format!("level {l}")),
-                    if e.level.is_some() && !params.is_empty() { ", " } else { "" },
+                    if e.level.is_some() && !params.is_empty() {
+                        ", "
+                    } else {
+                        ""
+                    },
                     params.join(", "),
                     e.reason,
                     e.origin,
-                    e.expires.map_or(String::new(), |x| format!(" (expires {x})"))
+                    e.expires
+                        .map_or(String::new(), |x| format!(" (expires {x})"))
                 );
             }
             if let Some(m) = &c.map {
-                println!("map: {} ({} layers, {} crates)", m.file, m.layers.len(), m.crates.len());
+                println!(
+                    "map: {} ({} layers, {} crates)",
+                    m.file,
+                    m.layers.len(),
+                    m.crates.len()
+                );
             }
             Ok(0)
         }
@@ -297,7 +340,13 @@ fn run(cli: Cli) -> Result<u8, String> {
             let ext = if tier.len() == 1 {
                 format!("{:?}", tier[0])
             } else {
-                format!("[{}]", tier.iter().map(|t| format!("{t:?}")).collect::<Vec<_>>().join(", "))
+                format!(
+                    "[{}]",
+                    tier.iter()
+                        .map(|t| format!("{t:?}"))
+                        .collect::<Vec<_>>()
+                        .join(", ")
+                )
             };
             let text = format!(
                 "# spirit_level configuration: https://github.com/romixlab/spirit_level (book: configuration)\nextends = {ext}\n\n# Override a lint: a level and/or parameters, always with a reason, optionally an expiry.\n# [lints.crate-lines]\n# level = \"deny\"\n# reason = \"why\"\n# expires = \"2027-06-30\"\n"
@@ -306,7 +355,11 @@ fn run(cli: Cli) -> Result<u8, String> {
             println!("wrote {}", file.display());
             Ok(0)
         }
-        Cmd::Book { docs, zensical, check } => {
+        Cmd::Book {
+            docs,
+            zensical,
+            check,
+        } => {
             let changed = sl_book::write(&docs, &zensical, check).map_err(|e| e.to_string())?;
             for c in &changed {
                 println!("{} {c}", if check { "stale" } else { "wrote" });

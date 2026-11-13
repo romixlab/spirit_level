@@ -32,7 +32,10 @@ pub(crate) fn run(cx: &Context<'_>) {
             let mut d = Diagnostic::new(
                 "workspace-inheritance",
                 format!("{}:{key}", pkg.name),
-                format!("{} does not inherit {key} from [workspace.package]", pkg.name),
+                format!(
+                    "{} does not inherit {key} from [workspace.package]",
+                    pkg.name
+                ),
             )
             .span(at(pkg, &["package", key]))
             .krate(&pkg.name)
@@ -47,13 +50,24 @@ pub(crate) fn run(cx: &Context<'_>) {
     // workspace-lints
     if root.get(&["workspace", "lints"]).is_none() {
         cx.emit(
-            Diagnostic::new("workspace-lints", "workspace.lints", "the root declares no [workspace.lints]")
-                .span(root_span(&["workspace"]))
-                .help("declare the lints once under [workspace.lints.rust] and [workspace.lints.clippy]"),
+            Diagnostic::new(
+                "workspace-lints",
+                "workspace.lints",
+                "the root declares no [workspace.lints]",
+            )
+            .span(root_span(&["workspace"]))
+            .help(
+                "declare the lints once under [workspace.lints.rust] and [workspace.lints.clippy]",
+            ),
         );
     }
     for pkg in &p.packages {
-        if pkg.manifest.get(&["lints", "workspace"]).and_then(|v| v.as_bool()) == Some(true) {
+        if pkg
+            .manifest
+            .get(&["lints", "workspace"])
+            .and_then(|v| v.as_bool())
+            == Some(true)
+        {
             continue;
         }
         let mut d = Diagnostic::new(
@@ -123,23 +137,41 @@ fn check_names(cx: &Context<'_>, pkg: &Package) {
         let dir = pkg.dir.rsplit('/').next().unwrap_or(&pkg.dir);
         if dir != pkg.name {
             cx.emit(
-                Diagnostic::new("crate-dir-name", format!("crate:{}", pkg.name), format!("crate {} lives in a directory named {dir}", pkg.name))
-                    .span(Span::new(pkg.manifest.rel.clone(), pkg.manifest.line(&["package", "name"])))
-                    .krate(&pkg.name)
-                    .help("name the directory after the crate (flat crates/<name>)"),
+                Diagnostic::new(
+                    "crate-dir-name",
+                    format!("crate:{}", pkg.name),
+                    format!("crate {} lives in a directory named {dir}", pkg.name),
+                )
+                .span(Span::new(
+                    pkg.manifest.rel.clone(),
+                    pkg.manifest.line(&["package", "name"]),
+                ))
+                .krate(&pkg.name)
+                .help("name the directory after the crate (flat crates/<name>)"),
             );
         }
     }
-    let suffixed = ["_macros", "_derive", "-macros", "-derive"].iter().any(|s| pkg.name.ends_with(s));
+    let suffixed = ["_macros", "_derive", "-macros", "-derive"]
+        .iter()
+        .any(|s| pkg.name.ends_with(s));
     let msg = match (suffixed, pkg.is_proc_macro()) {
-        (true, false) => Some(format!("{} is named like a proc-macro crate but is not one", pkg.name)),
-        (false, true) => Some(format!("{} is a proc-macro crate but its name does not end in _macros or _derive", pkg.name)),
+        (true, false) => Some(format!(
+            "{} is named like a proc-macro crate but is not one",
+            pkg.name
+        )),
+        (false, true) => Some(format!(
+            "{} is a proc-macro crate but its name does not end in _macros or _derive",
+            pkg.name
+        )),
         _ => None,
     };
     if let Some(m) = msg {
         cx.emit(
             Diagnostic::new("macro-crate-suffix", format!("crate:{}", pkg.name), m)
-                .span(Span::new(pkg.manifest.rel.clone(), pkg.manifest.line(&["package", "name"])))
+                .span(Span::new(
+                    pkg.manifest.rel.clone(),
+                    pkg.manifest.line(&["package", "name"]),
+                ))
                 .krate(&pkg.name)
                 .help("the suffixes _macros and _derive mean proc macros and nothing else"),
         );
@@ -168,7 +200,9 @@ fn inherit_fix(m: &TomlFile, key: &str) -> Option<Fix> {
         }
     } else {
         let ns = m.item_span(&["package", "name"])?;
-        let end = m.text[ns.end..].find('\n').map_or(m.text.len(), |i| ns.end + i);
+        let end = m.text[ns.end..]
+            .find('\n')
+            .map_or(m.text.len(), |i| ns.end + i);
         Edit {
             file: m.rel.clone(),
             start: end,

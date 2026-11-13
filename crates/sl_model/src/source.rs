@@ -49,7 +49,12 @@ pub struct SourceFile {
 
 impl SourceFile {
     /// Reads and parses one file
-    pub fn read(root: &Path, rel: &str, package: &str, in_package: &str) -> std::io::Result<SourceFile> {
+    pub fn read(
+        root: &Path,
+        rel: &str,
+        package: &str,
+        in_package: &str,
+    ) -> std::io::Result<SourceFile> {
         let text = std::fs::read_to_string(root.join(rel))?;
         Ok(SourceFile::from_text(rel, package, in_package, text))
     }
@@ -90,7 +95,8 @@ impl SourceFile {
     /// Whether it is a crate root (`src/lib.rs`, `src/main.rs`, `src/bin/*.rs`)
     pub fn is_crate_root(&self) -> bool {
         matches!(self.in_package.as_str(), "src/lib.rs" | "src/main.rs")
-            || (self.in_package.starts_with("src/bin/") && self.in_package.matches('/').count() == 2)
+            || (self.in_package.starts_with("src/bin/")
+                && self.in_package.matches('/').count() == 2)
     }
 }
 
@@ -108,8 +114,7 @@ fn kind_of(in_package: &str) -> FileKind {
 /// `src/a/b.rs` -> `a::b`; `src/a/mod.rs` -> `a`; `src/lib.rs` -> ``; `src/bin/x.rs` -> `` (a crate of its own)
 fn module_of(in_package: &str) -> String {
     let p = in_package.strip_prefix("src/").unwrap_or(in_package);
-    if p.starts_with("bin/") {
-        let rest = &p[4..];
+    if let Some(rest) = p.strip_prefix("bin/") {
         // src/bin/x/main.rs and src/bin/x.rs are binary roots; deeper files are their modules
         let parts: Vec<&str> = rest.trim_end_matches(".rs").split('/').collect();
         return if parts.len() <= 1 || (parts.len() == 2 && parts[1] == "main") {

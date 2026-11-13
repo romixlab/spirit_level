@@ -1,0 +1,36 @@
+# macro-crate-suffix
+
+**Rule:** Proc-macro crates and only they end in _macros or _derive.
+
+| | |
+|---|---|
+| Category | [workspace](index.md#workspace) |
+| Source | spirit_level |
+| Fix | by hand |
+
+## Level per tier
+
+| Tier | Level | Reason |
+|---|---|---|
+| [small](../tiers/small.md) | off |  |
+| [small-workspace](../tiers/small-workspace.md) | `warn` | _macros and _derive mean proc macros and nothing else |
+| [medium](../tiers/medium.md) | `warn` | _macros and _derive mean proc macros and nothing else |
+| [big](../tiers/big.md) | `warn` | _macros and _derive mean proc macros and nothing else |
+
+## Why
+
+`_macros` and `_derive` are reserved for proc-macro crates (Bevy, rerun): a reader knows from the name that the crate runs at compile time and has a compile-fail test crate beside it. A regular crate with such a name, or a proc-macro crate without one, breaks that.
+
+## How to fix
+
+Rename the crate.
+
+## Configure
+
+```toml
+[lints.macro-crate-suffix]
+level = "deny"
+reason = "why this project wants it at this level"
+```
+
+Allow one finding in the code with `// spirit-level: allow(macro-crate-suffix) <reason>` ([waivers](../waivers.md)).

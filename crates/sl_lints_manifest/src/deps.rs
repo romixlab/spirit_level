@@ -12,10 +12,19 @@ fn decl(p: &Project, pkg: &Package, d: &Dep) -> (Span, bool) {
     path.push("workspace");
     if pkg.manifest.get(&path).and_then(|v| v.as_bool()) == Some(true) {
         let r = &p.root_manifest;
-        (Span::new(r.rel.clone(), r.line(&["workspace", "dependencies", d.key()])), true)
+        (
+            Span::new(
+                r.rel.clone(),
+                r.line(&["workspace", "dependencies", d.key()]),
+            ),
+            true,
+        )
     } else {
         path.pop();
-        (Span::new(pkg.manifest.rel.clone(), pkg.manifest.line(&path)), false)
+        (
+            Span::new(pkg.manifest.rel.clone(), pkg.manifest.line(&path)),
+            false,
+        )
     }
 }
 
@@ -36,14 +45,21 @@ pub(crate) fn run(cx: &Context<'_>) {
                 format!("{}:{}:{}", pkg.name, d.kind.table(), d.key())
             };
             let krate = (!at_root).then(|| pkg.name.clone());
-            if d.default_features && d.path.is_none() && !allow_default.contains(&d.name) && seen.insert(("df", item.clone())) {
+            if d.default_features
+                && d.path.is_none()
+                && !allow_default.contains(&d.name)
+                && seen.insert(("df", item.clone()))
+            {
                 let mut diag = Diagnostic::new(
                     "default-features-off",
                     &item,
                     format!("{} is taken with its default features", d.name),
                 )
                 .span(span.clone())
-                .help(format!("write `default-features = false` and list only the features in use for {}", d.name));
+                .help(format!(
+                    "write `default-features = false` and list only the features in use for {}",
+                    d.name
+                ));
                 if let Some(k) = &krate {
                     diag = diag.krate(k);
                 }
@@ -91,7 +107,11 @@ pub(crate) fn run(cx: &Context<'_>) {
         return;
     }
     let Ok(res) = p.resolve() else { return };
-    let lock = if p.exists("Cargo.lock") { "Cargo.lock" } else { "Cargo.toml" };
+    let lock = if p.exists("Cargo.lock") {
+        "Cargo.lock"
+    } else {
+        "Cargo.toml"
+    };
     // what each member reaches through normal and build edges (and its own dev edges)
     let mut reached: BTreeMap<usize, BTreeSet<String>> = BTreeMap::new();
     for (i, rp) in res.packages.iter().enumerate() {
@@ -130,7 +150,7 @@ pub(crate) fn run(cx: &Context<'_>) {
     }
     let allow_dup = cx.params("duplicate-versions").list("allow");
     let mut versions: BTreeMap<&str, BTreeSet<&str>> = BTreeMap::new();
-    for (&j, _) in &reached {
+    for &j in reached.keys() {
         let rp = &res.packages[j];
         if !rp.member {
             versions.entry(&rp.name).or_default().insert(&rp.version);

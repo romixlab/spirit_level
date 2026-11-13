@@ -1,0 +1,47 @@
+# spirit_level checks itself at the big tier.
+extends = "big"
+
+[map.layers.core]
+desc = "Types only: lint metadata, levels, parameters, diagnostics"
+allow = []
+
+[map.layers.model]
+desc = "Reading the project and the configuration"
+allow = ["core", "model"]
+
+[map.layers.analysis]
+desc = "The analysis trait and helpers every lint crate uses"
+allow = ["core", "model"]
+
+[map.layers.lints]
+desc = "One crate per analysis family; lint crates never see each other"
+allow = ["core", "model", "analysis"]
+
+[map.layers.engine]
+desc = "Running analyses, waivers, fixes, reports"
+allow = ["core", "model", "analysis", "engine"]
+
+[map.layers.app]
+desc = "The registry, the book generator and the binary"
+allow = ["core", "model", "analysis", "lints", "engine", "app"]
+
+[map.layers.tests]
+desc = "Test-only crates; only dev-dependencies point here"
+allow = ["core", "model", "analysis", "engine", "tests"]
+
+[map.crates]
+sl_core = { layer = "core" }
+sl_model = { layer = "model" }
+sl_config = { layer = "model" }
+sl_analysis = { layer = "analysis" }
+sl_lints_manifest = { layer = "lints" }
+sl_engine = { layer = "engine" }
+sl_report = { layer = "engine" }
+spirit_level = { layer = "app" }
+sl_book = { layer = "app" }
+spirit_level_cli = { layer = "app" }
+sl_testkit = { layer = "tests" }
+
+[map.forbid]
+# the library a project links to check itself never pulls the CLI's dependencies
+spirit_level = ["clap", "anstream"]

@@ -111,7 +111,9 @@ impl Dep {
 
     /// Whether it comes from a registry (crates.io or another)
     pub fn is_registry(&self) -> bool {
-        self.source.as_deref().is_some_and(|s| s.starts_with("registry+") || s.starts_with("sparse+"))
+        self.source
+            .as_deref()
+            .is_some_and(|s| s.starts_with("registry+") || s.starts_with("sparse+"))
     }
 }
 
@@ -170,7 +172,9 @@ impl Package {
 
     /// Whether its library is a proc-macro
     pub fn is_proc_macro(&self) -> bool {
-        self.targets.iter().any(|(k, _)| *k == TargetKind::ProcMacro)
+        self.targets
+            .iter()
+            .any(|(k, _)| *k == TargetKind::ProcMacro)
     }
 
     /// Whether it builds a binary
@@ -448,9 +452,13 @@ impl Project {
             })
             .collect();
         for node in &resolve.nodes {
-            let Some(&i) = index.get(&node.id) else { continue };
+            let Some(&i) = index.get(&node.id) else {
+                continue;
+            };
             for d in &node.deps {
-                let Some(&j) = index.get(&d.pkg) else { continue };
+                let Some(&j) = index.get(&d.pkg) else {
+                    continue;
+                };
                 let mut kinds: Vec<DepKind> = d
                     .dep_kinds
                     .iter()
@@ -482,7 +490,8 @@ impl Project {
 /// `cargo` with the environment of an outer cargo removed, so a run under `cargo test` or a build script sees
 /// the project as a person would (CARGO_HOME and registry settings stay)
 fn cargo(dir: &Path) -> Command {
-    let mut cmd = Command::new(std::env::var_os("SPIRIT_LEVEL_CARGO").unwrap_or_else(|| "cargo".into()));
+    let mut cmd =
+        Command::new(std::env::var_os("SPIRIT_LEVEL_CARGO").unwrap_or_else(|| "cargo".into()));
     cmd.current_dir(dir);
     for (k, _) in std::env::vars_os() {
         let Some(k) = k.to_str() else { continue };
@@ -518,7 +527,9 @@ fn rel_path(root: &Path, p: &Path) -> String {
 }
 
 fn walk(pkg_dir: &Path, dir: &Path, out: &mut Vec<String>) {
-    let Ok(rd) = std::fs::read_dir(dir) else { return };
+    let Ok(rd) = std::fs::read_dir(dir) else {
+        return;
+    };
     for e in rd.flatten() {
         let p = e.path();
         let name = e.file_name();

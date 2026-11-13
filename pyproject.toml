@@ -1,0 +1,7 @@
+# The book's site (docs/, zensical.toml). Not a Python package of the crate: `uv run zensical ...` through
+# `just docs` and `just docs-build`.
+[project]
+name = "spirit-level-book"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = ["zensical==0.0.74"]

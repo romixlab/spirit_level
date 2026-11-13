@@ -22,7 +22,10 @@ pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 /// The shipped tiers, in the order they extend each other, then the ones that stand beside them
 pub static TIERS: &[(&str, &str)] = &[
     ("small", include_str!("../tiers/small.toml")),
-    ("small-workspace", include_str!("../tiers/small-workspace.toml")),
+    (
+        "small-workspace",
+        include_str!("../tiers/small-workspace.toml"),
+    ),
     ("medium", include_str!("../tiers/medium.toml")),
     ("big", include_str!("../tiers/big.toml")),
 ];
@@ -163,9 +166,18 @@ mod tests {
         assert_eq!(n, ids.len(), "duplicate lint ids");
         for m in &all {
             assert!(sl_core::meta::valid_id(m.id), "bad id {}", m.id);
-            assert!(!m.summary.is_empty() && !m.docs.trim().is_empty(), "{} has no summary or docs", m.id);
+            assert!(
+                !m.summary.is_empty() && !m.docs.trim().is_empty(),
+                "{} has no summary or docs",
+                m.id
+            );
             for p in m.params {
-                assert!(!sl_core::meta::RESERVED_KEYS.contains(&p.name), "{}: reserved param {}", m.id, p.name);
+                assert!(
+                    !sl_core::meta::RESERVED_KEYS.contains(&p.name),
+                    "{}: reserved param {}",
+                    m.id,
+                    p.name
+                );
             }
             let _ = sl_config::default_params(m);
         }

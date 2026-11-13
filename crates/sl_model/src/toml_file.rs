@@ -77,7 +77,11 @@ impl TomlFile {
 /// The 1-based line of a byte offset in `text`
 pub fn line_of(text: &str, offset: usize) -> u32 {
     let end = offset.min(text.len());
-    text.as_bytes()[..end].iter().filter(|b| **b == b'\n').count() as u32 + 1
+    text.as_bytes()[..end]
+        .iter()
+        .filter(|b| **b == b'\n')
+        .count() as u32
+        + 1
 }
 
 #[cfg(test)]

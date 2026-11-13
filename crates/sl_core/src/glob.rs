@@ -13,7 +13,9 @@ fn match_segments(pat: &[&str], segs: &[&str]) -> bool {
         None => segs.is_empty(),
         Some((&"**", rest)) => (0..=segs.len()).any(|i| match_segments(rest, &segs[i..])),
         Some((p, rest)) => match segs.split_first() {
-            Some((s, srest)) => match_segment(p.as_bytes(), s.as_bytes()) && match_segments(rest, srest),
+            Some((s, srest)) => {
+                match_segment(p.as_bytes(), s.as_bytes()) && match_segments(rest, srest)
+            }
             None => false,
         },
     }
@@ -34,7 +36,10 @@ mod tests {
 
     #[test]
     fn patterns() {
-        assert!(matches("crates/foo/src/gen/**", "crates/foo/src/gen/a/b.rs"));
+        assert!(matches(
+            "crates/foo/src/gen/**",
+            "crates/foo/src/gen/a/b.rs"
+        ));
         assert!(matches("crates/foo/src/gen/**", "crates/foo/src/gen"));
         assert!(matches("crates/*/src/lib.rs", "crates/foo/src/lib.rs"));
         assert!(!matches("crates/*/src/lib.rs", "crates/foo/bar/src/lib.rs"));

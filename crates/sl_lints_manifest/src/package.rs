@@ -8,7 +8,11 @@ pub(crate) fn run(cx: &Context<'_>) {
     let p = cx.project;
     for pkg in &p.packages {
         let item = format!("crate:{}", pkg.name);
-        if pkg.description.as_deref().is_none_or(|d| d.trim().is_empty()) {
+        if pkg
+            .description
+            .as_deref()
+            .is_none_or(|d| d.trim().is_empty())
+        {
             cx.emit(
                 Diagnostic::new("package-description", &item, format!("{} has no description", pkg.name))
                     .span(at(pkg, &["package"]))
@@ -18,10 +22,14 @@ pub(crate) fn run(cx: &Context<'_>) {
         }
         if pkg.license.is_none() && pkg.manifest.get(&["package", "license-file"]).is_none() {
             cx.emit(
-                Diagnostic::new("package-license", &item, format!("{} states no licence", pkg.name))
-                    .span(at(pkg, &["package"]))
-                    .krate(&pkg.name)
-                    .help("add `license = \"MIT OR Apache-2.0\"` (or `license.workspace = true`)"),
+                Diagnostic::new(
+                    "package-license",
+                    &item,
+                    format!("{} states no licence", pkg.name),
+                )
+                .span(at(pkg, &["package"]))
+                .krate(&pkg.name)
+                .help("add `license = \"MIT OR Apache-2.0\"` (or `license.workspace = true`)"),
             );
         }
         let want = cx.params("edition-latest").str("edition");
@@ -47,7 +55,10 @@ pub(crate) fn run(cx: &Context<'_>) {
         }
         if p.is_workspace()
             && pkg.publish
-            && !cx.params("publish-false").list("published").contains(&pkg.name)
+            && !cx
+                .params("publish-false")
+                .list("published")
+                .contains(&pkg.name)
         {
             cx.emit(
                 Diagnostic::new("publish-false", &item, format!("{} may be published but is not listed as published", pkg.name))
@@ -59,13 +70,21 @@ pub(crate) fn run(cx: &Context<'_>) {
         let readme = cx.params("readme-per-crate").str("file");
         if !p.exists(&pkg.path(readme)) {
             cx.emit(
-                Diagnostic::new("readme-per-crate", &item, format!("{} has no {readme}", pkg.name))
-                    .span(Span::new(pkg.path(readme), 0))
-                    .krate(&pkg.name)
-                    .help("write a short README: what the crate is, what it may depend on, how to use it"),
+                Diagnostic::new(
+                    "readme-per-crate",
+                    &item,
+                    format!("{} has no {readme}", pkg.name),
+                )
+                .span(Span::new(pkg.path(readme), 0))
+                .krate(&pkg.name)
+                .help(
+                    "write a short README: what the crate is, what it may depend on, how to use it",
+                ),
             );
         }
-        let root = ["src/lib.rs", "src/main.rs"].into_iter().find(|r| p.exists(&pkg.path(r)));
+        let root = ["src/lib.rs", "src/main.rs"]
+            .into_iter()
+            .find(|r| p.exists(&pkg.path(r)));
         if let Some(r) = root {
             let text = p.read(&pkg.path(r)).unwrap_or_default();
             let first = text
@@ -74,10 +93,16 @@ pub(crate) fn run(cx: &Context<'_>) {
                 .find(|l| !l.is_empty() && !l.starts_with("// "));
             if !first.is_some_and(|l| l.starts_with("//!") || l.starts_with("#![doc")) {
                 cx.emit(
-                    Diagnostic::new("crate-docs", &item, format!("{} does not open with crate documentation", pkg.path(r)))
-                        .span(Span::new(pkg.path(r), 1))
-                        .krate(&pkg.name)
-                        .help("start the file with `//!` lines: what the crate is for and how it is used"),
+                    Diagnostic::new(
+                        "crate-docs",
+                        &item,
+                        format!("{} does not open with crate documentation", pkg.path(r)),
+                    )
+                    .span(Span::new(pkg.path(r), 1))
+                    .krate(&pkg.name)
+                    .help(
+                        "start the file with `//!` lines: what the crate is for and how it is used",
+                    ),
                 );
             }
         }

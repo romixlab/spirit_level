@@ -38,8 +38,12 @@ static LINTS: &[&LintMeta] = &[&A, &B];
 
 fn tier(name: &str) -> Option<&'static str> {
     match name {
-        "small" => Some("[tier]\ndescription = \"d\"\n[lints.readme-per-crate]\nlevel = \"warn\"\nreason = \"r\"\n"),
-        "big" => Some("extends = \"small\"\n[lints.crate-lines]\nlevel = \"warn\"\nreason = \"r\"\n[lints.readme-per-crate]\nlevel = \"deny\"\nreason = \"r2\"\n"),
+        "small" => Some(
+            "[tier]\ndescription = \"d\"\n[lints.readme-per-crate]\nlevel = \"warn\"\nreason = \"r\"\n",
+        ),
+        "big" => Some(
+            "extends = \"small\"\n[lints.crate-lines]\nlevel = \"warn\"\nreason = \"r\"\n[lints.readme-per-crate]\nlevel = \"deny\"\nreason = \"r2\"\n",
+        ),
         "loop" => Some("extends = \"loop\"\n"),
         _ => None,
     }
@@ -74,7 +78,9 @@ fn messages(r: Result<Config, Vec<ConfigError>>) -> Vec<String> {
 
 #[test]
 fn tiers_extend_and_project_overrides() {
-    let c = load("extends = \"big\"\n[lints.crate-lines]\nwarn-above = 100\nreason = \"small repo\"\n").unwrap();
+    let c =
+        load("extends = \"big\"\n[lints.crate-lines]\nwarn-above = 100\nreason = \"small repo\"\n")
+            .unwrap();
     assert_eq!(c.lint("readme-per-crate").level, Level::Deny);
     assert_eq!(c.lint("crate-lines").level, Level::Warn);
     assert_eq!(c.lint("crate-lines").params.int("warn-above"), 100);
@@ -89,8 +95,16 @@ fn unknown_keys_lints_and_params_fail_loudly() {
         "extends = \"small\"\nfoo = 1\n[lints.crate-line]\nlevel = \"warn\"\nreason = \"r\"\n[lints.crate-lines]\nlevel = \"warn\"\nreason = \"r\"\nwarn-abov = 3\n",
     ));
     assert!(m.iter().any(|s| s.contains(":2: unknown key foo")), "{m:?}");
-    assert!(m.iter().any(|s| s.contains(":3: unknown lint crate-line; did you mean crate-lines")), "{m:?}");
-    assert!(m.iter().any(|s| s.contains(":9: crate-lines has no parameter warn-abov")), "{m:?}");
+    assert!(
+        m.iter()
+            .any(|s| s.contains(":3: unknown lint crate-line; did you mean crate-lines")),
+        "{m:?}"
+    );
+    assert!(
+        m.iter()
+            .any(|s| s.contains(":9: crate-lines has no parameter warn-abov")),
+        "{m:?}"
+    );
 }
 
 #[test]
@@ -100,12 +114,18 @@ fn reasons_types_and_levels_are_checked() {
     ));
     assert!(m.iter().any(|s| s.contains("needs a reason")), "{m:?}");
     assert!(m.iter().any(|s| s.contains("level = \"error\"")), "{m:?}");
-    assert!(m.iter().any(|s| s.contains("must be a integer") || s.contains("must be a")), "{m:?}");
+    assert!(
+        m.iter()
+            .any(|s| s.contains("must be a integer") || s.contains("must be a")),
+        "{m:?}"
+    );
 }
 
 #[test]
 fn a_lint_no_tier_enables_needs_a_level() {
-    let m = messages(load("extends = \"small\"\n[lints.crate-lines]\nreason = \"r\"\nwarn-above = 3\n"));
+    let m = messages(load(
+        "extends = \"small\"\n[lints.crate-lines]\nreason = \"r\"\nwarn-above = 3\n",
+    ));
     assert!(m.iter().any(|s| s.contains("sets no level")), "{m:?}");
 }
 
@@ -114,9 +134,19 @@ fn expired_overrides_fail() {
     let m = messages(load(
         "extends = \"big\"\n[lints.crate-lines]\nlevel = \"allow\"\nreason = \"r\"\nexpires = \"2026-11-01\"\n[[exceptions]]\nlint = \"readme-per-crate\"\ncrates = [\"x\"]\nlevel = \"allow\"\nreason = \"r\"\nexpires = \"v0.3.0\"\n",
     ));
-    assert!(m.iter().any(|s| s.contains(":5: the override of crate-lines expired (2026-11-01)")), "{m:?}");
-    assert!(m.iter().any(|s| s.contains("the exception for readme-per-crate expired (v0.3.0)")), "{m:?}");
-    let ok = load("extends = \"big\"\n[lints.crate-lines]\nlevel = \"allow\"\nreason = \"r\"\nexpires = \"2026-11-14\"\n");
+    assert!(
+        m.iter()
+            .any(|s| s.contains(":5: the override of crate-lines expired (2026-11-01)")),
+        "{m:?}"
+    );
+    assert!(
+        m.iter()
+            .any(|s| s.contains("the exception for readme-per-crate expired (v0.3.0)")),
+        "{m:?}"
+    );
+    let ok = load(
+        "extends = \"big\"\n[lints.crate-lines]\nlevel = \"allow\"\nreason = \"r\"\nexpires = \"2026-11-14\"\n",
+    );
     assert!(ok.is_ok());
 }
 
@@ -127,9 +157,20 @@ fn exceptions_scope_levels_and_params() {
     )
     .unwrap();
     assert_eq!(c.params_for("crate-lines", "gen").int("warn-above"), 90000);
-    assert_eq!(c.params_for("crate-lines", "other").int("warn-above"), 20000);
-    assert_eq!(c.level("readme-per-crate", None, Some("crates/old/Cargo.toml")).0, Level::Warn);
-    assert_eq!(c.level("readme-per-crate", None, Some("crates/new/Cargo.toml")).0, Level::Deny);
+    assert_eq!(
+        c.params_for("crate-lines", "other").int("warn-above"),
+        20000
+    );
+    assert_eq!(
+        c.level("readme-per-crate", None, Some("crates/old/Cargo.toml"))
+            .0,
+        Level::Warn
+    );
+    assert_eq!(
+        c.level("readme-per-crate", None, Some("crates/new/Cargo.toml"))
+            .0,
+        Level::Deny
+    );
 }
 
 #[test]
@@ -154,6 +195,13 @@ fn map_is_read_and_checked() {
         "extends = \"small\"\n[map.layers.core]\nallow = [\"nope\"]\n[map.crates]\na = { layer = \"x\", colour = 1 }\n",
     ));
     assert!(e.iter().any(|s| s.contains("allows nope")), "{e:?}");
-    assert!(e.iter().any(|s| s.contains("unknown key map.crates.a.colour")), "{e:?}");
-    assert!(e.iter().any(|s| s.contains("crate a is in layer x")), "{e:?}");
+    assert!(
+        e.iter()
+            .any(|s| s.contains("unknown key map.crates.a.colour")),
+        "{e:?}"
+    );
+    assert!(
+        e.iter().any(|s| s.contains("crate a is in layer x")),
+        "{e:?}"
+    );
 }

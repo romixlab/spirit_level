@@ -59,7 +59,12 @@ pub struct Context<'a> {
 
 impl<'a> Context<'a> {
     /// A context in which the lints `runnable` may report
-    pub fn new(project: &'a Project, config: &'a Config, today: Date, runnable: Vec<&'static str>) -> Context<'a> {
+    pub fn new(
+        project: &'a Project,
+        config: &'a Config,
+        today: Date,
+        runnable: Vec<&'static str>,
+    ) -> Context<'a> {
         Context {
             project,
             config,

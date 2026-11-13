@@ -24,14 +24,22 @@ pub struct TextOptions {
 /// The report for people, with ANSI styles (strip them with anstream when not on a terminal)
 pub fn text(r: &Report, o: TextOptions) -> String {
     let mut s = String::new();
-    for d in r.diagnostics.iter().filter(|d| o.show_allowed || d.allowed.is_none()) {
+    for d in r
+        .diagnostics
+        .iter()
+        .filter(|d| o.show_allowed || d.allowed.is_none())
+    {
         diagnostic(&mut s, d);
     }
     if !r.not_run.is_empty() {
         let _ = writeln!(s, "{DIM}not run:{DIM:#}");
         for n in &r.not_run {
             let st = if n.level == Level::Deny { DENY } else { WARN };
-            let _ = writeln!(s, "  {st}{}{st:#} {ID}{}{ID:#} needs {}: {}", n.level, n.lint, n.need, n.reason);
+            let _ = writeln!(
+                s,
+                "  {st}{}{st:#} {ID}{}{ID:#} needs {}: {}",
+                n.level, n.lint, n.need, n.reason
+            );
         }
     }
     if o.timings {
@@ -45,10 +53,20 @@ pub fn text(r: &Report, o: TextOptions) -> String {
         parts.push(format!("{DENY}{deny} denied{DENY:#}"));
     }
     if warn > 0 {
-        parts.push(format!("{WARN}{warn} warning{}{WARN:#}", if warn == 1 { "" } else { "s" }));
+        parts.push(format!(
+            "{WARN}{warn} warning{}{WARN:#}",
+            if warn == 1 { "" } else { "s" }
+        ));
     }
     if allowed > 0 {
-        parts.push(format!("{allowed} allowed{}", if o.show_allowed { "" } else { " (--show-allowed lists them)" }));
+        parts.push(format!(
+            "{allowed} allowed{}",
+            if o.show_allowed {
+                ""
+            } else {
+                " (--show-allowed lists them)"
+            }
+        ));
     }
     if !r.not_run.is_empty() {
         parts.push(format!("{} not run", r.not_run.len()));
@@ -63,8 +81,16 @@ pub fn text(r: &Report, o: TextOptions) -> String {
         "{head}: {} lints ran on {} ({}){}",
         r.ran.len(),
         r.root,
-        if r.extends.is_empty() { "no tier".to_string() } else { r.extends.join(" + ") },
-        if parts.is_empty() { String::new() } else { format!(": {}", parts.join(", ")) }
+        if r.extends.is_empty() {
+            "no tier".to_string()
+        } else {
+            r.extends.join(" + ")
+        },
+        if parts.is_empty() {
+            String::new()
+        } else {
+            format!(": {}", parts.join(", "))
+        }
     );
     s
 }
@@ -83,7 +109,15 @@ fn diagnostic(s: &mut String, d: &Diagnostic) {
     let _ = writeln!(s);
     let _ = writeln!(s, "  {}", d.message);
     for sp in d.spans.iter().skip(1) {
-        let _ = writeln!(s, "  {DIM}see {sp}{}{DIM:#}", if sp.label.is_empty() { String::new() } else { format!(": {}", sp.label) });
+        let _ = writeln!(
+            s,
+            "  {DIM}see {sp}{}{DIM:#}",
+            if sp.label.is_empty() {
+                String::new()
+            } else {
+                format!(": {}", sp.label)
+            }
+        );
     }
     if let Some(m) = &d.metric {
         let _ = writeln!(
@@ -91,7 +125,8 @@ fn diagnostic(s: &mut String, d: &Diagnostic) {
             "  {DIM}{}: {}{}{DIM:#}",
             m.name,
             num(m.value),
-            m.limit.map_or(String::new(), |l| format!(" (limit {})", num(l)))
+            m.limit
+                .map_or(String::new(), |l| format!(" (limit {})", num(l)))
         );
     }
     if let Some(h) = &d.help {
@@ -101,7 +136,10 @@ fn diagnostic(s: &mut String, d: &Diagnostic) {
         let _ = writeln!(s, "  {DIM}fix (--fix): {}{DIM:#}", f.description);
     }
     if d.confidence == Confidence::Estimate {
-        let _ = writeln!(s, "  {DIM}(an estimate: read without type information){DIM:#}");
+        let _ = writeln!(
+            s,
+            "  {DIM}(an estimate: read without type information){DIM:#}"
+        );
     }
     if let Some(a) = &d.allowed {
         let _ = writeln!(s, "  {DIM}allowed: {a}{DIM:#}");

@@ -115,7 +115,9 @@ impl Map {
         };
         if let Some(mut layers) = r.table("layers", errs) {
             for name in layers.keys() {
-                let Some(mut l) = layers.table(&name, errs) else { continue };
+                let Some(mut l) = layers.table(&name, errs) else {
+                    continue;
+                };
                 let desc = l.opt_str("desc", errs);
                 let allow = l.opt_list("allow", false, errs).unwrap_or_default();
                 l.finish(errs);
@@ -126,7 +128,9 @@ impl Map {
         if let Some(mut crates) = r.table("crates", errs) {
             for name in crates.keys() {
                 let line = crates.line(&name);
-                let Some(mut c) = crates.table(&name, errs) else { continue };
+                let Some(mut c) = crates.table(&name, errs) else {
+                    continue;
+                };
                 let entry = MapCrate {
                     layer: c.str("layer", errs).unwrap_or_default(),
                     desc: c.opt_str("desc", errs),
@@ -160,7 +164,9 @@ impl Map {
         if let Some(mut ext) = r.table("external", errs) {
             for name in ext.keys() {
                 let line = ext.line(&name);
-                let Some(mut e) = ext.table(&name, errs) else { continue };
+                let Some(mut e) = ext.table(&name, errs) else {
+                    continue;
+                };
                 let entry = External {
                     git: e.str("git", errs).unwrap_or_default(),
                     branch: e.opt_str("branch", errs),
@@ -179,7 +185,11 @@ impl Map {
     }
 
     fn check(&self, file: &sl_model::TomlFile, errs: &mut Vec<ConfigError>) {
-        let base: Vec<&str> = if file.get(&["map"]).is_some() { vec!["map"] } else { vec![] };
+        let base: Vec<&str> = if file.get(&["map"]).is_some() {
+            vec!["map"]
+        } else {
+            vec![]
+        };
         let line = |path: &[&str]| {
             let mut p = base.clone();
             p.extend_from_slice(path);
@@ -191,7 +201,10 @@ impl Map {
                     errs.push(ConfigError::new(
                         &self.file,
                         line(&["layers", &l.name, "allow"]),
-                        format!("layer {} allows {a}, which is not a layer of the map", l.name),
+                        format!(
+                            "layer {} allows {a}, which is not a layer of the map",
+                            l.name
+                        ),
                     ));
                 }
             }
@@ -201,7 +214,10 @@ impl Map {
                 errs.push(ConfigError::new(
                     &self.file,
                     c.line,
-                    format!("crate {name} is in layer {}, which is not a layer of the map", c.layer),
+                    format!(
+                        "crate {name} is in layer {}, which is not a layer of the map",
+                        c.layer
+                    ),
                 ));
             }
         }

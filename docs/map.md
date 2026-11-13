@@ -1,0 +1,56 @@
+# The crate map
+
+A big workspace declares its structure in a crate map: the layers, which layers each may depend on, the layer of every crate, and a few properties per crate. The graph lints check the real cargo graph against it, edge by edge.
+
+The map lives in `spirit_level.toml` as `[map]`, or in its own file named by `map-file`.
+
+```toml
+[map.layers.utils]
+desc = "Tiny helpers with no workspace dependencies outside utils"
+allow = ["utils"]
+
+[map.layers.model]
+allow = ["utils", "model"]
+
+[map.layers.app]
+allow = ["utils", "model", "app"]
+
+[map.crates]
+foo_ids = { layer = "utils" }
+foo_core = { layer = "model", deps = ["foo_ids"] }
+foo_gpu = { layer = "app", unsafe = true }
+foo_proto = { layer = "model", generated = true }
+foo_api = { layer = "model", stable = true }
+foo_math = { layer = "utils", no_std = true, deterministic = true }
+foo_cli = { layer = "app" }
+
+[map.forbid]
+foo_cli = ["foo_gpu", "wgpu"]       # the CLI never reaches these, directly or through others
+
+[map.external]
+exact_units = { git = "https://github.com/romixlab/exact_units", branch = "main", role = "utils" }
+
+[map.third-party]
+wgpu = ["foo_gpu"]                  # only these crates may depend on wgpu directly
+```
+
+## Keys
+
+| Key | Meaning |
+|---|---|
+| `layers.<name>.allow` | layers its crates may depend on; list its own name when crates of one layer may see each other |
+| `layers.<name>.desc` | what lives in the layer |
+| `crates.<name>.layer` | the crate's layer (required) |
+| `crates.<name>.deps` | the workspace crates it may depend on; absent: any its layer allows |
+| `crates.<name>.desc` | its description, when the map is where it is written |
+| `unsafe` | may allow `unsafe` code; every other crate forbids it |
+| `generated` | generated code, checked in: exempt from size limits |
+| `stable` | a published, stable API: semver-checked |
+| `no_std` | builds without std |
+| `wasm` | builds for `wasm32-unknown-unknown` |
+| `deterministic` | promises bit-identical results on every platform |
+| `forbid.<crate>` | crates (workspace or third-party) its closure must never reach |
+| `external.<crate>` | a crate of another project taken by git: its URL, branch and the layer that may use it |
+| `third-party.<crate>` | workspace crates that alone may depend on a heavy third-party crate |
+
+Unknown keys are errors, like everywhere in the configuration. Dev-dependencies are exempt from the layer rule but not from `forbid`. To fix an edge that points the wrong way, move a crate; do not reorder the layers.

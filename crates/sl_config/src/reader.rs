@@ -26,10 +26,10 @@ impl<'a> Reader<'a> {
 
     /// The line of a key of this table (the table's own line when `key` is empty)
     pub fn line(&self, key: &str) -> u32 {
-        if let Some((k, item)) = self.table.get_key_value(key) {
-            if let Some(s) = k.span().or_else(|| item.span()) {
-                return self.file.line_of_offset(s.start);
-            }
+        if let Some((k, item)) = self.table.get_key_value(key)
+            && let Some(s) = k.span().or_else(|| item.span())
+        {
+            return self.file.line_of_offset(s.start);
         }
         let p: Vec<&str> = self.path.iter().map(String::as_str).collect();
         self.file.line(&p)
@@ -103,7 +103,12 @@ impl<'a> Reader<'a> {
     }
 
     /// An optional list of strings; a single string is accepted as a list of one when `one_ok`
-    pub fn opt_list(&mut self, key: &str, one_ok: bool, errs: &mut Vec<ConfigError>) -> Option<Vec<String>> {
+    pub fn opt_list(
+        &mut self,
+        key: &str,
+        one_ok: bool,
+        errs: &mut Vec<ConfigError>,
+    ) -> Option<Vec<String>> {
         let v = self.value(key)?;
         if one_ok && let Some(s) = v.as_str() {
             return Some(vec![s.to_string()]);
@@ -115,7 +120,12 @@ impl<'a> Reader<'a> {
                     match x.as_str() {
                         Some(s) => out.push(s.to_string()),
                         None => {
-                            errs.push(self.err(key, format!("{} must be a list of strings", self.name(key))));
+                            errs.push(
+                                self.err(
+                                    key,
+                                    format!("{} must be a list of strings", self.name(key)),
+                                ),
+                            );
                             return None;
                         }
                     }

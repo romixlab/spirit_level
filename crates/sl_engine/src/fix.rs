@@ -22,7 +22,10 @@ pub fn apply(root: &Path, diagnostics: &[Diagnostic]) -> std::io::Result<Applied
     for d in diagnostics.iter().filter(|d| d.allowed.is_none()) {
         let Some(fix) = &d.fix else { continue };
         for e in &fix.edits {
-            by_file.entry(e.file.clone()).or_default().push((e, &fix.description));
+            by_file
+                .entry(e.file.clone())
+                .or_default()
+                .push((e, &fix.description));
         }
     }
     for (file, mut edits) in by_file {
@@ -31,7 +34,13 @@ pub fn apply(root: &Path, diagnostics: &[Diagnostic]) -> std::io::Result<Applied
         edits.sort_by_key(|(e, _)| (e.start, e.end));
         let mut kept: Vec<(&Edit, &str)> = Vec::new();
         for (e, desc) in edits {
-            let overlaps = kept.last().is_some_and(|(k, _)| e.start < k.end || (e.start == k.start && e.end == k.end && e.start == e.end && e.replacement == k.replacement));
+            let overlaps = kept.last().is_some_and(|(k, _)| {
+                e.start < k.end
+                    || (e.start == k.start
+                        && e.end == k.end
+                        && e.start == e.end
+                        && e.replacement == k.replacement)
+            });
             if overlaps || e.end > text.len() || e.start > e.end {
                 out.skipped.push((file.clone(), desc.to_string()));
             } else {
