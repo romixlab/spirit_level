@@ -117,8 +117,22 @@ mod tests {
 
     #[test]
     fn shipped_table_parses() {
-        let p = pins();
-        assert!(p.len() >= 12);
+        let names: Vec<&str> = pins().iter().map(|p| p.name.as_str()).collect();
+        assert_eq!(
+            names,
+            [
+                "clippy",
+                "rustfmt",
+                "cargo-deny",
+                "cargo-machete",
+                "cargo-shear",
+                "typos",
+                "taplo",
+                "cargo-semver-checks",
+                "cargo-udeps",
+                "cargo-audit"
+            ]
+        );
         let deny = pin("cargo-deny").unwrap();
         assert_eq!(deny.exe, "cargo-deny");
         assert!(matches!(deny.kind, PinKind::Crate { .. }));
