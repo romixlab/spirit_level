@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-11-13
+
 ### Added
 
 - Tier `embedded`: bedrock_lint's 97 firmware checks, `--elf`, migration page (TIER-2).
