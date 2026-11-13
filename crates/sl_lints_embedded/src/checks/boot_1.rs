@@ -60,7 +60,7 @@ pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
 }
 
 /// Whether some function reads VTOR or RCC_CFGR.SWS: the firmware looks at how it was entered itself
-fn reads_entry_state(fw: &Firmware) -> bool {
+fn reads_entry_state(fw: &Firmware<'_>) -> bool {
     scan::functions(fw).iter().any(|f| {
         let calls = scan::method_calls(f);
         if calls.iter().any(|c| c.name == "sws") {

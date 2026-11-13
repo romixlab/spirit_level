@@ -71,7 +71,7 @@ pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
 
 /// Flash driver constructors: `Flash::new`, `Flash::new_blocking`, `Flash::<..>::new_blocking`, with the function
 /// and the place
-pub(crate) fn flash_drivers(fw: &Firmware) -> Vec<(String, sl_firmware::Loc)> {
+pub(crate) fn flash_drivers(fw: &Firmware<'_>) -> Vec<(String, sl_firmware::Loc)> {
     let mut out = Vec::new();
     for f in scan::functions(fw) {
         scan::each(f.block, |n| {

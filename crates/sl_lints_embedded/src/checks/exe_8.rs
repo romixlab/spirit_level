@@ -23,7 +23,7 @@ const BUSES: &[&str] = &[
 ];
 
 /// Types that implement a WireWeaver API backend (`impl WireWeaverAsyncApiBackend for ServerState`)
-fn server_types(fw: &Firmware) -> Vec<String> {
+fn server_types(fw: &Firmware<'_>) -> Vec<String> {
     struct V(Vec<String>);
     impl<'a> Visit<'a> for V {
         fn visit_item_impl(&mut self, i: &'a syn::ItemImpl) {

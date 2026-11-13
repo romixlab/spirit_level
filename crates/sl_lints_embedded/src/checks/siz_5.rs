@@ -103,7 +103,7 @@ fn elf(fw: &Firmware<'_>, params: &Params) -> Vec<Diagnostic> {
 /// `Result::unwrap` / `expect` (through `&dyn Debug`), found where the receiver is a call that returns a Result
 /// for certain. `Option::unwrap` and defmt's `unwrap!` don't format; without types the other unwraps are not
 /// judged.
-fn source(fw: &Firmware) -> Vec<Diagnostic> {
+fn source(fw: &Firmware<'_>) -> Vec<Diagnostic> {
     let mut out = Vec::new();
     for w in scan::words(fw) {
         if w.text == "Debug2Format" || w.text == "Display2Format" {

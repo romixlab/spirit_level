@@ -116,7 +116,7 @@ impl Event {
 const DEPTH: usize = 3;
 
 /// Every event of every handler, one per place and kind
-pub fn analyze(fw: &Firmware) -> Vec<Event> {
+pub fn analyze(fw: &Firmware<'_>) -> Vec<Event> {
     let fns = scan::functions(fw);
     let mut by_name: BTreeMap<String, Vec<usize>> = BTreeMap::new();
     for (i, f) in fns.iter().enumerate() {
@@ -229,7 +229,7 @@ fn is_context(ty: &str) -> bool {
 }
 
 /// The server types `ww_codegen!(api::Api for super::ServerState, server = true, ..)` names
-fn server_types(fw: &Firmware) -> BTreeSet<String> {
+fn server_types(fw: &Firmware<'_>) -> BTreeSet<String> {
     struct V(BTreeSet<String>);
     impl<'ast> syn::visit::Visit<'ast> for V {
         fn visit_macro(&mut self, m: &'ast syn::Macro) {
@@ -254,7 +254,7 @@ fn server_types(fw: &Firmware) -> BTreeSet<String> {
     v.0
 }
 
-fn is_handler(f: &FnItem, servers: &BTreeSet<String>) -> bool {
+fn is_handler(f: &FnItem<'_>, servers: &BTreeSet<String>) -> bool {
     let params = f.params();
     // `Context<'_, impl EventOut>`: a bare `impl EventOut` is an event sender, not a request
     if params
@@ -271,7 +271,7 @@ fn is_handler(f: &FnItem, servers: &BTreeSet<String>) -> bool {
 }
 
 /// `[profile.release] overflow-checks = true` in the crate's or the workspace's manifest
-fn overflow_checks(fw: &Firmware) -> bool {
+fn overflow_checks(fw: &Firmware<'_>) -> bool {
     let key = ["profile", "release", "overflow-checks"];
     fw.manifest
         .get(&key)
@@ -282,7 +282,7 @@ fn overflow_checks(fw: &Firmware) -> bool {
 
 /// Names a function compares, bounds or checks for zero somewhere (`if i < buf.len()`, `n.min(MAX)`, `len != 0`):
 /// a panic on them is guarded or may be, so it is a candidate
-fn guarded_names(f: &FnItem) -> BTreeSet<String> {
+fn guarded_names(f: &FnItem<'_>) -> BTreeSet<String> {
     use syn::BinOp::*;
     let mut out = BTreeSet::new();
     // `let n = v.min(7);`, `let i = v % N;`: n and i are bounded
@@ -380,13 +380,13 @@ const COMMON: &[&str] = &[
 /// `self.m()` in the caller's own type; `x.m()` only when one method has that name; `Type::f()` / `module::f()` in
 /// that type or module; `f()` the one function of that name, or the one in the caller's module
 fn resolve(
-    fns: &[FnItem],
+    fns: &[FnItem<'_>],
     by_name: &BTreeMap<String, Vec<usize>>,
-    caller: &FnItem,
+    caller: &FnItem<'_>,
     call: &PendingCall,
 ) -> Option<(usize, usize)> {
     let cands = by_name.get(&call.name)?;
-    let module_of = |f: &FnItem| {
+    let module_of = |f: &FnItem<'_>| {
         let p = f.path();
         let mut parts: Vec<&str> = p.split("::").collect();
         parts.pop();

@@ -14,7 +14,7 @@ lint!(META, "log-2", "log", "DEFMT_RTT_BUFFER_SIZE and DEFMT_LOG are set in .car
 pub(crate) const NEEDS: &[FwNeed] = &[];
 
 
-fn env_var(fw: &Firmware, name: &str) -> bool {
+fn env_var(fw: &Firmware<'_>, name: &str) -> bool {
     fw.cargo_config(&["env", name]).is_some()
 }
 

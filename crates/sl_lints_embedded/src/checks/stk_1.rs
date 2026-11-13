@@ -53,7 +53,7 @@ fn rustflags_name_it(v: Option<&Item>) -> bool {
 }
 
 /// Whether some config section for `target` (the triple's or a `cfg(..)` one) sets flip-link
-fn configured(fw: &Firmware, target: &str) -> bool {
+fn configured(fw: &Firmware<'_>, target: &str) -> bool {
     if let Some((_, v)) = fw.cargo_config(&["target", target, "linker"]) {
         return v.as_str().is_some_and(is_flip_link);
     }
@@ -81,7 +81,7 @@ fn configured(fw: &Firmware, target: &str) -> bool {
     })
 }
 
-fn opted_out(fw: &Firmware) -> &'static str {
+fn opted_out(fw: &Firmware<'_>) -> &'static str {
     match fw
         .bedrock_fw
         .as_ref()
@@ -188,7 +188,7 @@ pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
 }
 
 /// The `[target.<triple>]` section, else the `[build] target` line
-fn target_span(fw: &Firmware, build_file: &TomlFile, target: &str) -> Span {
+fn target_span(fw: &Firmware<'_>, build_file: &TomlFile, target: &str) -> Span {
     for c in &fw.cargo_configs {
         let l = c.line_of_table(&["target", target]);
         if l > 0 {

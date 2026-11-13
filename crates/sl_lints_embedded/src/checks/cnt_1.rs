@@ -64,7 +64,7 @@ pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
 }
 
 /// Functions whose body counts, by name (a name defined twice counts only when both count)
-fn counting_fns(fns: &[FnItem]) -> BTreeSet<String> {
+fn counting_fns(fns: &[FnItem<'_>]) -> BTreeSet<String> {
     let mut by_name: BTreeMap<String, bool> = BTreeMap::new();
     for f in fns {
         let mut c = false;

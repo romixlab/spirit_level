@@ -21,7 +21,7 @@ const RING_TYPES: &[&str] = &["RingBufferedUartRx", "ReadableDmaRingBuffer"];
 
 /// Whether `fb` names a DMA ring consumer: `into_ring_buffered(..)` called in it, or one of [`RING_TYPES`] named in
 /// its signature or body
-fn uses_ring(fb: &FnBody) -> bool {
+fn uses_ring(fb: &FnBody<'_>) -> bool {
     let mut called = false;
     walk_exprs(fb.block, &mut |e| {
         if let Expr::MethodCall(m) = e

@@ -140,7 +140,7 @@ fn each_stmt(stmt: &syn::Stmt, f: impl FnMut(Node<'_>)) {
 }
 
 /// The function builds an output driver
-fn builds_output(f: &FnItem) -> bool {
+fn builds_output(f: &FnItem<'_>) -> bool {
     let mut b = false;
     scan::each(f.block, |n| {
         if let Node::Expr(e @ Expr::Call(_)) = n
