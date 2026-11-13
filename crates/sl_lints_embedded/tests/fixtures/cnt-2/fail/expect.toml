@@ -1,0 +1,8 @@
+project = "../../../projects/cnt_errors"
+
+[[finding]]
+at = "src/main.rs:44:26"
+
+[[finding]]
+at = "src/main.rs:45:28"
+

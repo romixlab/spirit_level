@@ -1,0 +1,5 @@
+project = "../../../projects/flt_faults"
+
+[[finding]]
+at = "src/main.rs:44:22"
+

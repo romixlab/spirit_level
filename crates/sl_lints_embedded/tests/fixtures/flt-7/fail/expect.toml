@@ -1,0 +1,9 @@
+project = "../../../projects/flt_faults"
+
+[[finding]]
+at = "src/main.rs:20:13"
+confidence = "estimate"
+
+[[finding]]
+at = "src/main.rs:32:51"
+

@@ -1,0 +1,8 @@
+project = "../../../projects/err4_edge_filtering"
+
+[[finding]]
+at = "src/main.rs:3:30"
+
+[[finding]]
+at = "src/main.rs:5:11"
+

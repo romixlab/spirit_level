@@ -1,0 +1,6 @@
+project = "../../../projects/log1_rtt_print"
+
+[[finding]]
+at = "src/main.rs:6:5"
+confidence = "estimate"
+

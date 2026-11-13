@@ -1,0 +1,10 @@
+project = "../../../projects/host_requests"
+
+[[finding]]
+at = "src/ww.rs:50:12"
+confidence = "estimate"
+
+[[finding]]
+at = "src/ww.rs:57:9"
+confidence = "candidate"
+

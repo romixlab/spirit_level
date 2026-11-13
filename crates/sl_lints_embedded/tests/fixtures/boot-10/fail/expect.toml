@@ -1,0 +1,8 @@
+project = "../../../projects/boot10_dbp_off"
+
+[[finding]]
+at = "src/main.rs:6:34"
+
+[[finding]]
+at = "src/main.rs:7:33"
+

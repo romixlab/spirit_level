@@ -1,0 +1,9 @@
+project = "../../../projects/err8_adc_cal"
+
+[[finding]]
+at = "src/main.rs:5:25"
+
+[[finding]]
+at = "src/main.rs:10:25"
+confidence = "candidate"
+

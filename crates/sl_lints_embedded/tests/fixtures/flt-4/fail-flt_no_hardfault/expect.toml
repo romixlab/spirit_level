@@ -1,0 +1,6 @@
+project = "../../../projects/flt_no_hardfault"
+
+[[finding]]
+at = "src/main.rs:13:11"
+confidence = "estimate"
+

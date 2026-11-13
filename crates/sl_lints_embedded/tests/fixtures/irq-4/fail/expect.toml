@@ -1,0 +1,10 @@
+project = "../../../projects/irq4_shared"
+
+[[finding]]
+at = "src/main.rs:2:5"
+confidence = "estimate"
+
+[[finding]]
+at = "src/main.rs:4:5"
+confidence = "candidate"
+

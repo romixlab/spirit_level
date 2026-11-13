@@ -1,0 +1,17 @@
+project = "../../../projects/irq1_clear"
+
+[[finding]]
+at = "src/main.rs:38:16"
+
+[[finding]]
+at = "src/main.rs:42:16"
+
+[[finding]]
+at = "src/main.rs:46:15"
+
+[[finding]]
+at = "src/main.rs:50:17"
+
+[[finding]]
+at = "src/main.rs:54:14"
+

@@ -1,0 +1,5 @@
+project = "../../../projects/fls1_no_nmi_hook"
+
+[[finding]]
+at = "src/main.rs:5:26"
+

@@ -1,0 +1,5 @@
+project = "../../../projects/boot1_rom_jump"
+
+[[finding]]
+at = "src/main.rs:9:29"
+

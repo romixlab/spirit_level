@@ -1,0 +1,8 @@
+project = "../../../projects/fls2_two_owners"
+
+[[finding]]
+at = "src/main.rs:12:21"
+
+[[finding]]
+at = "src/main.rs:12:50"
+

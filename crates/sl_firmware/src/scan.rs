@@ -238,7 +238,7 @@ pub fn entry_span(fw: &Firmware<'_>) -> sl_core::Span {
             fw.sources
                 .iter()
                 .find(|s| s.rel.ends_with("main.rs"))
-                .map_or("src/main.rs", |s| s.rel.as_str()),
+                .map_or_else(|| fw.path("src/main.rs"), |s| s.rel.clone()),
             0,
         ),
     }

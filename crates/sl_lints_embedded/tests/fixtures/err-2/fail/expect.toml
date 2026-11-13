@@ -1,0 +1,9 @@
+project = "../../../projects/err2_unquoted"
+
+[[finding]]
+at = "src/main.rs:4"
+
+[[finding]]
+at = "src/main.rs:8"
+confidence = "candidate"
+

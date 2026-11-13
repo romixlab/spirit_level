@@ -1,0 +1,10 @@
+project = "../../../projects/exe7_drain"
+
+[[finding]]
+at = "src/main.rs:6:9"
+confidence = "estimate"
+
+[[finding]]
+at = "src/main.rs:34:9"
+confidence = "candidate"
+

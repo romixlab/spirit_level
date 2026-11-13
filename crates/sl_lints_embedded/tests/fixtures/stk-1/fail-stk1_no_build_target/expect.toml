@@ -1,0 +1,5 @@
+project = "../../../projects/stk1_no_build_target"
+
+[[finding]]
+at = ".cargo/config.toml:4"
+

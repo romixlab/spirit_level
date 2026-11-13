@@ -1,0 +1,9 @@
+[package]
+name = "stk2_no_build_rs"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]
+
+[package.metadata.spirit-level]
+firmware = true

@@ -1,0 +1,5 @@
+project = "../../../projects/fls4_no_crc"
+
+[[finding]]
+at = "src/main.rs:3:10"
+

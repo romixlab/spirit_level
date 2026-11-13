@@ -1,0 +1,6 @@
+project = "../../../projects/dma4_ring"
+
+[[finding]]
+at = "src/main.rs:2:10"
+confidence = "estimate"
+

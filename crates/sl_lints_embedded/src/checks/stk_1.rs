@@ -109,7 +109,7 @@ pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
                     opted_out(fw)
                 ),
             )
-            .span(Span::new("Cargo.toml", 0))
+            .span(Span::new(&fw.manifest.rel, 0))
             .help(FIX),
         ];
     }

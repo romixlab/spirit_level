@@ -1,0 +1,5 @@
+project = "../../../projects/stk3_no_room"
+
+[[finding]]
+at = "memory.x:4"
+

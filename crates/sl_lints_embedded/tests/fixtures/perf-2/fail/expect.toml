@@ -1,0 +1,6 @@
+project = "../../../projects/perf2_libcalls"
+
+[[finding]]
+at = "<elf>"
+confidence = "candidate"
+

@@ -1,0 +1,5 @@
+project = "../../../projects/mem1_flash_covers_settings"
+
+[[finding]]
+at = "memory.x:4"
+

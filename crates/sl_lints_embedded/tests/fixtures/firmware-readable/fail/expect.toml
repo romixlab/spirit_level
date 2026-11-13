@@ -1,0 +1,8 @@
+project = "../../../projects/unreadable"
+
+[[finding]]
+at = "bedrock_fw.json"
+
+[[finding]]
+at = "memory.x"
+

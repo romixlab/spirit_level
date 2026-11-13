@@ -1,0 +1,8 @@
+project = "../../../projects/err6_pull_down"
+
+[[finding]]
+at = "src/main.rs:5:39"
+
+[[finding]]
+at = "src/main.rs:7:43"
+

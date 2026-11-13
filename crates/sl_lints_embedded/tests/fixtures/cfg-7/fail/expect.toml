@@ -1,0 +1,6 @@
+project = "../../../projects/cfg7_no_build_info"
+
+[[finding]]
+at = "Cargo.toml"
+confidence = "estimate"
+

@@ -1,0 +1,9 @@
+project = "../../../projects/err5_dar"
+
+[[finding]]
+at = "src/main.rs:3:9"
+
+[[finding]]
+at = "src/main.rs:4:9"
+confidence = "candidate"
+

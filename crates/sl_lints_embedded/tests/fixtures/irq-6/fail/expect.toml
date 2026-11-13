@@ -1,0 +1,6 @@
+project = "../../../projects/irq6_disable"
+
+[[finding]]
+at = "src/main.rs:21:14"
+confidence = "estimate"
+

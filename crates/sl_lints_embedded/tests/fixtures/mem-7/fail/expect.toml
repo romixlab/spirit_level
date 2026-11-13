@@ -1,0 +1,10 @@
+project = "../../../projects/mem7_absolute_partition"
+
+[[finding]]
+at = "memory.x:11"
+confidence = "estimate"
+
+[[finding]]
+at = "memory.x:12"
+confidence = "estimate"
+

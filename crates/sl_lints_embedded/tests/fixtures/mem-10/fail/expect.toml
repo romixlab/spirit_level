@@ -1,0 +1,8 @@
+project = "../../../projects/mem10_writable_flash"
+
+[[finding]]
+at = "<elf>"
+
+[[finding]]
+at = "src/main.rs:5:12"
+

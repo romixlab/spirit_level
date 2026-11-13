@@ -1,0 +1,8 @@
+project = "../../../projects/log2_missing_env"
+
+[[finding]]
+at = ".cargo/config.toml"
+
+[[finding]]
+at = ".cargo/config.toml"
+

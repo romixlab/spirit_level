@@ -1,0 +1,14 @@
+project = "../../../projects/pin_rp"
+
+[[finding]]
+at = "src/main.rs:7:57"
+confidence = "estimate"
+
+[[finding]]
+at = "src/main.rs:8:57"
+confidence = "estimate"
+
+[[finding]]
+at = "src/main.rs:19:15"
+confidence = "candidate"
+

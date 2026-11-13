@@ -1,0 +1,8 @@
+project = "../../../projects/usb1_hs_bulk"
+
+[[finding]]
+at = "src/main.rs:11:22"
+
+[[finding]]
+at = "src/main.rs:13:22"
+

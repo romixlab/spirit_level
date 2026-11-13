@@ -1,0 +1,5 @@
+project = "../../../projects/cfg2_download_reset"
+
+[[finding]]
+at = ".cargo/config.toml:2"
+

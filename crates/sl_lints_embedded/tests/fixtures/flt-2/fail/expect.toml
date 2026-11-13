@@ -1,0 +1,14 @@
+project = "../../../projects/flt_faults"
+
+[[finding]]
+at = "src/main.rs:37:5"
+
+[[finding]]
+at = "src/main.rs:38:5"
+
+[[finding]]
+at = "src/main.rs:43:5"
+
+[[finding]]
+at = "src/main.rs:43:28"
+

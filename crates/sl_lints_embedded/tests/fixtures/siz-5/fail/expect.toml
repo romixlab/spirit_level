@@ -1,0 +1,7 @@
+project = "../../../projects/siz5_core_fmt"
+
+params = { fmt-bytes = 16 }
+
+[[finding]]
+at = "<elf>"
+

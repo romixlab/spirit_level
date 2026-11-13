@@ -1,0 +1,17 @@
+project = "../../../projects/siz5_src_fmt"
+
+[[finding]]
+at = "src/main.rs:5:35"
+
+[[finding]]
+at = "src/main.rs:6:27"
+
+[[finding]]
+at = "src/main.rs:9:31"
+
+[[finding]]
+at = "src/main.rs:16:4"
+
+[[finding]]
+at = "src/main.rs:17:32"
+

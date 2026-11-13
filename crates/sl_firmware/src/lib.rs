@@ -435,9 +435,17 @@ impl Dependency<'_> {
     }
 }
 
-/// Whether a member is a firmware crate: it builds a binary, and its binary's root is `#![no_std]`, or it has a
-/// `memory.x` or a `bedrock_fw.json`, or cargo builds it for a bare-metal target (`-none-` in `[build] target`)
+/// Whether a member is a firmware crate: what `[package.metadata.spirit-level] firmware` says when it is set, else
+/// it builds a binary, and its binary's root is `#![no_std]`, or it has a `memory.x` or a `bedrock_fw.json`, or
+/// cargo builds it for a bare-metal target (`-none-` in `[build] target` or a `[target.<triple>]` section)
 pub fn is_firmware(project: &Project, pkg: &Package) -> bool {
+    if let Some(marked) = pkg
+        .manifest
+        .get(&["package", "metadata", "spirit-level", "firmware"])
+        .and_then(Item::as_bool)
+    {
+        return marked;
+    }
     if !pkg.has_bin() {
         return false;
     }
@@ -450,14 +458,15 @@ pub fn is_firmware(project: &Project, pkg: &Package) -> bool {
     }
     let mut notes = Vec::new();
     let bare_metal = cargo_configs(&root, &dir, &mut notes).iter().any(|c| {
-        c.lookup(&["build", "target"])
-            .is_some_and(|t| match t.as_value() {
-                Some(sl_model::toml_edit::Value::String(s)) => s.value().contains("-none"),
-                Some(sl_model::toml_edit::Value::Array(a)) => a
-                    .iter()
-                    .any(|t| t.as_str().is_some_and(|t| t.contains("-none"))),
-                _ => false,
-            })
+        c.targets().iter().any(|(t, _)| t.contains("-none"))
+            || c.lookup(&["build", "target"])
+                .is_some_and(|t| match t.as_value() {
+                    Some(sl_model::toml_edit::Value::String(s)) => s.value().contains("-none"),
+                    Some(sl_model::toml_edit::Value::Array(a)) => a
+                        .iter()
+                        .any(|t| t.as_str().is_some_and(|t| t.contains("-none"))),
+                    _ => false,
+                })
     });
     bare_metal
         || project.sources(pkg).iter().any(|f| {

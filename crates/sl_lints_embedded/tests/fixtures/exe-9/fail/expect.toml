@@ -1,0 +1,10 @@
+project = "../../../projects/exe9_noop"
+
+[[finding]]
+at = "src/main.rs:2:17"
+confidence = "estimate"
+
+[[finding]]
+at = "src/main.rs:8:13"
+confidence = "estimate"
+

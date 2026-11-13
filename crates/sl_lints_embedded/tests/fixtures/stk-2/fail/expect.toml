@@ -1,0 +1,8 @@
+project = "../../../projects/stk2_rustc_linker"
+
+[[finding]]
+at = "build.rs:6:14"
+
+[[finding]]
+at = "build.rs:8:14"
+

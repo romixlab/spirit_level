@@ -1,0 +1,5 @@
+project = "../../../projects/err11_chip_revision"
+
+[[finding]]
+at = "src/main.rs:3:35"
+

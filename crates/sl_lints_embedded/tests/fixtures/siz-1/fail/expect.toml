@@ -1,0 +1,5 @@
+project = "../../../projects/siz1_flash_full"
+
+[[finding]]
+at = "memory.x:3"
+

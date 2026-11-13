@@ -1,0 +1,8 @@
+project = "../../../projects/fls3_core1_flash"
+
+[[finding]]
+at = "src/main.rs:19:11"
+
+[[finding]]
+at = "src/main.rs:20:11"
+

@@ -1,0 +1,8 @@
+project = "../../../projects/log1_blocking_rtt"
+
+[[finding]]
+at = "src/main.rs:3:5"
+
+[[finding]]
+at = "src/main.rs:8:48"
+

@@ -1,0 +1,12 @@
+project = "../../../projects/pwr4_rtc_source"
+
+[[finding]]
+at = "src/main.rs:6:21"
+confidence = "estimate"
+
+[[finding]]
+at = "src/main.rs:13:11"
+
+[[finding]]
+at = "src/main.rs:14:11"
+

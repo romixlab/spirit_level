@@ -1,0 +1,6 @@
+project = "../../../projects/exe13_ring"
+
+[[finding]]
+at = "src/main.rs:6:27"
+confidence = "estimate"
+

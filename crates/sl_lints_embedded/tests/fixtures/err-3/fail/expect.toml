@@ -1,0 +1,6 @@
+project = "../../../projects/err3_bank2"
+
+[[finding]]
+at = "memory.x:3"
+confidence = "estimate"
+

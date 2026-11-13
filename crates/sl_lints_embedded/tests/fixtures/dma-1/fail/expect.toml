@@ -1,0 +1,10 @@
+project = "../../../projects/dma1_dtcm"
+
+[[finding]]
+at = "src/main.rs:4:12"
+confidence = "estimate"
+
+[[finding]]
+at = "src/main.rs:5:12"
+confidence = "candidate"
+

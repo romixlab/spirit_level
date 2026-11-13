@@ -1,0 +1,5 @@
+project = "../../../projects/siz3_lto_fat_override"
+
+[[finding]]
+at = "Cargo.toml:10"
+

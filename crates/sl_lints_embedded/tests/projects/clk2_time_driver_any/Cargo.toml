@@ -1,0 +1,12 @@
+[package]
+name = "clk2_time_driver_any"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+embassy-stm32 = { version = "0.4", features = ["stm32g0b1re", "time-driver-any"] }
+
+[workspace]
+
+[package.metadata.spirit-level]
+firmware = true

@@ -1,0 +1,8 @@
+project = "../../../projects/boot2_supply_blind"
+
+[[finding]]
+at = "src/main.rs:6:5"
+
+[[finding]]
+at = "src/main.rs:13:9"
+

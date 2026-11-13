@@ -1,0 +1,30 @@
+project = "../../../projects/host_requests"
+
+[[finding]]
+at = "src/ww.rs:15:30"
+
+[[finding]]
+at = "src/ww.rs:16:45"
+
+[[finding]]
+at = "src/ww.rs:22:32"
+confidence = "estimate"
+
+[[finding]]
+at = "src/ww.rs:32:33"
+confidence = "candidate"
+
+[[finding]]
+at = "src/ww.rs:49:32"
+
+[[finding]]
+at = "src/ww.rs:60:32"
+confidence = "estimate"
+
+[[finding]]
+at = "src/ww.rs:70:26"
+confidence = "candidate"
+
+[[finding]]
+at = "src/ww.rs:71:9"
+

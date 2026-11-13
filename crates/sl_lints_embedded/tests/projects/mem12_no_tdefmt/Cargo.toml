@@ -1,0 +1,12 @@
+[package]
+name = "mem12_no_tdefmt"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+defmt = "1"
+
+[workspace]
+
+[package.metadata.spirit-level]
+firmware = true

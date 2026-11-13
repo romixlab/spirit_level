@@ -1,0 +1,5 @@
+project = "../../../projects/boot1_rom_boot_early"
+
+[[finding]]
+at = "src/main.rs:8:5"
+

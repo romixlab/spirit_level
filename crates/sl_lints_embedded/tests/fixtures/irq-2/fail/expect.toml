@@ -1,0 +1,6 @@
+project = "../../../projects/irq2_modify"
+
+[[finding]]
+at = "src/main.rs:22:15"
+confidence = "candidate"
+

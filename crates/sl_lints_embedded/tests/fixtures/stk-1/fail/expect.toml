@@ -1,0 +1,5 @@
+project = "../../../projects/stk1_nearest"
+
+[[finding]]
+at = "fw/.cargo/config.toml:3"
+

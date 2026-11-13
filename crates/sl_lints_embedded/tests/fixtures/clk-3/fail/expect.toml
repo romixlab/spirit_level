@@ -1,0 +1,5 @@
+project = "../../../projects/clk3_css_no_nmi"
+
+[[finding]]
+at = "src/main.rs:7:32"
+

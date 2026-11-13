@@ -1,0 +1,6 @@
+project = "../../../projects/siz4_release_defaults"
+
+[[finding]]
+at = "Cargo.toml"
+confidence = "estimate"
+

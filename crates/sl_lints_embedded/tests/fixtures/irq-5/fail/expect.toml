@@ -1,0 +1,12 @@
+project = "../../../projects/irq5_unmask"
+
+[[finding]]
+at = "src/main.rs:32:34"
+
+[[finding]]
+at = "src/main.rs:40:14"
+
+[[finding]]
+at = "src/main.rs:55:9"
+confidence = "estimate"
+

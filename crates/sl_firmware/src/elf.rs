@@ -454,7 +454,7 @@ impl super::Firmware<'_> {
         let file = self
             .memory_x
             .as_ref()
-            .map_or("memory.x", |m| m.rel.as_str());
+            .map_or_else(|| self.path("memory.x"), |m| m.rel.clone());
         Span::new(file, r.line).label(format!("{} region", r.name))
     }
 

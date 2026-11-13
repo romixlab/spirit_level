@@ -1,0 +1,5 @@
+project = "../../../projects/fls1_raw_flash"
+
+[[finding]]
+at = "src/main.rs:6:17"
+

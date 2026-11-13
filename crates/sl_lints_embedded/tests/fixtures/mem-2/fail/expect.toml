@@ -1,0 +1,5 @@
+project = "../../../projects/mem2_tail_symbol"
+
+[[finding]]
+at = "memory.x:12"
+

@@ -295,7 +295,7 @@ pub fn entry_loc(fw: &Firmware<'_>) -> Loc {
         file: fw
             .sources
             .first()
-            .map_or("src/main.rs".into(), |f| f.rel.clone()),
+            .map_or_else(|| fw.path("src/main.rs"), |f| f.rel.clone()),
         line: 1,
         column: 1,
     }

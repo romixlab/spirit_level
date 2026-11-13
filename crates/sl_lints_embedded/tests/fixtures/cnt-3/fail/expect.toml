@@ -1,0 +1,5 @@
+project = "../../../projects/cnt3_macro_version_mismatch"
+
+[[finding]]
+at = "Cargo.toml:8"
+

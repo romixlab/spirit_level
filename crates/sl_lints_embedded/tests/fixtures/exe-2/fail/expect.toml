@@ -1,0 +1,16 @@
+project = "../../../projects/exe2_blocking"
+
+[[finding]]
+at = "src/main.rs:10:5"
+
+[[finding]]
+at = "src/main.rs:30:25"
+
+[[finding]]
+at = "src/main.rs:37:9"
+confidence = "estimate"
+
+[[finding]]
+at = "src/main.rs:38:9"
+confidence = "estimate"
+

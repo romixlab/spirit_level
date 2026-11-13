@@ -1,0 +1,6 @@
+project = "../../../projects/stk5_init_by_value"
+
+[[finding]]
+at = "src/main.rs:16:20"
+confidence = "estimate"
+

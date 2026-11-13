@@ -1,0 +1,5 @@
+project = "../../../projects/exe12_no_await"
+
+[[finding]]
+at = "src/main.rs:2:14"
+

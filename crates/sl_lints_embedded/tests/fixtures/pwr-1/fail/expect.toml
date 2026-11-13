@@ -1,0 +1,5 @@
+project = "../../../projects/pwr1_no_bor"
+
+[[finding]]
+at = "src/main.rs:3:10"
+

@@ -1,0 +1,5 @@
+project = "../../../projects/cfg1_no_probe"
+
+[[finding]]
+at = ".cargo/config.toml:2"
+

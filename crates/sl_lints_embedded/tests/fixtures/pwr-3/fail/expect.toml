@@ -1,0 +1,5 @@
+project = "../../../projects/pwr3_no_bd_reset"
+
+[[finding]]
+at = "src/main.rs:3:10"
+

@@ -1,0 +1,9 @@
+project = "../../../projects/stk4_paint_stack"
+
+[[finding]]
+at = "Cargo.toml:5"
+
+[[finding]]
+at = "fw/Cargo.toml:8"
+confidence = "estimate"
+

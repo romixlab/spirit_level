@@ -1,0 +1,5 @@
+project = "../../../projects/clk5_usb_no_48"
+
+[[finding]]
+at = "src/main.rs:7:38"
+

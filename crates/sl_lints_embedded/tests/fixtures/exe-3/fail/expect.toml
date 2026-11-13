@@ -1,0 +1,12 @@
+project = "../../../projects/exe3_order"
+
+[[finding]]
+at = "src/main.rs:9:25"
+
+[[finding]]
+at = "src/main.rs:12:35"
+
+[[finding]]
+at = "src/main.rs:17:35"
+confidence = "estimate"
+

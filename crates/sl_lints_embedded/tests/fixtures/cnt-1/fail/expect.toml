@@ -1,0 +1,22 @@
+project = "../../../projects/cnt_errors"
+
+[[finding]]
+at = "src/main.rs:11:9"
+confidence = "estimate"
+
+[[finding]]
+at = "src/main.rs:13:12"
+confidence = "estimate"
+
+[[finding]]
+at = "src/main.rs:14:5"
+confidence = "estimate"
+
+[[finding]]
+at = "src/main.rs:19:9"
+confidence = "estimate"
+
+[[finding]]
+at = "src/main.rs:21:18"
+confidence = "candidate"
+

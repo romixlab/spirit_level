@@ -1,0 +1,10 @@
+project = "../../../projects/ext7_minus_one"
+
+[[finding]]
+at = "src/main.rs:4:20"
+confidence = "estimate"
+
+[[finding]]
+at = "src/main.rs:5:22"
+confidence = "estimate"
+

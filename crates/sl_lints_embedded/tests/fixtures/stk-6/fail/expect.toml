@@ -1,0 +1,13 @@
+project = "../../../projects/stk6_frames_and_depth"
+
+[[finding]]
+at = "<elf>"
+confidence = "candidate"
+
+[[finding]]
+at = "memory.x:4"
+confidence = "estimate"
+
+[[finding]]
+at = "src/main.rs:6:4"
+

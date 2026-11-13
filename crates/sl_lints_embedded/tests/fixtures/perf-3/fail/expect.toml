@@ -1,0 +1,5 @@
+project = "../../../projects/perf3_ram_fn"
+
+[[finding]]
+at = "src/main.rs:5:1"
+

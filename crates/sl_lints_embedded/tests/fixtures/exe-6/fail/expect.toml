@@ -1,0 +1,9 @@
+project = "../../../projects/exe6_shared"
+
+[[finding]]
+at = "src/main.rs:2:8"
+
+[[finding]]
+at = "src/main.rs:4:12"
+confidence = "estimate"
+

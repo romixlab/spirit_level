@@ -1,0 +1,6 @@
+project = "../../../projects/exe1_deadline"
+
+[[finding]]
+at = "src/main.rs:11:10"
+confidence = "candidate"
+

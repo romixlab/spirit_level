@@ -1,0 +1,6 @@
+[package]
+name = "err4_edge_filtering"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]

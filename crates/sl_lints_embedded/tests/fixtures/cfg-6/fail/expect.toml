@@ -1,0 +1,5 @@
+project = "../../../projects/cfg6_thumbv6m_no_atomic"
+
+[[finding]]
+at = "Cargo.toml"
+

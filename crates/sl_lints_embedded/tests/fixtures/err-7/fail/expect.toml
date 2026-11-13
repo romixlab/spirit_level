@@ -1,0 +1,11 @@
+project = "../../../projects/err7_rom_reboot"
+
+[[finding]]
+at = "src/main.rs:5:5"
+
+[[finding]]
+at = "src/main.rs:9:5"
+
+[[finding]]
+at = "src/main.rs:16:11"
+

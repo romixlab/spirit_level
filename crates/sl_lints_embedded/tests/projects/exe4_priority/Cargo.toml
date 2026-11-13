@@ -1,0 +1,12 @@
+[package]
+name = "exe4_priority"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+embassy-time = "0.5"
+
+[workspace]
+
+[package.metadata.spirit-level]
+firmware = true
