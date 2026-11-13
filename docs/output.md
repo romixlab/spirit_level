@@ -6,22 +6,28 @@ For people, findings are grouped by lint, denied groups first, then warnings, ea
 
 ```text
 deny M0024 workspace-lints ×28: the root declares [workspace.lints] and every member inherits them
-  --> crates/tpm_base/Cargo.toml:1:1
-   |
- 1 | [package]
-   | ^^^^^^^^^ tpm_base does not inherit the workspace lints
- 2 | name = "tpm_base"
-   |
-  = help: add `[lints]` with `workspace = true` to its Cargo.toml
-  crates/tpm_base/Cargo.toml        tpm_base does not inherit the workspace lints
-  crates/tpm_browse/Cargo.toml      tpm_browse does not inherit the workspace lints
-  ... up to 5 places
+    --> Cargo.toml:15:1
+     |
+  13 | # under crates/ have their own
+  14 | # (`app_base::build`).
+  15 | [workspace]
+     | ^^^^^^^^^^^ the root declares no [workspace.lints]
+  16 | members = ["crates/*"]
+  17 |
+     |
+  help: add `[lints]` with `workspace = true` to its Cargo.toml
+  Cargo.toml  app does not inherit the workspace lints
+  Cargo.toml:15  the root declares no [workspace.lints]
+  crates/app_approve/Cargo.toml  app_approve does not inherit the workspace lints
+  crates/app_base/Cargo.toml  app_base does not inherit the workspace lints
+  crates/app_browse/Cargo.toml  app_browse does not inherit the workspace lints
+  fix (--fix): add [lints] workspace = true (27 of 28)
   +23 more: `spl check --all` lists them (explain: `spl explain M0024`)
 ```
 
 - **Header:** level, code, id, count and the lint's rule.
-- **Excerpt:** the first place's source, with 2 lines of context and its exact range marked with the finding's message. `--excerpts N` shows N per group; `0` turns them off.
-- **Places:** up to 5, then how many more and the command that lists them. `--all` lists every place.
+- **Excerpt:** the source of the first place that points at a line, with 2 lines of context and its exact range marked with the finding's message. `--excerpts N` shows N per group; `0` turns them off.
+- **Places:** up to 5, then how many more and the command that lists them. `--all` lists every place. An exact fix is named once per group, with how many places it fixes.
 - **`--group-by crate|file`** groups by crate or file instead of lint.
 - **Summary** last: the result, how many lints ran, and the counts.
 

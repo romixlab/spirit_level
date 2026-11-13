@@ -9,11 +9,15 @@ repository.workspace = true
 publish = false
 
 [dependencies]
-anstyle.workspace = true
+annotate-snippets.workspace = true
 serde_json.workspace = true
 sl_config.workspace = true
 sl_core.workspace = true
 sl_engine.workspace = true
+vc_ui.workspace = true
+
+[dev-dependencies]
+anstream.workspace = true
 
 [lints]
 workspace = true

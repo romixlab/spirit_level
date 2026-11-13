@@ -7,12 +7,15 @@
 - `--color auto|always|never`; colour, error line, exit codes and completion from vhrd_cli (CLI-4).
 - Stable lint codes (`S0001`) beside ids, in output, JSON, config, waivers and `explain` (ENG-9).
 - `spl codes`: every code ever given; `--check` guards the registry `codes.toml` (ENG-9).
+- Source excerpts per group with the range marked; `--excerpts N` (ENG-8).
+- `--all` lists every place; `--group-by crate|file` (ENG-7).
 
 ### Changed
 
 - **Breaking:** the binary is `spl`; `spirit-level` is gone (CLI-3).
 - Book lint pages are named after codes (`lints/S0001.md`), with the id as anchor (ENG-9).
 - Spans carry an end column; source and manifest lints report exact ranges (ENG-8).
+- Text output groups findings by lint: deny first, by count, 5 places each, summary last (ENG-7).
 
 ### Fixed
 

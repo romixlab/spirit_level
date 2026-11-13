@@ -74,8 +74,9 @@ fn denied_finding_exits_1_and_fix_repairs_it() {
     let o = run(&p.0, &["check"]);
     assert_eq!(o.status.code(), Some(1), "{}", text(&o));
     let t = text(&o);
+    assert!(t.contains("deny M0024 workspace-lints ×1"), "{t}");
     assert!(
-        t.contains("deny workspace-lints crates/a/Cargo.toml"),
+        t.contains("  crates/a/Cargo.toml  a does not inherit"),
         "{t}"
     );
     assert!(
@@ -151,10 +152,14 @@ fn waivers_allow_and_are_checked() {
     .unwrap();
     let o = run(&p.0, &["check"]);
     assert_eq!(o.status.code(), Some(1));
+    let t = text(&o);
+    assert!(t.contains("deny C0013 waiver-unused ×1"), "{t}");
+    assert!(t.contains("  crates/a/Cargo.toml:1  the waiver"), "{t}");
+    // the excerpt shows the waiver line, marked
+    assert!(t.contains("--> crates/a/Cargo.toml:1"), "{t}");
     assert!(
-        text(&o).contains("deny waiver-unused crates/a/Cargo.toml:1"),
-        "{}",
-        text(&o)
+        t.contains("1 | # spirit-level: allow(package-license)"),
+        "{t}"
     );
 }
 

@@ -20,7 +20,7 @@ const NOT_RUN: Exit = Exit(3);
 #[derive(Parser)]
 #[command(name = "spl", version = vc_build::version!(), about = "A linter for Rust projects of every size: tiers of lints in TOML, from one crate to a workspace of hundreds")]
 #[command(
-    after_help = "Examples:\n  spl check\n  spl check --format json --only crate-lines\n  spl explain workspace-lints\n  spl init --tier small-workspace"
+    after_help = "Examples:\n  spl check\n  spl check --all --group-by crate\n  spl check --format json --only S0001\n  spl explain workspace-lints\n  spl init --tier small-workspace"
 )]
 struct Cli {
     #[command(flatten)]
@@ -33,6 +33,16 @@ struct Cli {
 enum Format {
     Text,
     Json,
+}
+
+#[derive(Clone, Copy, ValueEnum)]
+enum GroupByArg {
+    /// One group per lint (an adapter's tool rule makes its own)
+    Lint,
+    /// One group per crate
+    Crate,
+    /// One group per file
+    File,
 }
 
 #[derive(Subcommand)]
@@ -125,6 +135,15 @@ struct CheckArgs {
     /// Also list findings allowed by waivers and exceptions
     #[arg(long)]
     show_allowed: bool,
+    /// List every place of a group, not the first 5 (text output; JSON always has every finding)
+    #[arg(long, short = 'a')]
+    all: bool,
+    /// Group the findings by lint, crate or file (text output)
+    #[arg(long, value_enum, default_value = "lint", value_name = "BY")]
+    group_by: GroupByArg,
+    /// Source excerpts per group, from its first places; 0 turns them off (text output)
+    #[arg(long, default_value_t = 1, value_name = "N")]
+    excerpts: usize,
     /// Show how long each analysis took
     #[arg(long)]
     timings: bool,
@@ -217,6 +236,9 @@ fn check(a: CheckArgs) -> Result<Exit, String> {
         format,
         fix,
         show_allowed,
+        all,
+        group_by,
+        excerpts,
         timings,
         today: t,
     } = a;
@@ -262,9 +284,18 @@ fn check(a: CheckArgs) -> Result<Exit, String> {
             "{}",
             sl_report::text(
                 &report,
+                &spirit_level::lints(),
                 sl_report::TextOptions {
                     show_allowed,
-                    timings
+                    timings,
+                    all,
+                    excerpts,
+                    group_by: match group_by {
+                        GroupByArg::Lint => sl_report::GroupBy::Lint,
+                        GroupByArg::Crate => sl_report::GroupBy::Crate,
+                        GroupByArg::File => sl_report::GroupBy::File,
+                    },
+                    ..sl_report::TextOptions::default()
                 }
             )
         ),
