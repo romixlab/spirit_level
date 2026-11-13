@@ -17,6 +17,7 @@
 | [small-workspace](../tiers/small-workspace.md) | `warn` | manifests are edited by people and by tools; one TOML formatting keeps their diffs about the change |
 | [medium](../tiers/medium.md) | `warn` | manifests are edited by people and by tools; one TOML formatting keeps their diffs about the change |
 | [big](../tiers/big.md) | `deny` | manifests are edited by people and by tools; one TOML formatting keeps their diffs about the change |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Why
 

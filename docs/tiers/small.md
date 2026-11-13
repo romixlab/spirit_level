@@ -10,16 +10,19 @@ Use it with `extends = "small"` in `spirit_level.toml`.
 |---|---|---|---|
 | [agent-file-lines](../lints/agent-file-lines.md) | `warn` | agents read AGENTS.md whole every session; a long one is skimmed, not followed | small |
 | [allow-without-reason](../lints/allow-without-reason.md) | `warn` | an exception to a lint says why, or it outlives its reason | small |
+| [cargo-doc](../lints/cargo-doc.md) | `warn` | broken intra-doc links and tags render wrong on docs.rs and in the IDE | small |
 | [changelog-entry-length](../lints/changelog-entry-length.md) | `warn` | a CHANGELOG is a list: one short line per change | small |
 | [changelog-unreleased](../lints/changelog-unreleased.md) | `warn` | work lands under [Unreleased]; the release step turns it into a version section | small |
 | [crate-docs](../lints/crate-docs.md) | `warn` | rustdoc's front page of the crate is its crate-level docs | small |
 | [default-features-off](../lints/default-features-off.md) | `warn` | dependencies are added with default-features = false and only the features in use | small |
+| [deny-advisories](../lints/deny-advisories.md) | `warn` | a dependency with a known vulnerability is a risk taken unseen; needs no deny.toml | small |
 | [edition-latest](../lints/edition-latest.md) | `warn` | new code starts on the current edition | small |
 | [function-complexity](../lints/function-complexity.md) | `warn` | more paths than can be tested or held in one's head | small |
 | [function-lines](../lints/function-lines.md) | `warn` | a function longer than a screen is changed without being read whole | small |
 | [git-dependency-pins](../lints/git-dependency-pins.md) | `warn` | git dependencies follow a branch; Cargo.lock fixes the commit | small |
 | [justfile-recipes](../lints/justfile-recipes.md) | `warn` | every repo answers to the same recipes: default, test, lint, install, deploy | small |
 | [lock-held-across](../lints/lock-held-across.md) | `warn` | a guard across .await or I/O stalls every other caller for as long as the slowest peer | small |
+| [machete-unused-deps](../lints/machete-unused-deps.md) | `warn` | an unused dependency costs build time, audit and lockfile churn for nothing | small |
 | [no-sys-crates](../lints/no-sys-crates.md) | `deny` | pure-Rust crates only: no bundled C, no -sys bindings without a written reason | small |
 | [package-description](../lints/package-description.md) | `warn` | the crate's one-line description is written once, in Cargo.toml; tables and READMEs are made from it | small |
 | [package-license](../lints/package-license.md) | `warn` | a crate without a licence cannot be reused or published | small |
@@ -31,6 +34,7 @@ Use it with `extends = "small"` in `spirit_level.toml`.
 | [static-interior-mutability](../lints/static-interior-mutability.md) | `warn` | every piece of mutable state has one owner; a global lock says why | small |
 | [static-mut](../lints/static-mut.md) | `deny` | global mutable state with no synchronisation; there is always a better owner | small |
 | [todo-macros](../lints/todo-macros.md) | `warn` | no stop-gaps: a todo!() is a panic waiting in shipped code | small |
+| [typos-misspelling](../lints/typos-misspelling.md) | `warn` | a misspelled identifier is copied to every call site; typos has almost no false positives | small |
 | [waiver-invalid](../lints/waiver-invalid.md) | `deny` | a waiver without a reason, for an unknown lint, or expired hides a finding without saying why | small |
 | [waiver-unused](../lints/waiver-unused.md) | `warn` | a waiver that allows nothing is left over from changed code | small |
 
@@ -140,4 +144,20 @@ reason = "a CHANGELOG is a list: one short line per change"
 [lints.agent-file-lines]
 level = "warn"
 reason = "agents read AGENTS.md whole every session; a long one is skimmed, not followed"
+
+[lints.typos-misspelling]
+level = "warn"
+reason = "a misspelled identifier is copied to every call site; typos has almost no false positives"
+
+[lints.machete-unused-deps]
+level = "warn"
+reason = "an unused dependency costs build time, audit and lockfile churn for nothing"
+
+[lints.deny-advisories]
+level = "warn"
+reason = "a dependency with a known vulnerability is a risk taken unseen; needs no deny.toml"
+
+[lints.cargo-doc]
+level = "warn"
+reason = "broken intra-doc links and tags render wrong on docs.rs and in the IDE"
 ```

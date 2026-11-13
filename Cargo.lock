@@ -1024,7 +1024,7 @@ dependencies = [
  "sl_core",
  "sl_model",
  "sl_testkit",
- "syn",
+ "syn 3.0.10",
 ]
 
 [[package]]
@@ -1035,7 +1035,7 @@ dependencies = [
  "sl_analysis",
  "sl_core",
  "sl_testkit",
- "syn",
+ "syn 3.0.10",
 ]
 
 [[package]]
@@ -1109,7 +1109,7 @@ dependencies = [
  "sl_core",
  "sl_model",
  "sl_testkit",
- "syn",
+ "syn 3.0.10",
 ]
 
 [[package]]
@@ -1119,7 +1119,7 @@ dependencies = [
  "sl_analysis",
  "sl_core",
  "sl_testkit",
- "syn",
+ "syn 3.0.10",
 ]
 
 [[package]]
@@ -1158,7 +1158,7 @@ dependencies = [
 
 [[package]]
 name = "sl_tool_audit"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "serde_json",
  "sl_analysis",
@@ -1169,7 +1169,7 @@ dependencies = [
 
 [[package]]
 name = "sl_tool_cargo"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "sl_analysis",
  "sl_config",
@@ -1181,7 +1181,7 @@ dependencies = [
 
 [[package]]
 name = "sl_tool_clippy"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "sl_analysis",
  "sl_core",
@@ -1191,7 +1191,7 @@ dependencies = [
 
 [[package]]
 name = "sl_tool_deny"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "serde_json",
  "sl_analysis",
@@ -1202,7 +1202,7 @@ dependencies = [
 
 [[package]]
 name = "sl_tool_geiger"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "geiger",
  "sl_analysis",
@@ -1214,7 +1214,7 @@ dependencies = [
 
 [[package]]
 name = "sl_tool_hakari"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "guppy",
  "hakari",
@@ -1227,7 +1227,7 @@ dependencies = [
 
 [[package]]
 name = "sl_tool_machete"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "sl_analysis",
  "sl_core",
@@ -1237,7 +1237,7 @@ dependencies = [
 
 [[package]]
 name = "sl_tool_rustfmt"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "sl_analysis",
  "sl_core",
@@ -1247,7 +1247,7 @@ dependencies = [
 
 [[package]]
 name = "sl_tool_semver"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "sl_analysis",
  "sl_core",
@@ -1257,7 +1257,7 @@ dependencies = [
 
 [[package]]
 name = "sl_tool_shear"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "serde_json",
  "sl_analysis",
@@ -1268,7 +1268,7 @@ dependencies = [
 
 [[package]]
 name = "sl_tool_taplo"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "sl_analysis",
  "sl_core",
@@ -1278,7 +1278,7 @@ dependencies = [
 
 [[package]]
 name = "sl_tool_typos"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "serde_json",
  "sl_analysis",
@@ -1289,7 +1289,7 @@ dependencies = [
 
 [[package]]
 name = "sl_tool_udeps"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "serde_json",
  "sl_analysis",
@@ -1300,7 +1300,7 @@ dependencies = [
 
 [[package]]
 name = "sl_tools"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "serde_json",
  "sha2",
@@ -1348,6 +1348,7 @@ dependencies = [
  "sl_tool_taplo",
  "sl_tool_typos",
  "sl_tool_udeps",
+ "sl_tools",
 ]
 
 [[package]]

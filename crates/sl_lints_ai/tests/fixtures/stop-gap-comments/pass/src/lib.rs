@@ -8,3 +8,6 @@ pub fn reset() {
     let s = "TODO: in a string";
     let _ = s;
 }
+
+// The workspace-hack package builds each shared dependency once.
+pub fn shared() {}

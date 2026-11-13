@@ -10,9 +10,10 @@
 
 use sl_analysis::Analysis;
 use sl_config::{Config, ConfigError, Env};
-use sl_core::{Date, LintMeta};
+use sl_core::{Date, LintMeta, Need};
 use sl_engine::{Report, RunOptions};
 use sl_model::Project;
+use std::collections::BTreeSet;
 use std::fmt;
 use std::path::{Path, PathBuf};
 
@@ -155,6 +156,62 @@ pub fn config(project: &Project, opts: &Options) -> Result<Config, CheckError> {
     .map_err(CheckError::Config)
 }
 
+/// What the lints a configuration enables need installed
+#[derive(Debug, Default, PartialEq, Eq)]
+pub struct ToolNeeds {
+    /// Pinned tools (`spirit-level tools list` names them)
+    pub tools: BTreeSet<String>,
+    /// Toolchains: the members' rust-versions, for `cargo-msrv`
+    pub toolchains: BTreeSet<String>,
+    /// Targets of the project's toolchain, for `cargo-no-std` and `cargo-wasm` when the map marks crates
+    pub targets: BTreeSet<String>,
+}
+
+/// The tools, toolchains and targets the enabled lints of `config` need on `project`
+pub fn tool_needs(project: &Project, config: &Config) -> ToolNeeds {
+    let mut n = ToolNeeds::default();
+    for m in lints().into_iter().filter(|m| config.enabled(m.id)) {
+        for need in m.needs {
+            if let Need::Tool(t) = need
+                && sl_tools::pin(t).is_some()
+            {
+                n.tools.insert((*t).to_string());
+            }
+        }
+    }
+    if config.enabled("cargo-msrv") {
+        n.toolchains.extend(
+            project
+                .packages
+                .iter()
+                .filter_map(|p| p.rust_version.clone()),
+        );
+    }
+    let marked = |pick: fn(&sl_config::MapCrate) -> bool| {
+        config.map.as_ref().is_some_and(|map| {
+            project
+                .packages
+                .iter()
+                .any(|p| map.crates.get(&p.name).is_some_and(pick))
+        })
+    };
+    if config.enabled("cargo-no-std") && marked(|c| c.no_std) {
+        n.targets.extend(
+            config
+                .lint("cargo-no-std")
+                .params
+                .list("targets")
+                .iter()
+                .cloned(),
+        );
+    }
+    if config.enabled("cargo-wasm") && marked(|c| c.wasm) {
+        n.targets
+            .insert(config.lint("cargo-wasm").params.str("target").to_string());
+    }
+    n
+}
+
 /// Loads the project at `dir` and its configuration, and runs every enabled lint
 pub fn check(dir: &Path, opts: &Options) -> Result<(Project, Report), CheckError> {
     let project = Project::load(dir).map_err(CheckError::Load)?;
@@ -181,6 +238,40 @@ pub fn check(dir: &Path, opts: &Options) -> Result<(Project, Report), CheckError
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn tool_needs_follow_the_config() {
+        let dir =
+            std::env::temp_dir().join(format!("spirit_level_tool_needs_{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(dir.join("src")).unwrap();
+        let manifest = "[package]\nname = \"a\"\nversion = \"0.1.0\"\nedition = \"2024\"\nrust-version = \"1.85\"\n\n[workspace]\n";
+        std::fs::write(dir.join("Cargo.toml"), manifest).unwrap();
+        std::fs::write(dir.join("src/lib.rs"), "#![no_std]\n").unwrap();
+        let own = "extends = \"big\"\n\n[map.layers.base]\ndesc = \"all\"\nallow = []\n\n[map.crates]\na = { layer = \"base\", no_std = true }\n";
+        std::fs::write(dir.join("spirit_level.toml"), own).unwrap();
+        let project = Project::load(&dir).unwrap();
+        let opts = Options::new(Date::parse("2026-11-13").unwrap());
+        let n = tool_needs(&project, &config(&project, &opts).unwrap());
+        let _ = std::fs::remove_dir_all(&dir);
+        for t in [
+            "cargo-deny",
+            "cargo-machete",
+            "typos",
+            "taplo",
+            "cargo-semver-checks",
+        ] {
+            assert!(n.tools.contains(t), "{t} in {:?}", n.tools);
+        }
+        // off at big
+        assert!(!n.tools.contains("cargo-udeps"));
+        assert_eq!(n.toolchains, BTreeSet::from(["1.85.0".to_string()]));
+        // no_std is marked, wasm is not
+        assert_eq!(
+            n.targets,
+            BTreeSet::from(["thumbv7em-none-eabihf".to_string()])
+        );
+    }
 
     #[test]
     fn registry_is_consistent() {

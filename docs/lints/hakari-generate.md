@@ -17,6 +17,7 @@
 | [small-workspace](../tiers/small-workspace.md) | off |  |
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | `warn` | a workspace-hack builds each shared dependency once; warn, as the lint needs spirit-level built with the hakari feature |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Why
 

@@ -17,6 +17,7 @@
 | [small-workspace](../tiers/small-workspace.md) | `warn` | an unused dependency costs build time, audit and lockfile churn for nothing |
 | [medium](../tiers/medium.md) | `warn` | an unused dependency costs build time, audit and lockfile churn for nothing |
 | [big](../tiers/big.md) | `deny` | an unused dependency in a big graph costs every build; false positives are listed in the manifest |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Why
 

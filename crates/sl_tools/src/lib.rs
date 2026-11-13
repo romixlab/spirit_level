@@ -15,6 +15,7 @@
 pub mod cache;
 pub mod cargo_json;
 mod pins;
+pub mod rustup;
 
 pub use cache::{Cache, InstallError};
 pub use pins::{Pin, PinKind, pin, pins};

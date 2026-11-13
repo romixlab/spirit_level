@@ -17,6 +17,7 @@
 | [small-workspace](../tiers/small-workspace.md) | off |  |
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | `deny` | banned crates (OpenSSL, a second runtime) and duplicate versions stay out of a big graph |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Why
 

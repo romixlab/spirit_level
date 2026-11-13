@@ -12,12 +12,14 @@ Use it with `extends = "small-workspace"` in `spirit_level.toml`.
 |---|---|---|---|
 | [agent-file-lines](../lints/agent-file-lines.md) | `warn` | agents read AGENTS.md whole every session; a long one is skimmed, not followed | small |
 | [allow-without-reason](../lints/allow-without-reason.md) | `warn` | an exception to a lint says why, or it outlives its reason | small |
+| [cargo-doc](../lints/cargo-doc.md) | `warn` | broken intra-doc links and tags render wrong on docs.rs and in the IDE | small |
 | [changelog-entry-length](../lints/changelog-entry-length.md) | `warn` | a CHANGELOG is a list: one short line per change | small |
 | [changelog-unreleased](../lints/changelog-unreleased.md) | `warn` | work lands under [Unreleased]; the release step turns it into a version section | small |
 | [crate-cycles](../lints/crate-cycles.md) | `warn` | crates in a cycle cannot be built or tested apart | small-workspace |
 | [crate-dir-name](../lints/crate-dir-name.md) | `warn` | flat crates/<name>: the folder is the crate | small-workspace |
 | [crate-docs](../lints/crate-docs.md) | `warn` | rustdoc's front page of the crate is its crate-level docs | small |
 | [default-features-off](../lints/default-features-off.md) | `warn` | dependencies are added with default-features = false and only the features in use | small |
+| [deny-advisories](../lints/deny-advisories.md) | `warn` | a dependency with a known vulnerability is a risk taken unseen; needs no deny.toml | small |
 | [duplicate-versions](../lints/duplicate-versions.md) | `warn` | two versions of a crate double its build time and split its types | small-workspace |
 | [edition-latest](../lints/edition-latest.md) | `warn` | new code starts on the current edition | small |
 | [function-complexity](../lints/function-complexity.md) | `warn` | more paths than can be tested or held in one's head | small |
@@ -25,6 +27,7 @@ Use it with `extends = "small-workspace"` in `spirit_level.toml`.
 | [git-dependency-pins](../lints/git-dependency-pins.md) | `warn` | git dependencies follow a branch; Cargo.lock fixes the commit | small |
 | [justfile-recipes](../lints/justfile-recipes.md) | `warn` | every repo answers to the same recipes: default, test, lint, install, deploy | small |
 | [lock-held-across](../lints/lock-held-across.md) | `warn` | a guard across .await or I/O stalls every other caller for as long as the slowest peer | small |
+| [machete-unused-deps](../lints/machete-unused-deps.md) | `warn` | an unused dependency costs build time, audit and lockfile churn for nothing | small |
 | [macro-crate-suffix](../lints/macro-crate-suffix.md) | `warn` | _macros and _derive mean proc macros and nothing else | small-workspace |
 | [nested-locks](../lints/nested-locks.md) | `warn` | two locks at once need one lock order everywhere | small-workspace |
 | [no-sys-crates](../lints/no-sys-crates.md) | `deny` | pure-Rust crates only: no bundled C, no -sys bindings without a written reason | small |
@@ -37,8 +40,10 @@ Use it with `extends = "small-workspace"` in `spirit_level.toml`.
 | [repo-files](../lints/repo-files.md) | `warn` | every work repo carries README, AGENTS, CLAUDE, FEATURES and CHANGELOG | small |
 | [static-interior-mutability](../lints/static-interior-mutability.md) | `warn` | every piece of mutable state has one owner; a global lock says why | small |
 | [static-mut](../lints/static-mut.md) | `deny` | global mutable state with no synchronisation; there is always a better owner | small |
+| [taplo-fmt](../lints/taplo-fmt.md) | `warn` | manifests are edited by people and by tools; one TOML formatting keeps their diffs about the change | small-workspace |
 | [thread-local-state](../lints/thread-local-state.md) | `warn` | thread-local state is a hidden side channel between functions | small-workspace |
 | [todo-macros](../lints/todo-macros.md) | `warn` | no stop-gaps: a todo!() is a panic waiting in shipped code | small |
+| [typos-misspelling](../lints/typos-misspelling.md) | `warn` | a misspelled identifier is copied to every call site; typos has almost no false positives | small |
 | [waiver-invalid](../lints/waiver-invalid.md) | `deny` | a waiver without a reason, for an unknown lint, or expired hides a finding without saying why | small |
 | [waiver-unused](../lints/waiver-unused.md) | `warn` | a waiver that allows nothing is left over from changed code | small |
 | [workspace-dependencies](../lints/workspace-dependencies.md) | `warn` | one version per dependency per workspace, written once in [workspace.dependencies] | small-workspace |
@@ -93,4 +98,8 @@ reason = "thread-local state is a hidden side channel between functions"
 [lints.crate-cycles]
 level = "warn"
 reason = "crates in a cycle cannot be built or tested apart"
+
+[lints.taplo-fmt]
+level = "warn"
+reason = "manifests are edited by people and by tools; one TOML formatting keeps their diffs about the change"
 ```

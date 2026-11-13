@@ -305,10 +305,8 @@ impl GitCase {
             case_dir.file_name().unwrap().to_string_lossy()
         ));
         let _ = std::fs::remove_dir_all(&dir);
-        copy_dir(project, &dir).map_err(|e| format!("copy: {e}"))?;
-        for f in ["expect.toml", "git.toml"] {
-            let _ = std::fs::remove_file(dir.join(f));
-        }
+        copy_dir(project, &dir, true).map_err(|e| format!("copy: {e}"))?;
+        let _ = std::fs::remove_file(dir.join("git.toml"));
         let repo = GitCase { dir };
         let untracked: Vec<String> = spec
             .get("untracked")
@@ -369,18 +367,4 @@ impl Drop for GitCase {
     fn drop(&mut self) {
         let _ = std::fs::remove_dir_all(&self.dir);
     }
-}
-
-fn copy_dir(from: &Path, to: &Path) -> std::io::Result<()> {
-    std::fs::create_dir_all(to)?;
-    for e in std::fs::read_dir(from)? {
-        let e = e?;
-        let target = to.join(e.file_name());
-        if e.file_type()?.is_dir() {
-            copy_dir(&e.path(), &target)?;
-        } else {
-            std::fs::copy(e.path(), target)?;
-        }
-    }
-    Ok(())
 }

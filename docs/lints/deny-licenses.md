@@ -17,6 +17,7 @@
 | [small-workspace](../tiers/small-workspace.md) | off |  |
 | [medium](../tiers/medium.md) | `warn` | every linked licence is one the project accepts, listed once in deny.toml |
 | [big](../tiers/big.md) | `deny` | every linked licence is one the project accepts, listed once in deny.toml |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Why
 

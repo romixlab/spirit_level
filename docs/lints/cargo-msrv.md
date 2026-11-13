@@ -17,6 +17,7 @@
 | [small-workspace](../tiers/small-workspace.md) | off |  |
 | [medium](../tiers/medium.md) | `warn` | the declared rust-version is built, so it stays true |
 | [big](../tiers/big.md) | `deny` | the declared rust-version is built, so it stays true |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Parameters
 

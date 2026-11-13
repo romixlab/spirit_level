@@ -17,6 +17,7 @@
 | [small-workspace](../tiers/small-workspace.md) | `warn` | a dependency with a known vulnerability is a risk taken unseen; needs no deny.toml |
 | [medium](../tiers/medium.md) | `deny` | a vulnerable dependency is updated, or its advisory ignored with a reason in deny.toml |
 | [big](../tiers/big.md) | `deny` | a vulnerable dependency is updated, or its advisory ignored with a reason in deny.toml |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Parameters
 

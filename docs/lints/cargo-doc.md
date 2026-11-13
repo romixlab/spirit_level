@@ -17,6 +17,7 @@
 | [small-workspace](../tiers/small-workspace.md) | `warn` | broken intra-doc links and tags render wrong on docs.rs and in the IDE |
 | [medium](../tiers/medium.md) | `deny` | the docs of internal crates are the map of the code; they build without a warning |
 | [big](../tiers/big.md) | `deny` | the docs of internal crates are the map of the code; they build without a warning |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Parameters
 

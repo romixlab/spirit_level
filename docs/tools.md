@@ -6,6 +6,7 @@ spirit_level reuses established Rust lint tools instead of reimplementing them. 
 - **Optional.** A linked tool is a cargo feature of `spirit_level` and `spirit_level_cli` (`hakari`, `geiger`), off by default. An executable adapter costs nothing to build, so it is always compiled in; it runs only when one of its lints is on.
 - **Missing tools.** A lint whose executable is not installed, or whose feature was not built, is reported as not run with the reason and the command that installs it. At `deny` the run then exits with code 3: it never passes green.
 - **Pinned versions.** `crates/sl_tools/tools.toml` pins each tool at the version its parser is tested against. `spirit-level tools install [TOOL]` installs it, `spirit-level tools list` shows where each is found.
+- **What a project needs.** `spirit-level tools install --needed` installs only what the project's enabled lints need: their tools, the toolchain of each `rust-version` for `cargo-msrv`, and the targets of `cargo-no-std` and `cargo-wasm` when the map marks crates. Run it before `check` in CI, so no lint is left not run.
 
 ## Library or executable
 

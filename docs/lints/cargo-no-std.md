@@ -17,6 +17,7 @@
 | [small-workspace](../tiers/small-workspace.md) | off |  |
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | `deny` | a crate the map marks no_std is built for a target without std, or the promise breaks unseen |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Parameters
 

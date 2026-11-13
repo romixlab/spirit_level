@@ -3,7 +3,7 @@
 use anstream::{eprint, println};
 use clap::Subcommand;
 use clap_complete::engine::{ArgValueCandidates, CompletionCandidate};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 #[derive(Subcommand)]
 pub enum ToolsCmd {
@@ -14,11 +14,15 @@ pub enum ToolsCmd {
     #[command(after_help = "Exit codes: 0 installed, 1 an install failed, 2 usage error")]
     Install {
         /// The tool (`spirit-level tools list` names them); none: every tool
-        #[arg(add = ArgValueCandidates::new(tool_candidates))]
+        #[arg(add = ArgValueCandidates::new(tool_candidates), conflicts_with = "needed")]
         tool: Option<String>,
         /// The project whose toolchain gets rustup components
         #[arg(long, default_value = ".")]
         path: PathBuf,
+        /// Only what the project's enabled lints need: their tools, the rust-version toolchains of `cargo-msrv`,
+        /// the targets of `cargo-no-std` and `cargo-wasm`
+        #[arg(long)]
+        needed: bool,
     },
 }
 
@@ -32,7 +36,14 @@ fn tool_candidates() -> Vec<CompletionCandidate> {
 pub fn run(cmd: ToolsCmd) -> Result<u8, String> {
     match cmd {
         ToolsCmd::List => list(),
-        ToolsCmd::Install { tool, path } => install(tool, path),
+        ToolsCmd::Install {
+            tool,
+            path,
+            needed: false,
+        } => install(tool, path),
+        ToolsCmd::Install {
+            path, needed: true, ..
+        } => install_needed(path),
     }
 }
 
@@ -59,11 +70,47 @@ fn install(tool: Option<String>, path: PathBuf) -> Result<u8, String> {
         ],
         None => sl_tools::pins().iter().collect(),
     };
+    Ok(u8::from(install_pins(&pins, &path) > 0))
+}
+
+fn install_needed(path: PathBuf) -> Result<u8, String> {
+    let project = sl_model::Project::load(&path).map_err(|e| e.to_string())?;
+    let opts = spirit_level::Options::new(sl_core::Date::today_utc());
+    let config = spirit_level::config(&project, &opts).map_err(|e| e.to_string())?;
+    let needs = spirit_level::tool_needs(&project, &config);
+    let pins: Vec<&sl_tools::Pin> = needs
+        .tools
+        .iter()
+        .filter_map(|t| sl_tools::pin(t))
+        .collect();
+    let mut failed = install_pins(&pins, &path);
+    let toolchains = needs.toolchains.iter().map(|v| {
+        let r = sl_tools::rustup::install_toolchain(v, &path);
+        (format!("toolchain {v}"), r)
+    });
+    let targets = needs.targets.iter().map(|t| {
+        let r = sl_tools::rustup::add_target(t, &path);
+        (format!("target {t}"), r)
+    });
+    for (what, r) in toolchains.chain(targets) {
+        match r {
+            Ok(()) => println!("{what}: installed"),
+            Err(e) => {
+                failed += 1;
+                eprint!("{what}: {e}\n");
+            }
+        }
+    }
+    Ok(u8::from(failed > 0))
+}
+
+/// Installs each pin; the number that failed
+fn install_pins(pins: &[&sl_tools::Pin], path: &Path) -> usize {
     let cache = sl_tools::Cache::from_env();
     let mut failed = 0;
     for p in pins {
         eprint!("{} {}\n", p.name, p.version());
-        match cache.install(p, &path) {
+        match cache.install(p, path) {
             Ok((exe, true)) => println!("{}: cached {}", p.name, exe.display()),
             Ok((exe, false)) => println!("{}: installed {}", p.name, exe.display()),
             Err(e) => {
@@ -72,5 +119,5 @@ fn install(tool: Option<String>, path: PathBuf) -> Result<u8, String> {
             }
         }
     }
-    Ok(u8::from(failed > 0))
+    failed
 }

@@ -43,17 +43,23 @@ pub fn tracked(text: &str) -> bool {
 
 /// Byte offsets of `word` in `text` as a whole word, case-sensitive
 fn find_marker(text: &str, word: &str) -> Option<usize> {
-    let w = |c: char| c.is_alphanumeric() || c == '_';
+    find_whole(text, word, |c| c.is_alphanumeric() || c == '_')
+}
+
+/// The same for a phrase, ASCII case-insensitive; a hyphen joins words, so a name like `workspace-hack` (the
+/// package cargo-hakari generates) is no stop-gap
+fn find_phrase(text: &str, phrase: &str) -> Option<usize> {
+    let low = text.to_ascii_lowercase();
+    find_whole(&low, &phrase.to_ascii_lowercase(), |c| {
+        c.is_alphanumeric() || c == '_' || c == '-'
+    })
+}
+
+fn find_whole(text: &str, word: &str, w: fn(char) -> bool) -> Option<usize> {
     text.match_indices(word).map(|(i, _)| i).find(|&i| {
         !text[..i].chars().next_back().is_some_and(w)
             && !text[i + word.len()..].chars().next().is_some_and(w)
     })
-}
-
-/// The same for a phrase, ASCII case-insensitive
-fn find_phrase(text: &str, phrase: &str) -> Option<usize> {
-    let low = text.to_ascii_lowercase();
-    find_marker(&low, &phrase.to_ascii_lowercase())
 }
 
 fn markers(cx: &Context<'_>) {

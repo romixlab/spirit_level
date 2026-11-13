@@ -7,6 +7,7 @@
 - Tool adapters: clippy, deny, machete, shear, rustfmt, typos, taplo, semver-checks, audit, udeps, hakari, geiger (TOOL-1).
 - Cargo checks: MSRV build, no_std and wasm builds of map crates, cargo doc warnings (TOOL-1).
 - `spirit-level tools list|install`: pinned tool versions built into a cache keyed on rustc (TOOL-1).
+- `spirit-level tools install --needed`: tools, toolchains and targets the enabled lints need (TOOL-1).
 - Book page External tools: library or executable per tool, link cost, commands and lint mapping (TOOL-1).
 
 ## [0.1.2] - 2026-11-13

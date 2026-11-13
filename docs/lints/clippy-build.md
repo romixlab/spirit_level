@@ -17,6 +17,7 @@
 | [small-workspace](../tiers/small-workspace.md) | off |  |
 | [medium](../tiers/medium.md) | off |  |
 | [big](../tiers/big.md) | off |  |
+| [ai](../tiers/ai.md) | off |  |
 
 ## Parameters
 
