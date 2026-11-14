@@ -43,6 +43,18 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [F0002](F0002.md) | [boot-10](F0002.md) | backup-domain helpers restore what they found | off | off | off | off | off | warn | off | off |
 | [F0003](F0003.md) | [boot-2](F0003.md) | the H7 supply configuration is read back, never written blind | off | off | off | off | off | deny | off | off |
 
+## brd
+
+| Code | Lint | Rule | small | small-workspace | medium | big | ai | embedded | ui | egui |
+|---|---|---|---|---|---|---|---|---|---|---|
+| [F0099](F0099.md) | [brd-1](F0099.md) | a board description reads, follows the schema, and the chip data and PCB it names read | off | off | off | off | off | deny | off | off |
+| [F0100](F0100.md) | [brd-2](F0100.md) | every pin of a board description has one job in each configuration | off | off | off | off | off | deny | off | off |
+| [F0101](F0101.md) | [brd-3](F0101.md) | of MCU pins joined on the board, at most one is used | off | off | off | off | off | deny | off | off |
+| [F0102](F0102.md) | [brd-4](F0102.md) | the pins, package, peripherals and signals a board description names exist on its chip | off | off | off | off | off | deny | off | off |
+| [F0103](F0103.md) | [brd-5](F0103.md) | every peripheral signal sits on a pin that can carry it | off | off | off | off | off | deny | off | off |
+| [F0104](F0104.md) | [brd-6](F0104.md) | the MCU pins are connected on the PCB as the board description says | off | off | off | off | off | deny | off | off |
+| [F0105](F0105.md) | [brd-7](F0105.md) | every connected MCU pin of the PCB is in the board description, and no free pin is unconnected | off | off | off | off | off | warn | off | off |
+
 ## build
 
 | Code | Lint | Rule | small | small-workspace | medium | big | ai | embedded | ui | egui |

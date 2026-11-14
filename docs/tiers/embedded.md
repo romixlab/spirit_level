@@ -106,6 +106,13 @@ Use it with `extends = "embedded"` in `spirit_level.toml`.
 | [F0096](../lints/F0096.md) | stk-6 | `warn` | bedrock warning: Stack frame over a budget (per function) or a worst-case stack depth over the stack region | embedded |
 | [F0097](../lints/F0097.md) | usb-1 | `deny` | bedrock error: High-speed bulk endpoint max packet not 512, bInterval out of range for the speed | embedded |
 | [F0098](../lints/F0098.md) | usb-3 | `warn` | bedrock suggestion, reported without failing the run: Single-buffered bulk endpoints on a hot path behind a hub TT (G0 usb_v4: 500 vs 947 kB/s) | embedded |
+| [F0099](../lints/F0099.md) | brd-1 | `deny` | a description that does not read, or names chip data or a PCB that does not read, hides every board finding | embedded |
+| [F0100](../lints/F0100.md) | brd-2 | `deny` | a pin with two jobs in one configuration is two drivers on one line | embedded |
+| [F0101](../lints/F0101.md) | brd-3 | `deny` | two used pins joined on the board drive against each other | embedded |
+| [F0102](../lints/F0102.md) | brd-4 | `deny` | a pin, package, peripheral or signal the chip does not have is a typo the generated code would carry | embedded |
+| [F0103](../lints/F0103.md) | brd-5 | `deny` | a signal on a pin that cannot carry it never reaches the peripheral | embedded |
+| [F0104](../lints/F0104.md) | brd-6 | `deny` | a pin the PCB does not connect as described is firmware driving the wrong line (B135B's LED on B135A's pins) | embedded |
+| [F0105](../lints/F0105.md) | brd-7 | `warn` | a connected pin the description leaves out is a fact missing, not a fault: the description grows to cover it | embedded |
 
 ## Clippy set (with what it extends)
 
@@ -523,6 +530,37 @@ reason = "bedrock warning: RAM function (`#[link_section = \".data.*\"]`) withou
 
 # The Clippy set of a firmware, on top of the size tier it is combined with: unsafe is documented and denied
 # where unsound, stack and flash are watched, the main loop is the only endless one.
+
+# The board description (board.toml): checked on every revision and rework, against itself, the chip's data and the
+# PCB's nets (the board lints, docs/boards.md).
+
+[lints.brd-1]
+level = "deny"
+reason = "a description that does not read, or names chip data or a PCB that does not read, hides every board finding"
+
+[lints.brd-2]
+level = "deny"
+reason = "a pin with two jobs in one configuration is two drivers on one line"
+
+[lints.brd-3]
+level = "deny"
+reason = "two used pins joined on the board drive against each other"
+
+[lints.brd-4]
+level = "deny"
+reason = "a pin, package, peripheral or signal the chip does not have is a typo the generated code would carry"
+
+[lints.brd-5]
+level = "deny"
+reason = "a signal on a pin that cannot carry it never reaches the peripheral"
+
+[lints.brd-6]
+level = "deny"
+reason = "a pin the PCB does not connect as described is firmware driving the wrong line (B135B's LED on B135A's pins)"
+
+[lints.brd-7]
+level = "warn"
+reason = "a connected pin the description leaves out is a fact missing, not a fault: the description grows to cover it"
 
 [clippy.lints]
 undocumented_unsafe_blocks = { level = "deny", reason = "firmware is full of unsafe; every block says in a SAFETY: comment why it is sound" }
