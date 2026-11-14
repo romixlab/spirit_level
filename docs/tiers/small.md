@@ -26,6 +26,7 @@ Use it with `extends = "small"` in `spirit_level.toml`.
 | [M0015](../lints/M0015.md) | justfile-recipes | `warn` | every repo answers to the same recipes: default, test, lint, install, deploy | small |
 | [M0017](../lints/M0017.md) | profile-defaults | `warn` | split debug info and an incremental deploy profile: measured large build-time wins | small |
 | [M0018](../lints/M0018.md) | repo-files | `warn` | every work repo carries README, AGENTS, CLAUDE, FEATURES and CHANGELOG | small |
+| [M0025](../lints/M0025.md) | tier-clippy-set | `warn` | Clippy runs in the editor and CI from the project's own lint table; the tier says what belongs in it | small |
 | [P0001](../lints/P0001.md) | agent-file-lines | `warn` | agents read AGENTS.md whole every session; a long one is skimmed, not followed | small |
 | [P0009](../lints/P0009.md) | changelog-entry-length | `warn` | a CHANGELOG is a list: one short line per change | small |
 | [S0002](../lints/S0002.md) | function-complexity | `warn` | more paths than can be tested or held in one's head | small |
@@ -37,6 +38,32 @@ Use it with `extends = "small"` in `spirit_level.toml`.
 | [X0019](../lints/X0019.md) | deny-advisories | `warn` | a dependency with a known vulnerability is a risk taken unseen; needs no deny.toml | small |
 | [X0026](../lints/X0026.md) | machete-unused-deps | `warn` | an unused dependency costs build time, audit and lockfile churn for nothing | small |
 | [X0032](../lints/X0032.md) | typos-misspelling | `warn` | a misspelled identifier is copied to every call site; typos has almost no false positives | small |
+
+## Clippy set (with what it extends)
+
+The project turns these on in its own `[workspace.lints.clippy]` (`allow` rows are accepted opt-outs, pasted with their reason); [tier-clippy-set](../lints/M0025.md) checks it.
+
+| Clippy lint | Level | Reason | Set in |
+|---|---|---|---|
+| `as_ptr_cast_mut` | `warn` | `as_ptr() as *mut` writes through a shared borrow: undefined behaviour | small |
+| `dbg_macro` | `warn` | debugging output left behind | small |
+| `exit` | `warn` | process::exit skips every destructor; main returns instead | small |
+| `fallible_impl_from` | `warn` | a From that can panic is a TryFrom | small |
+| `get_unwrap` | `warn` | `.get(i).unwrap()` is indexing with a worse message: index, or handle the None | small |
+| `let_underscore_must_use` | `warn` | `let _ =` on a must_use value drops an error unseen | small |
+| `map_err_ignore` | `warn` | `map_err(\|_\| ...)` throws the cause away; wrap it as the source | small |
+| `mem_forget` | `warn` | forget leaks the value and skips Drop; ManuallyDrop says it on purpose | small |
+| `todo` | `warn` | no stop-gaps: a todo!() is a panic waiting in shipped code | small |
+| `undocumented_unsafe_blocks` | `warn` | every unsafe block says in a SAFETY: comment why it is sound | small |
+| `unimplemented` | `warn` | no stop-gaps: an unimplemented!() is a panic waiting in shipped code | small |
+| `unnecessary_safety_doc` | `warn` | a # Safety section on a safe function sends readers looking for a contract that is not there | small |
+| `unwrap_used` | `warn` | a panic says what failed (expect with a message), or the error is returned | small |
+
+`clippy.toml` (an integer is a limit the project may lower):
+
+| Setting | Value | Reason | Set in |
+|---|---|---|---|
+| `allow-unwrap-in-tests` | `true` | a test that unwraps fails at the unwrap, which is what a test should do | small |
 
 ## The file
 
@@ -160,4 +187,28 @@ reason = "a dependency with a known vulnerability is a risk taken unseen; needs 
 [lints.cargo-doc]
 level = "warn"
 reason = "broken intra-doc links and tags render wrong on docs.rs and in the IDE"
+
+[lints.tier-clippy-set]
+level = "warn"
+reason = "Clippy runs in the editor and CI from the project's own lint table; the tier says what belongs in it"
+
+# The Clippy set every tier expects in [workspace.lints.clippy] (or [lints.clippy]); tier-clippy-set checks it.
+
+[clippy.lints]
+unwrap_used = { level = "warn", reason = "a panic says what failed (expect with a message), or the error is returned" }
+get_unwrap = { level = "warn", reason = "`.get(i).unwrap()` is indexing with a worse message: index, or handle the None" }
+todo = { level = "warn", reason = "no stop-gaps: a todo!() is a panic waiting in shipped code" }
+unimplemented = { level = "warn", reason = "no stop-gaps: an unimplemented!() is a panic waiting in shipped code" }
+dbg_macro = { level = "warn", reason = "debugging output left behind" }
+exit = { level = "warn", reason = "process::exit skips every destructor; main returns instead" }
+mem_forget = { level = "warn", reason = "forget leaks the value and skips Drop; ManuallyDrop says it on purpose" }
+let_underscore_must_use = { level = "warn", reason = "`let _ =` on a must_use value drops an error unseen" }
+map_err_ignore = { level = "warn", reason = "`map_err(|_| ...)` throws the cause away; wrap it as the source" }
+fallible_impl_from = { level = "warn", reason = "a From that can panic is a TryFrom" }
+undocumented_unsafe_blocks = { level = "warn", reason = "every unsafe block says in a SAFETY: comment why it is sound" }
+unnecessary_safety_doc = { level = "warn", reason = "a # Safety section on a safe function sends readers looking for a contract that is not there" }
+as_ptr_cast_mut = { level = "warn", reason = "`as_ptr() as *mut` writes through a shared borrow: undefined behaviour" }
+
+[clippy.config]
+allow-unwrap-in-tests = { value = true, reason = "a test that unwraps fails at the unwrap, which is what a test should do" }
 ```

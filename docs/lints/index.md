@@ -292,6 +292,7 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [M0011](M0011.md) | [publish-false](M0011.md) | workspace crates are publish = false unless listed as published | off | off | warn | warn | off | off |
 | [M0012](M0012.md) | [readme-per-crate](M0012.md) | every crate has a README | warn | deny | deny | deny | off | off |
 | [M0013](M0013.md) | [rust-version-set](M0013.md) | every crate declares its minimum Rust version | off | off | warn | deny | off | off |
+| [M0025](M0025.md) | [tier-clippy-set](M0025.md) | the project's [lints.clippy] and clippy.toml turn on the Clippy set its tiers expect, every opt-out with a reason | warn | warn | deny | deny | off | off |
 
 ## mem
 

@@ -38,6 +38,27 @@ Use it with `extends = "ai"` in `spirit_level.toml`.
 | [P0015](../lints/P0015.md) | sentence-words | `warn` | short sentences are read once and understood | ai |
 | [P0016](../lints/P0016.md) | thinking-comments | `deny` | a comment holds the conclusion, not the reasoning that led to it | ai |
 
+## Clippy set (with what it extends)
+
+The project turns these on in its own `[workspace.lints.clippy]` (`allow` rows are accepted opt-outs, pasted with their reason); [tier-clippy-set](../lints/M0025.md) checks it.
+
+| Clippy lint | Level | Reason | Set in |
+|---|---|---|---|
+| `allow_attributes` | `warn` | #[expect] fails once the lint stops firing, so an exception cannot outlive its cause | ai |
+| `cognitive_complexity` | `warn` | agents grow functions branch by branch; a tangled one is split | ai |
+| `print_stderr` | `warn` | agents leave debugging prints behind | ai |
+| `print_stdout` | `warn` | agents leave debugging prints behind | ai |
+| `self_named_module_files` | `warn` | one module layout, mod.rs, across the workspace | ai |
+| `str_to_string` | `warn` | to_owned says what happens: a copy of a borrowed str | ai |
+| `too_long_first_doc_paragraph` | `warn` | agents write long doc summaries; the first paragraph is one short sentence | ai |
+| `use_self` | `warn` | Self follows a rename | ai |
+
+`clippy.toml` (an integer is a limit the project may lower):
+
+| Setting | Value | Reason | Set in |
+|---|---|---|---|
+| `cognitive-complexity-threshold` | `25` | Clippy's default; spl's function-complexity (cyclomatic, 15) is the tighter limit | ai |
+
 ## The file
 
 ```toml
@@ -170,4 +191,20 @@ reason = "committed settings apply to every agent; a blanket grant lets any of t
 [lints.agent-session-files]
 level = "deny"
 reason = "transcripts and per-person agent files hold private context and secrets"
+
+# The Clippy lints that catch what agents write: allow without expect, stray prints, verbose conversions,
+# repeated type names, long doc summaries, tangled functions.
+
+[clippy.lints]
+allow_attributes = { level = "warn", reason = "#[expect] fails once the lint stops firing, so an exception cannot outlive its cause" }
+print_stdout = { level = "warn", reason = "agents leave debugging prints behind" }
+print_stderr = { level = "warn", reason = "agents leave debugging prints behind" }
+str_to_string = { level = "warn", reason = "to_owned says what happens: a copy of a borrowed str" }
+use_self = { level = "warn", reason = "Self follows a rename" }
+self_named_module_files = { level = "warn", reason = "one module layout, mod.rs, across the workspace" }
+too_long_first_doc_paragraph = { level = "warn", reason = "agents write long doc summaries; the first paragraph is one short sentence" }
+cognitive_complexity = { level = "warn", reason = "agents grow functions branch by branch; a tangled one is split" }
+
+[clippy.config]
+cognitive-complexity-threshold = { value = 25, reason = "Clippy's default; spl's function-complexity (cyclomatic, 15) is the tighter limit" }
 ```

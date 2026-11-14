@@ -127,3 +127,19 @@ reason = "committed settings apply to every agent; a blanket grant lets any of t
 [lints.agent-session-files]
 level = "deny"
 reason = "transcripts and per-person agent files hold private context and secrets"
+
+# The Clippy lints that catch what agents write: allow without expect, stray prints, verbose conversions,
+# repeated type names, long doc summaries, tangled functions.
+
+[clippy.lints]
+allow_attributes = { level = "warn", reason = "#[expect] fails once the lint stops firing, so an exception cannot outlive its cause" }
+print_stdout = { level = "warn", reason = "agents leave debugging prints behind" }
+print_stderr = { level = "warn", reason = "agents leave debugging prints behind" }
+str_to_string = { level = "warn", reason = "to_owned says what happens: a copy of a borrowed str" }
+use_self = { level = "warn", reason = "Self follows a rename" }
+self_named_module_files = { level = "warn", reason = "one module layout, mod.rs, across the workspace" }
+too_long_first_doc_paragraph = { level = "warn", reason = "agents write long doc summaries; the first paragraph is one short sentence" }
+cognitive_complexity = { level = "warn", reason = "agents grow functions branch by branch; a tangled one is split" }
+
+[clippy.config]
+cognitive-complexity-threshold = { value = 25, reason = "Clippy's default; spl's function-complexity (cyclomatic, 15) is the tighter limit" }

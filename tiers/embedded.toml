@@ -395,3 +395,14 @@ reason = "bedrock suggestion, reported without failing the run: 64-bit or i128 m
 [lints.perf-3]
 level = "warn"
 reason = "bedrock warning: RAM function (`#[link_section = \".data.*\"]`) without `#[inline(never)]`: LTO inlines it back into flash"
+
+# The Clippy set of a firmware, on top of the size tier it is combined with: unsafe is documented and denied
+# where unsound, stack and flash are watched, the main loop is the only endless one.
+
+[clippy.lints]
+undocumented_unsafe_blocks = { level = "deny", reason = "firmware is full of unsafe; every block says in a SAFETY: comment why it is sound" }
+unnecessary_safety_doc = { level = "deny", reason = "a # Safety section on a safe function sends readers looking for a contract that is not there" }
+as_ptr_cast_mut = { level = "deny", reason = "`as_ptr() as *mut` writes through a shared borrow: undefined behaviour" }
+large_stack_frames = { level = "warn", reason = "a large frame overflows a small stack with no guard page" }
+large_include_file = { level = "warn", reason = "an include_bytes! of a large file fills the flash unseen" }
+infinite_loop = { level = "warn", reason = "a loop that never ends returns `!`, so the hang is a type, not a surprise" }

@@ -80,3 +80,55 @@ reason = "the declared rust-version is built, so it stays true"
 [lints.cargo-doc]
 level = "deny"
 reason = "the docs of internal crates are the map of the code; they build without a warning"
+
+[lints.tier-clippy-set]
+level = "deny"
+reason = "the Clippy set is the lint policy of every crate; a gap in it is a gap in the policy"
+
+# On top of small's Clippy set: pedantic and cargo, with the opt-outs rerun found to be noise (each with its reason),
+# and the restriction and nursery lints a workspace of this size wants.
+
+[clippy.lints]
+pedantic = { level = "warn", reason = "the stricter idioms; the opt-outs below are the ones that are noise for most code" }
+cargo = { level = "warn", reason = "manifest hygiene: feature names, wildcard versions" }
+allow_attributes = { level = "warn", reason = "#[expect] fails once the lint stops firing, so an exception cannot outlive its cause" }
+print_stdout = { level = "warn", reason = "printing is the binary's choice, written in one place" }
+print_stderr = { level = "warn", reason = "printing is the binary's choice, written in one place" }
+str_to_string = { level = "warn", reason = "to_owned says what happens: a copy of a borrowed str" }
+use_self = { level = "warn", reason = "Self follows a rename" }
+self_named_module_files = { level = "warn", reason = "one module layout, mod.rs, across the workspace" }
+too_long_first_doc_paragraph = { level = "warn", reason = "the first doc paragraph is the summary rustdoc lists; one short sentence" }
+cognitive_complexity = { level = "warn", reason = "a function too tangled to follow in one read; complements spl's cyclomatic function-complexity" }
+# opt-outs of pedantic
+assigning_clones = { level = "allow", reason = "clone_into reads backwards" }
+cast_lossless = { level = "allow", reason = "a widening `as` cast loses nothing, and From is longer for no gain" }
+cast_possible_truncation = { level = "allow", reason = "too noisy: most casts are of values known to fit" }
+cast_precision_loss = { level = "allow", reason = "too noisy: integer to float for display and statistics is the common case" }
+cast_sign_loss = { level = "allow", reason = "too noisy: most casts are of values known to be non-negative" }
+default_trait_access = { level = "allow", reason = "Default::default() is clear where the type is written beside it" }
+float_cmp = { level = "allow", reason = "exact float comparisons are usually intended; float_cmp_const stays on in big" }
+implicit_hasher = { level = "allow", reason = "a BuildHasher type parameter on public functions is not worth it" }
+inline_always = { level = "allow", reason = "#[inline(always)] is written where it was measured" }
+items_after_statements = { level = "allow", reason = "a helper item next to its only use reads better" }
+many_single_char_names = { level = "allow", reason = "r, g, b and x, y, z are fine" }
+map_unwrap_or = { level = "allow", reason = "`.map(f).unwrap_or(x)` often reads better than map_or" }
+missing_errors_doc = { level = "allow", reason = "the error type documents its cases" }
+missing_panics_doc = { level = "allow", reason = "too noisy: most panics are invariants, not inputs" }
+must_use_candidate = { level = "allow", reason = "thousands of hits; must_use goes where ignoring the value is a bug" }
+needless_raw_string_hashes = { level = "allow", reason = "r#\"...\"# keeps a string editable when a quote is added" }
+redundant_closure_for_method_calls = { level = "allow", reason = "a closure is often clearer than a path to a method" }
+return_self_not_must_use = { level = "allow", reason = "thousands of hits on builders" }
+similar_names = { level = "allow", reason = "too many false positives: encoder and encoded are different things" }
+struct_excessive_bools = { level = "allow", reason = "a struct of flags is often just that" }
+struct_field_names = { level = "allow", reason = "a field named after its struct is often the clearest name" }
+trivially_copy_pass_by_ref = { level = "allow", reason = "passing small Copy types by reference is harmless" }
+unnecessary_debug_formatting = { level = "allow", reason = "paths printed with {:?} quote themselves, which helps with spaces" }
+unreadable_literal = { level = "allow", reason = "addresses and magic numbers are written as their sources write them" }
+used_underscore_binding = { level = "allow", reason = "an underscore binding used in one cfg is common" }
+# opt-outs of cargo
+cargo_common_metadata = { level = "allow", reason = "keywords and categories matter only for published crates; package-description covers the rest" }
+multiple_crate_versions = { level = "allow", reason = "spl's duplicate-versions checks this, with a reasoned allow list" }
+
+[clippy.config]
+cognitive-complexity-threshold = { value = 25, reason = "Clippy's default; spl's function-complexity (cyclomatic, 15) is the tighter limit" }
+allow-print-in-tests = { value = true, reason = "a test may print what it saw" }

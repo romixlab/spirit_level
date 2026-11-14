@@ -43,6 +43,7 @@ Use it with `extends = "medium"` in `spirit_level.toml`.
 | [M0022](../lints/M0022.md) | workspace-dependencies | `deny` | one version per dependency per workspace, written once in [workspace.dependencies] | medium |
 | [M0023](../lints/M0023.md) | workspace-inheritance | `deny` | edition, rust-version, licence and repository are declared once in [workspace.package] | small-workspace |
 | [M0024](../lints/M0024.md) | workspace-lints | `deny` | every crate inherits [workspace.lints], so one table is the policy | small-workspace |
+| [M0025](../lints/M0025.md) | tier-clippy-set | `deny` | the Clippy set is the lint policy of every crate; a gap in it is a gap in the policy | medium |
 | [P0001](../lints/P0001.md) | agent-file-lines | `warn` | agents read AGENTS.md whole every session; a long one is skimmed, not followed | small |
 | [P0007](../lints/P0007.md) | commit-subject-length | `warn` | the subject is what one-line logs and reviews show | medium |
 | [P0009](../lints/P0009.md) | changelog-entry-length | `warn` | a CHANGELOG is a list: one short line per change | small |
@@ -63,6 +64,71 @@ Use it with `extends = "medium"` in `spirit_level.toml`.
 | [X0026](../lints/X0026.md) | machete-unused-deps | `warn` | an unused dependency costs build time, audit and lockfile churn for nothing | small |
 | [X0031](../lints/X0031.md) | taplo-fmt | `warn` | manifests are edited by people and by tools; one TOML formatting keeps their diffs about the change | small-workspace |
 | [X0032](../lints/X0032.md) | typos-misspelling | `warn` | a misspelled identifier is copied to every call site; typos has almost no false positives | small |
+
+## Clippy set (with what it extends)
+
+The project turns these on in its own `[workspace.lints.clippy]` (`allow` rows are accepted opt-outs, pasted with their reason); [tier-clippy-set](../lints/M0025.md) checks it.
+
+| Clippy lint | Level | Reason | Set in |
+|---|---|---|---|
+| `cargo` | `warn` | manifest hygiene: feature names, wildcard versions | medium |
+| `pedantic` | `warn` | the stricter idioms; the opt-outs below are the ones that are noise for most code | medium |
+| `allow_attributes` | `warn` | #[expect] fails once the lint stops firing, so an exception cannot outlive its cause | medium |
+| `as_ptr_cast_mut` | `warn` | `as_ptr() as *mut` writes through a shared borrow: undefined behaviour | small |
+| `cognitive_complexity` | `warn` | a function too tangled to follow in one read; complements spl's cyclomatic function-complexity | medium |
+| `dbg_macro` | `warn` | debugging output left behind | small |
+| `exit` | `warn` | process::exit skips every destructor; main returns instead | small |
+| `fallible_impl_from` | `warn` | a From that can panic is a TryFrom | small |
+| `get_unwrap` | `warn` | `.get(i).unwrap()` is indexing with a worse message: index, or handle the None | small |
+| `let_underscore_must_use` | `warn` | `let _ =` on a must_use value drops an error unseen | small |
+| `map_err_ignore` | `warn` | `map_err(\|_\| ...)` throws the cause away; wrap it as the source | small |
+| `mem_forget` | `warn` | forget leaks the value and skips Drop; ManuallyDrop says it on purpose | small |
+| `print_stderr` | `warn` | printing is the binary's choice, written in one place | medium |
+| `print_stdout` | `warn` | printing is the binary's choice, written in one place | medium |
+| `self_named_module_files` | `warn` | one module layout, mod.rs, across the workspace | medium |
+| `str_to_string` | `warn` | to_owned says what happens: a copy of a borrowed str | medium |
+| `todo` | `warn` | no stop-gaps: a todo!() is a panic waiting in shipped code | small |
+| `too_long_first_doc_paragraph` | `warn` | the first doc paragraph is the summary rustdoc lists; one short sentence | medium |
+| `undocumented_unsafe_blocks` | `warn` | every unsafe block says in a SAFETY: comment why it is sound | small |
+| `unimplemented` | `warn` | no stop-gaps: an unimplemented!() is a panic waiting in shipped code | small |
+| `unnecessary_safety_doc` | `warn` | a # Safety section on a safe function sends readers looking for a contract that is not there | small |
+| `unwrap_used` | `warn` | a panic says what failed (expect with a message), or the error is returned | small |
+| `use_self` | `warn` | Self follows a rename | medium |
+| `assigning_clones` | `allow` | clone_into reads backwards | medium |
+| `cargo_common_metadata` | `allow` | keywords and categories matter only for published crates; package-description covers the rest | medium |
+| `cast_lossless` | `allow` | a widening `as` cast loses nothing, and From is longer for no gain | medium |
+| `cast_possible_truncation` | `allow` | too noisy: most casts are of values known to fit | medium |
+| `cast_precision_loss` | `allow` | too noisy: integer to float for display and statistics is the common case | medium |
+| `cast_sign_loss` | `allow` | too noisy: most casts are of values known to be non-negative | medium |
+| `default_trait_access` | `allow` | Default::default() is clear where the type is written beside it | medium |
+| `float_cmp` | `allow` | exact float comparisons are usually intended; float_cmp_const stays on in big | medium |
+| `implicit_hasher` | `allow` | a BuildHasher type parameter on public functions is not worth it | medium |
+| `inline_always` | `allow` | #[inline(always)] is written where it was measured | medium |
+| `items_after_statements` | `allow` | a helper item next to its only use reads better | medium |
+| `many_single_char_names` | `allow` | r, g, b and x, y, z are fine | medium |
+| `map_unwrap_or` | `allow` | `.map(f).unwrap_or(x)` often reads better than map_or | medium |
+| `missing_errors_doc` | `allow` | the error type documents its cases | medium |
+| `missing_panics_doc` | `allow` | too noisy: most panics are invariants, not inputs | medium |
+| `multiple_crate_versions` | `allow` | spl's duplicate-versions checks this, with a reasoned allow list | medium |
+| `must_use_candidate` | `allow` | thousands of hits; must_use goes where ignoring the value is a bug | medium |
+| `needless_raw_string_hashes` | `allow` | r#"..."# keeps a string editable when a quote is added | medium |
+| `redundant_closure_for_method_calls` | `allow` | a closure is often clearer than a path to a method | medium |
+| `return_self_not_must_use` | `allow` | thousands of hits on builders | medium |
+| `similar_names` | `allow` | too many false positives: encoder and encoded are different things | medium |
+| `struct_excessive_bools` | `allow` | a struct of flags is often just that | medium |
+| `struct_field_names` | `allow` | a field named after its struct is often the clearest name | medium |
+| `trivially_copy_pass_by_ref` | `allow` | passing small Copy types by reference is harmless | medium |
+| `unnecessary_debug_formatting` | `allow` | paths printed with {:?} quote themselves, which helps with spaces | medium |
+| `unreadable_literal` | `allow` | addresses and magic numbers are written as their sources write them | medium |
+| `used_underscore_binding` | `allow` | an underscore binding used in one cfg is common | medium |
+
+`clippy.toml` (an integer is a limit the project may lower):
+
+| Setting | Value | Reason | Set in |
+|---|---|---|---|
+| `allow-print-in-tests` | `true` | a test may print what it saw | medium |
+| `allow-unwrap-in-tests` | `true` | a test that unwraps fails at the unwrap, which is what a test should do | small |
+| `cognitive-complexity-threshold` | `25` | Clippy's default; spl's function-complexity (cyclomatic, 15) is the tighter limit | medium |
 
 ## The file
 
@@ -149,4 +215,56 @@ reason = "the declared rust-version is built, so it stays true"
 [lints.cargo-doc]
 level = "deny"
 reason = "the docs of internal crates are the map of the code; they build without a warning"
+
+[lints.tier-clippy-set]
+level = "deny"
+reason = "the Clippy set is the lint policy of every crate; a gap in it is a gap in the policy"
+
+# On top of small's Clippy set: pedantic and cargo, with the opt-outs rerun found to be noise (each with its reason),
+# and the restriction and nursery lints a workspace of this size wants.
+
+[clippy.lints]
+pedantic = { level = "warn", reason = "the stricter idioms; the opt-outs below are the ones that are noise for most code" }
+cargo = { level = "warn", reason = "manifest hygiene: feature names, wildcard versions" }
+allow_attributes = { level = "warn", reason = "#[expect] fails once the lint stops firing, so an exception cannot outlive its cause" }
+print_stdout = { level = "warn", reason = "printing is the binary's choice, written in one place" }
+print_stderr = { level = "warn", reason = "printing is the binary's choice, written in one place" }
+str_to_string = { level = "warn", reason = "to_owned says what happens: a copy of a borrowed str" }
+use_self = { level = "warn", reason = "Self follows a rename" }
+self_named_module_files = { level = "warn", reason = "one module layout, mod.rs, across the workspace" }
+too_long_first_doc_paragraph = { level = "warn", reason = "the first doc paragraph is the summary rustdoc lists; one short sentence" }
+cognitive_complexity = { level = "warn", reason = "a function too tangled to follow in one read; complements spl's cyclomatic function-complexity" }
+# opt-outs of pedantic
+assigning_clones = { level = "allow", reason = "clone_into reads backwards" }
+cast_lossless = { level = "allow", reason = "a widening `as` cast loses nothing, and From is longer for no gain" }
+cast_possible_truncation = { level = "allow", reason = "too noisy: most casts are of values known to fit" }
+cast_precision_loss = { level = "allow", reason = "too noisy: integer to float for display and statistics is the common case" }
+cast_sign_loss = { level = "allow", reason = "too noisy: most casts are of values known to be non-negative" }
+default_trait_access = { level = "allow", reason = "Default::default() is clear where the type is written beside it" }
+float_cmp = { level = "allow", reason = "exact float comparisons are usually intended; float_cmp_const stays on in big" }
+implicit_hasher = { level = "allow", reason = "a BuildHasher type parameter on public functions is not worth it" }
+inline_always = { level = "allow", reason = "#[inline(always)] is written where it was measured" }
+items_after_statements = { level = "allow", reason = "a helper item next to its only use reads better" }
+many_single_char_names = { level = "allow", reason = "r, g, b and x, y, z are fine" }
+map_unwrap_or = { level = "allow", reason = "`.map(f).unwrap_or(x)` often reads better than map_or" }
+missing_errors_doc = { level = "allow", reason = "the error type documents its cases" }
+missing_panics_doc = { level = "allow", reason = "too noisy: most panics are invariants, not inputs" }
+must_use_candidate = { level = "allow", reason = "thousands of hits; must_use goes where ignoring the value is a bug" }
+needless_raw_string_hashes = { level = "allow", reason = "r#\"...\"# keeps a string editable when a quote is added" }
+redundant_closure_for_method_calls = { level = "allow", reason = "a closure is often clearer than a path to a method" }
+return_self_not_must_use = { level = "allow", reason = "thousands of hits on builders" }
+similar_names = { level = "allow", reason = "too many false positives: encoder and encoded are different things" }
+struct_excessive_bools = { level = "allow", reason = "a struct of flags is often just that" }
+struct_field_names = { level = "allow", reason = "a field named after its struct is often the clearest name" }
+trivially_copy_pass_by_ref = { level = "allow", reason = "passing small Copy types by reference is harmless" }
+unnecessary_debug_formatting = { level = "allow", reason = "paths printed with {:?} quote themselves, which helps with spaces" }
+unreadable_literal = { level = "allow", reason = "addresses and magic numbers are written as their sources write them" }
+used_underscore_binding = { level = "allow", reason = "an underscore binding used in one cfg is common" }
+# opt-outs of cargo
+cargo_common_metadata = { level = "allow", reason = "keywords and categories matter only for published crates; package-description covers the rest" }
+multiple_crate_versions = { level = "allow", reason = "spl's duplicate-versions checks this, with a reasoned allow list" }
+
+[clippy.config]
+cognitive-complexity-threshold = { value = 25, reason = "Clippy's default; spl's function-complexity (cyclomatic, 15) is the tighter limit" }
+allow-print-in-tests = { value = true, reason = "a test may print what it saw" }
 ```

@@ -167,3 +167,11 @@ reason = "a workspace-hack builds each shared dependency once; warn, as the lint
 [lints.hakari-manage-deps]
 level = "warn"
 reason = "the workspace-hack helps only the members that depend on it; warn, as the lint needs the hakari feature"
+
+# On top of medium's Clippy set: the restriction and nursery lints a big codebase wants.
+
+[clippy.lints]
+iter_over_hash_type = { level = "warn", reason = "iteration over a hash map changes order from run to run; random-state-hash reports the type" }
+float_cmp_const = { level = "warn", reason = "comparing a float to a constant exactly is almost always a bug" }
+lossy_float_literal = { level = "warn", reason = "a float literal that does not fit its type silently becomes another number" }
+imprecise_flops = { level = "warn", reason = "hypot, ln_1p and friends are more precise than the formula written out" }

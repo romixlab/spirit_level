@@ -262,8 +262,48 @@ fn tier_page(name: &str, text: &str, c: &Config, lints: &[&LintMeta]) -> String 
             at
         );
     }
+    clippy_set(&mut s, c);
     let _ = writeln!(s, "\n## The file\n\n```toml\n{}\n```", text.trim());
     s
+}
+
+/// The Clippy set a tier expects, with what it extends ([M0025](../lints/M0025.md) checks it)
+fn clippy_set(s: &mut String, c: &Config) {
+    let set = &c.clippy;
+    if set.is_empty() {
+        return;
+    }
+    let set_in = |o: &sl_config::Origin| o.file.trim_start_matches("tier:").to_string();
+    let _ = writeln!(
+        s,
+        "\n## Clippy set (with what it extends)\n\nThe project turns these on in its own `[workspace.lints.clippy]` (`allow` rows are accepted opt-outs, pasted with their reason); [tier-clippy-set](../lints/M0025.md) checks it.\n\n| Clippy lint | Level | Reason | Set in |\n|---|---|---|---|"
+    );
+    let mut rows: Vec<_> = set.lints.iter().collect();
+    rows.sort_by_key(|(n, l)| (l.level == Level::Allow, !sl_config::clippy::is_group(n), *n));
+    for (name, l) in rows {
+        let _ = writeln!(
+            s,
+            "| `{name}` | `{}` | {} | {} |",
+            l.level,
+            cell(&l.reason),
+            set_in(&l.origin)
+        );
+    }
+    if !set.config.is_empty() {
+        let _ = writeln!(
+            s,
+            "\n`clippy.toml` (an integer is a limit the project may lower):\n\n| Setting | Value | Reason | Set in |\n|---|---|---|---|"
+        );
+        for (key, v) in &set.config {
+            let _ = writeln!(
+                s,
+                "| `{key}` | `{}` | {} | {} |",
+                v.value,
+                cell(&v.reason),
+                set_in(&v.origin)
+            );
+        }
+    }
 }
 
 fn tiers_index() -> String {

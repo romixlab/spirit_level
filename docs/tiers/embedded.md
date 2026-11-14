@@ -107,6 +107,19 @@ Use it with `extends = "embedded"` in `spirit_level.toml`.
 | [F0097](../lints/F0097.md) | usb-1 | `deny` | bedrock error: High-speed bulk endpoint max packet not 512, bInterval out of range for the speed | embedded |
 | [F0098](../lints/F0098.md) | usb-3 | `warn` | bedrock suggestion, reported without failing the run: Single-buffered bulk endpoints on a hot path behind a hub TT (G0 usb_v4: 500 vs 947 kB/s) | embedded |
 
+## Clippy set (with what it extends)
+
+The project turns these on in its own `[workspace.lints.clippy]` (`allow` rows are accepted opt-outs, pasted with their reason); [tier-clippy-set](../lints/M0025.md) checks it.
+
+| Clippy lint | Level | Reason | Set in |
+|---|---|---|---|
+| `as_ptr_cast_mut` | `deny` | `as_ptr() as *mut` writes through a shared borrow: undefined behaviour | embedded |
+| `infinite_loop` | `warn` | a loop that never ends returns `!`, so the hang is a type, not a surprise | embedded |
+| `large_include_file` | `warn` | an include_bytes! of a large file fills the flash unseen | embedded |
+| `large_stack_frames` | `warn` | a large frame overflows a small stack with no guard page | embedded |
+| `undocumented_unsafe_blocks` | `deny` | firmware is full of unsafe; every block says in a SAFETY: comment why it is sound | embedded |
+| `unnecessary_safety_doc` | `deny` | a # Safety section on a safe function sends readers looking for a contract that is not there | embedded |
+
 ## The file
 
 ```toml
@@ -507,4 +520,15 @@ reason = "bedrock suggestion, reported without failing the run: 64-bit or i128 m
 [lints.perf-3]
 level = "warn"
 reason = "bedrock warning: RAM function (`#[link_section = \".data.*\"]`) without `#[inline(never)]`: LTO inlines it back into flash"
+
+# The Clippy set of a firmware, on top of the size tier it is combined with: unsafe is documented and denied
+# where unsound, stack and flash are watched, the main loop is the only endless one.
+
+[clippy.lints]
+undocumented_unsafe_blocks = { level = "deny", reason = "firmware is full of unsafe; every block says in a SAFETY: comment why it is sound" }
+unnecessary_safety_doc = { level = "deny", reason = "a # Safety section on a safe function sends readers looking for a contract that is not there" }
+as_ptr_cast_mut = { level = "deny", reason = "`as_ptr() as *mut` writes through a shared borrow: undefined behaviour" }
+large_stack_frames = { level = "warn", reason = "a large frame overflows a small stack with no guard page" }
+large_include_file = { level = "warn", reason = "an include_bytes! of a large file fills the flash unseen" }
+infinite_loop = { level = "warn", reason = "a loop that never ends returns `!`, so the hang is a type, not a surprise" }
 ```

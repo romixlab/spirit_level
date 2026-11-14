@@ -58,6 +58,7 @@ Use it with `extends = "big"` in `spirit_level.toml`.
 | [M0022](../lints/M0022.md) | workspace-dependencies | `deny` | one version per dependency per workspace, written once in [workspace.dependencies] | medium |
 | [M0023](../lints/M0023.md) | workspace-inheritance | `deny` | edition, rust-version, licence and repository are declared once in [workspace.package] | small-workspace |
 | [M0024](../lints/M0024.md) | workspace-lints | `deny` | every crate inherits [workspace.lints], so one table is the policy | small-workspace |
+| [M0025](../lints/M0025.md) | tier-clippy-set | `deny` | the Clippy set is the lint policy of every crate; a gap in it is a gap in the policy | medium |
 | [P0001](../lints/P0001.md) | agent-file-lines | `warn` | agents read AGENTS.md whole every session; a long one is skimmed, not followed | small |
 | [P0003](../lints/P0003.md) | agent-rules-match-lints | `warn` | limits AGENTS.md states are the limits the lints check | big |
 | [P0007](../lints/P0007.md) | commit-subject-length | `warn` | the subject is what one-line logs and reviews show | medium |
@@ -87,6 +88,75 @@ Use it with `extends = "big"` in `spirit_level.toml`.
 | [X0028](../lints/X0028.md) | semver-checks-breaking | `deny` | a crate the map marks stable changes its API only with the version bump it needs | big |
 | [X0031](../lints/X0031.md) | taplo-fmt | `deny` | manifests are edited by people and by tools; one TOML formatting keeps their diffs about the change | big |
 | [X0032](../lints/X0032.md) | typos-misspelling | `deny` | names are searched across hundreds of crates; a misspelling hides from every search | big |
+
+## Clippy set (with what it extends)
+
+The project turns these on in its own `[workspace.lints.clippy]` (`allow` rows are accepted opt-outs, pasted with their reason); [tier-clippy-set](../lints/M0025.md) checks it.
+
+| Clippy lint | Level | Reason | Set in |
+|---|---|---|---|
+| `cargo` | `warn` | manifest hygiene: feature names, wildcard versions | medium |
+| `pedantic` | `warn` | the stricter idioms; the opt-outs below are the ones that are noise for most code | medium |
+| `allow_attributes` | `warn` | #[expect] fails once the lint stops firing, so an exception cannot outlive its cause | medium |
+| `as_ptr_cast_mut` | `warn` | `as_ptr() as *mut` writes through a shared borrow: undefined behaviour | small |
+| `cognitive_complexity` | `warn` | a function too tangled to follow in one read; complements spl's cyclomatic function-complexity | medium |
+| `dbg_macro` | `warn` | debugging output left behind | small |
+| `exit` | `warn` | process::exit skips every destructor; main returns instead | small |
+| `fallible_impl_from` | `warn` | a From that can panic is a TryFrom | small |
+| `float_cmp_const` | `warn` | comparing a float to a constant exactly is almost always a bug | big |
+| `get_unwrap` | `warn` | `.get(i).unwrap()` is indexing with a worse message: index, or handle the None | small |
+| `imprecise_flops` | `warn` | hypot, ln_1p and friends are more precise than the formula written out | big |
+| `iter_over_hash_type` | `warn` | iteration over a hash map changes order from run to run; random-state-hash reports the type | big |
+| `let_underscore_must_use` | `warn` | `let _ =` on a must_use value drops an error unseen | small |
+| `lossy_float_literal` | `warn` | a float literal that does not fit its type silently becomes another number | big |
+| `map_err_ignore` | `warn` | `map_err(\|_\| ...)` throws the cause away; wrap it as the source | small |
+| `mem_forget` | `warn` | forget leaks the value and skips Drop; ManuallyDrop says it on purpose | small |
+| `print_stderr` | `warn` | printing is the binary's choice, written in one place | medium |
+| `print_stdout` | `warn` | printing is the binary's choice, written in one place | medium |
+| `self_named_module_files` | `warn` | one module layout, mod.rs, across the workspace | medium |
+| `str_to_string` | `warn` | to_owned says what happens: a copy of a borrowed str | medium |
+| `todo` | `warn` | no stop-gaps: a todo!() is a panic waiting in shipped code | small |
+| `too_long_first_doc_paragraph` | `warn` | the first doc paragraph is the summary rustdoc lists; one short sentence | medium |
+| `undocumented_unsafe_blocks` | `warn` | every unsafe block says in a SAFETY: comment why it is sound | small |
+| `unimplemented` | `warn` | no stop-gaps: an unimplemented!() is a panic waiting in shipped code | small |
+| `unnecessary_safety_doc` | `warn` | a # Safety section on a safe function sends readers looking for a contract that is not there | small |
+| `unwrap_used` | `warn` | a panic says what failed (expect with a message), or the error is returned | small |
+| `use_self` | `warn` | Self follows a rename | medium |
+| `assigning_clones` | `allow` | clone_into reads backwards | medium |
+| `cargo_common_metadata` | `allow` | keywords and categories matter only for published crates; package-description covers the rest | medium |
+| `cast_lossless` | `allow` | a widening `as` cast loses nothing, and From is longer for no gain | medium |
+| `cast_possible_truncation` | `allow` | too noisy: most casts are of values known to fit | medium |
+| `cast_precision_loss` | `allow` | too noisy: integer to float for display and statistics is the common case | medium |
+| `cast_sign_loss` | `allow` | too noisy: most casts are of values known to be non-negative | medium |
+| `default_trait_access` | `allow` | Default::default() is clear where the type is written beside it | medium |
+| `float_cmp` | `allow` | exact float comparisons are usually intended; float_cmp_const stays on in big | medium |
+| `implicit_hasher` | `allow` | a BuildHasher type parameter on public functions is not worth it | medium |
+| `inline_always` | `allow` | #[inline(always)] is written where it was measured | medium |
+| `items_after_statements` | `allow` | a helper item next to its only use reads better | medium |
+| `many_single_char_names` | `allow` | r, g, b and x, y, z are fine | medium |
+| `map_unwrap_or` | `allow` | `.map(f).unwrap_or(x)` often reads better than map_or | medium |
+| `missing_errors_doc` | `allow` | the error type documents its cases | medium |
+| `missing_panics_doc` | `allow` | too noisy: most panics are invariants, not inputs | medium |
+| `multiple_crate_versions` | `allow` | spl's duplicate-versions checks this, with a reasoned allow list | medium |
+| `must_use_candidate` | `allow` | thousands of hits; must_use goes where ignoring the value is a bug | medium |
+| `needless_raw_string_hashes` | `allow` | r#"..."# keeps a string editable when a quote is added | medium |
+| `redundant_closure_for_method_calls` | `allow` | a closure is often clearer than a path to a method | medium |
+| `return_self_not_must_use` | `allow` | thousands of hits on builders | medium |
+| `similar_names` | `allow` | too many false positives: encoder and encoded are different things | medium |
+| `struct_excessive_bools` | `allow` | a struct of flags is often just that | medium |
+| `struct_field_names` | `allow` | a field named after its struct is often the clearest name | medium |
+| `trivially_copy_pass_by_ref` | `allow` | passing small Copy types by reference is harmless | medium |
+| `unnecessary_debug_formatting` | `allow` | paths printed with {:?} quote themselves, which helps with spaces | medium |
+| `unreadable_literal` | `allow` | addresses and magic numbers are written as their sources write them | medium |
+| `used_underscore_binding` | `allow` | an underscore binding used in one cfg is common | medium |
+
+`clippy.toml` (an integer is a limit the project may lower):
+
+| Setting | Value | Reason | Set in |
+|---|---|---|---|
+| `allow-print-in-tests` | `true` | a test may print what it saw | medium |
+| `allow-unwrap-in-tests` | `true` | a test that unwraps fails at the unwrap, which is what a test should do | small |
+| `cognitive-complexity-threshold` | `25` | Clippy's default; spl's function-complexity (cyclomatic, 15) is the tighter limit | medium |
 
 ## The file
 
@@ -260,4 +330,12 @@ reason = "a workspace-hack builds each shared dependency once; warn, as the lint
 [lints.hakari-manage-deps]
 level = "warn"
 reason = "the workspace-hack helps only the members that depend on it; warn, as the lint needs the hakari feature"
+
+# On top of medium's Clippy set: the restriction and nursery lints a big codebase wants.
+
+[clippy.lints]
+iter_over_hash_type = { level = "warn", reason = "iteration over a hash map changes order from run to run; random-state-hash reports the type" }
+float_cmp_const = { level = "warn", reason = "comparing a float to a constant exactly is almost always a bug" }
+lossy_float_literal = { level = "warn", reason = "a float literal that does not fit its type silently becomes another number" }
+imprecise_flops = { level = "warn", reason = "hypot, ln_1p and friends are more precise than the formula written out" }
 ```
