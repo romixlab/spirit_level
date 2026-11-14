@@ -2,7 +2,7 @@
 
 A firmware repo describes each board it runs on in one typed `board.toml`: which MCU pin does what (GPIOs with their level from reset, peripherals with their signals, LEDs, buttons, reserved and joined pins), for every revision and rework of the board. The board lints (`brd-*`, in the [embedded](tiers/embedded.md) tier) hold each description against itself, against the chip's data and against the PCB's nets, on every configuration: each revision, each revision with each of its reworks, and with all of them.
 
-The schema itself is embedded_bedrock's: its book page `board-description.md` explains the file.
+The schema and its loader are spirit_level's crate `sl_board_model`; embedded_bedrock's book page `board-description.md` explains the file field by field.
 
 ## The lints
 
@@ -43,12 +43,17 @@ A missing input never passes silently. Without the chip data, or for a chip stm3
 
 ## Where the model lives
 
-The schema has one owner and one loader: embedded_bedrock's `bedrock_board_model` crate (the schema, loading with spans, revisions and reworks as patches). spirit_level takes it as a git dependency on embedded_bedrock's default branch, pinned by Cargo.lock, and reads every description through it; `sl_board` adds the chip data and the PCB's nets, `sl_lints_board` the checks.
+The schema has one owner and one loader: spirit_level's `sl_board_model` (the schema, loading with spans, revisions and reworks as patches). It is the one crate of this workspace that is published, so that a generator of board code elsewhere reads the same file the same way; it depends on `serde` and `toml` only.
 
-- embedded_bedrock keeps the model because the firmware build path needs it: the generator that turns `board.toml` into a firmware's committed `board.rs` reads the same schema.
-- The checks, the stm32-data reader and the PCB-net reader live here, because spirit_level owns the firmware checks: one `spl check` covers the board and the code.
-- The model is a small std crate (serde, serde_json, toml) with no firmware crates behind it, so the dependency adds no embedded crates, no `-sys` crate and no C build to spirit_level.
-- The other direction (the model in spirit_level, embedded_bedrock depending on it) would make embedded_bedrock's generator depend on spirit_level's repository; two loaders of one schema would drift.
+| Crate | Holds |
+|---|---|
+| `sl_board_model` | the schema and the loader; published |
+| `sl_board` | finding the descriptions, stm32-data chip JSON, the MCU's nets from the PCB geometry |
+| `sl_lints_board` | the `brd-*` lints |
+
+- spirit_level owns the firmware checks, so the checks and the model they read live here: one `spl check` covers the board and the code, and the schema has no second loader to drift from.
+- embedded_bedrock's generator (`bedrock-board gen`, which turns `board.toml` into a firmware's committed `board.rs`) takes `sl_board_model` from this repository's default branch until it is on crates.io.
+- The model started in embedded_bedrock (`bedrock_board_model`, 0.3.1) with the checks as `bedrock-board check`; both moved here.
 
 ## What the description does not feed yet
 

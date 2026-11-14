@@ -20,6 +20,10 @@ reason = "second versions come only with the optional linked adapters (features 
 allow = ["rayon-core"]
 reason = "rayon-core sets `links` only to keep one copy in a graph; it builds no C (optional hakari feature)"
 
+[lints.publish-false]
+published = ["sl_board_model"]
+reason = "the board description's one loader: firmware code generators outside this repo read board.toml through it"
+
 [lints.hakari-generate]
 level = "allow"
 reason = "a few dozen small crates build fast without a workspace-hack"
@@ -97,6 +101,7 @@ sl_dependents = { layer = "model" }
 sl_docs = { layer = "model" }
 sl_tools = { layer = "model" }
 sl_firmware = { layer = "model" }
+sl_board_model = { layer = "model" }
 sl_board = { layer = "model" }
 sl_analysis = { layer = "analysis" }
 sl_lints_ai = { layer = "lints" }
@@ -140,8 +145,6 @@ sl_testkit = { layer = "tests" }
 vc_ui = { git = "https://github.com/vhrdtech/vhrd_cli", branch = "main", role = "core" }
 vc_build = { git = "https://github.com/vhrdtech/vhrd_cli", branch = "main", role = "app" }
 vc_complete = { git = "https://github.com/vhrdtech/vhrd_cli", branch = "main", role = "app" }
-# the board description's schema and loader, owned by embedded_bedrock (the board lints read board.toml through it)
-bedrock_board_model = { git = "https://github.com/romixlab/embedded_bedrock", branch = "main", role = "model" }
 
 [map.forbid]
 # the library a project links to check itself never pulls the CLI's dependencies

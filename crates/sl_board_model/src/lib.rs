@@ -8,9 +8,9 @@
 //!   base entry whole, `remove` drops one. [`Description::configurations`] resolves every revision, every
 //!   revision with each rework, and with all its reworks, into a complete [`Board`].
 //!
-//! This crate is the schema's one loader. The checks of a description against itself, the chip's data and the
-//! PCB's nets are spirit_level's board lints (`spl check`, the embedded tier's `brd-*`), which read the file
-//! through this crate.
+//! This crate is the schema's one loader, and the only part of `spirit_level` a generator of board code needs. The
+//! checks of a description against itself, the chip's data and the PCB's nets are the board lints (`spl check`,
+//! the embedded tier's `brd-*`), which read the file through this crate.
 
 mod load;
 mod schema;

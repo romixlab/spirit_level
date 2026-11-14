@@ -18,4 +18,4 @@ Write the entry as the schema says: the message and its help name the field. For
 
 ## How it is checked
 
-The description is read by embedded_bedrock's `bedrock_board_model`, the schema's one loader; its structural findings come out with their line and column. Chip data and PCB files that are there but do not read are findings at the key that names them. A file that is not there is no finding of this lint: the lints that need it report themselves as not run.
+The description is read by `sl_board_model`, the schema's one loader; its structural findings come out with their line and column. Chip data and PCB files that are there but do not read are findings at the key that names them. A file that is not there is no finding of this lint: the lints that need it report themselves as not run.

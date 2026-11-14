@@ -15,7 +15,9 @@ mod raw;
 /// A loaded description: the file, its `[board]`, the base entries and every configuration.
 #[derive(Debug, Clone)]
 pub struct Description {
+    /// The file and its text.
     pub source: Source,
+    /// The `[board]` table.
     pub board: BoardInfo,
     /// The entries outside `[rev.*]` and `[rework.*]`.
     pub base: Entries,
@@ -25,13 +27,18 @@ pub struct Description {
 /// Why a description could not be loaded.
 #[derive(Debug)]
 pub enum LoadError {
+    /// The file could not be read.
     Read {
+        /// The file.
         path: PathBuf,
+        /// Why.
         error: std::io::Error,
     },
     /// The file is not a valid description; every problem found, with its place in `file`.
     Invalid {
+        /// The file and its text.
         file: Source,
+        /// Every problem found.
         diagnostics: Vec<Diagnostic>,
     },
 }
@@ -100,7 +107,7 @@ impl Description {
                         ),
                     )
                     .at(&name.span)
-                    .help(format!("[board] revisions = {:?}", revisions)),
+                    .help(format!("[board] revisions = {revisions:?}")),
                 );
             }
             if let Some(r) = &p.revisions {
@@ -302,18 +309,17 @@ fn entries(e: raw::Entries, diags: &mut Vec<Diagnostic>) -> Entries {
             (Some(pin), None) => Some(LedPins::Mono(pin_ref(pin))),
             (None, Some(rgb)) => {
                 let span = rgb.span();
-                match <[raw::PinRef; 3]>::try_from(rgb.into_inner()) {
-                    Ok(pins) => Some(LedPins::Rgb(pins.map(pin_ref))),
-                    Err(_) => {
-                        diags.push(
-                            Diagnostic::error(
-                                "led-rgb",
-                                format!("led.{name}: `rgb` takes three pins, red, green, blue"),
-                            )
-                            .at(&span),
-                        );
-                        None
-                    }
+                if let Ok(pins) = <[raw::PinRef; 3]>::try_from(rgb.into_inner()) {
+                    Some(LedPins::Rgb(pins.map(pin_ref)))
+                } else {
+                    diags.push(
+                        Diagnostic::error(
+                            "led-rgb",
+                            format!("led.{name}: `rgb` takes three pins, red, green, blue"),
+                        )
+                        .at(&span),
+                    );
+                    None
                 }
             }
             _ => {
@@ -395,36 +401,34 @@ fn gpio_mode(name: &str, g: &raw::Gpio, diags: &mut Vec<Diagnostic>) -> Option<G
             if let Some(p) = &g.pull {
                 diags.push(bad("pull", p.span(), "is for an input"));
             }
-            match &g.init {
-                Some(init) => Some(GpioMode::Output {
+            if let Some(init) = &g.init {
+                Some(GpioMode::Output {
                     init: *init.get_ref(),
-                }),
-                None => {
-                    diags.push(bad(
-                        "init",
-                        mode_span,
-                        "is missing: an output needs its level from reset (\"high\" or \"low\")",
-                    ));
-                    None
-                }
+                })
+            } else {
+                diags.push(bad(
+                    "init",
+                    mode_span,
+                    "is missing: an output needs its level from reset (\"high\" or \"low\")",
+                ));
+                None
             }
         }
         raw::Mode::Input => {
             if let Some(i) = &g.init {
                 diags.push(bad("init", i.span(), "is for an output"));
             }
-            match &g.pull {
-                Some(pull) => Some(GpioMode::Input {
+            if let Some(pull) = &g.pull {
+                Some(GpioMode::Input {
                     pull: *pull.get_ref(),
-                }),
-                None => {
-                    diags.push(bad(
-                        "pull",
-                        mode_span,
-                        "is missing: \"up\", \"down\" or \"none\" (the board holds the line)",
-                    ));
-                    None
-                }
+                })
+            } else {
+                diags.push(bad(
+                    "pull",
+                    mode_span,
+                    "is missing: \"up\", \"down\" or \"none\" (the board holds the line)",
+                ));
+                None
             }
         }
         raw::Mode::Analog => {

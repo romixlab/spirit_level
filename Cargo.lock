@@ -100,16 +100,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bedrock_board_model"
-version = "0.1.0"
-source = "git+https://github.com/romixlab/embedded_bedrock#0c78c0d11ff807f2cd200596fd0db630ba596d3b"
-dependencies = [
- "serde",
- "serde_json",
- "toml",
-]
-
-[[package]]
 name = "bitflags"
 version = "2.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1016,10 +1006,18 @@ dependencies = [
 name = "sl_board"
 version = "0.2.7"
 dependencies = [
- "bedrock_board_model",
  "serde",
  "serde_json",
+ "sl_board_model",
  "sl_docs",
+]
+
+[[package]]
+name = "sl_board_model"
+version = "0.2.7"
+dependencies = [
+ "serde",
+ "toml",
 ]
 
 [[package]]

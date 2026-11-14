@@ -23,6 +23,8 @@ Result first, then only what the reader must decide or do. Bullets for lists, ta
 | `sl_config` | model | `spirit_level.toml` and tiers: extends, overrides, exceptions, expiries, the crate map |
 | `sl_docs` | model | Markdown pages as a reader meets them: page model, reading metrics, the Zensical book |
 | `sl_firmware` | model | firmware crates: cargo config, build.rs, memory.x, bedrock_fw.json, source facts, the linked ELF |
+| `sl_board_model` | model | the board description `board.toml`: schema and loader; the one published crate |
+| `sl_board` | model | board descriptions found, stm32-data chip JSON, the MCU's nets from the PCB geometry |
 | `sl_analysis` | analysis | the `Analysis` trait, `Context`, the `lint!` macro, syntax helpers |
 | `sl_lints_*` | lints | one crate per analysis family; each lint's docs in `docs/<id>.md`, fixtures in `tests/fixtures/<id>/` |
 | `sl_engine` | engine | runs analyses, needs, levels, exceptions, waivers, fixes; its own lints `waiver-*` |

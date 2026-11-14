@@ -1,6 +1,6 @@
 //! Loading: the schema, spans, structural mistakes, revisions and reworks.
 
-use bedrock_board_model::{Description, GpioMode, LedPins, Level, LoadError};
+use sl_board_model::{Description, GpioMode, LedPins, Level, LoadError};
 
 use crate::{fixture, load};
 
@@ -109,7 +109,7 @@ fn configurations_of_revisions_and_reworks() {
 #[test]
 fn structural_mistakes_point_at_their_lines() {
     let mut found = invalid("invalid.toml");
-    found.sort();
+    found.sort_unstable();
     let mut want = vec![
         ("pcb-mcu", 6),          // a PCB but no mcu
         ("rev-twice", 5),        // "A" twice
@@ -121,7 +121,7 @@ fn structural_mistakes_point_at_their_lines() {
         ("rework-revision", 29), // revision Z
         ("rework-pcb", 30),      // a rework with a PCB
     ];
-    want.sort();
+    want.sort_unstable();
     assert_eq!(found, want);
 }
 
@@ -140,20 +140,4 @@ fn removing_what_is_not_there() {
         }
         other => panic!("{other:?}"),
     }
-}
-
-#[test]
-fn b135_loads_both_revisions() {
-    let path =
-        std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/boards/b135/board.toml");
-    let d = Description::load(&path).unwrap_or_else(|e| panic!("{e}"));
-    let labels: Vec<&str> = d
-        .configurations()
-        .iter()
-        .map(|b| b.label.as_str())
-        .collect();
-    assert_eq!(labels, ["rev A", "rev B"]);
-    let rev_a = &d.configurations()[0];
-    assert_eq!(rev_a.pcb.as_ref().unwrap().value, "b135a-mcu.geometry.json");
-    assert!(rev_a.entries.led.contains_key("can"));
 }

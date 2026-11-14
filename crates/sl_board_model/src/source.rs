@@ -9,7 +9,9 @@ pub type Span = Range<usize>;
 /// A value with the place in the file it came from.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Located<T> {
+    /// The value.
     pub value: T,
+    /// Where it is written.
     pub span: Span,
 }
 
@@ -39,7 +41,9 @@ impl Located<String> {
 /// The description's file and text, for line numbers and snippets.
 #[derive(Debug, Clone)]
 pub struct Source {
+    /// The file.
     pub path: PathBuf,
+    /// Its text.
     pub text: String,
 }
 
@@ -64,6 +68,7 @@ impl Source {
 pub struct Diagnostic {
     /// Stable kebab-case name of the loader's check (`gpio-fields`, `rev-twice`).
     pub code: &'static str,
+    /// What is wrong.
     pub message: String,
     /// Where in the description; `None` for a mistake about the file as a whole.
     pub span: Option<Span>,

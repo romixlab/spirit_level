@@ -1,7 +1,7 @@
 //! The board descriptions of a firmware repo as the board lints read them.
 //!
 //! - [`find`] lists the `board.toml` files the `[board]` table's globs select.
-//! - [`load`] reads one through `embedded_bedrock`'s `bedrock_board_model` (the schema's one loader: spans, revisions
+//! - [`load`] reads one through [`sl_board_model`] (the schema's one loader: spans, revisions
 //!   and reworks as patches), then its inputs: the chip's data ([`ChipData`], stm32-data's chip JSON) and the MCU's
 //!   nets of every PCB its configurations name ([`McuPins`], boardmap's geometry JSON).
 //!
@@ -17,11 +17,11 @@ use std::io::Read;
 use std::ops::Range;
 use std::path::Path;
 
-pub use bedrock_board_model as model;
 pub use chip::{ChipData, ChipError, Package, SignalPin};
 pub use pcb::{McuPins, PcbError, net_matches};
+pub use sl_board_model as model;
 
-use bedrock_board_model::{Description, LoadError, Located};
+use sl_board_model::{Description, LoadError, Located};
 
 /// The largest chip JSON read; stm32-data's biggest chip files are under 1 MiB
 const CHIP_JSON_BYTES_MAX: u64 = 16 << 20;

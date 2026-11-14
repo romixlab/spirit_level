@@ -17,7 +17,8 @@ Working name. Private for now.
 | Crate | Layer | Description |
 |---|---|---|
 | [`sl_core`](crates/sl_core) | core | spirit_level's shared types: lint metadata, levels, parameters, diagnostics, spans, fixes, dates and globs |
-| [`sl_board`](crates/sl_board) | model | spirit_level's model of board descriptions: board.toml through bedrock_board_model, stm32-data chip JSON, the MCU's nets from the PCB geometry |
+| [`sl_board`](crates/sl_board) | model | spirit_level's model of board descriptions: board.toml through sl_board_model, stm32-data chip JSON, the MCU's nets from the PCB geometry |
+| [`sl_board_model`](crates/sl_board_model) | model | The board description board.toml: schema, loading with source spans, revisions and reworks as patches |
 | [`sl_config`](crates/sl_config) | model | spirit_level's configuration format: tiers, extends, lint levels, parameters, reasons, expiries, scoped exceptions and the crate map |
 | [`sl_dependents`](crates/sl_dependents) | model | The repos that build on a library and the crates in them to retest when it changes (`spl dependents`) |
 | [`sl_docs`](crates/sl_docs) | model | Markdown pages as a reader meets them: their shape, reading metrics, and the Zensical book they belong to |

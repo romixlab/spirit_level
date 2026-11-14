@@ -1,5 +1,5 @@
-//! The PCB side of the board lints: which net each MCU pin is on, read from boardmap's geometry JSON (`embedded_bedrock`
-//! `bedrock_board::Geometry`). Only the footprints' pads are read; every other field is left alone.
+//! The PCB side of the board lints: which net each MCU pin is on, read from boardmap's geometry JSON (`embedded_bedrock`'s
+//! `bedrock_board::Geometry`, written by `boardmap extract`). Only the footprints' pads are read; every other field is left alone.
 
 use std::collections::BTreeMap;
 use std::fmt;
