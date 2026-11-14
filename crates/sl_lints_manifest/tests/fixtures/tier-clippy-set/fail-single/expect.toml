@@ -1,0 +1,11 @@
+[[finding]]
+at = "Cargo.toml"
+contains = "not on in [lints.clippy]"
+
+[[finding]]
+at = "clippy.toml"
+contains = "allow-unwrap-in-tests"
+
+[[finding]]
+at = "clippy.toml"
+contains = "cognitive-complexity-threshold"

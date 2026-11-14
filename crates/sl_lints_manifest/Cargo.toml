@@ -10,6 +10,7 @@ publish = false
 
 [dependencies]
 sl_analysis.workspace = true
+sl_config.workspace = true
 sl_core.workspace = true
 sl_model.workspace = true
 

@@ -1,0 +1,14 @@
+[lints.tier-clippy-set]
+level = "deny"
+reason = "fixture"
+
+[clippy.lints]
+pedantic = { level = "warn", reason = "stricter idioms" }
+unwrap_used = { level = "deny", reason = "errors are returned" }
+todo = { level = "warn", reason = "no stop-gaps" }
+cast_lossless = { level = "allow", reason = "widening casts lose nothing" }
+
+[clippy.config]
+cognitive-complexity-threshold = { value = 25, reason = "Clippy default" }
+allow-unwrap-in-tests = { value = true, reason = "a test may panic" }
+

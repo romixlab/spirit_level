@@ -1,6 +1,7 @@
 //! Manifest and repo-file lints. One analysis, [`MANIFEST`], reports them all: they share nothing heavier than
 //! the manifests cargo metadata already read.
 
+mod clippy;
 mod deps;
 mod package;
 mod repo;
@@ -62,6 +63,8 @@ lint!(CRATE_DIR_NAME, "M0020", "crate-dir-name", "workspace", "a member's direct
     params: [], needs: [], fix: None);
 lint!(MACRO_CRATE_SUFFIX, "M0021", "macro-crate-suffix", "workspace", "proc-macro crates and only they end in _macros or _derive",
     params: [], needs: [], fix: None);
+lint!(TIER_CLIPPY_SET, "M0025", "tier-clippy-set", "manifest", "the project's [lints.clippy] and clippy.toml turn on the Clippy set its tiers expect, every opt-out with a reason",
+    params: [], needs: [], fix: None);
 
 /// The manifest analysis
 pub struct Manifest;
@@ -94,6 +97,7 @@ static LINTS: &[&LintMeta] = &[
     &FEATURE_DOCS,
     &CRATE_DIR_NAME,
     &MACRO_CRATE_SUFFIX,
+    &TIER_CLIPPY_SET,
 ];
 
 impl Analysis for Manifest {
@@ -110,6 +114,7 @@ impl Analysis for Manifest {
         workspace::run(cx);
         deps::run(cx);
         repo::run(cx);
+        clippy::run(cx);
     }
 }
 

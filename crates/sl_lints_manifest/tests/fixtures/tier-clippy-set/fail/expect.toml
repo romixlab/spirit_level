@@ -1,0 +1,23 @@
+[[finding]]
+at = "Cargo.toml:9:18"
+contains = "3 of the 3 Clippy lints the tier expects are not on"
+
+[[finding]]
+at = "Cargo.toml:11"
+contains = "cast_lossless is turned off"
+
+[[finding]]
+at = "Cargo.toml:13"
+contains = "similar_names is turned off"
+
+[[finding]]
+at = "clippy.toml"
+contains = "does not set allow-unwrap-in-tests"
+
+[[finding]]
+at = "clippy.toml:1:1"
+contains = "above the tier's 25"
+
+[[finding]]
+at = "crates/fx_b/Cargo.toml:7:8"
+contains = "2 of the 3"

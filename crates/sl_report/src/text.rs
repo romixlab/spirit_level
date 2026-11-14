@@ -190,7 +190,17 @@ fn group(s: &mut String, g: &Grp<'_>, lints: &[&LintMeta], root: &Path, o: TextO
         }
     }
     if by_lint && let Some(h) = &first.help {
-        let _ = writeln!(s, "  {} {h}", p.paint(NEXT, "help:"));
+        let mut lines = h.lines();
+        let _ = writeln!(
+            s,
+            "  {} {}",
+            p.paint(NEXT, "help:"),
+            lines.next().unwrap_or_default()
+        );
+        // a help of several lines (TOML to paste) stays indented under its first
+        for l in lines {
+            let _ = writeln!(s, "{}", format!("        {l}").trim_end());
+        }
     }
     let take = if o.all { n } else { o.places.min(n) };
     for d in &g.items[..take] {

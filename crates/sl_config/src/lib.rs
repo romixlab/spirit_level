@@ -10,6 +10,9 @@
 //! reason = "this repo splits early"
 //! expires = "2027-06-30"              # optional: a date or a release (`v0.5.0`); expired fails the run
 //!
+//! [clippy.lints]                      # the Clippy set expected in [workspace.lints.clippy] (see [`clippy`])
+//! unwrap_used = { level = "warn", reason = "errors are returned or expected with a message" }
+//!
 //! [[exceptions]]                      # scoped to crates and/or paths
 //! lint = "crate-lines"
 //! crates = ["foo_sdk_types"]
@@ -18,10 +21,12 @@
 //! expires = "v0.4.0"
 //! ```
 
+pub mod clippy;
 mod error;
 pub mod map;
 mod reader;
 
+pub use clippy::{ClippyConfig, ClippyLint, ClippySet};
 pub use error::ConfigError;
 pub use map::{External, Layer, Map, MapCrate};
 
@@ -108,6 +113,8 @@ pub struct Config {
     /// The crate map
     #[serde(skip)]
     pub map: Option<Map>,
+    /// The Clippy set the project is expected to turn on
+    pub clippy: ClippySet,
 }
 
 /// What a resolution needs to know besides the files
@@ -219,6 +226,7 @@ struct Resolver<'a> {
     lints: BTreeMap<String, LintSetting>,
     exceptions: Vec<Exception>,
     map: Option<Map>,
+    clippy: ClippySet,
     extends: Vec<String>,
     stack: Vec<String>,
     /// The depth at which an extended name is a top-level one (1 under a project file, 0 for bare tiers)
@@ -250,6 +258,7 @@ impl<'a> Resolver<'a> {
             lints,
             exceptions: Vec::new(),
             map: None,
+            clippy: ClippySet::default(),
             extends: Vec::new(),
             stack: Vec::new(),
             record_at: 1,
@@ -267,6 +276,7 @@ impl<'a> Resolver<'a> {
             lints: self.lints,
             exceptions: self.exceptions,
             map: self.map,
+            clippy: self.clippy,
         })
     }
 
@@ -359,6 +369,9 @@ impl<'a> Resolver<'a> {
         }
         if let Some(lints) = r.table("lints", &mut errs) {
             self.lints_table(lints, project || !tier, &mut errs);
+        }
+        if let Some(c) = r.table("clippy", &mut errs) {
+            self.clippy.read(c, &mut errs);
         }
         if !tier {
             if let Some(item) = r.item("exceptions") {

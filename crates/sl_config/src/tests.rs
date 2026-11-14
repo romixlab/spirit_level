@@ -214,3 +214,31 @@ fn map_is_read_and_checked() {
         "{e:?}"
     );
 }
+
+#[test]
+fn clippy_set_layers_override_entry_by_entry() {
+    let c = load(
+        "extends = \"small\"\n[clippy.lints]\nunwrap-used = { level = \"deny\", reason = \"r\" }\npedantic = { level = \"warn\", reason = \"p\" }\n[clippy.config]\ncognitive-complexity-threshold = { value = 20, reason = \"c\" }\n",
+    )
+    .unwrap();
+    let l = &c.clippy.lints["unwrap_used"];
+    assert_eq!(l.level, Level::Deny);
+    assert_eq!(l.origin.file, FILE);
+    assert_eq!(c.clippy.lints["pedantic"].level, Level::Warn);
+    assert_eq!(
+        c.clippy.config["cognitive-complexity-threshold"].value,
+        ParamValue::Int(20)
+    );
+}
+
+#[test]
+fn clippy_entries_need_a_level_and_a_reason() {
+    let m = messages(load(
+        "[clippy.lints]\nunwrap_used = { level = \"loud\" }\nx = \"warn\"\n[clippy.config]\nt = { reason = \"r\" }\n[clippy.other]\n",
+    ));
+    assert!(m.iter().any(|e| e.contains("level = \"loud\"")), "{m:?}");
+    assert!(m.iter().any(|e| e.contains("clippy.lints.unwrap_used needs a reason")), "{m:?}");
+    assert!(m.iter().any(|e| e.contains("clippy.lints.x must be a table")), "{m:?}");
+    assert!(m.iter().any(|e| e.contains("clippy.config.t.value is missing")), "{m:?}");
+    assert!(m.iter().any(|e| e.contains("unknown key clippy.other")), "{m:?}");
+}
