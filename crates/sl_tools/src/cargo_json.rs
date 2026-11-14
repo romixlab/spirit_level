@@ -1,7 +1,7 @@
 //! The compiler messages of `cargo check|clippy|doc --message-format json`.
 //!
 //! One JSON object per line on stdout; the objects with `"reason": "compiler-message"` carry a rustc diagnostic,
-//! `"build-finished"` says whether the build succeeded.
+//! `"compiler-artifact"` an executable that was built, `"build-finished"` says whether the build succeeded.
 
 use serde_json::Value;
 use sl_core::Span;
@@ -47,8 +47,23 @@ pub struct MessageSpan {
 pub struct Messages {
     /// The diagnostics, each once (a lib and its test target report the same warning twice)
     pub messages: Vec<Message>,
+    /// The binaries built (`cargo build`): the artifacts with an executable and a `bin` target
+    pub executables: Vec<Executable>,
     /// `build-finished`'s `success`, when the run got that far
     pub success: Option<bool>,
+}
+
+/// A binary cargo built
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Executable {
+    /// The manifest of its package (absolute)
+    pub manifest_path: String,
+    /// The bin target's name
+    pub name: String,
+    /// The bin target's main source file (absolute)
+    pub src_path: String,
+    /// The built executable (absolute)
+    pub path: String,
 }
 
 /// Reads cargo's JSON lines; other lines (a tool's own output) are skipped
@@ -60,6 +75,25 @@ pub fn parse(stdout: &str) -> Messages {
         };
         match v.get("reason").and_then(Value::as_str) {
             Some("build-finished") => out.success = v.get("success").and_then(Value::as_bool),
+            Some("compiler-artifact") => {
+                let (Some(path), Some(target)) =
+                    (v.get("executable").and_then(Value::as_str), v.get("target"))
+                else {
+                    continue;
+                };
+                let is_bin = target
+                    .get("kind")
+                    .and_then(Value::as_array)
+                    .is_some_and(|k| k.iter().any(|k| k.as_str() == Some("bin")));
+                if is_bin {
+                    out.executables.push(Executable {
+                        manifest_path: str_of(&v, "manifest_path"),
+                        name: str_of(target, "name"),
+                        src_path: str_of(target, "src_path"),
+                        path: path.to_owned(),
+                    });
+                }
+            }
             Some("compiler-message") => {
                 let Some(m) = v.get("message") else { continue };
                 let msg = Message {
@@ -206,6 +240,26 @@ mod tests {
     use super::*;
 
     const CLIPPY: &str = include_str!("../tests/samples/clippy.jsonl");
+
+    #[test]
+    fn reads_built_executables() {
+        let lines = [
+            r#"{"reason":"compiler-artifact","manifest_path":"/p/Cargo.toml","target":{"kind":["lib"],"name":"foo","src_path":"/p/src/lib.rs"},"executable":null}"#,
+            r#"{"reason":"compiler-artifact","manifest_path":"/p/Cargo.toml","target":{"kind":["bin"],"name":"foo","src_path":"/p/src/main.rs"},"executable":"/p/target/debug/foo"}"#,
+            r#"{"reason":"build-finished","success":true}"#,
+        ];
+        let m = parse(&lines.join("\n"));
+        assert_eq!(m.success, Some(true));
+        assert_eq!(
+            m.executables,
+            [Executable {
+                manifest_path: "/p/Cargo.toml".into(),
+                name: "foo".into(),
+                src_path: "/p/src/main.rs".into(),
+                path: "/p/target/debug/foo".into(),
+            }]
+        );
+    }
 
     #[test]
     fn reads_clippy_messages() {

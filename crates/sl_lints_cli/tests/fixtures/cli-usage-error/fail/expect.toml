@@ -1,0 +1,6 @@
+project = "../../../projects/bad"
+
+[[finding]]
+at = "src/main.rs"
+contains = "exits with 1, not 2, writes to stdout, says nothing on stderr"
+

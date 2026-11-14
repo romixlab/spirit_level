@@ -1,0 +1,6 @@
+project = "../../../projects/bad"
+
+[[finding]]
+at = "src/main.rs"
+contains = "writes colour escapes to stdout"
+

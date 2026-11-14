@@ -99,6 +99,7 @@ sl_tools = { layer = "model" }
 sl_firmware = { layer = "model" }
 sl_analysis = { layer = "analysis" }
 sl_lints_ai = { layer = "lints" }
+sl_lints_cli = { layer = "lints" }
 sl_lints_code = { layer = "lints" }
 sl_lints_embedded = { layer = "lints" }
 sl_lints_graph = { layer = "lints" }
@@ -128,7 +129,7 @@ sl_engine = { layer = "engine" }
 sl_report = { layer = "engine" }
 spirit_level = { layer = "app" }
 sl_book = { layer = "app" }
-spirit_level_cli = { layer = "app" }
+spirit_level_cli = { layer = "app", cli = true }
 sl_testkit = { layer = "tests" }
 
 [map.external]

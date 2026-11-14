@@ -25,6 +25,7 @@ Working name. Private for now.
 | [`sl_tools`](crates/sl_tools) | model | External tools for spirit_level's adapters: the pinned versions, the build cache, finding and running a tool, cargo's JSON messages |
 | [`sl_analysis`](crates/sl_analysis) | analysis | The one trait every spirit_level analysis implements, its run context, and syntax helpers shared by the source analyses |
 | [`sl_lints_ai`](crates/sl_lints_ai) | lints | spirit_level lints for code written with agents: stop-gap comments, commented-out code, near-duplicate functions, dead features, committed agent secrets and transcripts |
+| [`sl_lints_cli`](crates/sl_lints_cli) | lints | spirit_level CLI lints: builds each command-line tool and checks its help, examples, completion, colour, version line and exit codes |
 | [`sl_lints_code`](crates/sl_lints_code) | lints | spirit_level source lints: todo!() and unimplemented!(), panics and prints in library code, allow without reason, float and hashing determinism, calls of the workspace's own CLIs |
 | [`sl_lints_dead`](crates/sl_lints_dead) | lints | spirit_level lint on dead code rustc cannot see: public items of workspace libraries no other crate names |
 | [`sl_lints_docs`](crates/sl_lints_docs) | lints | spirit_level lints on docs as a reader meets them: prose runs, reading time, headings, code walls, image text, and Zensical book practices |

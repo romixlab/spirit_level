@@ -1,0 +1,6 @@
+project = "../../../projects/bad"
+
+[[finding]]
+at = "src/main.rs"
+contains = "the name is `tool-cli`, the binary is `tool`"
+

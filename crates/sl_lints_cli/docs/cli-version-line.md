@@ -1,0 +1,14 @@
+## Why
+
+`--version` answers "which build is this": the version alone does not say whether a fix is in. The SHA names the commit, `-dirty` says the tree had changes, and the commit time orders builds without a clock in the build. The name is the binary's, so a report names the tool a person types. A build from a git checkout that prints `unknown` has a build script that did not find git, usually because it looks for `.git` as a directory and the checkout is a worktree.
+
+## Example
+
+```text
+$ tool --version
+tool 0.4.2 (a1b2c3d-dirty, commit 3 Oct 2026 18:20 UTC)
+```
+
+## How to fix
+
+Use vhrd_cli's `vc_build`: `vc_build::emit()` in `build.rs` and `#[command(version = vc_build::version!())]`. A build script of its own runs `git rev-parse --short HEAD`, `git log -1 --format=%ct` and `git status --porcelain`, prints `unknown` without git, and reruns on the real git dir's `HEAD` and index (`git rev-parse --git-dir`). Only the first line is checked, so a tool may list more below it. The parameter `format` is the expected first line.

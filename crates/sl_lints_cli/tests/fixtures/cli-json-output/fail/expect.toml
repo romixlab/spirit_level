@@ -1,0 +1,12 @@
+project = "../../../projects/bad"
+
+[[finding]]
+at = "src/main.rs"
+contains = "`tool prune` takes no --json"
+confidence = "estimate"
+
+[[finding]]
+at = "src/main.rs"
+contains = "`tool sync` takes no --json"
+confidence = "estimate"
+

@@ -25,8 +25,12 @@
 //!
 //! [docs]                              # the Markdown pages (see [`docs`])
 //! reference = ["docs/lints/**"]
+//!
+//! [cli]                               # how the CLI lints build and run the tools (see [`cli`])
+//! timeout-secs = 20
 //! ```
 
+pub mod cli;
 pub mod clippy;
 pub mod dependents;
 pub mod docs;
@@ -34,6 +38,7 @@ mod error;
 pub mod map;
 mod reader;
 
+pub use cli::CliProbe;
 pub use clippy::{ClippyConfig, ClippyLint, ClippySet};
 pub use dependents::Dependents;
 pub use docs::Docs;
@@ -129,6 +134,8 @@ pub struct Config {
     pub dependents: Option<Dependents>,
     /// The Markdown pages: the `[docs]` table, or its defaults
     pub docs: Docs,
+    /// How the CLI lints build and run the tools
+    pub cli: CliProbe,
 }
 
 /// What a resolution needs to know besides the files
@@ -239,6 +246,7 @@ struct Resolver<'a> {
     clippy: ClippySet,
     dependents: Option<Dependents>,
     docs: Docs,
+    cli: CliProbe,
     extends: Vec<String>,
     stack: Vec<String>,
     /// The depth at which an extended name is a top-level one (1 under a project file, 0 for bare tiers)
@@ -273,6 +281,7 @@ impl<'a> Resolver<'a> {
             clippy: ClippySet::default(),
             dependents: None,
             docs: Docs::default(),
+            cli: CliProbe::default(),
             extends: Vec::new(),
             stack: Vec::new(),
             record_at: 1,
@@ -293,6 +302,7 @@ impl<'a> Resolver<'a> {
             clippy: self.clippy,
             dependents: self.dependents,
             docs: self.docs,
+            cli: self.cli,
         })
     }
 
@@ -415,6 +425,9 @@ impl<'a> Resolver<'a> {
             }
             if let Some(d) = r.table("docs", &mut errs) {
                 self.docs = Docs::read(d, &mut errs);
+            }
+            if let Some(c) = r.table("cli", &mut errs) {
+                self.cli = CliProbe::read(c, &mut errs);
             }
             if let Some(mf) = r.opt_str("map-file", &mut errs) {
                 if self.map.is_some() {

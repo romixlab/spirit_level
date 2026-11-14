@@ -1,0 +1,14 @@
+project = "../../../projects/bad"
+
+[[finding]]
+at = "src/main.rs"
+contains = "COMPLETE=bash tool"
+
+[[finding]]
+at = "src/main.rs"
+contains = "COMPLETE=fish tool"
+
+[[finding]]
+at = "src/main.rs"
+contains = "COMPLETE=zsh tool"
+

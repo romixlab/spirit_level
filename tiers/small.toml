@@ -130,6 +130,49 @@ reason = "broken intra-doc links and tags render wrong on docs.rs and in the IDE
 level = "warn"
 reason = "Clippy runs in the editor and CI from the project's own lint table; the tier says what belongs in it"
 
+# CLIs (the crates the map marks cli, or with a binary and clap): built and run with help, version and
+# completion probes; docs/cli.md has the catalogue
+
+[lints.cli-help-examples]
+level = "warn"
+reason = "a reader learns a command from its examples first; most existing CLIs lack them on many leaves"
+
+[lints.cli-help-text]
+level = "warn"
+reason = "-h is the map of a tool; an entry without a line leaves the reader guessing"
+
+[lints.cli-help-clean]
+level = "warn"
+reason = "rustdoc source in help hides the tool's description"
+
+[lints.cli-completion]
+level = "warn"
+reason = "completion makes a tool discoverable at the prompt; older CLIs add it when touched"
+
+[lints.cli-plain-when-piped]
+level = "warn"
+reason = "colour escapes in a pipe break grep, diffs and scripts"
+
+[lints.cli-color-flag]
+level = "warn"
+reason = "--color settles what automatic colour guesses wrong, the same way in every tool; older CLIs add it when touched"
+
+[lints.cli-usage-error]
+level = "warn"
+reason = "a caller tells a wrong call from a failure by exit code 2"
+
+[lints.cli-version-line]
+level = "warn"
+reason = "the SHA and commit time say which build runs; older CLIs print other formats"
+
+[lints.cli-standard-flags]
+level = "warn"
+reason = "short flags are habits across tools; a different meaning turns a habit into a mistake"
+
+[lints.cli-json-output]
+level = "allow"
+reason = "an estimate: help does not say which commands print data, so it fires on every setup command until a project lists them in exempt"
+
 # The Clippy set every tier expects in [workspace.lints.clippy] (or [lints.clippy]); tier-clippy-set checks it.
 
 [clippy.lints]

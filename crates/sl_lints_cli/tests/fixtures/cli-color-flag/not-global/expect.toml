@@ -1,0 +1,6 @@
+project = "../../../projects/half"
+
+[[finding]]
+at = "src/main.rs"
+contains = "--color is not global"
+

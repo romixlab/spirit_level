@@ -13,7 +13,7 @@
 //!
 //! [map.crates]
 //! foo_core = { layer = "core" }
-//! foo_cli = { layer = "app", deps = ["foo_core"] }
+//! foo_cli = { layer = "app", deps = ["foo_core"], cli = true }
 //!
 //! [map.forbid]
 //! foo_cli = ["foo_gpu"]
@@ -63,6 +63,9 @@ pub struct MapCrate {
     pub deterministic: bool,
     /// A contract crate: the serde types that cross a process or node boundary, read by every party
     pub contract: bool,
+    /// Whether its binaries are command-line tools the `cli` lints probe; None: a crate with a binary target that
+    /// depends on clap is one
+    pub cli: Option<bool>,
     /// The line of its entry
     pub line: u32,
 }
@@ -146,6 +149,7 @@ impl Map {
                     wasm: c.opt_bool("wasm", errs).unwrap_or(false),
                     deterministic: c.opt_bool("deterministic", errs).unwrap_or(false),
                     contract: c.opt_bool("contract", errs).unwrap_or(false),
+                    cli: c.opt_bool("cli", errs),
                     line,
                 };
                 c.finish(errs);

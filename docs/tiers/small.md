@@ -13,6 +13,15 @@ Use it with `extends = "small"` in `spirit_level.toml`.
 | [C0008](../lints/C0008.md) | todo-macros | `warn` | no stop-gaps: a todo!() is a panic waiting in shipped code | small |
 | [C0012](../lints/C0012.md) | waiver-invalid | `deny` | a waiver without a reason, for an unknown lint, or expired hides a finding without saying why | small |
 | [C0013](../lints/C0013.md) | waiver-unused | `warn` | a waiver that allows nothing is left over from changed code | small |
+| [C0020](../lints/C0020.md) | cli-help-examples | `warn` | a reader learns a command from its examples first; most existing CLIs lack them on many leaves | small |
+| [C0021](../lints/C0021.md) | cli-help-text | `warn` | -h is the map of a tool; an entry without a line leaves the reader guessing | small |
+| [C0022](../lints/C0022.md) | cli-help-clean | `warn` | rustdoc source in help hides the tool's description | small |
+| [C0023](../lints/C0023.md) | cli-completion | `warn` | completion makes a tool discoverable at the prompt; older CLIs add it when touched | small |
+| [C0024](../lints/C0024.md) | cli-plain-when-piped | `warn` | colour escapes in a pipe break grep, diffs and scripts | small |
+| [C0025](../lints/C0025.md) | cli-color-flag | `warn` | --color settles what automatic colour guesses wrong, the same way in every tool; older CLIs add it when touched | small |
+| [C0026](../lints/C0026.md) | cli-usage-error | `warn` | a caller tells a wrong call from a failure by exit code 2 | small |
+| [C0027](../lints/C0027.md) | cli-version-line | `warn` | the SHA and commit time say which build runs; older CLIs print other formats | small |
+| [C0029](../lints/C0029.md) | cli-standard-flags | `warn` | short flags are habits across tools; a different meaning turns a habit into a mistake | small |
 | [D0001](../lints/D0001.md) | prose-run-words | `warn` | a long stretch of prose with no heading, figure, table or code block is skimmed, not read | small |
 | [D0002](../lints/D0002.md) | page-reading-time | `warn` | a guide longer than one sitting is left half read | small |
 | [D0003](../lints/D0003.md) | heading-words | `warn` | headings are scanned to find a section; a sentence is read slowly | small |
@@ -213,6 +222,49 @@ reason = "broken intra-doc links and tags render wrong on docs.rs and in the IDE
 [lints.tier-clippy-set]
 level = "warn"
 reason = "Clippy runs in the editor and CI from the project's own lint table; the tier says what belongs in it"
+
+# CLIs (the crates the map marks cli, or with a binary and clap): built and run with help, version and
+# completion probes; docs/cli.md has the catalogue
+
+[lints.cli-help-examples]
+level = "warn"
+reason = "a reader learns a command from its examples first; most existing CLIs lack them on many leaves"
+
+[lints.cli-help-text]
+level = "warn"
+reason = "-h is the map of a tool; an entry without a line leaves the reader guessing"
+
+[lints.cli-help-clean]
+level = "warn"
+reason = "rustdoc source in help hides the tool's description"
+
+[lints.cli-completion]
+level = "warn"
+reason = "completion makes a tool discoverable at the prompt; older CLIs add it when touched"
+
+[lints.cli-plain-when-piped]
+level = "warn"
+reason = "colour escapes in a pipe break grep, diffs and scripts"
+
+[lints.cli-color-flag]
+level = "warn"
+reason = "--color settles what automatic colour guesses wrong, the same way in every tool; older CLIs add it when touched"
+
+[lints.cli-usage-error]
+level = "warn"
+reason = "a caller tells a wrong call from a failure by exit code 2"
+
+[lints.cli-version-line]
+level = "warn"
+reason = "the SHA and commit time say which build runs; older CLIs print other formats"
+
+[lints.cli-standard-flags]
+level = "warn"
+reason = "short flags are habits across tools; a different meaning turns a habit into a mistake"
+
+[lints.cli-json-output]
+level = "allow"
+reason = "an estimate: help does not say which commands print data, so it fires on every setup command until a project lists them in exempt"
 
 # The Clippy set every tier expects in [workspace.lints.clippy] (or [lints.clippy]); tier-clippy-set checks it.
 

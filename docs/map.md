@@ -23,7 +23,7 @@ foo_proto = { layer = "model", generated = true }
 foo_api = { layer = "model", stable = true }
 foo_math = { layer = "utils", no_std = true, deterministic = true }
 foo_proto_types = { layer = "utils", contract = true }
-foo_cli = { layer = "app" }
+foo_cli = { layer = "app", cli = true }
 
 [map.forbid]
 foo_cli = ["foo_gpu", "wgpu"]       # the CLI never reaches these, directly or through others
@@ -51,6 +51,7 @@ wgpu = ["foo_gpu"]                  # only these crates may depend on wgpu direc
 | `wasm` | builds for `wasm32-unknown-unknown` |
 | `deterministic` | promises bit-identical results on every platform |
 | `contract` | holds the serde types that cross a process or node boundary; sized integers only ([sized-ints-in-contracts](lints/C0017.md)) |
+| `cli` | its binaries are command-line tools the [CLI checks](cli.md) build and run; `false` leaves them out. Absent: a crate with a binary target that depends on `clap` is one |
 | `forbid.<crate>` | crates (workspace or third-party) its closure must never reach |
 | `external.<crate>` | a crate of another project taken by git: its URL, its branch (optional) and the layer that may use it; how it is pinned is `git-dependency-pins`' policy |
 | `third-party.<crate>` | workspace crates that alone may depend on a heavy third-party crate |

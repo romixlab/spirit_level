@@ -113,6 +113,20 @@ reason = "a file no mod reaches is never compiled or tested, yet reads like live
 level = "warn"
 reason = "a contract is read on every party; usize is 32 bits on some of them"
 
+# CLIs: the defects that are rare and plain fail the run
+
+[lints.cli-help-clean]
+level = "deny"
+reason = "rustdoc source in help is a plain defect, fixed in a line"
+
+[lints.cli-plain-when-piped]
+level = "deny"
+reason = "colour escapes in a pipe break grep, diffs and scripts"
+
+[lints.cli-usage-error]
+level = "deny"
+reason = "a caller tells a wrong call from a failure by exit code 2; clap gives it for free"
+
 # On top of small's Clippy set: pedantic and cargo, with the opt-outs rerun found to be noise (each with its reason),
 # and the restriction and nursery lints a workspace of this size wants.
 

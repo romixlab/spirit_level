@@ -74,6 +74,16 @@ C0016 = { id = "orphan-source-file", group = "code", status = "active" }
 C0017 = { id = "sized-ints-in-contracts", group = "code", status = "active" }
 C0018 = { id = "unit-suffix", group = "code", status = "active" }
 C0019 = { id = "unbounded-read", group = "code", status = "active" }
+C0020 = { id = "cli-help-examples", group = "code", status = "active" }
+C0021 = { id = "cli-help-text", group = "code", status = "active" }
+C0022 = { id = "cli-help-clean", group = "code", status = "active" }
+C0023 = { id = "cli-completion", group = "code", status = "active" }
+C0024 = { id = "cli-plain-when-piped", group = "code", status = "active" }
+C0025 = { id = "cli-color-flag", group = "code", status = "active" }
+C0026 = { id = "cli-usage-error", group = "code", status = "active" }
+C0027 = { id = "cli-version-line", group = "code", status = "active" }
+C0028 = { id = "cli-json-output", group = "code", status = "active" }
+C0029 = { id = "cli-standard-flags", group = "code", status = "active" }
 P0001 = { id = "agent-file-lines", group = "prose", status = "active" }
 P0002 = { id = "agent-file-links", group = "prose", status = "active" }
 P0003 = { id = "agent-rules-match-lints", group = "prose", status = "active" }

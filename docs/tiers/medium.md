@@ -23,6 +23,15 @@ Use it with `extends = "medium"` in `spirit_level.toml`.
 | [C0015](../lints/C0015.md) | test-support-gated | `warn` | fakes and test helpers never ship: cfg(test), a test-support feature from dev-dependencies, or a test crate | medium |
 | [C0016](../lints/C0016.md) | orphan-source-file | `warn` | a file no mod reaches is never compiled or tested, yet reads like live code | medium |
 | [C0017](../lints/C0017.md) | sized-ints-in-contracts | `warn` | a contract is read on every party; usize is 32 bits on some of them | medium |
+| [C0020](../lints/C0020.md) | cli-help-examples | `warn` | a reader learns a command from its examples first; most existing CLIs lack them on many leaves | small |
+| [C0021](../lints/C0021.md) | cli-help-text | `warn` | -h is the map of a tool; an entry without a line leaves the reader guessing | small |
+| [C0022](../lints/C0022.md) | cli-help-clean | `deny` | rustdoc source in help is a plain defect, fixed in a line | medium |
+| [C0023](../lints/C0023.md) | cli-completion | `warn` | completion makes a tool discoverable at the prompt; older CLIs add it when touched | small |
+| [C0024](../lints/C0024.md) | cli-plain-when-piped | `deny` | colour escapes in a pipe break grep, diffs and scripts | medium |
+| [C0025](../lints/C0025.md) | cli-color-flag | `warn` | --color settles what automatic colour guesses wrong, the same way in every tool; older CLIs add it when touched | small |
+| [C0026](../lints/C0026.md) | cli-usage-error | `deny` | a caller tells a wrong call from a failure by exit code 2; clap gives it for free | medium |
+| [C0027](../lints/C0027.md) | cli-version-line | `warn` | the SHA and commit time say which build runs; older CLIs print other formats | small |
+| [C0029](../lints/C0029.md) | cli-standard-flags | `warn` | short flags are habits across tools; a different meaning turns a habit into a mistake | small |
 | [D0001](../lints/D0001.md) | prose-run-words | `warn` | a long stretch of prose with no heading, figure, table or code block is skimmed, not read | small |
 | [D0002](../lints/D0002.md) | page-reading-time | `warn` | a guide longer than one sitting is left half read | small |
 | [D0003](../lints/D0003.md) | heading-words | `warn` | headings are scanned to find a section; a sentence is read slowly | small |
@@ -270,6 +279,20 @@ reason = "a file no mod reaches is never compiled or tested, yet reads like live
 [lints.sized-ints-in-contracts]
 level = "warn"
 reason = "a contract is read on every party; usize is 32 bits on some of them"
+
+# CLIs: the defects that are rare and plain fail the run
+
+[lints.cli-help-clean]
+level = "deny"
+reason = "rustdoc source in help is a plain defect, fixed in a line"
+
+[lints.cli-plain-when-piped]
+level = "deny"
+reason = "colour escapes in a pipe break grep, diffs and scripts"
+
+[lints.cli-usage-error]
+level = "deny"
+reason = "a caller tells a wrong call from a failure by exit code 2; clap gives it for free"
 
 # On top of small's Clippy set: pedantic and cargo, with the opt-outs rerun found to be noise (each with its reason),
 # and the restriction and nursery lints a workspace of this size wants.

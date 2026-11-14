@@ -63,6 +63,21 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [F0008](F0008.md) | [cfg-6](F0008.md) | thumbv6m firmware that needs compare-and-swap uses portable-atomic with critical-section | off | off | off | off | off | warn |
 | [F0009](F0009.md) | [cfg-7](F0009.md) | the build info carries the git SHA and a dirty flag | off | off | off | off | off | warn |
 
+## cli
+
+| Code | Lint | Rule | small | small-workspace | medium | big | ai | embedded |
+|---|---|---|---|---|---|---|---|---|
+| [C0020](C0020.md) | [cli-help-examples](C0020.md) | --help of a CLI and of each of its leaf commands ends in an Examples block | warn | warn | warn | warn | off | off |
+| [C0021](C0021.md) | [cli-help-text](C0021.md) | every command and argument of a CLI has a help line | warn | warn | warn | warn | off | off |
+| [C0022](C0022.md) | [cli-help-clean](C0022.md) | a CLI's help holds no rustdoc leftovers | warn | warn | deny | deny | off | off |
+| [C0023](C0023.md) | [cli-completion](C0023.md) | a CLI prints its shell completion registration for bash, zsh and fish | warn | warn | warn | warn | off | off |
+| [C0024](C0024.md) | [cli-plain-when-piped](C0024.md) | a CLI writes no colour escapes into a pipe | warn | warn | deny | deny | off | off |
+| [C0025](C0025.md) | [cli-color-flag](C0025.md) | a CLI takes a global --color flag with auto, always and never | warn | warn | warn | warn | off | off |
+| [C0026](C0026.md) | [cli-usage-error](C0026.md) | a CLI answers an unknown flag with exit code 2 and a message on stderr only | warn | warn | deny | deny | off | off |
+| [C0027](C0027.md) | [cli-version-line](C0027.md) | --version prints the binary's name, version, git SHA and commit time | warn | warn | warn | warn | off | off |
+| [C0028](C0028.md) | [cli-json-output](C0028.md) | every leaf command of a CLI has a machine-readable output flag | off | off | off | off | off | off |
+| [C0029](C0029.md) | [cli-standard-flags](C0029.md) | a CLI's short flags keep their standard meaning | warn | warn | warn | warn | off | off |
+
 ## clippy
 
 | Code | Lint | Rule | small | small-workspace | medium | big | ai | embedded |

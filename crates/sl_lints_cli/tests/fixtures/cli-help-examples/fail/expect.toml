@@ -1,0 +1,14 @@
+project = "../../../projects/bad"
+
+[[finding]]
+at = "src/main.rs"
+contains = "`tool --help`"
+
+[[finding]]
+at = "src/main.rs"
+contains = "`tool prune --help`"
+
+[[finding]]
+at = "src/main.rs"
+contains = "`tool sync --help`"
+

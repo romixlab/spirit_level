@@ -1090,6 +1090,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "sl_lints_cli"
+version = "0.2.5"
+dependencies = [
+ "sl_analysis",
+ "sl_core",
+ "sl_model",
+ "sl_testkit",
+ "sl_tools",
+]
+
+[[package]]
 name = "sl_lints_code"
 version = "0.2.5"
 dependencies = [
@@ -1430,6 +1441,7 @@ dependencies = [
  "sl_core",
  "sl_engine",
  "sl_lints_ai",
+ "sl_lints_cli",
  "sl_lints_code",
  "sl_lints_dead",
  "sl_lints_docs",

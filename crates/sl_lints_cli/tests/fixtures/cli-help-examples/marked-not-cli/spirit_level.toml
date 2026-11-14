@@ -1,0 +1,9 @@
+[lints.cli-help-examples]
+level = "deny"
+reason = "fixture"
+
+[map.layers.app]
+allow = ["app"]
+
+[map.crates]
+server = { layer = "app", cli = false }

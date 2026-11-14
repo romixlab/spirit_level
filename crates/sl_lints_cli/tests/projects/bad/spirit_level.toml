@@ -1,0 +1,45 @@
+[lints.cli-help-examples]
+level = "deny"
+reason = "fixture"
+
+[lints.cli-help-text]
+level = "deny"
+reason = "fixture"
+
+[lints.cli-help-clean]
+level = "deny"
+reason = "fixture"
+
+[lints.cli-completion]
+level = "deny"
+reason = "fixture"
+
+[lints.cli-plain-when-piped]
+level = "deny"
+reason = "fixture"
+
+[lints.cli-color-flag]
+level = "deny"
+reason = "fixture"
+
+[lints.cli-usage-error]
+level = "deny"
+reason = "fixture"
+
+[lints.cli-version-line]
+level = "deny"
+reason = "fixture"
+
+[lints.cli-json-output]
+level = "deny"
+reason = "fixture"
+
+[lints.cli-standard-flags]
+level = "deny"
+reason = "fixture"
+
+[map.layers.app]
+allow = ["app"]
+
+[map.crates]
+bad = { layer = "app", cli = true }

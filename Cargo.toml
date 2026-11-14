@@ -63,6 +63,7 @@ sl_core = { path = "crates/sl_core" }
 sl_engine = { path = "crates/sl_engine" }
 sl_firmware = { path = "crates/sl_firmware" }
 sl_lints_ai = { path = "crates/sl_lints_ai" }
+sl_lints_cli = { path = "crates/sl_lints_cli" }
 sl_lints_code = { path = "crates/sl_lints_code" }
 sl_lints_dead = { path = "crates/sl_lints_dead" }
 sl_lints_docs = { path = "crates/sl_lints_docs" }

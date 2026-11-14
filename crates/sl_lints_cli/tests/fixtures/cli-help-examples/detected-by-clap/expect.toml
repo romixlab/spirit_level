@@ -1,0 +1,4 @@
+[[finding]]
+at = "src/main.rs"
+contains = "`plain --help` has no Examples block"
+

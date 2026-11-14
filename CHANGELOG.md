@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Added
+
+- CLI lints C0020-C0029: spl builds each CLI and checks help, examples, completion, colour, version and exit codes (CODE-9).
+- Crate map key `cli` and the `[cli]` table: which crates are CLIs and how they are probed (CODE-9).
+
 ### Fixed
 
 - `spl --help` opens with spl's own description, not vc_ui ColorFlag's rustdoc (CLI-4).

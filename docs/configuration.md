@@ -30,6 +30,9 @@ scan = ["~/git"]
 
 [docs]                               # the Markdown pages the docs lints read
 reference = ["docs/lints/**"]        # pages that are looked up, not read through
+
+[cli]                                # how the CLI lints build and run the tools
+timeout-secs = 20
 ```
 
 ## Rules
@@ -48,6 +51,7 @@ reference = ["docs/lints/**"]        # pages that are looked up, not read throug
 - **The Clippy set** is what the project turns on in its own `[workspace.lints.clippy]` and `clippy.toml`: a lint or group (`pedantic`) at `warn` or `deny`, or at `allow` as an accepted opt-out that the help pastes with its reason. Tiers declare it; later layers override it entry by entry. [tier-clippy-set](lints/M0025.md) checks the project's files against it; spirit_level never passes Clippy flags of its own.
 - **Dependents** turn on `spl dependents` for a library: [Dependents](dependents.md). Only a project file or a shared file sets them, never a tier.
 - **Docs** say which Markdown files are pages, which of them are reference pages, and their language: [Docs as the reader meets them](reading.md#which-pages). Only a project file or a shared file sets them, never a tier.
+- **The `[cli]` table** sets how the CLI lints build and probe the tools: [CLI checks](cli.md). Only a project file or a shared file sets it, never a tier.
 
 ## Seeing the result
 

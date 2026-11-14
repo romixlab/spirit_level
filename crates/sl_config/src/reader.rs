@@ -100,6 +100,21 @@ impl<'a> Reader<'a> {
         }
     }
 
+    /// An optional integer of at least `min`
+    pub fn opt_int(&mut self, key: &str, min: i64, errs: &mut Vec<ConfigError>) -> Option<i64> {
+        let v = self.value(key)?;
+        match v.as_integer() {
+            Some(i) if i >= min => Some(i),
+            _ => {
+                errs.push(self.err(
+                    key,
+                    format!("{} must be an integer of at least {min}", self.name(key)),
+                ));
+                None
+            }
+        }
+    }
+
     /// An optional list of strings; a single string is accepted as a list of one when `one_ok`
     pub fn opt_list(
         &mut self,

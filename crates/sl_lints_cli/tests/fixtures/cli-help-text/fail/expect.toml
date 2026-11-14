@@ -1,0 +1,14 @@
+project = "../../../projects/bad"
+
+[[finding]]
+at = "src/main.rs"
+contains = "says nothing before `Usage:`"
+
+[[finding]]
+at = "src/main.rs"
+contains = "`-n, --name <NAME>` has no help line"
+
+[[finding]]
+at = "src/main.rs"
+contains = "subcommand `tool prune`"
+

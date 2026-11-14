@@ -75,6 +75,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - 📋 `CODE-10` Assertion policy, decision open: `compound-assert` (`assert!(a && b)` in libraries) and `assert-message` (`assert!` without a message) wait for it; existing panic lints stay as they are.
 - 📋 `CODE-5` `build-script-clock`: build.rs reads no clock and finds git through the real git dir, so worktree builds stay clean.
 - 📋 `CODE-6` `command-registry`: a CLI past a size parameter registers commands per module, not in one central Subcommand enum (estimate).
+- ✅ `CODE-9` CLI lints (`sl_lints_cli`): spl builds each CLI and checks its help, examples, completion, colour, version line and exit codes; the map key `cli` and the `[cli]` table.
 
 ## STATE - shared state (fewer-locks)
 
