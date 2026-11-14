@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.2.4] - 2026-11-14
+
 ### Added
 
 - `spl check --landing` (`SPIRIT_LEVEL_LANDING`) and `Spirit-Level: allow(...)` commit trailers as waivers (ENG-10).
