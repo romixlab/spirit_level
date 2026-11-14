@@ -9,10 +9,14 @@ mod stopgap;
 use sl_analysis::{Analysis, Context, lint};
 use sl_core::{LintMeta, Need};
 
-lint!(STOP_GAP_COMMENTS, "A0010", "stop-gap-comments", "stop-gap", "comments carry no stop-gap markers: TODO, FIXME, HACK, for now, workaround",
-    params: [("markers", StrList, "[\"TODO\", \"FIXME\", \"XXX\", \"HACK\"]", "markers matched as whole words, case-sensitive"),
+lint!(STOP_GAP_COMMENTS, "A0010", "stop-gap-comments", "stop-gap", "comments carry no stop-gap markers: TODO, HACK, for now, workaround",
+    params: [("markers", StrList, "[\"TODO\", \"XXX\", \"HACK\"]", "markers matched as whole words, case-sensitive; FIXME is fixme-before-land's"),
              ("phrases", StrList, "[\"for now\", \"hack\", \"workaround\", \"shim\", \"quick fix\", \"temporary fix\", \"temporary solution\", \"temporary workaround\", \"temporary hack\", \"temporary code\", \"temporary implementation\", \"temporary patch\", \"is temporary\", \"temporarily disabled\", \"fix later\", \"refactor later\", \"clean up later\"]", "phrases matched as whole words, case-insensitive"),
              ("tracked-ok", Bool, "true", "a comment with a tracker id (`CFG-3`), an issue number (`#12`) or a URL is tracked work and passes"),
+             ("docs", Bool, "true", "also check doc comments")],
+    needs: [], fix: None);
+lint!(FIXME_BEFORE_LAND, "A0011", "fixme-before-land", "stop-gap", "no FIXME is left when a branch lands",
+    params: [("markers", StrList, "[\"FIXME\"]", "markers of a note to revisit before landing, matched as whole words, case-sensitive"),
              ("docs", Bool, "true", "also check doc comments")],
     needs: [], fix: None);
 lint!(COMMENTED_OUT_CODE, "A0005", "commented-out-code", "stop-gap", "no code is left commented out",
@@ -55,6 +59,7 @@ pub static AI: Ai = Ai;
 
 static LINTS: &[&LintMeta] = &[
     &STOP_GAP_COMMENTS,
+    &FIXME_BEFORE_LAND,
     &COMMENTED_OUT_CODE,
     &LINT_TABLE_ALLOW_REASON,
     &NEAR_DUPLICATE_FNS,

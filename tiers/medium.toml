@@ -56,6 +56,10 @@ reason = "components call each other as libraries, not through their CLIs"
 level = "warn"
 reason = "the subject is what one-line logs and reviews show"
 
+[lints.fixes-tag]
+level = "warn"
+reason = "a Fixes: trailer that points nowhere is worse than none; it fires only where one is written"
+
 [lints.module-graph-scc]
 level = "warn"
 reason = "a module cycle holding most of a crate can't be split into crates; cut it while it is small"

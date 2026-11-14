@@ -80,10 +80,12 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 
 - ✅ `PROSE-1` Terse-output limits: CHANGELOG entries, commit subjects and bodies, AGENTS.md length, sentences, paragraphs (`sl_lints_prose`).
 - ✅ `PROSE-2` AI-isms and agent files: filler, narration, stream-of-thought, emoji, restating comments, diff descriptions; CLAUDE.md pointer, links, stated limits match the lints.
+- ✅ `PROSE-3` Fix commits: `fixes-tag` checks `Fixes:` hash and subject, `fix-without-test` wants a test in a fix.
 
 ## AI - code written with agents
 
 - ✅ `AI-1` Stop-gap comments, commented-out code, lint-table allows without reason, near-duplicate fns and modules, dead features, leftover files, agent-config secrets, permissions and transcripts (`sl_lints_ai`).
+- ✅ `AI-2` `fixme-before-land`: a FIXME is a candidate on the branch and a finding in a landing run; `stop-gap-comments` leaves FIXME to it.
 
 ## TOOL - external tools
 

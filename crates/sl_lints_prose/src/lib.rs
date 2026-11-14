@@ -6,6 +6,7 @@
 mod agents;
 mod changelog;
 mod commits;
+mod fixes;
 mod style;
 mod text;
 mod units;
@@ -89,6 +90,18 @@ lint!(COMMIT_BODY_LINES, "P0005", "commit-body-lines", "commits", "a commit body
 lint!(COMMIT_PROSE, "P0006", "commit-prose", "commits", "commit messages use no filler, narration or emoji and do not describe the diff",
     params: [("base", Str, "\"main\"", "the branch work merges into; commits in base..HEAD are checked")],
     needs: [Need::Tool("git")], fix: None);
+lint!(FIXES_TAG, "P0017", "fixes-tag", "commits", "a Fixes: trailer names its culprit by a hash that resolves and the culprit's subject",
+    params: [("trailer", Str, "\"Fixes\"", "the trailer key that names the commit a fix repairs"),
+             ("min-hex", Int, "12", "hex digits the hash must have"),
+             ("base", Str, "\"main\"", "the branch work merges into; commits in base..HEAD are checked")],
+    needs: [Need::Tool("git")], fix: None);
+lint!(FIX_WITHOUT_TEST, "P0018", "fix-without-test", "commits", "a commit that fixes code adds a test",
+    params: [("fix-words", StrList, "[\"fix\", \"fixes\", \"fixed\"]", "words that, opening a subject, make a commit a fix (case-insensitive); a `Fixes:` trailer always does"),
+             ("code", StrList, "[\"**/*.rs\"]", "globs of the files whose change makes a fix need a test"),
+             ("tests", StrList, "[\"tests/**\", \"**/tests/**\", \"**/benches/**\", \"fuzz/**\"]", "globs of test files: changing one counts as a test"),
+             ("markers", StrList, "[\"#[test]\", \"#[tokio::test\", \"#[test_case\", \"#[rstest\", \"proptest!\"]", "text of an added line that counts as a test"),
+             ("base", Str, "\"main\"", "the branch work merges into; commits in base..HEAD are checked")],
+    needs: [Need::Tool("git")], fix: None);
 
 /// The prose analysis; the commit lints read the history with git and need it
 pub struct Prose;
@@ -113,6 +126,8 @@ static PROSE_LINTS: &[&LintMeta] = &[
     &COMMIT_SUBJECT_LENGTH,
     &COMMIT_BODY_LINES,
     &COMMIT_PROSE,
+    &FIXES_TAG,
+    &FIX_WITHOUT_TEST,
 ];
 
 impl Analysis for Prose {
@@ -129,5 +144,6 @@ impl Analysis for Prose {
         agents::run(cx);
         style::run(cx);
         commits::run(cx);
+        fixes::run(cx);
     }
 }

@@ -1,0 +1,23 @@
+[[commit]]
+message = "Add the parser"
+files = { "src/lib.rs" = "//! Fixture.\n\n/// Parses\npub fn parse() {}\n" }
+
+[[commit]]
+message = "Fix the empty input case"
+files = { "src/lib.rs" = "//! Fixture.\n\n/// Parses\npub fn parse() -> bool { true }\n\n#[cfg(test)]\nmod tests {\n    #[test]\n    fn empty() {\n        assert!(super::parse());\n    }\n}\n" }
+
+[[commit]]
+message = "Fix a typo in the README"
+files = { "README.md" = "Parses.\n" }
+
+[[commit]]
+message = "Reject long input\n\nFixes: {sha:1} (\"Add the parser\")"
+files = { "src/lib.rs" = "//! Fixture.\n\n/// Parses\npub fn parse() -> bool { false }\n", "tests/long.rs" = "#[test]\nfn long() {}\n" }
+
+[[commit]]
+message = "Fixture builder for the parser"
+files = { "src/lib.rs" = "//! Fixture.\n\n/// Parses\npub fn parse() -> bool { !false }\n" }
+
+[[commit]]
+message = "Fix the timing on the board\n\nSpirit-Level: allow(fix-without-test) needs the board on the bench"
+files = { "src/lib.rs" = "//! Fixture.\n\n/// Parses\npub fn parse() -> bool { !true }\n" }

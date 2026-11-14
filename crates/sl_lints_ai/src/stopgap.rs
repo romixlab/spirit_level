@@ -3,12 +3,15 @@
 
 use sl_analysis::Context;
 use sl_analysis::comments::{CommentKind, comments, line_comment_blocks};
-use sl_core::{Diagnostic, Span};
+use sl_core::{Confidence, Diagnostic, Span};
 use sl_model::Package;
 
 pub(crate) fn run(cx: &Context<'_>) {
     if cx.enabled("stop-gap-comments") {
         markers(cx);
+    }
+    if cx.enabled("fixme-before-land") {
+        fixmes(cx);
     }
     if cx.enabled("commented-out-code") {
         commented_code(cx);
@@ -92,6 +95,43 @@ fn markers(cx: &Context<'_>) {
                             .span(Span::new(src.rel.clone(), n))
                             .krate(&pkg.name)
                             .help("build the final design now, or track the work: a FEATURES.md id or an issue link in the comment"),
+                    );
+                }
+            }
+        }
+    }
+}
+
+/// FIXME notes: a candidate while the branch is in work, a finding when it lands
+fn fixmes(cx: &Context<'_>) {
+    let id = "fixme-before-land";
+    for pkg in &cx.project.packages {
+        let p = cx.params_for(id, pkg);
+        for src in cx.project.sources(pkg) {
+            for c in comments(&src.text) {
+                if c.kind.is_doc() && !p.bool("docs") {
+                    continue;
+                }
+                for (i, line) in c.text.lines().enumerate() {
+                    let Some(what) = p
+                        .list("markers")
+                        .iter()
+                        .find(|m| find_marker(line, m).is_some())
+                    else {
+                        continue;
+                    };
+                    let n = c.line + i as u32;
+                    let (confidence, when) = if cx.landing() {
+                        (Confidence::Certain, "the branch lands with")
+                    } else {
+                        (Confidence::Candidate, "resolve before landing:")
+                    };
+                    cx.emit(
+                        Diagnostic::new(id, format!("{}:{}", src.rel, key(line)), format!("{when} `{what}` {}", short(line)))
+                            .span(Span::new(src.rel.clone(), n))
+                            .krate(&pkg.name)
+                            .confidence(confidence)
+                            .help("do what the note says and remove it; work left for later is a TODO(ID) with a FEATURES.md id"),
                     );
                 }
             }

@@ -46,6 +46,14 @@ reason = "a body holds why, not a retelling of the diff"
 level = "warn"
 reason = "commit messages follow the prose rules of the docs"
 
+[lints.fixes-tag]
+level = "deny"
+reason = "an agent copies the culprit's hash and subject from git; a wrong one sends the next reader astray"
+
+[lints.fix-without-test]
+level = "warn"
+reason = "an agent writes the failing test first; a warning, since a fix is judged from its subject"
+
 [lints.sentence-words]
 level = "warn"
 reason = "short sentences are read once and understood"
@@ -81,6 +89,10 @@ reason = "a comment says what the code cannot"
 [lints.stop-gap-comments]
 level = "deny"
 reason = "a TODO or a 'for now' marks a path the final design throws away; tracked work names its id"
+
+[lints.fixme-before-land]
+level = "deny"
+reason = "an agent may leave itself a FIXME on its branch; the landing refuses it"
 
 [lints.todo-macros]
 level = "deny"

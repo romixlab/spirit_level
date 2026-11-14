@@ -2,6 +2,17 @@
 
 ## [Unreleased]
 
+### Added
+
+- `spl check --landing` (`SPIRIT_LEVEL_LANDING`) and `Spirit-Level: allow(...)` commit trailers as waivers (ENG-10).
+- fixme-before-land (A0011): FIXME is a candidate on the branch, a finding when the branch lands (AI-2).
+- fixes-tag (P0017): a `Fixes:` trailer names a resolving hash of 12+ digits and the culprit's subject (PROSE-3).
+- fix-without-test (P0018): a commit that fixes code adds a test, or says why not (PROSE-3).
+
+### Changed
+
+- stop-gap-comments (A0010) no longer reports FIXME; fixme-before-land does (AI-2).
+
 ## [0.2.3] - 2026-11-14
 
 ### Added

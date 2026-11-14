@@ -1,0 +1,15 @@
+[[commit]]
+message = "Add the parser"
+files = { "src/lib.rs" = "//! Fixture.\n\n/// Parses\npub fn parse() {}\n" }
+
+[[commit]]
+message = "Reject empty input\n\nFixes: 0123abc (\"Add the parser\")"
+
+[[commit]]
+message = "Reject long input\n\nFixes: {sha:1} (\"Add a parser\")"
+
+[[commit]]
+message = "Reject odd input\n\nFixes: {sha:1}"
+
+[[commit]]
+message = "Reject bad input\n\nFixes: 0123456789abcdef (\"Add the parser\")"

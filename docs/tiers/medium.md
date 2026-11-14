@@ -53,6 +53,7 @@ Use it with `extends = "medium"` in `spirit_level.toml`.
 | [P0001](../lints/P0001.md) | agent-file-lines | `warn` | agents read AGENTS.md whole every session; a long one is skimmed, not followed | small |
 | [P0007](../lints/P0007.md) | commit-subject-length | `warn` | the subject is what one-line logs and reviews show | medium |
 | [P0009](../lints/P0009.md) | changelog-entry-length | `warn` | a CHANGELOG is a list: one short line per change | small |
+| [P0017](../lints/P0017.md) | fixes-tag | `warn` | a Fixes: trailer that points nowhere is worse than none; it fires only where one is written | medium |
 | [S0001](../lints/S0001.md) | crate-lines | `warn` | split a crate before it passes ~20,000 lines: one crate is one serial compile step | medium |
 | [S0002](../lints/S0002.md) | function-complexity | `warn` | more paths than can be tested or held in one's head | small |
 | [S0003](../lints/S0003.md) | function-lines | `warn` | a function longer than a screen is changed without being read whole | small |
@@ -198,6 +199,10 @@ reason = "components call each other as libraries, not through their CLIs"
 [lints.commit-subject-length]
 level = "warn"
 reason = "the subject is what one-line logs and reviews show"
+
+[lints.fixes-tag]
+level = "warn"
+reason = "a Fixes: trailer that points nowhere is worse than none; it fires only where one is written"
 
 [lints.module-graph-scc]
 level = "warn"

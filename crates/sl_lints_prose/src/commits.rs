@@ -19,10 +19,16 @@ pub(crate) fn branch(cx: &Context<'_>, id: &str) -> Option<Arc<[Commit]>> {
         Ok(l) => Some(l),
         Err(e) => {
             cx.emit(
-                Diagnostic::new(id, format!("base:{base}"), format!("commits not checked: {e}"))
-                    .span(Span::new(".git", 0))
-                    .confidence(Confidence::Candidate)
-                    .help("set the lint's `base` to the branch work merges into (`main`, `origin/main`)"),
+                Diagnostic::new(
+                    id,
+                    format!("base:{base}"),
+                    format!("commits not checked: {e}"),
+                )
+                .span(Span::new(".git", 0))
+                .confidence(Confidence::Candidate)
+                .help(
+                    "set the lint's `base` to the branch work merges into (`main`, `origin/main`)",
+                ),
             );
             None
         }

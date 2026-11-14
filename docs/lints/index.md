@@ -106,6 +106,8 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [P0005](P0005.md) | [commit-body-lines](P0005.md) | a commit body stays short | off | off | off | off | warn | off |
 | [P0006](P0006.md) | [commit-prose](P0006.md) | commit messages use no filler, narration or emoji and do not describe the diff | off | off | off | off | warn | off |
 | [P0007](P0007.md) | [commit-subject-length](P0007.md) | a commit subject stays under its length limit | off | off | warn | warn | deny | off |
+| [P0017](P0017.md) | [fixes-tag](P0017.md) | a Fixes: trailer names its culprit by a hash that resolves and the culprit's subject | off | off | warn | warn | deny | off |
+| [P0018](P0018.md) | [fix-without-test](P0018.md) | a commit that fixes code adds a test | off | off | off | warn | warn | off |
 
 ## dead-code
 
@@ -433,7 +435,8 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [A0007](A0007.md) | [lint-table-allow-reason](A0007.md) | a lint allowed in a Cargo.toml [lints] table says why in a comment | off | off | off | off | deny | off |
 | [A0008](A0008.md) | [near-duplicate-fns](A0008.md) | no two functions are near copies of each other | off | off | off | off | warn | off |
 | [A0009](A0009.md) | [near-duplicate-modules](A0009.md) | no two modules are near copies of each other | off | off | off | off | deny | off |
-| [A0010](A0010.md) | [stop-gap-comments](A0010.md) | comments carry no stop-gap markers: TODO, FIXME, HACK, for now, workaround | off | off | off | deny | deny | off |
+| [A0010](A0010.md) | [stop-gap-comments](A0010.md) | comments carry no stop-gap markers: TODO, HACK, for now, workaround | off | off | off | deny | deny | off |
+| [A0011](A0011.md) | [fixme-before-land](A0011.md) | no FIXME is left when a branch lands | off | off | off | deny | deny | off |
 
 ## structure
 

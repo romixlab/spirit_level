@@ -108,6 +108,14 @@ reason = "crates the map marks deterministic iterate in the same order every run
 level = "deny"
 reason = "no stop-gaps: a TODO or a 'for now' names its tracker id or goes"
 
+[lints.fixme-before-land]
+level = "deny"
+reason = "a FIXME is a note for the branch; a candidate while it is in work, refused when it lands"
+
+[lints.fix-without-test]
+level = "warn"
+reason = "a bug is fixed when a test fails without the fix; a warning, since a fix is judged from its subject"
+
 [lints.agent-rules-match-lints]
 level = "warn"
 reason = "limits AGENTS.md states are the limits the lints check"

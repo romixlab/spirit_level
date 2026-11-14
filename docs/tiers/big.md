@@ -11,6 +11,7 @@ Use it with `extends = "big"` in `spirit_level.toml`.
 | Code | Lint | Level | Reason | Set in |
 |---|---|---|---|---|
 | [A0010](../lints/A0010.md) | stop-gap-comments | `deny` | no stop-gaps: a TODO or a 'for now' names its tracker id or goes | big |
+| [A0011](../lints/A0011.md) | fixme-before-land | `deny` | a FIXME is a note for the branch; a candidate while it is in work, refused when it lands | big |
 | [C0001](../lints/C0001.md) | pub-surface | `warn` | in a big workspace pub is the easy way across crates; a library that is all surface keeps nothing apart | big |
 | [C0002](../lints/C0002.md) | allow-without-reason | `deny` | an exception to a lint says why, or it outlives its reason | big |
 | [C0003](../lints/C0003.md) | cli-subprocess | `deny` | components call each other as libraries, not through their CLIs | medium |
@@ -69,6 +70,8 @@ Use it with `extends = "big"` in `spirit_level.toml`.
 | [P0003](../lints/P0003.md) | agent-rules-match-lints | `warn` | limits AGENTS.md states are the limits the lints check | big |
 | [P0007](../lints/P0007.md) | commit-subject-length | `warn` | the subject is what one-line logs and reviews show | medium |
 | [P0009](../lints/P0009.md) | changelog-entry-length | `warn` | a CHANGELOG is a list: one short line per change | small |
+| [P0017](../lints/P0017.md) | fixes-tag | `warn` | a Fixes: trailer that points nowhere is worse than none; it fires only where one is written | medium |
+| [P0018](../lints/P0018.md) | fix-without-test | `warn` | a bug is fixed when a test fails without the fix; a warning, since a fix is judged from its subject | big |
 | [S0001](../lints/S0001.md) | crate-lines | `warn` | split a crate before it passes ~20,000 lines: one crate is one serial compile step | medium |
 | [S0002](../lints/S0002.md) | function-complexity | `warn` | more paths than can be tested or held in one's head | small |
 | [S0003](../lints/S0003.md) | function-lines | `warn` | a function longer than a screen is changed without being read whole | small |
@@ -278,6 +281,14 @@ reason = "crates the map marks deterministic iterate in the same order every run
 [lints.stop-gap-comments]
 level = "deny"
 reason = "no stop-gaps: a TODO or a 'for now' names its tracker id or goes"
+
+[lints.fixme-before-land]
+level = "deny"
+reason = "a FIXME is a note for the branch; a candidate while it is in work, refused when it lands"
+
+[lints.fix-without-test]
+level = "warn"
+reason = "a bug is fixed when a test fails without the fix; a warning, since a fix is judged from its subject"
 
 [lints.agent-rules-match-lints]
 level = "warn"

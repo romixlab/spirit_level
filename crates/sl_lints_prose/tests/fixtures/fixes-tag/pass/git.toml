@@ -1,0 +1,10 @@
+[[commit]]
+message = "Add the parser"
+files = { "src/lib.rs" = "//! Fixture.\n\n/// Parses\npub fn parse() {}\n" }
+
+[[commit]]
+message = "Reject empty input\n\nFixes: {sha:1} (\"Add the parser\")"
+files = { "src/lib.rs" = "//! Fixture.\n\n/// Parses\npub fn parse() -> bool { true }\n" }
+
+[[commit]]
+message = "Keep the subject line\n\nFixes: is a word in this body, not a trailer here.\n\nCo-Authored-By: A <a@example.org>"

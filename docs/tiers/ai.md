@@ -18,6 +18,7 @@ Use it with `extends = "ai"` in `spirit_level.toml`.
 | [A0008](../lints/A0008.md) | near-duplicate-fns | `warn` | a rewrite that keeps the old function leaves two copies to fix | ai |
 | [A0009](../lints/A0009.md) | near-duplicate-modules | `deny` | a rewrite that keeps the old module is not finished | ai |
 | [A0010](../lints/A0010.md) | stop-gap-comments | `deny` | a TODO or a 'for now' marks a path the final design throws away; tracked work names its id | ai |
+| [A0011](../lints/A0011.md) | fixme-before-land | `deny` | an agent may leave itself a FIXME on its branch; the landing refuses it | ai |
 | [C0002](../lints/C0002.md) | allow-without-reason | `deny` | an allowed lint says why, so it can be turned back on | ai |
 | [C0008](../lints/C0008.md) | todo-macros | `deny` | todo!() and unimplemented!() are stop-gaps that compile | ai |
 | [M0018](../lints/M0018.md) | repo-files | `deny` | AGENTS.md holds the rules every agent reads; CLAUDE.md points to it | ai |
@@ -37,6 +38,8 @@ Use it with `extends = "ai"` in `spirit_level.toml`.
 | [P0014](../lints/P0014.md) | restating-comments | `warn` | a comment says what the code cannot | ai |
 | [P0015](../lints/P0015.md) | sentence-words | `warn` | short sentences are read once and understood | ai |
 | [P0016](../lints/P0016.md) | thinking-comments | `deny` | a comment holds the conclusion, not the reasoning that led to it | ai |
+| [P0017](../lints/P0017.md) | fixes-tag | `deny` | an agent copies the culprit's hash and subject from git; a wrong one sends the next reader astray | ai |
+| [P0018](../lints/P0018.md) | fix-without-test | `warn` | an agent writes the failing test first; a warning, since a fix is judged from its subject | ai |
 
 ## Clippy set (with what it extends)
 
@@ -110,6 +113,14 @@ reason = "a body holds why, not a retelling of the diff"
 level = "warn"
 reason = "commit messages follow the prose rules of the docs"
 
+[lints.fixes-tag]
+level = "deny"
+reason = "an agent copies the culprit's hash and subject from git; a wrong one sends the next reader astray"
+
+[lints.fix-without-test]
+level = "warn"
+reason = "an agent writes the failing test first; a warning, since a fix is judged from its subject"
+
 [lints.sentence-words]
 level = "warn"
 reason = "short sentences are read once and understood"
@@ -145,6 +156,10 @@ reason = "a comment says what the code cannot"
 [lints.stop-gap-comments]
 level = "deny"
 reason = "a TODO or a 'for now' marks a path the final design throws away; tracked work names its id"
+
+[lints.fixme-before-land]
+level = "deny"
+reason = "an agent may leave itself a FIXME on its branch; the landing refuses it"
 
 [lints.todo-macros]
 level = "deny"

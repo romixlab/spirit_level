@@ -86,6 +86,8 @@ P0013 = { id = "paragraph-sentences", group = "prose", status = "active" }
 P0014 = { id = "restating-comments", group = "prose", status = "active" }
 P0015 = { id = "sentence-words", group = "prose", status = "active" }
 P0016 = { id = "thinking-comments", group = "prose", status = "active" }
+P0017 = { id = "fixes-tag", group = "prose", status = "active" }
+P0018 = { id = "fix-without-test", group = "prose", status = "active" }
 A0001 = { id = "agent-config-permissions", group = "ai", status = "active" }
 A0002 = { id = "agent-config-secrets", group = "ai", status = "active" }
 A0003 = { id = "agent-session-files", group = "ai", status = "active" }
@@ -96,6 +98,7 @@ A0007 = { id = "lint-table-allow-reason", group = "ai", status = "active" }
 A0008 = { id = "near-duplicate-fns", group = "ai", status = "active" }
 A0009 = { id = "near-duplicate-modules", group = "ai", status = "active" }
 A0010 = { id = "stop-gap-comments", group = "ai", status = "active" }
+A0011 = { id = "fixme-before-land", group = "ai", status = "active" }
 F0001 = { id = "boot-1", group = "firmware", status = "active" }
 F0002 = { id = "boot-10", group = "firmware", status = "active" }
 F0003 = { id = "boot-2", group = "firmware", status = "active" }

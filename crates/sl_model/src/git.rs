@@ -67,15 +67,23 @@ pub(crate) struct Cache(Mutex<BTreeMap<String, Result<Arc<[Commit]>, String>>>);
 
 impl Cache {
     pub(crate) fn get(&self, root: &Path, base: &str) -> Result<Arc<[Commit]>, String> {
-        let mut map = self.0.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+        let mut map = self
+            .0
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
         map.entry(base.to_owned())
             .or_insert_with(|| read(root, base).map(Arc::from))
             .clone()
     }
 
     pub(crate) fn read_so_far(&self) -> Vec<Arc<[Commit]>> {
-        let map = self.0.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
-        map.values().filter_map(|r| r.as_ref().ok().cloned()).collect()
+        let map = self
+            .0
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner);
+        map.values()
+            .filter_map(|r| r.as_ref().ok().cloned())
+            .collect()
     }
 }
 
@@ -131,9 +139,8 @@ pub fn parse(hash: &str, msg: &str) -> Option<Commit> {
         .iter()
         .rposition(|l| l.trim().is_empty())
         .map_or(lines.len(), |i| i + 1);
-    let block_is_trailers = start > 1
-        && start < lines.len()
-        && lines[start..].iter().all(|l| trailer(l).is_some());
+    let block_is_trailers =
+        start > 1 && start < lines.len() && lines[start..].iter().all(|l| trailer(l).is_some());
     let mut body = Vec::new();
     let mut trailers = Vec::new();
     for (i, l) in lines.iter().enumerate().skip(1) {
@@ -173,7 +180,15 @@ fn trailer(l: &str) -> Option<(&str, &str)> {
 pub fn changes(root: &Path, c: &Commit) -> Result<Vec<Change>, String> {
     let out = git(
         root,
-        &["show", "--format=", "--name-status", "-M", "-C", "-z", &c.hash],
+        &[
+            "show",
+            "--format=",
+            "--name-status",
+            "-M",
+            "-C",
+            "-z",
+            &c.hash,
+        ],
     )?;
     let mut parts = out.split('\0').filter(|s| !s.is_empty());
     let mut v = Vec::new();

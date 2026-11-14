@@ -2,6 +2,8 @@
 
 The top rule of agent-written code: no stop-gaps. A `TODO`, a `HACK` or "for now" marks a second path that the final design throws away, and agents leave them by the dozen. A marker that names planned work (`TODO(CFG-3)`, an issue link) is tracked and passes.
 
+`FIXME` is not a stop-gap here: it is a note to revisit before the branch lands, and [fixme-before-land](A0011.md) refuses it at the landing.
+
 The rule checks every comment of the workspace members, doc comments included (`docs`):
 
 - `markers` match as whole words, case-sensitive (`TODO`, not "a todo list");

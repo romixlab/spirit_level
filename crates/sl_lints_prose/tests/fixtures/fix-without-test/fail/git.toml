@@ -1,0 +1,11 @@
+[[commit]]
+message = "Add the parser"
+files = { "src/lib.rs" = "//! Fixture.\n\n/// Parses\npub fn parse() {}\n" }
+
+[[commit]]
+message = "Fix the empty input case"
+files = { "src/lib.rs" = "//! Fixture.\n\n/// Parses\npub fn parse() -> bool { true }\n" }
+
+[[commit]]
+message = "Reject long input\n\nFixes: {sha:1} (\"Add the parser\")"
+files = { "src/lib.rs" = "//! Fixture.\n\n/// Parses\npub fn parse() -> bool { false }\n" }
