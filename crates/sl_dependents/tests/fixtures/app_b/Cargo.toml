@@ -1,0 +1,9 @@
+[package]
+name = "b"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+lib_core = { path = "../lib/crates/lib_core" }
+
+[workspace]

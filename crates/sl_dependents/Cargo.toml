@@ -1,0 +1,18 @@
+[package]
+name = "sl_dependents"
+description = "The repos that build on a library and the crates in them to retest when it changes (`spl dependents`)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+serde.workspace = true
+sl_config.workspace = true
+sl_model.workspace = true
+toml_edit.workspace = true
+
+[lints]
+workspace = true

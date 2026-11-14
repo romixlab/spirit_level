@@ -1,0 +1,4 @@
+extends = "small"
+
+[dependents]
+scan = [".."]

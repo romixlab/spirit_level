@@ -56,6 +56,7 @@ rustc-demangle = { version = "0.1", default-features = false }
 sl_analysis = { path = "crates/sl_analysis" }
 sl_book = { path = "crates/sl_book" }
 sl_config = { path = "crates/sl_config" }
+sl_dependents = { path = "crates/sl_dependents" }
 sl_core = { path = "crates/sl_core" }
 sl_engine = { path = "crates/sl_engine" }
 sl_firmware = { path = "crates/sl_firmware" }

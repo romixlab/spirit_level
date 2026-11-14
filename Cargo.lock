@@ -1018,6 +1018,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "sl_dependents"
+version = "0.2.1"
+dependencies = [
+ "serde",
+ "sl_config",
+ "sl_model",
+ "toml_edit",
+]
+
+[[package]]
 name = "sl_engine"
 version = "0.2.2"
 dependencies = [

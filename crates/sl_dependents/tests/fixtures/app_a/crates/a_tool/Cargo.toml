@@ -1,0 +1,7 @@
+[package]
+name = "a_tool"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+lib_extra.workspace = true

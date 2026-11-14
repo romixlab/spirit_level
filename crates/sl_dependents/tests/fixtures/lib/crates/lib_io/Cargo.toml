@@ -1,0 +1,7 @@
+[package]
+name = "lib_io"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+lib_core = { path = "../lib_core" }

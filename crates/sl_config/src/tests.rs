@@ -283,3 +283,25 @@ fn clippy_entries_need_a_level_and_a_reason() {
         "{m:?}"
     );
 }
+
+#[test]
+fn dependents_table() {
+    let c = load("extends = \"small\"\n[dependents]\nscan = \"~/git\"\nrepos = [\"../app\"]\n")
+        .unwrap();
+    let d = c.dependents.unwrap();
+    assert_eq!(d.scan, vec!["~/git"]);
+    assert_eq!(d.repos, vec!["../app"]);
+    assert_eq!(d.base, "main");
+    assert_eq!(d.test, "cargo nextest run");
+    assert_eq!(d.origin.line, 2);
+    assert!(load("extends = \"small\"\n").unwrap().dependents.is_none());
+    let m = messages(load(
+        "extends = \"small\"\n[dependents]\nbase = \"dev\"\nrun = 1\n",
+    ));
+    assert!(m.iter().any(|s| s.contains("names no checkouts")), "{m:?}");
+    assert!(
+        m.iter()
+            .any(|s| s.contains(":4: unknown key dependents.run")),
+        "{m:?}"
+    );
+}

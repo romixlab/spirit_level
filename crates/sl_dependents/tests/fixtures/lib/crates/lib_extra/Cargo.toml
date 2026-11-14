@@ -1,0 +1,4 @@
+[package]
+name = "lib_extra"
+version.workspace = true
+edition.workspace = true

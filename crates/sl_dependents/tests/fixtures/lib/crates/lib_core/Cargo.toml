@@ -1,0 +1,4 @@
+[package]
+name = "lib_core"
+version.workspace = true
+edition.workspace = true

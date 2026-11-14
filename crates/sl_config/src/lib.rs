@@ -19,14 +19,19 @@
 //! deny-above = 120000
 //! reason = "generated protocol types"
 //! expires = "v0.4.0"
+//!
+//! [dependents]                        # the repos that build on this one (see [`dependents`])
+//! scan = ["~/git"]
 //! ```
 
 pub mod clippy;
+pub mod dependents;
 mod error;
 pub mod map;
 mod reader;
 
 pub use clippy::{ClippyConfig, ClippyLint, ClippySet};
+pub use dependents::Dependents;
 pub use error::ConfigError;
 pub use map::{External, Layer, Map, MapCrate};
 
@@ -115,6 +120,8 @@ pub struct Config {
     pub map: Option<Map>,
     /// The Clippy set the project is expected to turn on
     pub clippy: ClippySet,
+    /// Where the repos that build on this one are; None: `spl dependents` is off
+    pub dependents: Option<Dependents>,
 }
 
 /// What a resolution needs to know besides the files
@@ -223,6 +230,7 @@ struct Resolver<'a> {
     exceptions: Vec<Exception>,
     map: Option<Map>,
     clippy: ClippySet,
+    dependents: Option<Dependents>,
     extends: Vec<String>,
     stack: Vec<String>,
     /// The depth at which an extended name is a top-level one (1 under a project file, 0 for bare tiers)
@@ -255,6 +263,7 @@ impl<'a> Resolver<'a> {
             exceptions: Vec::new(),
             map: None,
             clippy: ClippySet::default(),
+            dependents: None,
             extends: Vec::new(),
             stack: Vec::new(),
             record_at: 1,
@@ -273,6 +282,7 @@ impl<'a> Resolver<'a> {
             exceptions: self.exceptions,
             map: self.map,
             clippy: self.clippy,
+            dependents: self.dependents,
         })
     }
 
@@ -389,6 +399,9 @@ impl<'a> Resolver<'a> {
             }
             if let Some(m) = r.table("map", &mut errs) {
                 self.map = Some(Map::read(m, &mut errs));
+            }
+            if let Some(d) = r.table("dependents", &mut errs) {
+                self.dependents = Some(Dependents::read(d, &dir, &mut errs));
             }
             if let Some(mf) = r.opt_str("map-file", &mut errs) {
                 if self.map.is_some() {

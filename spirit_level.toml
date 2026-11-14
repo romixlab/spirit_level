@@ -89,6 +89,7 @@ allow = ["core", "model", "analysis", "engine", "tests"]
 sl_core = { layer = "core" }
 sl_model = { layer = "model" }
 sl_config = { layer = "model" }
+sl_dependents = { layer = "model" }
 sl_tools = { layer = "model" }
 sl_firmware = { layer = "model" }
 sl_analysis = { layer = "analysis" }

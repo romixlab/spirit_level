@@ -1,0 +1,10 @@
+[package]
+name = "lib_cli"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+lib_io = { path = "../lib_io" }
+
+[dev-dependencies]
+lib_extra = { path = "../lib_extra" }
