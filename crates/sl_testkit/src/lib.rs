@@ -40,9 +40,9 @@ pub fn check_with(analysis: &dyn Analysis, dir: &Path, hooks: &Hooks<'_>) {
 /// Like [`check`], for an adapter that runs an external tool.
 ///
 /// Each case runs on a copy in the temporary directory (the tool may write `Cargo.lock` or `target/`), and a case
-/// whose lint cannot run because the tool, a toolchain, a target or a cargo feature is missing is skipped with a
-/// `skipped:` line on stderr instead of failing. `SPIRIT_LEVEL_REQUIRE_TOOLS=1` turns those skips into failures (for
-/// a run that must cover them).
+/// whose lint cannot run because the tool, a toolchain, a target or a cargo feature is missing fails the test with a
+/// `skipped:` line naming what is missing: a missing tool never passes green (`just tools` installs them). A case
+/// that needs the network is skipped with a `skipped:` line on stderr unless `SPIRIT_LEVEL_NETWORK` is set.
 pub fn check_tools(analysis: &dyn Analysis, dir: &Path) {
     check_impl(analysis, dir, &Hooks::default(), true);
 }
@@ -129,22 +129,17 @@ fn check_impl(analysis: &dyn Analysis, dir: &Path, hooks: &Hooks<'_>, tools: boo
             }
         }
     }
+    let (network, missing): (Vec<&String>, Vec<&String>) =
+        skipped.iter().partition(|s| s.ends_with(NETWORK_SKIP));
     #[expect(
         clippy::print_stderr,
         reason = "a skipped case is shown on stderr, as the test runner shows it"
     )]
-    for s in &skipped {
+    for s in network {
         eprintln!("skipped: {s}"); // spirit-level: allow(print-in-library) a skipped case is shown on stderr, as the test runner shows it
     }
-    let missing_tools = skipped
-        .iter()
-        .filter(|s| !s.ends_with(NETWORK_SKIP))
-        .count();
-    if missing_tools > 0 && std::env::var_os("SPIRIT_LEVEL_REQUIRE_TOOLS").is_some() {
-        let _ = writeln!(
-            problems,
-            "{missing_tools} cases skipped while SPIRIT_LEVEL_REQUIRE_TOOLS is set"
-        );
+    for s in missing {
+        let _ = writeln!(problems, "skipped: {s}");
     }
     assert!(problems.is_empty(), "fixture problems:\n{problems}");
 }
@@ -618,5 +613,66 @@ impl GitCase {
 impl Drop for GitCase {
     fn drop(&mut self) {
         let _ = std::fs::remove_dir_all(&self.dir);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use sl_analysis::Context;
+    use sl_core::{FixKind, LintMeta, Source};
+
+    static FAKE: LintMeta = LintMeta {
+        code: "X9999",
+        id: "fake-tool",
+        category: "test",
+        summary: "s",
+        docs: "",
+        params: &[],
+        needs: &[],
+        fix: FixKind::None,
+        source: Source::Native,
+    };
+
+    /// An adapter whose tool is never installed
+    struct NoTool;
+
+    impl Analysis for NoTool {
+        fn name(&self) -> &'static str {
+            "fake"
+        }
+
+        fn lints(&self) -> &'static [&'static LintMeta] {
+            static LINTS: &[&LintMeta] = &[&FAKE];
+            LINTS
+        }
+
+        fn run(&self, cx: &Context<'_>) {
+            cx.not_run_all("tool:fake", "fake is not installed");
+        }
+    }
+
+    #[test]
+    fn a_missing_tool_fails_the_test() {
+        let dir = std::env::temp_dir().join(format!("sl_testkit_missing_{}", std::process::id()));
+        for case in ["pass", "fail"] {
+            let d = dir.join("fake-tool").join(case);
+            std::fs::create_dir_all(d.join("src")).unwrap();
+            std::fs::write(
+                d.join("Cargo.toml"),
+                "[package]\nname = \"fx\"\nversion = \"0.1.0\"\nedition = \"2024\"\n\n[workspace]\n",
+            )
+            .unwrap();
+            std::fs::write(d.join("src/lib.rs"), "//! fx\n").unwrap();
+        }
+        let run = std::panic::catch_unwind(|| check_tools(&NoTool, &dir));
+        let _ = std::fs::remove_dir_all(&dir);
+        let err = run.expect_err("a missing tool never passes green");
+        let msg = err.downcast_ref::<String>().cloned().unwrap_or_default();
+        assert!(
+            msg.contains("skipped: fake-tool/fail: fake is not installed")
+                && msg.contains("skipped: fake-tool/pass: fake is not installed"),
+            "{msg}"
+        );
     }
 }
