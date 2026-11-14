@@ -1,0 +1,9 @@
+# Beside the size tiers, above units-strict: quantities stay typed inside function bodies too. Combine: extends = ["medium", "units-paranoid"].
+extends = "units-strict"
+
+[tier]
+description = "Units inside function bodies: locals, literal arguments, casts, float maths, bare comparisons, raw arithmetic, scale constants and conversions by hand"
+
+[lints.exact-units-in-bodies]
+level = "warn"
+reason = "a quantity that leaves its type inside a function loses the checks the type gave it"

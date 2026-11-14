@@ -42,6 +42,7 @@ Working name. Private for now.
 | [`sl_lints_state`](crates/sl_lints_state) | lints | spirit_level shared-state lints from the fewer-locks rule: statics with interior mutability, static mut, thread-local state, lock().unwrap() counts, guards held across await or I/O, nested locks |
 | [`sl_lints_surface`](crates/sl_lints_surface) | lints | spirit_level lints on a library's public surface: public items reachable from the root per 1000 code lines |
 | [`sl_lints_ui`](crates/sl_lints_ui) | lints | spirit_level UI lints: theme colours and sizes, disabled controls with a reason, confirmed destructive actions, no blocking or raw spawns in UI code, wording, egui ids and repaints |
+| [`sl_lints_units`](crates/sl_lints_units) | lints | spirit_level lints that move plain numbers into exact_units types: quantities, positions and counts, bounds, and quantities inside function bodies |
 | [`sl_tool_audit`](crates/sl_tool_audit) | lints | spirit_level adapter of cargo-audit: vulnerable, unmaintained, unsound and yanked dependencies from the RustSec database |
 | [`sl_tool_cargo`](crates/sl_tool_cargo) | lints | spirit_level checks driven by cargo: the MSRV build, no_std and wasm builds of the map's crates, cargo doc without warnings |
 | [`sl_tool_clippy`](crates/sl_tool_clippy) | lints | spirit_level adapter of clippy: runs cargo clippy, reads its JSON messages, one lint per clippy group |

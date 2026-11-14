@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Added
+
+- `exact-units-quantity` (C0033, warn from small): unit- and quantity-named plain numbers get their exact_units type (CODE-11).
+- `exact-units-bounds` (C0035, warn from small): exact_units values without bounds whose range the crate states (CODE-11).
+- `exact-units-plain-number` (C0034): indices, counts, sequence numbers and `Duration` as exact_units types; tier `units-strict` (CODE-11).
+- `exact-units-in-bodies` (C0036): unit-named locals, literals, casts, float maths, comparisons, conversions; tier `units-paranoid` (CODE-11).
+
 ## [0.3.0] - 2026-11-14
 
 ### Added

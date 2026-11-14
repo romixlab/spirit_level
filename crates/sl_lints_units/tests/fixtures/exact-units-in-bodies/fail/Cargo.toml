@@ -1,0 +1,9 @@
+[package]
+name = "fx"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]
+
+[dependencies]
+exact_units = { path = "exact_units" }

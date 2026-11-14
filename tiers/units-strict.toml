@@ -1,0 +1,7 @@
+# Beside the size tiers: every number exact_units can type, positions and counts too. Combine: extends = ["medium", "units-strict"].
+[tier]
+description = "Units everywhere: indices, counts, sequence numbers and time spans in exact_units types, besides the quantities every tier checks"
+
+[lints.exact-units-plain-number]
+level = "warn"
+reason = "an index of one table used for another, or a count of samples taken for bytes, is a bug no plain integer catches"

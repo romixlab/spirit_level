@@ -87,6 +87,10 @@ C0029 = { id = "cli-standard-flags", group = "code", status = "active" }
 C0030 = { id = "compound-assert", group = "code", status = "active" }
 C0031 = { id = "assert-message", group = "code", status = "active" }
 C0032 = { id = "float-partial-cmp-unwrap", group = "code", status = "active" }
+C0033 = { id = "exact-units-quantity", group = "code", status = "active" }
+C0034 = { id = "exact-units-plain-number", group = "code", status = "active" }
+C0035 = { id = "exact-units-bounds", group = "code", status = "active" }
+C0036 = { id = "exact-units-in-bodies", group = "code", status = "active" }
 P0001 = { id = "agent-file-lines", group = "prose", status = "active" }
 P0002 = { id = "agent-file-links", group = "prose", status = "active" }
 P0003 = { id = "agent-rules-match-lints", group = "prose", status = "active" }

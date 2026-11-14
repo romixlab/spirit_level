@@ -245,3 +245,13 @@ reason = "a page without a title is shown under its file name"
 [lints.admonition-syntax]
 level = "deny"
 reason = "an unknown type loses its colour and a body indented less than four spaces renders outside the box"
+
+# Units in types (exact_units)
+
+[lints.exact-units-quantity]
+level = "warn"
+reason = "a unit in a name is checked by no one; in the type the compiler checks every use. Names only, so a warning"
+
+[lints.exact-units-bounds]
+level = "warn"
+reason = "a range the code enforces belongs in the type, where every value is checked when it is made"

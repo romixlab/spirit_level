@@ -105,6 +105,7 @@ sl_board_model = { layer = "model" }
 sl_board = { layer = "model" }
 sl_analysis = { layer = "analysis" }
 sl_lints_ai = { layer = "lints" }
+sl_lints_units = { layer = "lints" }
 sl_lints_board = { layer = "lints" }
 sl_lints_cli = { layer = "lints" }
 sl_lints_code = { layer = "lints" }

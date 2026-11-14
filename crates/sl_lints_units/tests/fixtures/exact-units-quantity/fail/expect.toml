@@ -1,0 +1,48 @@
+[[finding]]
+at = "src/lib.rs:4:21"
+confidence = "estimate"
+
+[[finding]]
+at = "src/lib.rs:5:18"
+confidence = "estimate"
+
+[[finding]]
+at = "src/lib.rs:7:23"
+confidence = "estimate"
+
+[[finding]]
+at = "src/lib.rs:8:25"
+confidence = "estimate"
+
+[[finding]]
+at = "src/lib.rs:9:18"
+confidence = "estimate"
+
+[[finding]]
+at = "src/lib.rs:10:15"
+confidence = "estimate"
+
+[[finding]]
+at = "src/lib.rs:11:22"
+confidence = "estimate"
+
+[[finding]]
+at = "src/lib.rs:14:28"
+confidence = "estimate"
+
+[[finding]]
+at = "src/lib.rs:16:28"
+confidence = "estimate"
+
+[[finding]]
+at = "src/lib.rs:16:36"
+confidence = "estimate"
+
+[[finding]]
+at = "src/lib.rs:20:27"
+confidence = "estimate"
+
+[[finding]]
+at = "src/lib.rs:25:25"
+confidence = "estimate"
+

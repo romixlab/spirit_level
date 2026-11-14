@@ -35,6 +35,14 @@ pub static TIERS: &[(&str, &str)] = &[
     ("embedded", include_str!("../../../tiers/embedded.toml")),
     ("ui", include_str!("../../../tiers/ui.toml")),
     ("egui", include_str!("../../../tiers/egui.toml")),
+    (
+        "units-strict",
+        include_str!("../../../tiers/units-strict.toml"),
+    ),
+    (
+        "units-paranoid",
+        include_str!("../../../tiers/units-paranoid.toml"),
+    ),
 ];
 
 /// The text of a shipped tier
@@ -62,6 +70,7 @@ pub fn analyses() -> Vec<&'static dyn Analysis> {
         &sl_lints_prose::PROSE,
         &sl_lints_docs::DOCS,
         &sl_lints_ai::AI,
+        &sl_lints_units::UNITS,
         &sl_lints_modules::MODULES,
         &sl_lints_dead::DEAD,
         &sl_lints_errors::ERRORS,

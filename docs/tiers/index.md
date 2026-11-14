@@ -12,3 +12,5 @@ A tier is a TOML file of lints shipped with spirit_level. Each size tier extends
 | [embedded](embedded.md) | Bare-metal firmware: executors, interrupts, DMA, stack, memory, size, faults, boot, power, flash, pins, clocks, errata, USB, host input, logging, counters, build configuration |
 | [ui](ui.md) | User interfaces of any toolkit: theme colours and sizes, disabled controls with a reason, confirmed destructive actions, no blocking or raw spawns on the UI thread, wording |
 | [egui](egui.md) | egui apps: the ui tier with egui's calls filled in, plus ids, repaints, the shared theme and status glyphs |
+| [units-strict](units-strict.md) | Units everywhere: indices, counts, sequence numbers and time spans in exact_units types, besides the quantities every tier checks |
+| [units-paranoid](units-paranoid.md) | Units inside function bodies: locals, literal arguments, casts, float maths, bare comparisons, raw arithmetic, scale constants and conversions by hand |

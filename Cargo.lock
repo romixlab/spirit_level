@@ -1303,6 +1303,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "sl_lints_units"
+version = "0.3.0"
+dependencies = [
+ "quote",
+ "sl_analysis",
+ "sl_core",
+ "sl_model",
+ "sl_testkit",
+ "syn 3.0.10",
+]
+
+[[package]]
 name = "sl_model"
 version = "0.3.0"
 dependencies = [
@@ -1521,6 +1533,7 @@ dependencies = [
  "sl_lints_state",
  "sl_lints_surface",
  "sl_lints_ui",
+ "sl_lints_units",
  "sl_model",
  "sl_tool_audit",
  "sl_tool_cargo",

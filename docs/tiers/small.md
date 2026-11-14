@@ -23,6 +23,8 @@ Use it with `extends = "small"` in `spirit_level.toml`.
 | [C0027](../lints/C0027.md) | cli-version-line | `warn` | the SHA and commit time say which build runs; older CLIs print other formats | small |
 | [C0029](../lints/C0029.md) | cli-standard-flags | `warn` | short flags are habits across tools; a different meaning turns a habit into a mistake | small |
 | [C0032](../lints/C0032.md) | float-partial-cmp-unwrap | `warn` | partial_cmp(..).unwrap() panics on the first NaN; total_cmp orders every float | small |
+| [C0033](../lints/C0033.md) | exact-units-quantity | `warn` | a unit in a name is checked by no one; in the type the compiler checks every use. Names only, so a warning | small |
+| [C0035](../lints/C0035.md) | exact-units-bounds | `warn` | a range the code enforces belongs in the type, where every value is checked when it is made | small |
 | [D0001](../lints/D0001.md) | prose-run-words | `warn` | a long stretch of prose with no heading, figure, table or code block is skimmed, not read | small |
 | [D0002](../lints/D0002.md) | page-reading-time | `warn` | a guide longer than one sitting is left half read | small |
 | [D0003](../lints/D0003.md) | heading-words | `warn` | headings are scanned to find a section; a sentence is read slowly | small |
@@ -340,4 +342,14 @@ reason = "a page without a title is shown under its file name"
 [lints.admonition-syntax]
 level = "deny"
 reason = "an unknown type loses its colour and a body indented less than four spaces renders outside the box"
+
+# Units in types (exact_units)
+
+[lints.exact-units-quantity]
+level = "warn"
+reason = "a unit in a name is checked by no one; in the type the compiler checks every use. Names only, so a warning"
+
+[lints.exact-units-bounds]
+level = "warn"
+reason = "a range the code enforces belongs in the type, where every value is checked when it is made"
 ```
