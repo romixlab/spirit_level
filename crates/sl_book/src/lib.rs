@@ -25,6 +25,7 @@ pub const HAND_PAGES: &[(&str, &str)] = &[
     ("Waivers", "waivers.md"),
     ("Output and exit codes", "output.md"),
     ("External tools", "tools.md"),
+    ("Dependents", "dependents.md"),
     ("Writing a lint", "writing-lints.md"),
 ];
 

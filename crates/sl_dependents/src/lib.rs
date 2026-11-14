@@ -135,6 +135,7 @@ pub enum SourceKind {
         /// The commit the lock holds
         commit: String,
         /// That commit against the library's checkout
+        #[serde(flatten)]
         state: CommitState,
     },
     /// A path dependency: it builds against a checkout as it is

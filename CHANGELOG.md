@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `spl dependents`: dependent repos and the crates in them to retest; `[dependents]` turns it on (DEP-1).
+
 ### Changed
 
 - cognitive-complexity-threshold 25 -> 20; module-lines (S0004) 2000 -> 1000.

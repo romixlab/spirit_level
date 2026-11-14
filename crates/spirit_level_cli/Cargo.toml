@@ -1,6 +1,6 @@
 [package]
 name = "spirit_level_cli"
-description = "The spl command: check a project, explain a lint, list lints and tiers, show the resolved configuration, write the book pages"
+description = "The spl command: check a project, explain a lint, list lints and tiers, show the resolved configuration, write the book pages, list the dependents to retest"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

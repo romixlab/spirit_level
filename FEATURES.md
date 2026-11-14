@@ -24,10 +24,15 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 
 ## CLI - the command
 
-- ✅ `CLI-1` check, explain, lints, tiers, config, init, book; dynamic completion; version with SHA.
+- ✅ `CLI-1` check, explain, lints, tiers, config, init, book, dependents; dynamic completion; version with SHA.
 - 📋 `CLI-2` Usage records per subcommand.
 - ✅ `CLI-3` The binary is `spl`; crate and repo stay spirit_level.
 - ✅ `CLI-4` The generic CLI parts from vhrd_cli: `--version` (vc_build), `--color`, error line, exit codes (vc_ui), completion (vc_complete).
+
+## DEP - dependents (crater-lite)
+
+- ✅ `DEP-1` `spl dependents`: the repos that build on a library and the crates in them to retest when it changes, from their `Cargo.lock`; `[dependents]` in `spirit_level.toml` turns it on (`sl_dependents`).
+- 📋 `DEP-2` `spl dependents --run`: run the listed tests against the changed library through a `[patch]` in a scratch copy of each dependent, never in its checkout; a failure fails the run.
 
 ## TIER - shipped tiers
 
