@@ -4,6 +4,9 @@
 
 ### Added
 
+- `compound-assert` (C0030): `assert!(a && b)` outside tests; warn in big and embedded (CODE-10).
+- `assert-message` (C0031): `assert!` or `debug_assert!` without a message; warn in big and embedded (CODE-10).
+- `float-partial-cmp-unwrap` (C0032): `partial_cmp(..).unwrap()` panics on NaN; warn from small (CODE-10).
 - `panic-in-library` in the embedded tier: deny on `service` modules, `expect`, `unreachable!` and `assert!` included (CODE-10).
 - `[embedded.classes]` table: task classes `control`, `service`, `protocol`, `boot` per module glob (CODE-10).
 

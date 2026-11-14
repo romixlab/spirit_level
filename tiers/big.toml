@@ -188,6 +188,14 @@ reason = "a workspace-hack builds each shared dependency once; warn, as the lint
 level = "warn"
 reason = "the workspace-hack helps only the members that depend on it; warn, as the lint needs the hakari feature"
 
+[lints.compound-assert]
+level = "warn"
+reason = "assert!(a && b) is two assertions: a failure does not say which condition broke"
+
+[lints.assert-message]
+level = "warn"
+reason = "a failed assertion says in words what broke, not only the expression"
+
 # On top of medium's Clippy set: the restriction and nursery lints a big codebase wants.
 
 [clippy.lints]

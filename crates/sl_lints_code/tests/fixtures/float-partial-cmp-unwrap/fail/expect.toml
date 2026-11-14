@@ -1,0 +1,9 @@
+[[finding]]
+at = "src/lib.rs:3"
+contains = "partial_cmp(..).unwrap() panics on NaN"
+confidence = "estimate"
+
+[[finding]]
+at = "src/lib.rs:6"
+contains = "partial_cmp(..).expect()"
+confidence = "estimate"

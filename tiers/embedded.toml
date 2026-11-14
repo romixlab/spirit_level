@@ -440,6 +440,14 @@ methods = ["unwrap", "expect"]
 macros = ["panic", "todo", "unimplemented", "unreachable", "assert", "assert_eq", "assert_ne"]
 bare-macros = []
 
+[lints.compound-assert]
+level = "warn"
+reason = "assert!(a && b) is two assertions: a crash record from the field does not say which condition broke"
+
+[lints.assert-message]
+level = "warn"
+reason = "a failed assertion says in words what broke, which is what the crash record carries back; with defmt it costs no flash"
+
 [clippy.lints]
 undocumented_unsafe_blocks = { level = "deny", reason = "firmware is full of unsafe; every block says in a SAFETY: comment why it is sound" }
 unnecessary_safety_doc = { level = "deny", reason = "a # Safety section on a safe function sends readers looking for a contract that is not there" }

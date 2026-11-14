@@ -9,6 +9,8 @@ Use it with `extends = "embedded"` in `spirit_level.toml`.
 | Code | Lint | Level | Reason | Set in |
 |---|---|---|---|---|
 | [C0005](../lints/C0005.md) | panic-in-library | `deny` | a service module (LED, log, telemetry) never reaches the panic handler in release: the whole MCU resets for it | embedded |
+| [C0030](../lints/C0030.md) | compound-assert | `warn` | assert!(a && b) is two assertions: a crash record from the field does not say which condition broke | embedded |
+| [C0031](../lints/C0031.md) | assert-message | `warn` | a failed assertion says in words what broke, which is what the crash record carries back; with defmt it costs no flash | embedded |
 | [F0001](../lints/F0001.md) | boot-1 | `deny` | bedrock error: Firmware entered by a jump (ROM DfuSe leave, bootloader) not detected: VTOR, PLL, SysTick, enabled IRQs of the ROM are still set; detect (RCC_CFGR SWS, VTOR, NVIC) and reset once | embedded |
 | [F0002](../lints/F0002.md) | boot-10 | `warn` | bedrock warning: Backup-domain helper that turns the RTC clock or `PWR_CR1.DBP` off afterwards instead of restoring what it found | embedded |
 | [F0003](../lints/F0003.md) | boot-2 | `deny` | bedrock error: H7 supply config written blind: an old ROM bootloader (before V9.3) locks PWR_CR3 until a power cycle; read it back, use what it holds, count a mismatch | embedded |
@@ -572,6 +574,14 @@ classes = ["service"]
 methods = ["unwrap", "expect"]
 macros = ["panic", "todo", "unimplemented", "unreachable", "assert", "assert_eq", "assert_ne"]
 bare-macros = []
+
+[lints.compound-assert]
+level = "warn"
+reason = "assert!(a && b) is two assertions: a crash record from the field does not say which condition broke"
+
+[lints.assert-message]
+level = "warn"
+reason = "a failed assertion says in words what broke, which is what the crash record carries back; with defmt it costs no flash"
 
 [clippy.lints]
 undocumented_unsafe_blocks = { level = "deny", reason = "firmware is full of unsafe; every block says in a SAFETY: comment why it is sound" }

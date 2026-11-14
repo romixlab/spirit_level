@@ -1,5 +1,6 @@
 //! Source lints, one analysis: [`CODE`].
 
+mod asserts;
 mod build_info;
 mod fakes;
 mod practice;
@@ -21,6 +22,15 @@ lint!(PANIC_IN_LIBRARY, "C0005", "panic-in-library", "code", "library code retur
         ("classes", StrList, "[]", "task classes ([embedded.classes]) whose modules are checked in every crate, binaries included, instead of library code"),
         ("max", Int, "0", "panicking calls allowed per crate before each is reported"),
     ],
+    needs: [], fix: None);
+lint!(COMPOUND_ASSERT, "C0030", "compound-assert", "code", "an assertion checks one condition, so a failure names the one that broke",
+    params: [("macros", StrList, "[\"assert\", \"debug_assert\"]", "assertion macros whose condition is checked")],
+    needs: [], fix: None);
+lint!(ASSERT_MESSAGE, "C0031", "assert-message", "code", "every assertion says in words what it checks",
+    params: [("macros", StrList, "[\"assert\", \"debug_assert\"]", "assertion macros that need a message; assert_eq! and assert_ne! print their values")],
+    needs: [], fix: None);
+lint!(FLOAT_PARTIAL_CMP_UNWRAP, "C0032", "float-partial-cmp-unwrap", "code", "floats are ordered with total_cmp, not partial_cmp that panics on NaN",
+    params: [("methods", StrList, "[\"unwrap\", \"expect\"]", "methods on the partial_cmp result that panic on None")],
     needs: [], fix: None);
 lint!(PRINT_IN_LIBRARY, "C0006", "print-in-library", "code", "library code does not print",
     params: [("macros", StrList, "[\"println\", \"eprintln\", \"print\", \"eprint\", \"dbg\"]", "macros that print")],
@@ -86,6 +96,9 @@ static LINTS: &[&LintMeta] = &[
     &SIZED_INTS_IN_CONTRACTS,
     &UNIT_SUFFIX,
     &UNBOUNDED_READ,
+    &COMPOUND_ASSERT,
+    &ASSERT_MESSAGE,
+    &FLOAT_PARTIAL_CMP_UNWRAP,
 ];
 
 impl Analysis for Code {
@@ -114,6 +127,7 @@ impl Analysis for Code {
             build_info::run(cx, pkg);
             fakes::run(cx, pkg);
             practice::run(cx, pkg);
+            asserts::run(cx, pkg);
             let det = cx
                 .map()
                 .and_then(|m| m.crates.get(&pkg.name))

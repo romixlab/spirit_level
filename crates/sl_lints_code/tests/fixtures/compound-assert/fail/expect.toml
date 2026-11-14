@@ -1,0 +1,7 @@
+[[finding]]
+at = "src/lib.rs:3"
+contains = "assert!(a && b)"
+
+[[finding]]
+at = "src/lib.rs:4"
+contains = "debug_assert!(a && b)"

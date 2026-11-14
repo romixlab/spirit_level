@@ -173,6 +173,10 @@ reason = "short flags are habits across tools; a different meaning turns a habit
 level = "allow"
 reason = "an estimate: help does not say which commands print data, so it fires on every setup command until a project lists them in exempt"
 
+[lints.float-partial-cmp-unwrap]
+level = "warn"
+reason = "partial_cmp(..).unwrap() panics on the first NaN; total_cmp orders every float"
+
 # The Clippy set every tier expects in [workspace.lints.clippy] (or [lints.clippy]); tier-clippy-set checks it.
 
 [clippy.lints]

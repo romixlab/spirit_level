@@ -137,6 +137,9 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [C0017](C0017.md) | [sized-ints-in-contracts](C0017.md) | serde types of a contract crate use sized integers, not usize or isize | off | off | warn | deny | off | off | off | off |
 | [C0018](C0018.md) | [unit-suffix](C0018.md) | a numeric field or constant that holds a time or a size names its unit | off | off | off | off | warn | off | off | off |
 | [C0019](C0019.md) | [unbounded-read](C0019.md) | a read to the end of a stream is bounded with take() | off | off | off | warn | warn | off | off | off |
+| [C0030](C0030.md) | [compound-assert](C0030.md) | an assertion checks one condition, so a failure names the one that broke | off | off | off | warn | off | warn | off | off |
+| [C0031](C0031.md) | [assert-message](C0031.md) | every assertion says in words what it checks | off | off | off | warn | off | warn | off | off |
+| [C0032](C0032.md) | [float-partial-cmp-unwrap](C0032.md) | floats are ordered with total_cmp, not partial_cmp that panics on NaN | warn | warn | warn | warn | off | off | off | off |
 
 ## commits
 

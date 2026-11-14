@@ -39,6 +39,9 @@ Use it with `extends = "big"` in `spirit_level.toml`.
 | [C0026](../lints/C0026.md) | cli-usage-error | `deny` | a caller tells a wrong call from a failure by exit code 2; clap gives it for free | medium |
 | [C0027](../lints/C0027.md) | cli-version-line | `warn` | the SHA and commit time say which build runs; older CLIs print other formats | small |
 | [C0029](../lints/C0029.md) | cli-standard-flags | `warn` | short flags are habits across tools; a different meaning turns a habit into a mistake | small |
+| [C0030](../lints/C0030.md) | compound-assert | `warn` | assert!(a && b) is two assertions: a failure does not say which condition broke | big |
+| [C0031](../lints/C0031.md) | assert-message | `warn` | a failed assertion says in words what broke, not only the expression | big |
+| [C0032](../lints/C0032.md) | float-partial-cmp-unwrap | `warn` | partial_cmp(..).unwrap() panics on the first NaN; total_cmp orders every float | small |
 | [D0001](../lints/D0001.md) | prose-run-words | `warn` | a long stretch of prose with no heading, figure, table or code block is skimmed, not read | small |
 | [D0002](../lints/D0002.md) | page-reading-time | `warn` | a guide longer than one sitting is left half read | small |
 | [D0003](../lints/D0003.md) | heading-words | `warn` | headings are scanned to find a section; a sentence is read slowly | small |
@@ -385,6 +388,14 @@ reason = "a workspace-hack builds each shared dependency once; warn, as the lint
 [lints.hakari-manage-deps]
 level = "warn"
 reason = "the workspace-hack helps only the members that depend on it; warn, as the lint needs the hakari feature"
+
+[lints.compound-assert]
+level = "warn"
+reason = "assert!(a && b) is two assertions: a failure does not say which condition broke"
+
+[lints.assert-message]
+level = "warn"
+reason = "a failed assertion says in words what broke, not only the expression"
 
 # On top of medium's Clippy set: the restriction and nursery lints a big codebase wants.
 
