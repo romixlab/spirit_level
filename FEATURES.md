@@ -34,10 +34,11 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `TIER-1` small, small-workspace, medium, big.
 - ✅ `TIER-2` embedded: every bedrock_lint check (port of embedded_bedrock's bedrock_lint): `sl_firmware`, `sl_lints_embedded`, `--elf`, migration page.
 - ✅ `TIER-3` ai: agent files, terse output, AI-isms, stop-gap smells, agent-config hygiene; stands beside the size tiers.
+- ✅ `TIER-4` Clippy set per tier (`[clippy]` in tier files, modelled on rerun's), checked by `tier-clippy-set` (M0025) in the project's `[lints.clippy]` and `clippy.toml`.
 
 ## MAN - manifest and repo lints
 
-- ✅ `MAN-1` 24 lints: metadata, inheritance, workspace lints and deps, default features, -sys, duplicates, pins, paths, profiles, toolchain, repo files, changelog, justfile, feature docs, naming.
+- ✅ `MAN-1` 25 lints: metadata, inheritance, workspace lints and deps, default features, -sys, duplicates, pins, paths, profiles, toolchain, repo files, changelog, justfile, feature docs, naming.
 
 ## GRAPH - crate graph and map
 

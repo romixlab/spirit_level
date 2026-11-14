@@ -2,11 +2,23 @@
 
 ## [Unreleased]
 
+### Added
+
+- Each tier declares its Clippy set; `tier-clippy-set` (M0025) checks `[lints.clippy]` and `clippy.toml` (TIER-4).
+
 ### Changed
+
+- spirit_level runs the big tier's Clippy set itself (TIER-4).
+- Multi-line help is indented in text output (TIER-4).
 
 - function-complexity (S0002) limit 25 -> 15.
 - Theme overrides folder renamed `docs-overrides/`.
 - Tier TOMLs moved to `tiers/` at the repo root.
+
+### Fixed
+
+- Hakari fixtures resolve again (workspace-hack 0.1).
+- Tool fixtures of two checkouts no longer share a temp copy.
 
 ## [0.2.0] - 2026-11-14
 
