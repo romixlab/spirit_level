@@ -27,6 +27,9 @@ cognitive-complexity-threshold = { value = 20, reason = "this team splits early"
 
 [dependents]                         # where the repos that build on this library are checked out
 scan = ["~/git"]
+
+[docs]                               # the Markdown pages the docs lints read
+reference = ["docs/lints/**"]        # pages that are looked up, not read through
 ```
 
 ## Rules
@@ -40,6 +43,7 @@ scan = ["~/git"]
 - **The Clippy set** is what the project turns on in its own `[workspace.lints.clippy]` and `clippy.toml`: a lint or group (`pedantic`) at `warn` or `deny`, or at `allow` as an accepted opt-out that the help pastes with its reason. Tiers declare it; later layers override it entry by entry. [tier-clippy-set](lints/M0025.md) checks the project's files against it; spirit_level never passes Clippy flags of its own.
 - **Unknown keys fail.** A typo in a key, a lint id or a tier name stops the run with the file and line, before any lint runs.
 - **Dependents** turn on `spl dependents` for a library: [Dependents](dependents.md). Only a project file or a shared file sets them, never a tier.
+- **Docs** say which Markdown files are pages, which of them are reference pages, and their language: [Docs as the reader meets them](reading.md#which-pages). Only a project file or a shared file sets them, never a tier.
 - **Codes or ids.** A lint is named by its id or its code: `[lints.S0001]` is `[lints.crate-lines]`, in exceptions (`lint = "S0001"`), waivers and `--only` too.
 
 ## Seeing the result

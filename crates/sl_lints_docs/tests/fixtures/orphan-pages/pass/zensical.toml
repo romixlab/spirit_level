@@ -1,0 +1,9 @@
+[project]
+site_name = "fx"
+nav = ["index.md"]
+not_in_nav = """
+/old-url.md
+"""
+exclude_docs = """
+drafts/
+"""

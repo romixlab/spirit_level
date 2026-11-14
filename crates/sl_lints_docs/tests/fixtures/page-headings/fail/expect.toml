@@ -1,0 +1,5 @@
+params = { min-words = 20 }
+
+[[finding]]
+at = "README.md:1"
+

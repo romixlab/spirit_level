@@ -87,6 +87,11 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `PROSE-3` Fix commits: `fixes-tag` checks `Fixes:` hash and subject, `fix-without-test` wants a test in a fix.
 - ✅ `PROSE-4` Commit hygiene: `commit-tested-line` wants a `Tested:` trailer, `commit-mixed-move` a move without edits.
 
+## DOCS - docs as the reader meets them
+
+- ✅ `DOCS-1` Reading lints per page: prose runs, reading time, heading length, sections, code walls, image text, code languages; the `[docs]` table (`sl_docs`, `sl_lints_docs`).
+- ✅ `DOCS-2` Zensical book lints: navigation entries that exist, orphan pages, one title per page, admonition syntax.
+
 ## AI - code written with agents
 
 - ✅ `AI-1` Stop-gap comments, commented-out code, lint-table allows without reason, near-duplicate fns and modules, dead features, leftover files, agent-config secrets, permissions and transcripts (`sl_lints_ai`).

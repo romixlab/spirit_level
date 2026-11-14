@@ -1,0 +1,178 @@
+//! Docs lints: the shape of a page as a reader meets it (long runs of prose, reading time, headings, walls of code,
+//! images without alternative text, code without a language) and the practices of a Zensical book (a navigation
+//! that names real pages, no page nobody reaches, one title, admonitions that render). One analysis, [`DOCS`]; the
+//! same numbers feed `spl pages` through [`report`].
+
+mod book;
+mod reading;
+
+use sl_analysis::{Analysis, Context, lint};
+use sl_config::Config;
+use sl_core::{LintMeta, Params};
+use sl_docs::{Book, Kind, Page, ReadingSpeed, Selection, Stats};
+use sl_model::Project;
+
+lint!(PROSE_RUN_WORDS, "D0001", "prose-run-words", "reading", "prose between two visual breaks stays short",
+    params: [("max-words", Int, "250", "words of prose a reader meets between two headings, figures, tables or code blocks"),
+             ("pages", Choice["all", "guide", "reference"], "\"all\"", "the kinds of page judged")],
+    needs: [], fix: None);
+lint!(PAGE_READING_TIME, "D0002", "page-reading-time", "reading", "a guide reads in a bounded time",
+    params: [("max-minutes", Float, "10", "minutes a page may take to read"),
+             ("wpm", Int, "230", "words read per minute"),
+             ("image-first-seconds", Float, "12", "seconds the first figure of a page takes"),
+             ("image-min-seconds", Float, "3", "seconds every figure takes at least"),
+             ("image-falloff-count", Int, "10", "figures over which the time per figure falls to the floor"),
+             ("pages", Choice["all", "guide", "reference"], "\"guide\"", "the kinds of page judged")],
+    needs: [], fix: None);
+lint!(HEADING_WORDS, "D0003", "heading-words", "reading", "a heading is a short name, not a sentence",
+    params: [("max-words", Int, "8", "words a heading may have"),
+             ("pages", Choice["all", "guide", "reference"], "\"guide\"", "the kinds of page judged")],
+    needs: [], fix: None);
+lint!(PAGE_HEADINGS, "D0004", "page-headings", "reading", "a long page is divided into sections",
+    params: [("min-words", Int, "400", "words of prose from which a page needs a section heading"),
+             ("pages", Choice["all", "guide", "reference"], "\"all\"", "the kinds of page judged")],
+    needs: [], fix: None);
+lint!(CODE_WALL, "D0005", "code-wall", "reading", "code comes with prose that explains it",
+    params: [("max-lines", Int, "60", "lines of code a reader meets with no prose between them"),
+             ("pages", Choice["all", "guide", "reference"], "\"guide\"", "the kinds of page judged")],
+    needs: [], fix: None);
+lint!(IMAGE_ALT, "D0006", "image-alt", "reading", "every image has alternative text",
+    params: [], needs: [], fix: None);
+lint!(CODE_BLOCK_LANGUAGE, "D0007", "code-block-language", "reading", "every code block names its language",
+    params: [], needs: [], fix: None);
+lint!(NAV_ENTRIES, "D0008", "nav-entries", "book", "the book's navigation names pages that exist",
+    params: [], needs: [], fix: None);
+lint!(ORPHAN_PAGES, "D0009", "orphan-pages", "book", "every page of the book is in the navigation or linked from another page",
+    params: [], needs: [], fix: None);
+lint!(PAGE_TITLE, "D0010", "page-title", "book", "every page of the book has one title",
+    params: [], needs: [], fix: None);
+lint!(ADMONITION_SYNTAX, "D0011", "admonition-syntax", "book", "admonitions use a type Zensical styles and a body indented four spaces",
+    params: [("types", StrList, "[\"note\", \"abstract\", \"info\", \"tip\", \"success\", \"question\", \"warning\", \"failure\", \"danger\", \"bug\", \"example\", \"quote\"]", "the admonition types the book styles")],
+    needs: [], fix: None);
+
+/// The docs analysis
+pub struct Docs;
+
+/// The registered instance
+pub static DOCS: Docs = Docs;
+
+static DOCS_LINTS: &[&LintMeta] = &[
+    &PROSE_RUN_WORDS,
+    &PAGE_READING_TIME,
+    &HEADING_WORDS,
+    &PAGE_HEADINGS,
+    &CODE_WALL,
+    &IMAGE_ALT,
+    &CODE_BLOCK_LANGUAGE,
+    &NAV_ENTRIES,
+    &ORPHAN_PAGES,
+    &PAGE_TITLE,
+    &ADMONITION_SYNTAX,
+];
+
+impl Analysis for Docs {
+    fn name(&self) -> &'static str {
+        "docs"
+    }
+
+    fn lints(&self) -> &'static [&'static LintMeta] {
+        DOCS_LINTS
+    }
+
+    fn run(&self, cx: &Context<'_>) {
+        let pages = pages(cx.project, cx.config);
+        reading::run(cx, &pages);
+        match Book::read(&cx.project.root) {
+            Ok(Some(b)) => book::run(cx, &b),
+            Ok(None) => {}
+            Err(e) => {
+                for m in DOCS_LINTS.iter().filter(|m| m.category == "book") {
+                    cx.not_run(m.id, "file:zensical.toml", format!("cannot read it: {e}"));
+                }
+            }
+        }
+    }
+}
+
+/// The directories of the workspace members, relative to the root
+fn members(project: &Project) -> Vec<&str> {
+    project.packages.iter().map(|p| p.dir.as_str()).collect()
+}
+
+/// The pages the `[docs]` table selects
+fn pages(project: &Project, config: &Config) -> Vec<Page> {
+    let d = &config.docs;
+    let sel = Selection {
+        files: &d.files,
+        skip: &d.skip,
+        reference: &d.reference,
+    };
+    sl_docs::pages(&project.root, &members(project), &sel)
+}
+
+/// Whether a lint's `pages` parameter judges a page of this kind
+fn judges(p: &Params, kind: Kind) -> bool {
+    match p.str("pages") {
+        "guide" => kind == Kind::Guide,
+        "reference" => kind == Kind::Reference,
+        _ => true,
+    }
+}
+
+/// The reading speed `page-reading-time`'s parameters set
+pub(crate) fn reading_speed(config: &Config) -> ReadingSpeed {
+    let p = &config.lint(PAGE_READING_TIME.id).params;
+    ReadingSpeed {
+        wpm: p.float("wpm"),
+        image_first_seconds: p.float("image-first-seconds"),
+        image_min_seconds: p.float("image-min-seconds"),
+        image_falloff_count: p.count("image-falloff-count"),
+    }
+}
+
+/// Whether the pages are in English: the `[docs]` language, else the book's theme language, else English
+fn english(project: &Project, config: &Config) -> bool {
+    let lang = config.docs.language.clone().or_else(|| {
+        Book::read(&project.root)
+            .ok()
+            .flatten()
+            .and_then(|b| b.language)
+    });
+    lang.is_none_or(|l| l.to_ascii_lowercase().starts_with("en"))
+}
+
+/// One page's row of `spl pages`
+#[derive(Clone, Debug, serde::Serialize)]
+pub struct PageReport {
+    /// The page, relative to the project root
+    pub page: String,
+    /// Guide or reference
+    pub kind: Kind,
+    /// Its metrics
+    #[serde(flatten)]
+    pub stats: Stats,
+}
+
+/// The metrics of every page the `[docs]` table selects, as the lints measure them
+pub fn report(project: &Project, config: &Config) -> Vec<PageReport> {
+    let speed = reading_speed(config);
+    let en = english(project, config);
+    pages(project, config)
+        .iter()
+        .map(|p| PageReport {
+            page: p.rel.clone(),
+            kind: p.kind,
+            stats: sl_docs::stats::stats(p, &speed, en),
+        })
+        .collect()
+}
+
+/// The first `n` words of a text, for a finding's stable item
+fn first_words(text: &str, n: usize) -> String {
+    sl_docs::text::words(text)
+        .into_iter()
+        .take(n)
+        .collect::<Vec<_>>()
+        .join(" ")
+        .to_lowercase()
+}

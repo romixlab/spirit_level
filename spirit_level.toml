@@ -57,6 +57,10 @@ phrases = [
 ]
 reason = "the errata checks quote errata sheets, whose fix field is called workaround"
 
+# The generated lint and tier pages of the book are looked up, not read through.
+[docs]
+reference = ["docs/lints/**", "docs/tiers/**"]
+
 [map.layers.core]
 desc = "Types only: lint metadata, levels, parameters, diagnostics"
 allow = []
@@ -104,6 +108,7 @@ sl_lints_size = { layer = "lints" }
 sl_lints_state = { layer = "lints" }
 sl_lints_modules = { layer = "lints" }
 sl_lints_dead = { layer = "lints" }
+sl_lints_docs = { layer = "lints" }
 sl_lints_errors = { layer = "lints" }
 sl_lints_surface = { layer = "lints" }
 sl_tool_clippy = { layer = "lints" }

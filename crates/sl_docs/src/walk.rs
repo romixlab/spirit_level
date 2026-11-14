@@ -1,8 +1,12 @@
 //! Finding a project's files: a walk from the root that leaves out `target/`, hidden folders and nested cargo
-//! projects that are not workspace members (test fixtures).
+//! projects that are not workspace members (test fixtures), and bounded reads of what it finds.
 
 use sl_core::glob;
+use std::io::Read;
 use std::path::Path;
+
+/// The most bytes a page may have; a bigger file is not a page a person reads, and is left unread
+const PAGE_BYTES_MAX: u64 = 4 * 1024 * 1024;
 
 /// Every file under `root` matching one of `include` and none of `skip`, relative to the root and sorted; `members`
 /// are the directories of the workspace members, relative to the root
@@ -40,4 +44,12 @@ fn walk(root: &Path, rel: &str, members: &[&str], out: &mut Vec<String>) {
             out.push(path);
         }
     }
+}
+
+/// A page's text: None when it cannot be read, is not UTF-8 or is over 4 MiB
+pub fn read_page(root: &Path, rel: &str) -> Option<String> {
+    let f = std::fs::File::open(root.join(rel)).ok()?;
+    let mut text = String::new();
+    f.take(PAGE_BYTES_MAX + 1).read_to_string(&mut text).ok()?;
+    (text.len() as u64 <= PAGE_BYTES_MAX).then_some(text)
 }

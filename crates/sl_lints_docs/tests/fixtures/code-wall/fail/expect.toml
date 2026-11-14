@@ -1,0 +1,5 @@
+params = { max-lines = 5 }
+
+[[finding]]
+at = "README.md:5"
+

@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Added
+
+- Reading lints D0001-D0007: prose runs, reading time, heading length, sections, code walls, image text, code languages (DOCS-1).
+- `[docs]` table: which Markdown files are pages, and which are reference pages (DOCS-1).
+- Zensical book lints D0008-D0011: navigation entries, orphan pages, page titles, admonition syntax (DOCS-2).
+
 ## [0.2.4] - 2026-11-14
 
 ### Added

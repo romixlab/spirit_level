@@ -30,6 +30,17 @@ Use it with `extends = "big"` in `spirit_level.toml`.
 | [C0016](../lints/C0016.md) | orphan-source-file | `deny` | a file no mod reaches is never compiled or tested, yet reads like live code | big |
 | [C0017](../lints/C0017.md) | sized-ints-in-contracts | `deny` | a contract is read on every party; usize is 32 bits on some of them | big |
 | [C0019](../lints/C0019.md) | unbounded-read | `warn` | input from outside sets the memory a read to the end takes; candidates only, a place to look | big |
+| [D0001](../lints/D0001.md) | prose-run-words | `warn` | a long stretch of prose with no heading, figure, table or code block is skimmed, not read | small |
+| [D0002](../lints/D0002.md) | page-reading-time | `warn` | a guide longer than one sitting is left half read | small |
+| [D0003](../lints/D0003.md) | heading-words | `warn` | headings are scanned to find a section; a sentence is read slowly | small |
+| [D0004](../lints/D0004.md) | page-headings | `warn` | a long page without sections gives the reader no map | small |
+| [D0005](../lints/D0005.md) | code-wall | `warn` | code without prose leaves the reader to guess what it shows | small |
+| [D0006](../lints/D0006.md) | image-alt | `warn` | an image without alternative text tells a screen reader, a search engine and a broken link nothing | small |
+| [D0007](../lints/D0007.md) | code-block-language | `warn` | the language selects the highlighting and tells the reader what the block is | small |
+| [D0008](../lints/D0008.md) | nav-entries | `deny` | a navigation entry that names no page renders as a link that leads nowhere, and the build does not fail | small |
+| [D0009](../lints/D0009.md) | orphan-pages | `warn` | a page nobody reaches is published, unread and left to go stale | small |
+| [D0010](../lints/D0010.md) | page-title | `warn` | a page without a title is shown under its file name | small |
+| [D0011](../lints/D0011.md) | admonition-syntax | `deny` | an unknown type loses its colour and a body indented less than four spaces renders outside the box | small |
 | [G0001](../lints/G0001.md) | core-crate-deps | `deny` | a _core crate holds shared types and drags nothing in | big |
 | [G0002](../lints/G0002.md) | core-crate-types | `deny` | _core crates hold only types: no I/O, threads or runtimes | big |
 | [G0003](../lints/G0003.md) | crate-cycles | `deny` | crates in a cycle cannot be built or tested apart | medium |

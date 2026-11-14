@@ -2,7 +2,7 @@
 # retired lint keeps its row with status = "retired", so its code stays reserved. `spl codes --check` (in
 # `just lint`) holds the lints and this file to each other, and to main's copy.
 #
-# Groups: M manifest, S size, T state, G graph, C code, P prose, A ai, F firmware, X external tool adapters.
+# Groups: M manifest, S size, T state, G graph, C code, P prose, A ai, F firmware, X external tool adapters, D docs.
 # A new lint takes the next free number of its group.
 
 M0001 = { id = "default-features-off", group = "manifest", status = "active" }
@@ -236,3 +236,14 @@ X0030 = { id = "shear-unused-deps", group = "external", status = "active" }
 X0031 = { id = "taplo-fmt", group = "external", status = "active" }
 X0032 = { id = "typos-misspelling", group = "external", status = "active" }
 X0033 = { id = "udeps-unused-deps", group = "external", status = "active" }
+D0001 = { id = "prose-run-words", group = "docs", status = "active" }
+D0002 = { id = "page-reading-time", group = "docs", status = "active" }
+D0003 = { id = "heading-words", group = "docs", status = "active" }
+D0004 = { id = "page-headings", group = "docs", status = "active" }
+D0005 = { id = "code-wall", group = "docs", status = "active" }
+D0006 = { id = "image-alt", group = "docs", status = "active" }
+D0007 = { id = "code-block-language", group = "docs", status = "active" }
+D0008 = { id = "nav-entries", group = "docs", status = "active" }
+D0009 = { id = "orphan-pages", group = "docs", status = "active" }
+D0010 = { id = "page-title", group = "docs", status = "active" }
+D0011 = { id = "admonition-syntax", group = "docs", status = "active" }

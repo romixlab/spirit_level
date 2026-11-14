@@ -152,6 +152,7 @@ pub const CODE_GROUPS: &[(char, &str)] = &[
     ('A', "ai"),
     ('F', "firmware"),
     ('X', "external"),
+    ('D', "docs"),
 ];
 
 /// The group a code belongs to, when it is a valid code: a group letter and four digits, not `0000`

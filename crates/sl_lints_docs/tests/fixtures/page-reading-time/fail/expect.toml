@@ -1,0 +1,6 @@
+params = { max-minutes = 0.1 }
+
+[[finding]]
+at = "README.md:1"
+confidence = "estimate"
+

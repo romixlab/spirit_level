@@ -1,0 +1,7 @@
+[project]
+site_name = "fx"
+nav = [
+  "index.md",
+  { "Guide" = "guide/a.md" },
+  { "Repo" = "https://example.org/repo" },
+]

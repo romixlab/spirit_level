@@ -26,6 +26,15 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [X0003](X0003.md) | [audit-vulnerabilities](X0003.md) | no dependency has a published security vulnerability | off | off | off | off | off | off |
 | [X0004](X0004.md) | [audit-yanked](X0004.md) | Cargo.lock holds no yanked version | off | off | off | off | off | off |
 
+## book
+
+| Code | Lint | Rule | small | small-workspace | medium | big | ai | embedded |
+|---|---|---|---|---|---|---|---|---|
+| [D0008](D0008.md) | [nav-entries](D0008.md) | the book's navigation names pages that exist | deny | deny | deny | deny | off | off |
+| [D0009](D0009.md) | [orphan-pages](D0009.md) | every page of the book is in the navigation or linked from another page | warn | warn | warn | warn | off | off |
+| [D0010](D0010.md) | [page-title](D0010.md) | every page of the book has one title | warn | warn | warn | warn | off | off |
+| [D0011](D0011.md) | [admonition-syntax](D0011.md) | admonitions use a type Zensical styles and a body indented four spaces | deny | deny | deny | deny | off | off |
+
 ## boot
 
 | Code | Lint | Rule | small | small-workspace | medium | big | ai | embedded |
@@ -356,6 +365,18 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [F0083](F0083.md) | [pwr-1](F0083.md) | a brown-out reset level or voltage detector fits the board's supply | off | off | off | off | off | warn |
 | [F0084](F0084.md) | [pwr-3](F0084.md) | the backup domain is reset at boot when nothing keeps state there | off | off | off | off | off | warn |
 | [F0085](F0085.md) | [pwr-4](F0085.md) | a firmware that keeps state in the backup domain never changes the RTC clock source | off | off | off | off | off | warn |
+
+## reading
+
+| Code | Lint | Rule | small | small-workspace | medium | big | ai | embedded |
+|---|---|---|---|---|---|---|---|---|
+| [D0001](D0001.md) | [prose-run-words](D0001.md) | prose between two visual breaks stays short | warn | warn | warn | warn | off | off |
+| [D0002](D0002.md) | [page-reading-time](D0002.md) | a guide reads in a bounded time | warn | warn | warn | warn | off | off |
+| [D0003](D0003.md) | [heading-words](D0003.md) | a heading is a short name, not a sentence | warn | warn | warn | warn | off | off |
+| [D0004](D0004.md) | [page-headings](D0004.md) | a long page is divided into sections | warn | warn | warn | warn | off | off |
+| [D0005](D0005.md) | [code-wall](D0005.md) | code comes with prose that explains it | warn | warn | warn | warn | off | off |
+| [D0006](D0006.md) | [image-alt](D0006.md) | every image has alternative text | warn | warn | warn | warn | off | off |
+| [D0007](D0007.md) | [code-block-language](D0007.md) | every code block names its language | warn | warn | warn | warn | off | off |
 
 ## repo
 

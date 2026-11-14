@@ -150,3 +150,50 @@ ignore_without_reason = { level = "warn", reason = "an ignored test says why, or
 
 [clippy.config]
 allow-unwrap-in-tests = { value = true, reason = "a test that unwraps fails at the unwrap, which is what a test should do" }
+
+# Docs as the reader meets them (the docs lints). The budgets warn: they fire on most repos with long docs, and a
+# project raises a budget, marks its reference pages ([docs] reference) or turns a lint to deny once its pages fit.
+
+[lints.prose-run-words]
+level = "warn"
+reason = "a long stretch of prose with no heading, figure, table or code block is skimmed, not read"
+
+[lints.page-reading-time]
+level = "warn"
+reason = "a guide longer than one sitting is left half read"
+
+[lints.heading-words]
+level = "warn"
+reason = "headings are scanned to find a section; a sentence is read slowly"
+
+[lints.page-headings]
+level = "warn"
+reason = "a long page without sections gives the reader no map"
+
+[lints.code-wall]
+level = "warn"
+reason = "code without prose leaves the reader to guess what it shows"
+
+[lints.image-alt]
+level = "warn"
+reason = "an image without alternative text tells a screen reader, a search engine and a broken link nothing"
+
+[lints.code-block-language]
+level = "warn"
+reason = "the language selects the highlighting and tells the reader what the block is"
+
+[lints.nav-entries]
+level = "deny"
+reason = "a navigation entry that names no page renders as a link that leads nowhere, and the build does not fail"
+
+[lints.orphan-pages]
+level = "warn"
+reason = "a page nobody reaches is published, unread and left to go stale"
+
+[lints.page-title]
+level = "warn"
+reason = "a page without a title is shown under its file name"
+
+[lints.admonition-syntax]
+level = "deny"
+reason = "an unknown type loses its colour and a body indented less than four spaces renders outside the box"

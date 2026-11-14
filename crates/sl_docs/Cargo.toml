@@ -9,7 +9,11 @@ repository.workspace = true
 publish = false
 
 [dependencies]
+pulldown-cmark.workspace = true
+serde.workspace = true
 sl_core.workspace = true
+sl_model.workspace = true
+toml_edit.workspace = true
 
 [lints]
 workspace = true

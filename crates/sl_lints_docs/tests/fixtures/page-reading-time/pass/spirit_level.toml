@@ -1,0 +1,7 @@
+[lints.page-reading-time]
+level = "deny"
+reason = "fixture"
+max-minutes = 0.1
+
+[docs]
+reference = ["docs/lints/**"]

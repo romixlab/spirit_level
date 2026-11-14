@@ -27,6 +27,7 @@ pub const HAND_PAGES: &[(&str, &str)] = &[
     ("Output and exit codes", "output.md"),
     ("External tools", "tools.md"),
     ("Dependents", "dependents.md"),
+    ("Docs as the reader meets them", "reading.md"),
     ("Writing a lint", "writing-lints.md"),
 ];
 

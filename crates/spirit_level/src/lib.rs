@@ -57,6 +57,7 @@ pub fn analyses() -> Vec<&'static dyn Analysis> {
         &sl_lints_graph::GRAPH,
         &sl_lints_code::CODE,
         &sl_lints_prose::PROSE,
+        &sl_lints_docs::DOCS,
         &sl_lints_ai::AI,
         &sl_lints_modules::MODULES,
         &sl_lints_dead::DEAD,

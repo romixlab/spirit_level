@@ -1,6 +1,6 @@
-//! Words and sentences of prose: the counting the prose lints and the reading metrics share.
+//! Words, sentences and syllables of prose: the counting the prose lints and the reading metrics share.
 
-/// The words of a text: runs of letters, digits, `'` and `-` that hold a letter or digit
+/// The words of a text: runs of letters, digits, `'`, `-` and `_` that hold a letter or digit
 pub fn words(text: &str) -> Vec<&str> {
     text.split(|c: char| !(c.is_alphanumeric() || c == '\'' || c == '-' || c == '_'))
         .filter(|w| w.chars().any(char::is_alphanumeric))
@@ -48,6 +48,57 @@ pub fn sentences(text: &str) -> Vec<&str> {
     out
 }
 
+/// The syllables of an English word: groups of vowels, less a silent final `e`, `es` or `ed`, at least one. A
+/// common heuristic, not a dictionary count
+pub fn syllables(word: &str) -> usize {
+    let w: Vec<u8> = word
+        .bytes()
+        .filter(u8::is_ascii_alphabetic)
+        .map(|b| b.to_ascii_lowercase())
+        .collect();
+    if w.is_empty() {
+        return 0;
+    }
+    if w.len() <= 3 {
+        return 1;
+    }
+    let vowel = |b: u8| matches!(b, b'a' | b'e' | b'i' | b'o' | b'u' | b'y');
+    let mut end = w.len();
+    let n = w.len();
+    if w.ends_with(b"ed") || (w.ends_with(b"es") && !matches!(w[n - 3], b'l') && !vowel(w[n - 3])) {
+        end -= 2;
+    } else if w[n - 1] == b'e' && !matches!(w[n - 2], b'l') && !vowel(w[n - 2]) {
+        end -= 1;
+    }
+    let w = &w[usize::from(w[0] == b'y')..end];
+    let mut groups = 0;
+    let mut i = 0;
+    while i < w.len() {
+        if vowel(w[i]) {
+            groups += 1;
+            // a group is one or two vowels in a row
+            i += if w.get(i + 1).is_some_and(|b| vowel(*b)) {
+                2
+            } else {
+                1
+            };
+        } else {
+            i += 1;
+        }
+    }
+    groups.max(1)
+}
+
+/// Flesch reading ease: 206.835 - 1.015 × words per sentence - 84.6 × syllables per word; None without words or
+/// sentences
+pub fn flesch(words: usize, sentences: usize, syllables: usize) -> Option<f64> {
+    (words > 0 && sentences > 0).then(|| {
+        206.835
+            - 1.015 * (words as f64 / sentences as f64)
+            - 84.6 * (syllables as f64 / words as f64)
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -62,5 +113,23 @@ mod tests {
             words("it's a re-run, 3 ms"),
             vec!["it's", "a", "re-run", "3", "ms"]
         );
+    }
+
+    #[test]
+    fn syllable_counts() {
+        assert_eq!(syllables("cat"), 1);
+        assert_eq!(syllables("reading"), 2);
+        assert_eq!(syllables("make"), 1);
+        assert_eq!(syllables("table"), 2);
+        assert_eq!(syllables("configuration"), 5);
+        assert_eq!(syllables("jumped"), 1);
+        assert_eq!(syllables("42"), 0);
+    }
+
+    #[test]
+    fn reading_ease() {
+        assert_eq!(flesch(0, 0, 0), None);
+        let f = flesch(10, 1, 10).unwrap_or_default();
+        assert!((f - (206.835 - 10.15 - 84.6)).abs() < 1e-9, "{f}");
     }
 }

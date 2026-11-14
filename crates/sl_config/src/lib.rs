@@ -22,16 +22,21 @@
 //!
 //! [dependents]                        # the repos that build on this one (see [`dependents`])
 //! scan = ["~/git"]
+//!
+//! [docs]                              # the Markdown pages (see [`docs`])
+//! reference = ["docs/lints/**"]
 //! ```
 
 pub mod clippy;
 pub mod dependents;
+pub mod docs;
 mod error;
 pub mod map;
 mod reader;
 
 pub use clippy::{ClippyConfig, ClippyLint, ClippySet};
 pub use dependents::Dependents;
+pub use docs::Docs;
 pub use error::ConfigError;
 pub use map::{External, Layer, Map, MapCrate};
 
@@ -122,6 +127,8 @@ pub struct Config {
     pub clippy: ClippySet,
     /// Where the repos that build on this one are; None: `spl dependents` is off
     pub dependents: Option<Dependents>,
+    /// The Markdown pages: the `[docs]` table, or its defaults
+    pub docs: Docs,
 }
 
 /// What a resolution needs to know besides the files
@@ -231,6 +238,7 @@ struct Resolver<'a> {
     map: Option<Map>,
     clippy: ClippySet,
     dependents: Option<Dependents>,
+    docs: Docs,
     extends: Vec<String>,
     stack: Vec<String>,
     /// The depth at which an extended name is a top-level one (1 under a project file, 0 for bare tiers)
@@ -264,6 +272,7 @@ impl<'a> Resolver<'a> {
             map: None,
             clippy: ClippySet::default(),
             dependents: None,
+            docs: Docs::default(),
             extends: Vec::new(),
             stack: Vec::new(),
             record_at: 1,
@@ -283,6 +292,7 @@ impl<'a> Resolver<'a> {
             map: self.map,
             clippy: self.clippy,
             dependents: self.dependents,
+            docs: self.docs,
         })
     }
 
@@ -402,6 +412,9 @@ impl<'a> Resolver<'a> {
             }
             if let Some(d) = r.table("dependents", &mut errs) {
                 self.dependents = Some(Dependents::read(d, &dir, &mut errs));
+            }
+            if let Some(d) = r.table("docs", &mut errs) {
+                self.docs = Docs::read(d, &mut errs);
             }
             if let Some(mf) = r.opt_str("map-file", &mut errs) {
                 if self.map.is_some() {
