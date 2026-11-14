@@ -140,6 +140,7 @@ str_to_string = { level = "warn", reason = "to_owned says what happens: a copy o
 use_self = { level = "warn", reason = "Self follows a rename" }
 self_named_module_files = { level = "warn", reason = "one module layout, mod.rs, across the workspace" }
 too_long_first_doc_paragraph = { level = "warn", reason = "the first doc paragraph is the summary rustdoc lists; one short sentence" }
+missing_panics_doc = { level = "warn", reason = "a public function that can panic says when in a # Panics section; the docs keep up with the asserts" }
 cognitive_complexity = { level = "warn", reason = "a function too tangled to follow in one read; complements spl's cyclomatic function-complexity" }
 # opt-outs of pedantic
 assigning_clones = { level = "allow", reason = "clone_into reads backwards" }
@@ -155,7 +156,6 @@ items_after_statements = { level = "allow", reason = "a helper item next to its 
 many_single_char_names = { level = "allow", reason = "r, g, b and x, y, z are fine" }
 map_unwrap_or = { level = "allow", reason = "`.map(f).unwrap_or(x)` often reads better than map_or" }
 missing_errors_doc = { level = "allow", reason = "the error type documents its cases" }
-missing_panics_doc = { level = "allow", reason = "too noisy: most panics are invariants, not inputs" }
 must_use_candidate = { level = "allow", reason = "thousands of hits; must_use goes where ignoring the value is a bug" }
 needless_raw_string_hashes = { level = "allow", reason = "r#\"...\"# keeps a string editable when a quote is added" }
 redundant_closure_for_method_calls = { level = "allow", reason = "a closure is often clearer than a path to a method" }

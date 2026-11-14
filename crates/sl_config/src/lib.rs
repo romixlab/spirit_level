@@ -193,7 +193,11 @@ impl Config {
         r.finish(None)
     }
 
-    /// The setting of a lint; panics for an unregistered id (a bug)
+    /// The setting of a lint
+    ///
+    /// # Panics
+    ///
+    /// For an unregistered id: a bug in the analysis asking for it.
     // spirit-level: allow(panic-in-library) every registered lint has a setting; an analysis asking for another id is a bug its fixtures catch
     pub fn lint(&self, id: &str) -> &LintSetting {
         self.lints
@@ -694,8 +698,11 @@ fn value_of(v: &Value) -> Option<ParamValue> {
     })
 }
 
-/// The declared defaults of a lint's parameters; panics on a default that is not a valid value of its kind (a
-/// bug caught by the registry test)
+/// The declared defaults of a lint's parameters
+///
+/// # Panics
+///
+/// On a default that is not a valid value of its kind: a declaration bug the registry test catches.
 pub fn default_params(meta: &LintMeta) -> Params {
     let mut p = Params::default();
     for spec in meta.params {

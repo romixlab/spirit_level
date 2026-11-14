@@ -70,6 +70,7 @@ The project turns these on in its own `[workspace.lints.clippy]` (`allow` rows a
 |---|---|---|---|
 | `as_ptr_cast_mut` | `warn` | `as_ptr() as *mut` writes through a shared borrow: undefined behaviour | small |
 | `dbg_macro` | `warn` | debugging output left behind | small |
+| `debug_assert_with_mut_call` | `warn` | a debug_assert! that calls a &mut method makes debug and release builds behave differently | small |
 | `exit` | `warn` | process::exit skips every destructor; main returns instead | small |
 | `fallible_impl_from` | `warn` | a From that can panic is a TryFrom | small |
 | `get_unwrap` | `warn` | `.get(i).unwrap()` is indexing with a worse message: index, or handle the None | small |
@@ -275,6 +276,7 @@ reason = "partial_cmp(..).unwrap() panics on the first NaN; total_cmp orders eve
 
 [clippy.lints]
 unwrap_used = { level = "warn", reason = "a panic says what failed (expect with a message), or the error is returned" }
+debug_assert_with_mut_call = { level = "warn", reason = "a debug_assert! that calls a &mut method makes debug and release builds behave differently" }
 get_unwrap = { level = "warn", reason = "`.get(i).unwrap()` is indexing with a worse message: index, or handle the None" }
 todo = { level = "warn", reason = "no stop-gaps: a todo!() is a panic waiting in shipped code" }
 unimplemented = { level = "warn", reason = "no stop-gaps: an unimplemented!() is a panic waiting in shipped code" }

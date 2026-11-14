@@ -136,6 +136,7 @@ The project turns these on in its own `[workspace.lints.clippy]` (`allow` rows a
 | `as_ptr_cast_mut` | `warn` | `as_ptr() as *mut` writes through a shared borrow: undefined behaviour | small |
 | `cognitive_complexity` | `warn` | a function too tangled to follow in one read; complements spl's cyclomatic function-complexity | medium |
 | `dbg_macro` | `warn` | debugging output left behind | small |
+| `debug_assert_with_mut_call` | `warn` | a debug_assert! that calls a &mut method makes debug and release builds behave differently | small |
 | `exit` | `warn` | process::exit skips every destructor; main returns instead | small |
 | `fallible_impl_from` | `warn` | a From that can panic is a TryFrom | small |
 | `float_cmp_const` | `warn` | comparing a float to a constant exactly is almost always a bug | big |
@@ -147,6 +148,7 @@ The project turns these on in its own `[workspace.lints.clippy]` (`allow` rows a
 | `lossy_float_literal` | `warn` | a float literal that does not fit its type silently becomes another number | big |
 | `map_err_ignore` | `warn` | `map_err(\|_\| ...)` throws the cause away; wrap it as the source | small |
 | `mem_forget` | `warn` | forget leaks the value and skips Drop; ManuallyDrop says it on purpose | small |
+| `missing_panics_doc` | `warn` | a public function that can panic says when in a # Panics section; the docs keep up with the asserts | medium |
 | `print_stderr` | `warn` | printing is the binary's choice, written in one place | medium |
 | `print_stdout` | `warn` | printing is the binary's choice, written in one place | medium |
 | `self_named_module_files` | `warn` | one module layout, mod.rs, across the workspace | medium |
@@ -172,7 +174,6 @@ The project turns these on in its own `[workspace.lints.clippy]` (`allow` rows a
 | `many_single_char_names` | `allow` | r, g, b and x, y, z are fine | medium |
 | `map_unwrap_or` | `allow` | `.map(f).unwrap_or(x)` often reads better than map_or | medium |
 | `missing_errors_doc` | `allow` | the error type documents its cases | medium |
-| `missing_panics_doc` | `allow` | too noisy: most panics are invariants, not inputs | medium |
 | `multiple_crate_versions` | `allow` | spl's duplicate-versions checks this, with a reasoned allow list | medium |
 | `must_use_candidate` | `allow` | thousands of hits; must_use goes where ignoring the value is a bug | medium |
 | `needless_raw_string_hashes` | `allow` | r#"..."# keeps a string editable when a quote is added | medium |

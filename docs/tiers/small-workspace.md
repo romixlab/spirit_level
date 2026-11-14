@@ -82,6 +82,7 @@ The project turns these on in its own `[workspace.lints.clippy]` (`allow` rows a
 |---|---|---|---|
 | `as_ptr_cast_mut` | `warn` | `as_ptr() as *mut` writes through a shared borrow: undefined behaviour | small |
 | `dbg_macro` | `warn` | debugging output left behind | small |
+| `debug_assert_with_mut_call` | `warn` | a debug_assert! that calls a &mut method makes debug and release builds behave differently | small |
 | `exit` | `warn` | process::exit skips every destructor; main returns instead | small |
 | `fallible_impl_from` | `warn` | a From that can panic is a TryFrom | small |
 | `get_unwrap` | `warn` | `.get(i).unwrap()` is indexing with a worse message: index, or handle the None | small |

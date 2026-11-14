@@ -46,6 +46,10 @@ impl Pin {
 const TOOLS: &str = include_str!("../tools.toml");
 
 /// Every pinned tool, in the order of `tools.toml`
+///
+/// # Panics
+///
+/// When the compiled-in `tools.toml` does not parse; a unit test parses it.
 pub fn pins() -> &'static [Pin] {
     static PINS: OnceLock<Vec<Pin>> = OnceLock::new();
     // spirit-level: allow(panic-in-library) tools.toml is compiled in, and a unit test parses it

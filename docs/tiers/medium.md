@@ -107,6 +107,7 @@ The project turns these on in its own `[workspace.lints.clippy]` (`allow` rows a
 | `as_ptr_cast_mut` | `warn` | `as_ptr() as *mut` writes through a shared borrow: undefined behaviour | small |
 | `cognitive_complexity` | `warn` | a function too tangled to follow in one read; complements spl's cyclomatic function-complexity | medium |
 | `dbg_macro` | `warn` | debugging output left behind | small |
+| `debug_assert_with_mut_call` | `warn` | a debug_assert! that calls a &mut method makes debug and release builds behave differently | small |
 | `exit` | `warn` | process::exit skips every destructor; main returns instead | small |
 | `fallible_impl_from` | `warn` | a From that can panic is a TryFrom | small |
 | `get_unwrap` | `warn` | `.get(i).unwrap()` is indexing with a worse message: index, or handle the None | small |
@@ -114,6 +115,7 @@ The project turns these on in its own `[workspace.lints.clippy]` (`allow` rows a
 | `let_underscore_must_use` | `warn` | `let _ =` on a must_use value drops an error unseen | small |
 | `map_err_ignore` | `warn` | `map_err(\|_\| ...)` throws the cause away; wrap it as the source | small |
 | `mem_forget` | `warn` | forget leaks the value and skips Drop; ManuallyDrop says it on purpose | small |
+| `missing_panics_doc` | `warn` | a public function that can panic says when in a # Panics section; the docs keep up with the asserts | medium |
 | `print_stderr` | `warn` | printing is the binary's choice, written in one place | medium |
 | `print_stdout` | `warn` | printing is the binary's choice, written in one place | medium |
 | `self_named_module_files` | `warn` | one module layout, mod.rs, across the workspace | medium |
@@ -139,7 +141,6 @@ The project turns these on in its own `[workspace.lints.clippy]` (`allow` rows a
 | `many_single_char_names` | `allow` | r, g, b and x, y, z are fine | medium |
 | `map_unwrap_or` | `allow` | `.map(f).unwrap_or(x)` often reads better than map_or | medium |
 | `missing_errors_doc` | `allow` | the error type documents its cases | medium |
-| `missing_panics_doc` | `allow` | too noisy: most panics are invariants, not inputs | medium |
 | `multiple_crate_versions` | `allow` | spl's duplicate-versions checks this, with a reasoned allow list | medium |
 | `must_use_candidate` | `allow` | thousands of hits; must_use goes where ignoring the value is a bug | medium |
 | `needless_raw_string_hashes` | `allow` | r#"..."# keeps a string editable when a quote is added | medium |
@@ -308,6 +309,7 @@ str_to_string = { level = "warn", reason = "to_owned says what happens: a copy o
 use_self = { level = "warn", reason = "Self follows a rename" }
 self_named_module_files = { level = "warn", reason = "one module layout, mod.rs, across the workspace" }
 too_long_first_doc_paragraph = { level = "warn", reason = "the first doc paragraph is the summary rustdoc lists; one short sentence" }
+missing_panics_doc = { level = "warn", reason = "a public function that can panic says when in a # Panics section; the docs keep up with the asserts" }
 cognitive_complexity = { level = "warn", reason = "a function too tangled to follow in one read; complements spl's cyclomatic function-complexity" }
 # opt-outs of pedantic
 assigning_clones = { level = "allow", reason = "clone_into reads backwards" }
@@ -323,7 +325,6 @@ items_after_statements = { level = "allow", reason = "a helper item next to its 
 many_single_char_names = { level = "allow", reason = "r, g, b and x, y, z are fine" }
 map_unwrap_or = { level = "allow", reason = "`.map(f).unwrap_or(x)` often reads better than map_or" }
 missing_errors_doc = { level = "allow", reason = "the error type documents its cases" }
-missing_panics_doc = { level = "allow", reason = "too noisy: most panics are invariants, not inputs" }
 must_use_candidate = { level = "allow", reason = "thousands of hits; must_use goes where ignoring the value is a bug" }
 needless_raw_string_hashes = { level = "allow", reason = "r#\"...\"# keeps a string editable when a quote is added" }
 redundant_closure_for_method_calls = { level = "allow", reason = "a closure is often clearer than a path to a method" }
