@@ -56,7 +56,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 ## GRAPH - crate graph and map
 
 - ✅ `GRAPH-1` Map completeness, layer edges, forbidden closures, external form, third-party placement, `_core` rules, crate cycles, crate table, unsafe allow-list (`sl_lints_graph`).
-- 📋 `GRAPH-3` `clippy-policy-bans`: map roles `ui` and `theme`; clippy.toml bans raw spawns and blocking Command in UI crates, colours outside the theme, unbounded channels, wall-clock timers in tests.
+- 📋 `GRAPH-3` `clippy-policy-bans`: clippy.toml bans unbounded channels and wall-clock timers in tests. Raw spawns, blocking calls and colours in UI crates are `UI-1`'s source lints.
 - ✅ `GRAPH-2` linkme elements and unsafe attributes count as unsafe; crates marked unsafe copy the workspace lints.
 
 ## SIZE - size and complexity
@@ -97,6 +97,10 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 
 - ✅ `AI-1` Stop-gap comments, commented-out code, lint-table allows without reason, near-duplicate fns and modules, dead features, leftover files, agent-config secrets, permissions and transcripts (`sl_lints_ai`).
 - ✅ `AI-2` `fixme-before-land`: a FIXME is a candidate on the branch and a finding in a landing run; `stop-gap-comments` leaves FIXME to it.
+
+## UI - user interface lints
+
+- ✅ `UI-1` `ui-practice-lints`: UI practices as lints: `ui` tier (toolkit-neutral, calls as parameters), `egui` tier (egui calls, ids, repaints, theme, glyphs); map keys `ui` and `theme` ([UI practices](docs/ui.md)).
 
 ## TOOL - external tools
 

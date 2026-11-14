@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Added
+
+- Tiers `ui` and `egui`: 13 UI lints (U0001-U0013) and the "UI practices" catalogue page (UI-1).
+- Crate map keys `ui` and `theme` mark UI crates and the theme crate (UI-1).
+
 ## [0.2.6] - 2026-11-14
 
 ### Added
