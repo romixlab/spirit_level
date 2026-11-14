@@ -1,0 +1,4 @@
+# The branch edits a snapshot main has, without a new version.
+[[commit]]
+message = "edited: a new field"
+files = { "crates/edited/schema/v1.json" = "{\"v\":1,\"extra\":true}\n" }

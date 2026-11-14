@@ -1,0 +1,2 @@
+# The snapshot exists but was never committed.
+untracked = ["crates/untracked/schema/v1.json"]

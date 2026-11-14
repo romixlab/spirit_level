@@ -52,7 +52,7 @@ wgpu = ["foo_gpu"]                  # only these crates may depend on wgpu direc
 | `no_std` | builds without std |
 | `wasm` | builds for `wasm32-unknown-unknown` |
 | `deterministic` | promises bit-identical results on every platform |
-| `contract` | holds the serde types that cross a process or node boundary; sized integers only ([sized-ints-in-contracts](lints/C0017.md)) |
+| `contract` | holds the serde types that cross a process or node boundary; sized integers only ([sized-ints-in-contracts](lints/C0017.md)), a `VERSION` and a schema snapshot per version ([contract-snapshot](lints/M0030.md)) |
 | `cli` | its binaries are command-line tools the [CLI checks](cli.md) build and run; `false` leaves them out. Absent: a crate with a binary target that depends on `clap` is one |
 | `ui` | a user interface crate, held to the [UI practices](ui.md); absent: a crate that depends on a UI toolkit is one, `false` exempts such a crate |
 | `theme` | the theme crate: colours and sizes are written as values here and nowhere else in UI code |

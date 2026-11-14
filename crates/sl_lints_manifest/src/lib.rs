@@ -2,6 +2,7 @@
 //! the manifests cargo metadata already read.
 
 mod clippy;
+mod contract;
 mod deps;
 mod macros;
 mod package;
@@ -83,6 +84,13 @@ lint!(TEST_BINARIES, "M0028", "test-binaries", "repo", "a crate builds its integ
     params: [("max-binaries", Int, "1", "integration-test binaries a crate may have")], needs: [], fix: None);
 lint!(MACRO_COMPILE_FAIL, "M0029", "macro-compile-fail", "workspace", "every proc-macro crate has compile-fail tests",
     params: [("harnesses", StrList, "[\"trybuild\", \"ui_test\"]", "crates that run compile-fail cases")], needs: [], fix: None);
+lint!(CONTRACT_SNAPSHOT, "M0030", "contract-snapshot", "workspace", "a contract crate exports its version and keeps every version's schema snapshot in git, unchanged once in the base",
+    params: [
+        ("const", Str, "\"VERSION\"", "the integer constant of the library root that holds the contract's version"),
+        ("snapshot", Str, "\"schema/v{version}.json\"", "the snapshot of a version, in the crate's directory; `{version}` is the number"),
+        ("base", Str, "\"main\"", "the branch work merges into; a snapshot it has must not change"),
+    ],
+    needs: [Need::Map], fix: None);
 
 /// The manifest analysis
 pub struct Manifest;
@@ -120,6 +128,7 @@ static LINTS: &[&LintMeta] = &[
     &PATCH_OUTSIDE_WORKSPACE,
     &TEST_BINARIES,
     &MACRO_COMPILE_FAIL,
+    &CONTRACT_SNAPSHOT,
 ];
 
 impl Analysis for Manifest {
@@ -140,6 +149,7 @@ impl Analysis for Manifest {
         speed::run(cx);
         patch::run(cx);
         macros::run(cx);
+        contract::run(cx);
     }
 }
 

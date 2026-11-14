@@ -596,3 +596,4 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [M0023](M0023.md) | [workspace-inheritance](M0023.md) | members inherit the shared package keys from [workspace.package] | off | deny | deny | deny | off | off | off | off | off | off |
 | [M0024](M0024.md) | [workspace-lints](M0024.md) | the root declares [workspace.lints] and every member inherits them | off | deny | deny | deny | off | off | off | off | off | off |
 | [M0029](M0029.md) | [macro-compile-fail](M0029.md) | every proc-macro crate has compile-fail tests | off | off | warn | warn | off | off | off | off | off | off |
+| [M0030](M0030.md) | [contract-snapshot](M0030.md) | a contract crate exports its version and keeps every version's schema snapshot in git, unchanged once in the base | off | off | off | deny | off | off | off | off | off | off |

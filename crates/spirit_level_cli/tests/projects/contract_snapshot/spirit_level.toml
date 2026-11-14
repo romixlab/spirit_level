@@ -1,0 +1,11 @@
+# A contract crate with its version and the snapshot of version 1.
+
+[lints.contract-snapshot]
+level = "deny"
+reason = "fixture"
+
+[map.layers.contracts]
+allow = ["contracts"]
+
+[map.crates]
+wire = { layer = "contracts", contract = true }

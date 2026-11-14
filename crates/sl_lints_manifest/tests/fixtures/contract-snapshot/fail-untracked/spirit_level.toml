@@ -1,0 +1,9 @@
+[lints.contract-snapshot]
+level = "deny"
+reason = "fixture"
+
+[map.layers.contracts]
+allow = ["contracts"]
+
+[map.crates]
+untracked = { layer = "contracts", contract = true }

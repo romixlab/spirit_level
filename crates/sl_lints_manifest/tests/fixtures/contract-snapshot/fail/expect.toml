@@ -1,0 +1,11 @@
+[[finding]]
+at = "crates/edited/schema/v1.json:1"
+contains = "crates/edited/schema/v1.json changed or was removed since main"
+
+[[finding]]
+at = "crates/none/src/lib.rs:1"
+contains = "contract crate none has no `pub const VERSION: u32` in src/lib.rs"
+
+[[finding]]
+at = "crates/nosnap/src/lib.rs:3"
+contains = "nosnap is at version 1 but crates/nosnap/schema/v1.json is missing"

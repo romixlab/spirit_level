@@ -94,6 +94,7 @@ Use it with `extends = "big"` in `spirit_level.toml`.
 | [M0027](../lints/M0027.md) | patch-outside-workspace | `deny` | a committed patch into a sibling checkout builds differently on every machine; it lives in an ignored .cargo/config.toml | small |
 | [M0028](../lints/M0028.md) | test-binaries | `warn` | each integration-test binary links the library again; one tests/it binary links it once | medium |
 | [M0029](../lints/M0029.md) | macro-compile-fail | `warn` | a proc macro must refuse bad input with a clear error, and only compile-fail cases show that | medium |
+| [M0030](../lints/M0030.md) | contract-snapshot | `deny` | every party of a contract knows its version and what that version looks like; a released snapshot never changes | big |
 | [P0001](../lints/P0001.md) | agent-file-lines | `warn` | agents read AGENTS.md whole every session; a long one is skimmed, not followed | small |
 | [P0003](../lints/P0003.md) | agent-rules-match-lints | `warn` | limits AGENTS.md states are the limits the lints check | big |
 | [P0007](../lints/P0007.md) | commit-subject-length | `warn` | the subject is what one-line logs and reviews show | medium |
@@ -320,6 +321,10 @@ reason = "a file no mod reaches is never compiled or tested, yet reads like live
 [lints.sized-ints-in-contracts]
 level = "deny"
 reason = "a contract is read on every party; usize is 32 bits on some of them"
+
+[lints.contract-snapshot]
+level = "deny"
+reason = "every party of a contract knows its version and what that version looks like; a released snapshot never changes"
 
 [lints.unbounded-read]
 level = "warn"

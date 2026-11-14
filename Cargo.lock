@@ -1178,6 +1178,7 @@ dependencies = [
  "sl_core",
  "sl_model",
  "sl_testkit",
+ "syn 3.0.10",
 ]
 
 [[package]]

@@ -116,6 +116,10 @@ reason = "a file no mod reaches is never compiled or tested, yet reads like live
 level = "deny"
 reason = "a contract is read on every party; usize is 32 bits on some of them"
 
+[lints.contract-snapshot]
+level = "deny"
+reason = "every party of a contract knows its version and what that version looks like; a released snapshot never changes"
+
 [lints.unbounded-read]
 level = "warn"
 reason = "input from outside sets the memory a read to the end takes; candidates only, a place to look"

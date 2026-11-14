@@ -51,7 +51,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `MAN-1` 25 lints: metadata, inheritance, workspace lints and deps, default features, -sys, duplicates, pins, paths, profiles, toolchain, repo files, changelog, justfile, feature docs, naming.
 - ✅ `MAN-2` Pin policy per project: `git-dependency-pins` checks branch, default-branch, dev-branch, tag, release or any, separately for own repos.
 - ✅ `MAN-3` Survey gaps: `profile-no-lto`, `patch-outside-workspace`, `test-binaries`, `macro-compile-fail`; medium's Clippy set caps bool parameters at one.
-- 📋 `MAN-4` `contract-snapshot`: a crate the map marks contract carries a VERSION and a schema snapshot per version; a changed snapshot needs a bump against the base.
+- ✅ `MAN-4` `contract-snapshot` (M0030): a crate the map marks contract exports `VERSION` and keeps `schema/v<N>.json` in git; a snapshot the base has never changes.
 - 📋 `MAN-5` `git-dependency-pins` also holds git `[patch]` overrides to the pin policy.
 - 📋 `MAN-6` `default-members`: a workspace past a size parameter names its main binary in `default-members`.
 - 📋 `MAN-7` `example-metadata`: every example carries name, description and category in the manifest; the examples index is generated.
