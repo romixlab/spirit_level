@@ -117,6 +117,7 @@ The project turns these on in its own `[workspace.lints.clippy]` (`allow` rows a
 | `similar_names` | `allow` | too many false positives: encoder and encoded are different things | medium |
 | `struct_excessive_bools` | `allow` | a struct of flags is often just that | medium |
 | `struct_field_names` | `allow` | a field named after its struct is often the clearest name | medium |
+| `too_many_lines` | `allow` | spl's function-lines measures function length, with a limit per crate and expiring exceptions | medium |
 | `trivially_copy_pass_by_ref` | `allow` | passing small Copy types by reference is harmless | medium |
 | `unnecessary_debug_formatting` | `allow` | paths printed with {:?} quote themselves, which helps with spaces | medium |
 | `unreadable_literal` | `allow` | addresses and magic numbers are written as their sources write them | medium |
@@ -260,6 +261,7 @@ trivially_copy_pass_by_ref = { level = "allow", reason = "passing small Copy typ
 unnecessary_debug_formatting = { level = "allow", reason = "paths printed with {:?} quote themselves, which helps with spaces" }
 unreadable_literal = { level = "allow", reason = "addresses and magic numbers are written as their sources write them" }
 used_underscore_binding = { level = "allow", reason = "an underscore binding used in one cfg is common" }
+too_many_lines = { level = "allow", reason = "spl's function-lines measures function length, with a limit per crate and expiring exceptions" }
 # opt-outs of cargo
 cargo_common_metadata = { level = "allow", reason = "keywords and categories matter only for published crates; package-description covers the rest" }
 multiple_crate_versions = { level = "allow", reason = "spl's duplicate-versions checks this, with a reasoned allow list" }
