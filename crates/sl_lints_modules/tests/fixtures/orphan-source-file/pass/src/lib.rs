@@ -2,6 +2,7 @@
 
 mod a;
 mod b;
+mod checks;
 #[path = "elsewhere.rs"]
 mod other;
 

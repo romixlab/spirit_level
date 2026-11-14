@@ -45,6 +45,7 @@ pub(crate) fn run(cx: &Context<'_>) {
                     .iter()
                     .any(|g| sl_core::glob::matches(g, &f.in_package))
                 || included(sources, &f.in_package)
+                || by_macro(sources, &reached, &f.in_package)
             {
                 continue;
             }
@@ -63,6 +64,40 @@ pub(crate) fn run(cx: &Context<'_>) {
             );
         }
     }
+}
+
+/// Whether the module file that would declare it names it inside a macro call (`declare_checks! { boot_1, ... }`):
+/// a macro that writes the `mod` lines
+fn by_macro(sources: &[sl_model::SourceFile], reached: &BTreeSet<&str>, in_package: &str) -> bool {
+    let (dir, file) = in_package.rsplit_once('/').unwrap_or(("", in_package));
+    let (dir, stem) = if file == "mod.rs" {
+        dir.rsplit_once('/').map_or(("", dir), |(d, s)| (d, s))
+    } else {
+        (dir, file.trim_end_matches(".rs"))
+    };
+    let mut parents = vec![format!("{dir}.rs"), format!("{dir}/mod.rs")];
+    if dir == "src" {
+        parents.extend(["src/lib.rs".to_owned(), "src/main.rs".to_owned()]);
+    }
+    sources
+        .iter()
+        .filter(|s| parents.contains(&s.in_package) && reached.contains(s.in_package.as_str()))
+        .filter_map(|s| s.ast().ok())
+        .any(|ast| {
+            struct V<'s>(&'s str, bool);
+            impl<'ast> syn::visit::Visit<'ast> for V<'_> {
+                fn visit_macro(&mut self, m: &'ast syn::Macro) {
+                    self.1 |= m
+                        .tokens
+                        .to_string()
+                        .split(|c: char| !(c.is_alphanumeric() || c == '_'))
+                        .any(|w| w == self.0);
+                }
+            }
+            let mut v = V(stem, false);
+            syn::visit::Visit::visit_file(&mut v, ast);
+            v.1
+        })
 }
 
 /// Whether another file of the package pulls the file in with `include!` (generated code, a shared table)
