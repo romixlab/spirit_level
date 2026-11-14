@@ -528,6 +528,7 @@ mod tests {
     fn file(src: &str) -> SourceFile {
         SourceFile {
             rel: "src/main.rs".into(),
+            in_package: "src/main.rs".into(),
             krate: "fw".into(),
             module: String::new(),
             text: src.into(),

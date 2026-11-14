@@ -80,7 +80,7 @@ pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
     out
 }
 
-fn each_stmt(stmt: &syn::Stmt, f: impl FnMut(Node<'_>)) {
+pub(crate) fn each_stmt(stmt: &syn::Stmt, f: impl FnMut(Node<'_>)) {
     let block = syn::Block {
         brace_token: Default::default(),
         stmts: vec![stmt.clone()],
@@ -103,7 +103,7 @@ fn builds_output(f: &FnItem<'_>) -> bool {
 
 /// Whether each function of the source builds an output driver: by `Type::name` for methods, by name for
 /// functions (a name defined twice counts when both build)
-fn output_builders(fns: &[FnItem<'_>]) -> BTreeMap<String, bool> {
+pub(crate) fn output_builders(fns: &[FnItem<'_>]) -> BTreeMap<String, bool> {
     let mut builds_outputs: BTreeMap<String, bool> = BTreeMap::new();
     for f in fns {
         let b = builds_output(f);
@@ -120,16 +120,16 @@ fn output_builders(fns: &[FnItem<'_>]) -> BTreeMap<String, bool> {
 }
 
 /// What one statement of the entry point does
-struct Stmt {
+pub(crate) struct Stmt {
     /// The HAL init
-    is_init: bool,
+    pub(crate) is_init: bool,
     /// Pin setup: an output driver built, or a function called that builds one
-    is_setup: bool,
+    pub(crate) is_setup: bool,
     /// Something slow, where and what
-    slow: Option<(proc_macro2::Span, &'static str)>,
+    pub(crate) slow: Option<(proc_macro2::Span, &'static str)>,
 }
 
-fn classify(stmt: &syn::Stmt, builds_outputs: &BTreeMap<String, bool>) -> Stmt {
+pub(crate) fn classify(stmt: &syn::Stmt, builds_outputs: &BTreeMap<String, bool>) -> Stmt {
     let mut is_init = false;
     let mut is_setup = false;
     let mut slow: Option<(proc_macro2::Span, &'static str)> = None;

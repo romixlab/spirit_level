@@ -1,0 +1,6 @@
+project = "../../../projects/classes_bad"
+
+[[finding]]
+at = "src/main.rs:15:5"
+confidence = "estimate"
+

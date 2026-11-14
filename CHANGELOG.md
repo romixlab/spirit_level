@@ -7,6 +7,9 @@
 - `compound-assert` (C0030): `assert!(a && b)` outside tests; warn in big and embedded (CODE-10).
 - `assert-message` (C0031): `assert!` or `debug_assert!` without a message; warn in big and embedded (CODE-10).
 - `float-partial-cmp-unwrap` (C0032): `partial_cmp(..).unwrap()` panics on NaN; warn from small (CODE-10).
+- `cls-1` (F0106, warn) and `cls-2` (F0107, deny): task files have a class; `service` modules deny Clippy's panic lints (CODE-10).
+- `flt-11` (F0108, warn): panic and HardFault handlers call `safe_state()` first (CODE-10).
+- `flt-12` (F0109, warn): the crash record's `boots_since` is read before the first output is enabled (CODE-10).
 - `panic-in-library` in the embedded tier: deny on `service` modules, `expect`, `unreachable!` and `assert!` included (CODE-10).
 - Clippy sets: `debug_assert_with_mut_call` from small, `missing_panics_doc` warn from medium (CODE-10).
 - `[embedded.classes]` table: task classes `control`, `service`, `protocol`, `boot` per module glob (CODE-10).

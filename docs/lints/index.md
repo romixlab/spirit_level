@@ -113,6 +113,13 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [F0011](F0011.md) | [clk-3](F0011.md) | the clock security system watches HSE and LSE, with a handler | off | off | off | off | off | warn | off | off |
 | [F0012](F0012.md) | [clk-5](F0012.md) | USB has an exact 48 MHz clock | off | off | off | off | off | deny | off | off |
 
+## cls
+
+| Code | Lint | Rule | small | small-workspace | medium | big | ai | embedded | ui | egui |
+|---|---|---|---|---|---|---|---|---|---|---|
+| [F0106](F0106.md) | [cls-1](F0106.md) | every file that holds an executor task has a task class in [embedded.classes] | off | off | off | off | off | warn | off | off |
+| [F0107](F0107.md) | [cls-2](F0107.md) | a service module denies the Clippy lints that find panics at its top | off | off | off | off | off | deny | off | off |
+
 ## cnt
 
 | Code | Lint | Rule | small | small-workspace | medium | big | ai | embedded | ui | egui |
@@ -268,6 +275,8 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [F0053](F0053.md) | [flt-7](F0053.md) | a watchdog runs, fed from a bounded loop of the main work | off | off | off | off | off | deny | off | off |
 | [F0054](F0054.md) | [flt-8](F0054.md) | a boot-loop rescue falls back to the ROM bootloader after repeated unhealthy boots | off | off | off | off | off | warn | off | off |
 | [F0055](F0055.md) | [flt-9](F0055.md) | the healthy mark is set on the transport in use | off | off | off | off | off | warn | off | off |
+| [F0108](F0108.md) | [flt-11](F0108.md) | the panic and HardFault handlers put the board into its safe state before anything else | off | off | off | off | off | warn | off | off |
+| [F0109](F0109.md) | [flt-12](F0109.md) | the boot counter is read before the first output is enabled | off | off | off | off | off | warn | off | off |
 
 ## geiger
 

@@ -432,6 +432,22 @@ reason = "a connected pin the description leaves out is a fact missing, not a fa
 
 # The assertion policy: what a broken invariant may do depends on the module's task class ([embedded.classes]).
 
+[lints.cls-1]
+level = "warn"
+reason = "every task file says what a panic in it may do; warn while no firmware declares [embedded.classes] yet, then deny"
+
+[lints.cls-2]
+level = "deny"
+reason = "a service module never reaches the panic handler in release; Clippy finds its panics at build time. Fires only where classes are declared"
+
+[lints.flt-11]
+level = "warn"
+reason = "a panic in control code turns the outputs off before it records and resets; warn while no board generates safe_state() yet, then deny"
+
+[lints.flt-12]
+level = "warn"
+reason = "a crash loop must not re-enable the outputs on every boot; an estimate by statement order, and no firmware reads boots_since at boot yet"
+
 [lints.panic-in-library]
 level = "deny"
 reason = "a service module (LED, log, telemetry) never reaches the panic handler in release: the whole MCU resets for it"

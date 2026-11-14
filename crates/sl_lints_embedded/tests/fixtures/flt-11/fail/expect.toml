@@ -1,0 +1,8 @@
+project = "../../../projects/classes_bad"
+
+[[finding]]
+at = "src/main.rs:27:5"
+
+[[finding]]
+at = "src/main.rs:35:14"
+

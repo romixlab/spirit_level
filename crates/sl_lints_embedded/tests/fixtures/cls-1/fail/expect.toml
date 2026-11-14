@@ -1,0 +1,5 @@
+project = "../../../projects/classes_bad"
+
+[[finding]]
+at = "src/usb.rs:2:14"
+

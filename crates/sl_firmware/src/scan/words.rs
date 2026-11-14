@@ -341,6 +341,7 @@ mod tests {
         assert_eq!(int_value(&e, &c), Some(64));
         let file = SourceFile {
             rel: "src/main.rs".into(),
+            in_package: "src/main.rs".into(),
             krate: "fw".into(),
             module: String::new(),
             text: "fn a() {\n    // ES0548 2.2.10\n    // \"Prefetch failure\"\n    poke(); // A, Z\n}\n".into(),

@@ -1,0 +1,13 @@
+extends = []
+
+# globs are relative to the crate directory, fw/
+[embedded.classes]
+service = ["src/led.rs"]
+
+[lints.cls-1]
+level = "deny"
+reason = "fixture"
+
+[lints.cls-2]
+level = "deny"
+reason = "fixture"

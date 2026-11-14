@@ -1,0 +1,5 @@
+project = "../../../projects/clean"
+
+[[finding]]
+at = "src/lint11_flash.rs:18:14"
+

@@ -84,7 +84,8 @@ impl Analysis for Embedded {
 
     fn run(&self, cx: &Context<'_>) {
         let mut seen = std::collections::BTreeSet::new();
-        for fw in Firmware::load_all(cx.project, cx.elf()) {
+        for mut fw in Firmware::load_all(cx.project, cx.elf()) {
+            fw.classes = cx.config.embedded.classes.clone();
             for n in &fw.notes {
                 cx.emit(
                     Diagnostic::new(

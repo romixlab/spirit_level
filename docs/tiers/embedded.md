@@ -116,6 +116,10 @@ Use it with `extends = "embedded"` in `spirit_level.toml`.
 | [F0103](../lints/F0103.md) | brd-5 | `deny` | a signal on a pin that cannot carry it never reaches the peripheral | embedded |
 | [F0104](../lints/F0104.md) | brd-6 | `deny` | a pin the PCB does not connect as described is firmware driving the wrong line (B135B's LED on B135A's pins) | embedded |
 | [F0105](../lints/F0105.md) | brd-7 | `warn` | a connected pin the description leaves out is a fact missing, not a fault: the description grows to cover it | embedded |
+| [F0106](../lints/F0106.md) | cls-1 | `warn` | every task file says what a panic in it may do; warn while no firmware declares [embedded.classes] yet, then deny | embedded |
+| [F0107](../lints/F0107.md) | cls-2 | `deny` | a service module never reaches the panic handler in release; Clippy finds its panics at build time. Fires only where classes are declared | embedded |
+| [F0108](../lints/F0108.md) | flt-11 | `warn` | a panic in control code turns the outputs off before it records and resets; warn while no board generates safe_state() yet, then deny | embedded |
+| [F0109](../lints/F0109.md) | flt-12 | `warn` | a crash loop must not re-enable the outputs on every boot; an estimate by statement order, and no firmware reads boots_since at boot yet | embedded |
 
 ## Clippy set (with what it extends)
 
@@ -566,6 +570,22 @@ level = "warn"
 reason = "a connected pin the description leaves out is a fact missing, not a fault: the description grows to cover it"
 
 # The assertion policy: what a broken invariant may do depends on the module's task class ([embedded.classes]).
+
+[lints.cls-1]
+level = "warn"
+reason = "every task file says what a panic in it may do; warn while no firmware declares [embedded.classes] yet, then deny"
+
+[lints.cls-2]
+level = "deny"
+reason = "a service module never reaches the panic handler in release; Clippy finds its panics at build time. Fires only where classes are declared"
+
+[lints.flt-11]
+level = "warn"
+reason = "a panic in control code turns the outputs off before it records and resets; warn while no board generates safe_state() yet, then deny"
+
+[lints.flt-12]
+level = "warn"
+reason = "a crash loop must not re-enable the outputs on every boot; an estimate by statement order, and no firmware reads boots_since at boot yet"
 
 [lints.panic-in-library]
 level = "deny"

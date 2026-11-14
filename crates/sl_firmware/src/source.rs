@@ -14,8 +14,10 @@ use syn::{Expr, Token};
 
 /// A parsed Rust file
 pub struct SourceFile {
-    /// Relative to the firmware crate directory
+    /// Relative to the project root
     pub rel: String,
+    /// Relative to the directory of the crate it belongs to (`src/led.rs`): what `[embedded.classes]` matches
+    pub in_package: String,
     /// The crate it belongs to (`b200_usb_io`), `-` as `_`
     pub krate: String,
     /// Module path inside the crate from the file's place (`sd::task`); inline `mod` blocks add to it
@@ -30,6 +32,7 @@ impl std::fmt::Debug for SourceFile {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("SourceFile")
             .field("rel", &self.rel)
+            .field("in_package", &self.in_package)
             .field("krate", &self.krate)
             .field("module", &self.module)
             .finish_non_exhaustive()
@@ -991,6 +994,7 @@ mod tests {
     fn facts(src: &str) -> Facts {
         let f = SourceFile {
             rel: "src/main.rs".into(),
+            in_package: "src/main.rs".into(),
             krate: "fw".into(),
             module: String::new(),
             text: src.into(),

@@ -160,6 +160,16 @@ pub struct Firmware<'p> {
     pub elf: Option<Elf>,
     /// What could not be read
     pub notes: Vec<Note>,
+    /// The task class of each module (`[embedded.classes]`), set by the caller; empty when none is declared
+    pub classes: sl_core::Classes,
+}
+
+impl Firmware<'_> {
+    /// The task class of a source file, by its path relative to the project root
+    pub fn class_of(&self, rel: &str) -> Option<sl_core::TaskClass> {
+        let f = self.sources.iter().find(|f| f.rel == rel)?;
+        self.classes.class_of(&f.in_package)
+    }
 }
 
 impl<'p> Firmware<'p> {
@@ -273,6 +283,7 @@ impl<'p> Firmware<'p> {
             facts,
             elf,
             notes,
+            classes: sl_core::Classes::default(),
         }
     }
 
@@ -514,6 +525,7 @@ fn sources(
             match f.ast() {
                 Ok(ast) => out.push(SourceFile {
                     rel: f.rel.clone(),
+                    in_package: f.in_package.clone(),
                     krate: f.package.replace('-', "_"),
                     module: f.module.clone(),
                     text: f.text.clone(),

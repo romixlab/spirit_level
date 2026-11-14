@@ -1,0 +1,3 @@
+[workspace]
+members = ["fw"]
+resolver = "3"

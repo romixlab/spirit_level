@@ -1,0 +1,5 @@
+project = "../../../projects/classes_bad"
+
+[[finding]]
+at = "src/led.rs:1:1"
+

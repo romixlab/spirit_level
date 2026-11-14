@@ -439,6 +439,7 @@ mod tests {
     fn facts(src: &str) -> Facts {
         let f = SourceFile {
             rel: "src/main.rs".into(),
+            in_package: "src/main.rs".into(),
             krate: "fw".into(),
             module: String::new(),
             text: src.into(),
