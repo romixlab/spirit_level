@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.2.8] - 2026-11-14
+
 ### Added
 
 - Board lints `brd-1`..`brd-7` (F0099-F0105) check `board.toml` against chip data and PCB nets, in the embedded tier (TIER-5).
