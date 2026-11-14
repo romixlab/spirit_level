@@ -61,9 +61,12 @@ impl Commit {
     }
 }
 
+/// A commit list, or why it could not be read
+type Read = Result<Arc<[Commit]>, String>;
+
 /// The commit lists read during a run, by base
 #[derive(Debug, Default)]
-pub(crate) struct Cache(Mutex<BTreeMap<String, Result<Arc<[Commit]>, String>>>);
+pub(crate) struct Cache(Mutex<BTreeMap<String, Read>>);
 
 impl Cache {
     pub(crate) fn get(&self, root: &Path, base: &str) -> Result<Arc<[Commit]>, String> {
@@ -247,6 +250,6 @@ mod tests {
     fn a_body_alone_is_no_trailer_block() {
         let c = parse("ab", "Subject\n\nsee foo: bar\n").expect("a commit");
         assert_eq!(c.body, ["see foo: bar"]);
-        assert!(c.trailers.is_empty());
+        assert_eq!(c.trailers.len(), 0);
     }
 }

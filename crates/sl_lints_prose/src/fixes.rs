@@ -71,7 +71,7 @@ fn tags(cx: &Context<'_>, c: &Commit) {
                         "the culprit's subject is missing: `{hash} (\"{s}\")`"
                     )),
                     Some(q) if q != s => {
-                        wrong.push(format!("the quoted subject is not the culprit's: `{s}`"))
+                        wrong.push(format!("the quoted subject is not the culprit's: `{s}`"));
                     }
                     Some(_) => {}
                 }
