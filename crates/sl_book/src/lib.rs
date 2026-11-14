@@ -28,6 +28,7 @@ pub const HAND_PAGES: &[(&str, &str)] = &[
     ("External tools", "tools.md"),
     ("Dependents", "dependents.md"),
     ("Docs as the reader meets them", "reading.md"),
+    ("Migrating from bedrock-lint", "embedded-migration.md"),
     ("Writing a lint", "writing-lints.md"),
 ];
 
