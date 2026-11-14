@@ -22,6 +22,7 @@ foo_gpu = { layer = "app", unsafe = true }
 foo_proto = { layer = "model", generated = true }
 foo_api = { layer = "model", stable = true }
 foo_math = { layer = "utils", no_std = true, deterministic = true }
+foo_proto_types = { layer = "utils", contract = true }
 foo_cli = { layer = "app" }
 
 [map.forbid]
@@ -49,6 +50,7 @@ wgpu = ["foo_gpu"]                  # only these crates may depend on wgpu direc
 | `no_std` | builds without std |
 | `wasm` | builds for `wasm32-unknown-unknown` |
 | `deterministic` | promises bit-identical results on every platform |
+| `contract` | holds the serde types that cross a process or node boundary; sized integers only ([sized-ints-in-contracts](lints/C0017.md)) |
 | `forbid.<crate>` | crates (workspace or third-party) its closure must never reach |
 | `external.<crate>` | a crate of another project taken by git: its URL, its branch (optional) and the layer that may use it; how it is pinned is `git-dependency-pins`' policy |
 | `third-party.<crate>` | workspace crates that alone may depend on a heavy third-party crate |

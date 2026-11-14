@@ -2,6 +2,7 @@
 
 mod build_info;
 mod fakes;
+mod practice;
 
 use sl_analysis::syntax::{Range, range, without_tests};
 use sl_analysis::{Analysis, Context, lint};
@@ -47,6 +48,21 @@ lint!(TEST_SUPPORT_GATED, "C0015", "test-support-gated", "code", "test fakes and
         ("test-dirs", StrList, "[\"**/tests/**\"]", "directories whose crates exist for tests and are exempt"),
     ],
     needs: [], fix: None);
+lint!(SIZED_INTS_IN_CONTRACTS, "C0017", "sized-ints-in-contracts", "code", "serde types of a contract crate use sized integers, not usize or isize",
+    params: [("also", StrList, "[]", "crates held to it besides those the map marks contract")],
+    needs: [], fix: None);
+lint!(UNIT_SUFFIX, "C0018", "unit-suffix", "code", "a numeric field or constant that holds a time or a size names its unit",
+    params: [
+        ("words", StrList, "[\"timeout\", \"delay\", \"interval\", \"period\", \"latency\", \"ttl\", \"backoff\", \"elapsed\", \"deadline\", \"size\"]", "name words that say a time or a size"),
+        ("units", StrList, "[\"ns\", \"us\", \"ms\", \"s\", \"sec\", \"secs\", \"seconds\", \"nanos\", \"micros\", \"millis\", \"min\", \"mins\", \"minutes\", \"h\", \"hours\", \"days\", \"ticks\", \"cycles\", \"bytes\", \"b\", \"kb\", \"kib\", \"mb\", \"mib\", \"gb\", \"gib\", \"bits\", \"words\", \"pages\", \"sectors\", \"blocks\", \"count\", \"items\", \"entries\", \"elements\", \"chars\", \"lines\", \"samples\", \"frames\", \"px\", \"pt\", \"mm\"]", "name words that are units; one anywhere in the name is enough"),
+    ],
+    needs: [], fix: None);
+lint!(UNBOUNDED_READ, "C0019", "unbounded-read", "code", "a read to the end of a stream is bounded with take()",
+    params: [
+        ("methods", StrList, "[\"read_to_end\", \"read_to_string\"]", "methods that read until the end"),
+        ("bounds", StrList, "[\"take\"]", "methods in the receiver chain that bound the read"),
+    ],
+    needs: [], fix: None);
 
 /// The source analysis
 pub struct Code;
@@ -64,6 +80,9 @@ static LINTS: &[&LintMeta] = &[
     &CLI_SUBPROCESS,
     &BUILD_INFO_ENV,
     &TEST_SUPPORT_GATED,
+    &SIZED_INTS_IN_CONTRACTS,
+    &UNIT_SUFFIX,
+    &UNBOUNDED_READ,
 ];
 
 impl Analysis for Code {
@@ -91,6 +110,7 @@ impl Analysis for Code {
         for pkg in &p.packages {
             build_info::run(cx, pkg);
             fakes::run(cx, pkg);
+            practice::run(cx, pkg);
             let det = cx
                 .map()
                 .and_then(|m| m.crates.get(&pkg.name))

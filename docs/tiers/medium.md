@@ -21,6 +21,8 @@ Use it with `extends = "medium"` in `spirit_level.toml`.
 | [C0013](../lints/C0013.md) | waiver-unused | `warn` | a waiver that allows nothing is left over from changed code | small |
 | [C0014](../lints/C0014.md) | build-info-env | `warn` | build info compiled into libraries recompiles them on every commit; the binary sets it once | medium |
 | [C0015](../lints/C0015.md) | test-support-gated | `warn` | fakes and test helpers never ship: cfg(test), a test-support feature from dev-dependencies, or a test crate | medium |
+| [C0016](../lints/C0016.md) | orphan-source-file | `warn` | a file no mod reaches is never compiled or tested, yet reads like live code | medium |
+| [C0017](../lints/C0017.md) | sized-ints-in-contracts | `warn` | a contract is read on every party; usize is 32 bits on some of them | medium |
 | [G0001](../lints/G0001.md) | core-crate-deps | `warn` | a _core crate holds shared types and drags nothing in | medium |
 | [G0003](../lints/G0003.md) | crate-cycles | `deny` | crates in a cycle cannot be built or tested apart | medium |
 | [M0001](../lints/M0001.md) | default-features-off | `warn` | dependencies are added with default-features = false and only the features in use | small |
@@ -248,6 +250,14 @@ reason = "fakes and test helpers never ship: cfg(test), a test-support feature f
 [lints.macro-compile-fail]
 level = "warn"
 reason = "a proc macro must refuse bad input with a clear error, and only compile-fail cases show that"
+
+[lints.orphan-source-file]
+level = "warn"
+reason = "a file no mod reaches is never compiled or tested, yet reads like live code"
+
+[lints.sized-ints-in-contracts]
+level = "warn"
+reason = "a contract is read on every party; usize is 32 bits on some of them"
 
 # On top of small's Clippy set: pedantic and cargo, with the opt-outs rerun found to be noise (each with its reason),
 # and the restriction and nursery lints a workspace of this size wants.

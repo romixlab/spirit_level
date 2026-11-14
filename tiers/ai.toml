@@ -94,6 +94,14 @@ reason = "a TODO or a 'for now' marks a path the final design throws away; track
 level = "deny"
 reason = "an agent may leave itself a FIXME on its branch; the landing refuses it"
 
+[lints.unit-suffix]
+level = "warn"
+reason = "agents write units last in names from the start; a warning, since it reads names only and fires widely in older code"
+
+[lints.unbounded-read]
+level = "warn"
+reason = "input from outside sets the memory a read to the end takes; candidates only, a place to look"
+
 [lints.todo-macros]
 level = "deny"
 reason = "todo!() and unimplemented!() are stop-gaps that compile"

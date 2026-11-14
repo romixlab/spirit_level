@@ -8,6 +8,9 @@
 - fixme-before-land (A0011): FIXME is a candidate on the branch, a finding when the branch lands (AI-2).
 - fixes-tag (P0017): a `Fixes:` trailer names a resolving hash of 12+ digits and the culprit's subject (PROSE-3).
 - fix-without-test (P0018): a commit that fixes code adds a test, or says why not (PROSE-3).
+- sized-ints-in-contracts (C0017): serde types of a crate the map marks `contract` use sized integers (CODE-8).
+- unit-suffix (C0018): numeric fields and constants named for a time or size carry a unit (CODE-8).
+- unbounded-read (C0019): `read_to_end` and `read_to_string` are bounded with `take()`; candidates (CODE-8).
 - orphan-source-file (C0016): every `.rs` file under `src/` is reached by a `mod` declaration (CODE-7).
 
 ### Changed

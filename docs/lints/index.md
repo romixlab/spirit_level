@@ -98,6 +98,9 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [C0008](C0008.md) | [todo-macros](C0008.md) | no todo!() or unimplemented!() outside tests | warn | warn | warn | deny | deny | off |
 | [C0014](C0014.md) | [build-info-env](C0014.md) | library code reads build info at run time, not through env! | off | off | warn | warn | off | off |
 | [C0015](C0015.md) | [test-support-gated](C0015.md) | test fakes and testing modules compile only for tests or behind the test-support feature | off | off | warn | warn | off | off |
+| [C0017](C0017.md) | [sized-ints-in-contracts](C0017.md) | serde types of a contract crate use sized integers, not usize or isize | off | off | warn | deny | off | off |
+| [C0018](C0018.md) | [unit-suffix](C0018.md) | a numeric field or constant that holds a time or a size names its unit | off | off | off | off | warn | off |
+| [C0019](C0019.md) | [unbounded-read](C0019.md) | a read to the end of a stream is bounded with take() | off | off | off | warn | warn | off |
 
 ## commits
 
@@ -443,6 +446,7 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | Code | Lint | Rule | small | small-workspace | medium | big | ai | embedded |
 |---|---|---|---|---|---|---|---|---|
 | [C0011](C0011.md) | [module-graph-scc](C0011.md) | no module cycle holds most of a crate's code | off | off | warn | warn | off | off |
+| [C0016](C0016.md) | [orphan-source-file](C0016.md) | every .rs file under src/ is reached by a mod declaration | off | off | warn | deny | off | off |
 
 ## taplo
 

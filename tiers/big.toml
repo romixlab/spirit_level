@@ -112,6 +112,14 @@ reason = "no stop-gaps: a TODO or a 'for now' names its tracker id or goes"
 level = "deny"
 reason = "a file no mod reaches is never compiled or tested, yet reads like live code"
 
+[lints.sized-ints-in-contracts]
+level = "deny"
+reason = "a contract is read on every party; usize is 32 bits on some of them"
+
+[lints.unbounded-read]
+level = "warn"
+reason = "input from outside sets the memory a read to the end takes; candidates only, a place to look"
+
 [lints.fixme-before-land]
 level = "deny"
 reason = "a FIXME is a note for the branch; a candidate while it is in work, refused when it lands"

@@ -21,6 +21,8 @@ Use it with `extends = "ai"` in `spirit_level.toml`.
 | [A0011](../lints/A0011.md) | fixme-before-land | `deny` | an agent may leave itself a FIXME on its branch; the landing refuses it | ai |
 | [C0002](../lints/C0002.md) | allow-without-reason | `deny` | an allowed lint says why, so it can be turned back on | ai |
 | [C0008](../lints/C0008.md) | todo-macros | `deny` | todo!() and unimplemented!() are stop-gaps that compile | ai |
+| [C0018](../lints/C0018.md) | unit-suffix | `warn` | agents write units last in names from the start; a warning, since it reads names only and fires widely in older code | ai |
+| [C0019](../lints/C0019.md) | unbounded-read | `warn` | input from outside sets the memory a read to the end takes; candidates only, a place to look | ai |
 | [M0018](../lints/M0018.md) | repo-files | `deny` | AGENTS.md holds the rules every agent reads; CLAUDE.md points to it | ai |
 | [P0001](../lints/P0001.md) | agent-file-lines | `deny` | agents read the file whole every session; a long one is skimmed, not followed | ai |
 | [P0002](../lints/P0002.md) | agent-file-links | `deny` | an agent that follows a dead link guesses or stops | ai |
@@ -160,6 +162,14 @@ reason = "a TODO or a 'for now' marks a path the final design throws away; track
 [lints.fixme-before-land]
 level = "deny"
 reason = "an agent may leave itself a FIXME on its branch; the landing refuses it"
+
+[lints.unit-suffix]
+level = "warn"
+reason = "agents write units last in names from the start; a warning, since it reads names only and fires widely in older code"
+
+[lints.unbounded-read]
+level = "warn"
+reason = "input from outside sets the memory a read to the end takes; candidates only, a place to look"
 
 [lints.todo-macros]
 level = "deny"

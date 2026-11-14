@@ -1,0 +1,12 @@
+[[finding]]
+at = "src/lib.rs:4:11"
+confidence = "estimate"
+
+[[finding]]
+at = "src/lib.rs:9:9"
+confidence = "estimate"
+
+[[finding]]
+at = "src/lib.rs:11:9"
+confidence = "estimate"
+

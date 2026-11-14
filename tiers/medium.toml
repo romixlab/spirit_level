@@ -109,6 +109,10 @@ reason = "a proc macro must refuse bad input with a clear error, and only compil
 level = "warn"
 reason = "a file no mod reaches is never compiled or tested, yet reads like live code"
 
+[lints.sized-ints-in-contracts]
+level = "warn"
+reason = "a contract is read on every party; usize is 32 bits on some of them"
+
 # On top of small's Clippy set: pedantic and cargo, with the opt-outs rerun found to be noise (each with its reason),
 # and the restriction and nursery lints a workspace of this size wants.
 

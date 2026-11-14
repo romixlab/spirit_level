@@ -71,6 +71,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `CODE-2` Module-graph SCC share, dead pub items, error enum growth, pub surface (`sl_lints_modules`, `sl_lints_dead`, `sl_lints_errors`, `sl_lints_surface`).
 - ✅ `CODE-4` `build-info-env` and `test-support-gated`: build info and test fakes stay out of library builds.
 - ✅ `CODE-7` `orphan-source-file`: files under `src/` that no `mod` reaches, test modules and `#[path]` included.
+- ✅ `CODE-8` Limits and units: `sized-ints-in-contracts` (map key `contract`), `unit-suffix`, `unbounded-read`.
 - 📋 `CODE-5` `build-script-clock`: build.rs reads no clock and finds git through the real git dir, so worktree builds stay clean.
 - 📋 `CODE-6` `command-registry`: a CLI past a size parameter registers commands per module, not in one central Subcommand enum (estimate).
 

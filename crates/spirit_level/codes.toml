@@ -71,6 +71,9 @@ C0013 = { id = "waiver-unused", group = "code", status = "active" }
 C0014 = { id = "build-info-env", group = "code", status = "active" }
 C0015 = { id = "test-support-gated", group = "code", status = "active" }
 C0016 = { id = "orphan-source-file", group = "code", status = "active" }
+C0017 = { id = "sized-ints-in-contracts", group = "code", status = "active" }
+C0018 = { id = "unit-suffix", group = "code", status = "active" }
+C0019 = { id = "unbounded-read", group = "code", status = "active" }
 P0001 = { id = "agent-file-lines", group = "prose", status = "active" }
 P0002 = { id = "agent-file-links", group = "prose", status = "active" }
 P0003 = { id = "agent-rules-match-lints", group = "prose", status = "active" }

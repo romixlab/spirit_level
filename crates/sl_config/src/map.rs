@@ -61,6 +61,8 @@ pub struct MapCrate {
     pub wasm: bool,
     /// Promises bit-identical results on every platform: floats only through libm, no random-state hashing
     pub deterministic: bool,
+    /// A contract crate: the serde types that cross a process or node boundary, read by every party
+    pub contract: bool,
     /// The line of its entry
     pub line: u32,
 }
@@ -143,6 +145,7 @@ impl Map {
                     no_std: c.opt_bool("no_std", errs).unwrap_or(false),
                     wasm: c.opt_bool("wasm", errs).unwrap_or(false),
                     deterministic: c.opt_bool("deterministic", errs).unwrap_or(false),
+                    contract: c.opt_bool("contract", errs).unwrap_or(false),
                     line,
                 };
                 c.finish(errs);

@@ -1,0 +1,9 @@
+[lints.sized-ints-in-contracts]
+level = "deny"
+reason = "fixture"
+
+[map.layers.k]
+allow = ["k"]
+
+[map.crates]
+fx = { layer = "k", contract = true }

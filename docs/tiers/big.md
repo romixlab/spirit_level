@@ -27,6 +27,9 @@ Use it with `extends = "big"` in `spirit_level.toml`.
 | [C0013](../lints/C0013.md) | waiver-unused | `deny` | every waiver allows something, or it goes | big |
 | [C0014](../lints/C0014.md) | build-info-env | `warn` | build info compiled into libraries recompiles them on every commit; the binary sets it once | medium |
 | [C0015](../lints/C0015.md) | test-support-gated | `warn` | fakes and test helpers never ship: cfg(test), a test-support feature from dev-dependencies, or a test crate | medium |
+| [C0016](../lints/C0016.md) | orphan-source-file | `deny` | a file no mod reaches is never compiled or tested, yet reads like live code | big |
+| [C0017](../lints/C0017.md) | sized-ints-in-contracts | `deny` | a contract is read on every party; usize is 32 bits on some of them | big |
+| [C0019](../lints/C0019.md) | unbounded-read | `warn` | input from outside sets the memory a read to the end takes; candidates only, a place to look | big |
 | [G0001](../lints/G0001.md) | core-crate-deps | `deny` | a _core crate holds shared types and drags nothing in | big |
 | [G0002](../lints/G0002.md) | core-crate-types | `deny` | _core crates hold only types: no I/O, threads or runtimes | big |
 | [G0003](../lints/G0003.md) | crate-cycles | `deny` | crates in a cycle cannot be built or tested apart | medium |
@@ -281,6 +284,18 @@ reason = "crates the map marks deterministic iterate in the same order every run
 [lints.stop-gap-comments]
 level = "deny"
 reason = "no stop-gaps: a TODO or a 'for now' names its tracker id or goes"
+
+[lints.orphan-source-file]
+level = "deny"
+reason = "a file no mod reaches is never compiled or tested, yet reads like live code"
+
+[lints.sized-ints-in-contracts]
+level = "deny"
+reason = "a contract is read on every party; usize is 32 bits on some of them"
+
+[lints.unbounded-read]
+level = "warn"
+reason = "input from outside sets the memory a read to the end takes; candidates only, a place to look"
 
 [lints.fixme-before-land]
 level = "deny"
