@@ -16,7 +16,7 @@ pub struct DependentsArgs {
     /// A configuration file instead of `<root>/spirit_level.toml`
     #[arg(long)]
     config: Option<PathBuf>,
-    /// The revision changes are measured against (default: `base` in [dependents], else main)
+    /// The revision changes are measured against (default: `base` in `[dependents]`, else the default branch)
     #[arg(long, value_name = "REV", add = ArgValueCandidates::new(rev_candidates))]
     base: Option<String>,
     /// Count every crate of the library as changed (needs no git)

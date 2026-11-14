@@ -14,7 +14,7 @@ use crate::reader::Reader;
 use std::path::{Path, PathBuf};
 
 /// The retest command when the table names none
-pub const DEFAULT_TEST: &str = "cargo nextest run";
+const DEFAULT_TEST: &str = "cargo nextest run";
 
 /// Where the dependent repos are and how they are retested
 #[derive(Clone, Debug, PartialEq, Eq, serde::Serialize)]

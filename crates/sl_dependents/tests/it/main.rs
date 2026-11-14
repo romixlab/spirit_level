@@ -29,7 +29,7 @@ impl Scratch {
     }
 
     fn write(&self, rel: &str, text: &str) {
-        std::fs::write(self.0.join(rel), text).unwrap();
+        std::fs::write(self.0.join(rel), text).expect("write a scratch file");
     }
 
     /// Makes the library a git repository on `main` with one commit; returns it
@@ -44,15 +44,15 @@ impl Scratch {
         git(&self.lib(), &["rev-parse", "HEAD"]).trim().to_owned()
     }
 
-    /// Puts `commit` into app_a's lock as the library commit
+    /// Puts `commit` into `app_a`'s lock as the library commit
     fn lock_app_a_at(&self, commit: &str) {
         let p = self.0.join("app_a/Cargo.lock");
-        let t = std::fs::read_to_string(&p).unwrap();
-        std::fs::write(p, t.replace("LIB_COMMIT", commit)).unwrap();
+        let t = std::fs::read_to_string(&p).expect("read the lock");
+        std::fs::write(p, t.replace("LIB_COMMIT", commit)).expect("write the lock");
     }
 
     fn find(&self, opts: &Options) -> Report {
-        let project = Project::load(&self.lib()).unwrap();
+        let project = Project::load(&self.lib()).expect("the fixture library loads");
         let table = Dependents {
             scan: vec!["..".to_owned()],
             repos: vec![],
@@ -64,7 +64,7 @@ impl Scratch {
                 line: 3,
             },
         };
-        find(&project, &table, opts).unwrap()
+        find(&project, &table, opts).expect("find runs")
     }
 }
 
@@ -75,13 +75,16 @@ impl Drop for Scratch {
 }
 
 fn copy(from: &Path, to: &Path) {
-    std::fs::create_dir_all(to).unwrap();
-    for e in std::fs::read_dir(from).unwrap().flatten() {
+    std::fs::create_dir_all(to).expect("create a scratch folder");
+    for e in std::fs::read_dir(from)
+        .expect("read a fixture folder")
+        .flatten()
+    {
         let (src, dst) = (e.path(), to.join(e.file_name()));
-        if e.file_type().unwrap().is_dir() {
+        if src.is_dir() {
             copy(&src, &dst);
         } else {
-            std::fs::copy(&src, &dst).unwrap();
+            std::fs::copy(&src, &dst).expect("copy a fixture file");
         }
     }
 }
@@ -94,7 +97,7 @@ fn git(dir: &Path, args: &[&str]) -> String {
         .env("GIT_CONFIG_GLOBAL", "/dev/null")
         .env("GIT_CONFIG_NOSYSTEM", "1")
         .output()
-        .unwrap();
+        .expect("git starts");
     assert!(
         out.status.success(),
         "git {args:?}: {}",
