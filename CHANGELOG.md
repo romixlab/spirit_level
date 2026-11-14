@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.2.2] - 2026-11-14
+
 ### Added
 
 - Choice parameters: a value outside the listed strings is a configuration error (MAN-2).
