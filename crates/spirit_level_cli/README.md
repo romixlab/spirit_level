@@ -14,6 +14,7 @@ spl config                   # the resolved levels, overrides and exceptions wit
 spl init --tier small        # write a spirit_level.toml
 spl book docs                # write the book's generated pages (--check: fail when stale)
 spl dependents               # the dependent repos and crates to retest after this change ([dependents] turns it on)
+spl pages                    # reading metrics per Markdown page: words, reading time, longest run, headings
 ```
 
 Exit codes: 0 clean (warnings allowed), 1 a denied finding, 2 a configuration or usage error or a project cargo cannot read, 3 a denied lint could not run (a tool or the crate map is missing).

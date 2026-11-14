@@ -89,7 +89,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 
 ## DOCS - docs as the reader meets them
 
-- ✅ `DOCS-1` Reading lints per page: prose runs, reading time, heading length, sections, code walls, image text, code languages; the `[docs]` table (`sl_docs`, `sl_lints_docs`).
+- ✅ `DOCS-1` Reading metrics per page (`spl pages`, text and JSON) and lints: prose runs, reading time, heading length, sections, code walls, image text, code languages; the `[docs]` table (`sl_docs`, `sl_lints_docs`).
 - ✅ `DOCS-2` Zensical book lints: navigation entries that exist, orphan pages, one title per page, admonition syntax.
 
 ## AI - code written with agents

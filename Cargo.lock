@@ -1473,6 +1473,7 @@ dependencies = [
  "sl_dependents",
  "sl_engine",
  "sl_firmware",
+ "sl_lints_docs",
  "sl_model",
  "sl_report",
  "sl_tools",

@@ -9,10 +9,10 @@ The numbers are useful on their own, before any budget. `spl pages` prints them 
 `spl pages` prints one row per page:
 
 ```text
-page                    kind       words  read  run  para  sent  flesch  img  h   links  code
-README.md               guide        412  1.8m  140    48    14      52    1  6    9/3     4
-docs/configuration.md   guide       1630  7.1m  210    61    16      48    0  14  12/0    11
-docs/lints/D0001.md     reference    310  1.3m   88    40    11      55    0  6    8/0     1
+page                     kind       words  read  run  para  sent  flesch  img   h  links  code
+README.md                guide        412  1.8m  140    48    14      52    1   6    9/3     4
+docs/configuration.md    guide       1630  7.1m  210    61    16      48    0  14   12/0    11
+docs/lints/D0001.md      reference    310  1.3m   88    40    11      55    0   6    8/0     1
 ```
 
 | Column | Meaning |
@@ -29,7 +29,7 @@ docs/lints/D0001.md     reference    310  1.3m   88    40    11      55    0  6 
 | `links` | internal and external links |
 | `code` | code blocks |
 
-`spl pages PAGE` prints every number of one page, with its runs and headings. `spl pages --format json` prints all of them for every page as one document. Two JSON files from two runs diff line by line, so a change to a page shows what it moved.
+`spl pages --page PAGE` prints every number of one page, with its runs and headings. `spl pages --format json` prints all of them for every page as one document. Two JSON files from two runs diff line by line, so a change to a page shows what it moved.
 
 The report uses the parameters of the lints, so the report and the lints count the same way: the reading speed and image times come from `page-reading-time`, the budgets from each lint.
 

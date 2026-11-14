@@ -13,6 +13,7 @@ use std::process::ExitCode;
 use vc_ui::{Exit, Paint};
 
 mod dependents;
+mod pages;
 mod tools;
 
 /// The tool's name, in front of its error lines
@@ -25,7 +26,7 @@ const NOT_RUN: Exit = Exit::category(3, "not_run");
 #[derive(Parser)]
 #[command(name = "spl", version = vc_build::version!(), about = "A linter for Rust projects of every size: tiers of lints in TOML, from one crate to a workspace of hundreds")]
 #[command(
-    after_help = "Examples:\n  spl check\n  spl check --all --group-by crate\n  spl check --format json --only S0001\n  spl explain workspace-lints\n  spl init --tier small-workspace\n  spl dependents --base main"
+    after_help = "Examples:\n  spl check\n  spl check --all --group-by crate\n  spl check --format json --only S0001\n  spl explain workspace-lints\n  spl init --tier small-workspace\n  spl dependents --base main\n  spl pages"
 )]
 struct Cli {
     #[command(flatten)]
@@ -101,6 +102,10 @@ enum Cmd {
     /// crates of the dependents' locks that reach it, the command to run in each
     #[command(after_help = dependents::AFTER_HELP)]
     Dependents(dependents::DependentsArgs),
+    /// The reading metrics of every Markdown page: words, reading time, longest run of prose, paragraphs,
+    /// sentences, figures, headings, links, code
+    #[command(after_help = pages::AFTER_HELP)]
+    Pages(pages::PagesArgs),
     /// The external tools of the adapters: where each is found, and installing the pinned versions
     #[command(subcommand)]
     Tools(tools::ToolsCmd),
@@ -226,6 +231,7 @@ fn run(cli: Cli) -> Result<Exit, String> {
         Cmd::Config(a) => show_config(a),
         Cmd::Init { path, tier } => init(&path, &tier),
         Cmd::Dependents(a) => dependents::run(a),
+        Cmd::Pages(a) => pages::run(a),
         Cmd::Tools(cmd) => tools::run(cmd),
         Cmd::Book {
             docs,
