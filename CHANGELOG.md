@@ -8,6 +8,10 @@
 - `[[crate-tiers]]` and map key `tiers`: tiers such as embedded or egui on chosen crates only (CFG-7).
 - Lint `contract-snapshot` (M0030): contract crates export VERSION and keep unchanged schema snapshots in git (MAN-4).
 
+### Fixed
+
+- `taplo-fmt` no longer reads "did not run" when taplo loses its log lines under load (TOOL-1).
+
 ## [0.4.1] - 2026-11-15
 
 ### Fixed
