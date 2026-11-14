@@ -12,7 +12,7 @@ Use it with `extends = "medium"` in `spirit_level.toml`.
 |---|---|---|---|---|
 | [C0002](../lints/C0002.md) | allow-without-reason | `warn` | an exception to a lint says why, or it outlives its reason | small |
 | [C0003](../lints/C0003.md) | cli-subprocess | `deny` | components call each other as libraries, not through their CLIs | medium |
-| [C0005](../lints/C0005.md) | panic-in-library | `warn` | a library returns errors; its caller decides what is fatal | medium |
+| [C0005](../lints/C0005.md) | panic-in-library | `warn` | a library returns errors for what can fail and says why where it panics; warn until tpm_cli, wire_weaver and embedded_bedrock are under 50 findings each, then deny | medium |
 | [C0006](../lints/C0006.md) | print-in-library | `warn` | printing is the binary's choice | small |
 | [C0008](../lints/C0008.md) | todo-macros | `warn` | no stop-gaps: a todo!() is a panic waiting in shipped code | small |
 | [C0010](../lints/C0010.md) | error-enum-growth | `warn` | a flat error enum grows a variant per failure and loses the source errors; wrap them by layer | medium |
@@ -213,7 +213,7 @@ reason = "a _core crate holds shared types and drags nothing in"
 
 [lints.panic-in-library]
 level = "warn"
-reason = "a library returns errors; its caller decides what is fatal"
+reason = "a library returns errors for what can fail and says why where it panics; warn until tpm_cli, wire_weaver and embedded_bedrock are under 50 findings each, then deny"
 
 [lints.cli-subprocess]
 level = "deny"

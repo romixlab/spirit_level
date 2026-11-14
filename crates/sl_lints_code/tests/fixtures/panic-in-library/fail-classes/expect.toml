@@ -1,0 +1,7 @@
+[[finding]]
+at = "src/led.rs:2"
+contains = "assert!"
+
+[[finding]]
+at = "src/led.rs:3"
+contains = ".expect()"

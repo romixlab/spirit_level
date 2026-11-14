@@ -12,10 +12,13 @@ use syn::visit::Visit;
 
 lint!(TODO_MACROS, "C0008", "todo-macros", "code", "no todo!() or unimplemented!() outside tests",
     params: [], needs: [], fix: None);
-lint!(PANIC_IN_LIBRARY, "C0005", "panic-in-library", "code", "library code returns errors instead of panicking",
+lint!(PANIC_IN_LIBRARY, "C0005", "panic-in-library", "code", "library code returns errors for what can fail and says why where it panics",
     params: [
-        ("methods", StrList, "[\"unwrap\", \"expect\"]", "methods that panic on None or Err"),
-        ("macros", StrList, "[\"panic\", \"unreachable\"]", "macros that panic"),
+        ("methods", StrList, "[\"unwrap\"]", "methods that panic on None or Err without saying why"),
+        ("macros", StrList, "[\"panic\", \"todo\", \"unimplemented\"]", "macros that panic"),
+        ("bare-macros", StrList, "[\"unreachable\"]", "macros that count only without a message"),
+        ("test-files", StrList, "[\"**/*_tests.rs\"]", "files of test code by name, relative to the crate, besides tests/, benches/, examples/ and #[cfg(test)] modules"),
+        ("classes", StrList, "[]", "task classes ([embedded.classes]) whose modules are checked in every crate, binaries included, instead of library code"),
         ("max", Int, "0", "panicking calls allowed per crate before each is reported"),
     ],
     needs: [], fix: None);
@@ -152,6 +155,7 @@ impl Analysis for Code {
                     cx,
                     bins: &bins,
                     lib,
+                    panics_checked: panics_checked(cx, pkg, f, lib),
                     det_float,
                     det_hash,
                     found: Vec::new(),
@@ -184,12 +188,36 @@ impl Analysis for Code {
                             .span(Span::range(file, r.0, r.1))
                             .krate(&pkg.name)
                             .metric("panics", n as f64, Some(max as f64))
-                            .help("return an error the caller can handle; where the case truly cannot happen, say why in a waiver"),
+                            .help("return an error for what can fail; where it cannot, say why: `.expect(\"why\")`, `unreachable!(\"why\")`, or a waiver"),
                     );
                 }
             }
         }
     }
+}
+
+/// Whether panic-in-library looks at a file: library code that is not test code by name, or, where the lint names
+/// task classes, a module of one of them in any crate
+fn panics_checked(cx: &Context<'_>, pkg: &Package, f: &SourceFile, lib: bool) -> bool {
+    let params = cx.params_for("panic-in-library", pkg);
+    if params
+        .list("test-files")
+        .iter()
+        .any(|g| sl_core::glob::matches(g, &f.in_package))
+    {
+        return false;
+    }
+    let classes = params.list("classes");
+    if classes.is_empty() {
+        return lib;
+    }
+    f.kind == FileKind::Src
+        && cx
+            .config
+            .embedded
+            .classes
+            .class_of(&f.in_package)
+            .is_some_and(|c| classes.iter().any(|n| n == c.name()))
 }
 
 /// Library code: under src/ of a crate with a library target, not a binary root or src/bin/
@@ -250,6 +278,8 @@ struct Calls<'a> {
     cx: &'a Context<'a>,
     bins: &'a [String],
     lib: bool,
+    /// panic-in-library looks at this file
+    panics_checked: bool,
     det_float: bool,
     det_hash: bool,
     found: Found,
@@ -285,25 +315,24 @@ impl<'ast> Visit<'ast> for Calls<'_> {
                 Confidence::Certain,
             ));
         }
-        if self.lib {
-            if self.on("panic-in-library")
-                && self
-                    .cx
-                    .params("panic-in-library")
-                    .list("macros")
-                    .contains(&name)
-            {
+        if self.panics_checked && self.on("panic-in-library") {
+            let params = self.cx.params("panic-in-library");
+            if params.list("macros").contains(&name) {
                 self.panics.push((line, format!("{name}!")));
+            } else if params.list("bare-macros").contains(&name) && m.tokens.is_empty() {
+                self.panics
+                    .push((line, format!("{name}!() without a message")));
             }
-            if self.on("print-in-library")
-                && self
-                    .cx
-                    .params("print-in-library")
-                    .list("macros")
-                    .contains(&name)
-            {
-                self.found.push(("print-in-library", line, format!("{name}! in library code"), "return the text or log it through `log`/`tracing`; printing is the binary's choice".into(), Confidence::Certain));
-            }
+        }
+        if self.lib
+            && self.on("print-in-library")
+            && self
+                .cx
+                .params("print-in-library")
+                .list("macros")
+                .contains(&name)
+        {
+            self.found.push(("print-in-library", line, format!("{name}! in library code"), "return the text or log it through `log`/`tracing`; printing is the binary's choice".into(), Confidence::Certain));
         }
         syn::visit::visit_macro(self, m);
     }
@@ -312,7 +341,7 @@ impl<'ast> Visit<'ast> for Calls<'_> {
         let name = e.method.to_string();
         // `.name(args)`
         let line = (range(&e.dot_token).0, range(&e.paren_token.span.join()).1);
-        if self.lib
+        if self.panics_checked
             && self.on("panic-in-library")
             && self
                 .cx

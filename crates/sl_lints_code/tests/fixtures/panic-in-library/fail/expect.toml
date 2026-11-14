@@ -1,12 +1,15 @@
-
-[[finding]]
-at = "src/lib.rs:2"
-contains = ".unwrap() in library code (3 in fx)"
-
 [[finding]]
 at = "src/lib.rs:3"
-contains = ".expect()"
+contains = ".unwrap() in library code (4 in fx)"
 
 [[finding]]
-at = "src/lib.rs:4"
+at = "src/lib.rs:5"
 contains = "panic!"
+
+[[finding]]
+at = "src/lib.rs:6"
+contains = "unreachable!() without a message"
+
+[[finding]]
+at = "src/lib.rs:8"
+contains = "todo!"

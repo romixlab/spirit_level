@@ -430,6 +430,16 @@ reason = "a pin the PCB does not connect as described is firmware driving the wr
 level = "warn"
 reason = "a connected pin the description leaves out is a fact missing, not a fault: the description grows to cover it"
 
+# The assertion policy: what a broken invariant may do depends on the module's task class ([embedded.classes]).
+
+[lints.panic-in-library]
+level = "deny"
+reason = "a service module (LED, log, telemetry) never reaches the panic handler in release: the whole MCU resets for it"
+classes = ["service"]
+methods = ["unwrap", "expect"]
+macros = ["panic", "todo", "unimplemented", "unreachable", "assert", "assert_eq", "assert_ne"]
+bare-macros = []
+
 [clippy.lints]
 undocumented_unsafe_blocks = { level = "deny", reason = "firmware is full of unsafe; every block says in a SAFETY: comment why it is sound" }
 unnecessary_safety_doc = { level = "deny", reason = "a # Safety section on a safe function sends readers looking for a contract that is not there" }

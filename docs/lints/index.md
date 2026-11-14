@@ -128,7 +128,7 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [C0002](C0002.md) | [allow-without-reason](C0002.md) | every allow or expect of a lint says why | warn | warn | warn | deny | deny | off | off | off |
 | [C0003](C0003.md) | [cli-subprocess](C0003.md) | workspace crates call each other as libraries, never by running the workspace's own binaries | off | off | deny | deny | off | off | off | off |
 | [C0004](C0004.md) | [float-determinism](C0004.md) | deterministic crates compute float transcendentals through libm | off | off | off | deny | off | off | off | off |
-| [C0005](C0005.md) | [panic-in-library](C0005.md) | library code returns errors instead of panicking | off | off | warn | warn | off | off | off | off |
+| [C0005](C0005.md) | [panic-in-library](C0005.md) | library code returns errors for what can fail and says why where it panics | off | off | warn | warn | off | deny | off | off |
 | [C0006](C0006.md) | [print-in-library](C0006.md) | library code does not print | warn | warn | warn | warn | off | off | off | off |
 | [C0007](C0007.md) | [random-state-hash](C0007.md) | deterministic crates use no randomly seeded hash maps | off | off | off | deny | off | off | off | off |
 | [C0008](C0008.md) | [todo-macros](C0008.md) | no todo!() or unimplemented!() outside tests | warn | warn | warn | deny | deny | off | off | off |

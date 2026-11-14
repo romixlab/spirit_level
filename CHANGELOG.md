@@ -4,7 +4,12 @@
 
 ### Added
 
+- `panic-in-library` in the embedded tier: deny on `service` modules, `expect`, `unreachable!` and `assert!` included (CODE-10).
 - `[embedded.classes]` table: task classes `control`, `service`, `protocol`, `boot` per module glob (CODE-10).
+
+### Changed
+
+- **Breaking:** `panic-in-library` counts bare `unwrap`, `panic!`, `todo!`, `unimplemented!`, message-less `unreachable!`; `expect` and `*_tests.rs` no longer (CODE-10).
 
 ## [0.2.8] - 2026-11-14
 

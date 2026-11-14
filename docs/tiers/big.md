@@ -16,7 +16,7 @@ Use it with `extends = "big"` in `spirit_level.toml`.
 | [C0002](../lints/C0002.md) | allow-without-reason | `deny` | an exception to a lint says why, or it outlives its reason | big |
 | [C0003](../lints/C0003.md) | cli-subprocess | `deny` | components call each other as libraries, not through their CLIs | medium |
 | [C0004](../lints/C0004.md) | float-determinism | `deny` | crates the map marks deterministic compute the same bits on every platform | big |
-| [C0005](../lints/C0005.md) | panic-in-library | `warn` | a library returns errors; its caller decides what is fatal | medium |
+| [C0005](../lints/C0005.md) | panic-in-library | `warn` | a library returns errors for what can fail and says why where it panics; warn until tpm_cli, wire_weaver and embedded_bedrock are under 50 findings each, then deny | medium |
 | [C0006](../lints/C0006.md) | print-in-library | `warn` | printing is the binary's choice | small |
 | [C0007](../lints/C0007.md) | random-state-hash | `deny` | crates the map marks deterministic iterate in the same order every run | big |
 | [C0008](../lints/C0008.md) | todo-macros | `deny` | no stop-gaps: a todo!() is a panic waiting in shipped code | big |

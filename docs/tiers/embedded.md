@@ -8,6 +8,7 @@ Use it with `extends = "embedded"` in `spirit_level.toml`.
 
 | Code | Lint | Level | Reason | Set in |
 |---|---|---|---|---|
+| [C0005](../lints/C0005.md) | panic-in-library | `deny` | a service module (LED, log, telemetry) never reaches the panic handler in release: the whole MCU resets for it | embedded |
 | [F0001](../lints/F0001.md) | boot-1 | `deny` | bedrock error: Firmware entered by a jump (ROM DfuSe leave, bootloader) not detected: VTOR, PLL, SysTick, enabled IRQs of the ROM are still set; detect (RCC_CFGR SWS, VTOR, NVIC) and reset once | embedded |
 | [F0002](../lints/F0002.md) | boot-10 | `warn` | bedrock warning: Backup-domain helper that turns the RTC clock or `PWR_CR1.DBP` off afterwards instead of restoring what it found | embedded |
 | [F0003](../lints/F0003.md) | boot-2 | `deny` | bedrock error: H7 supply config written blind: an old ROM bootloader (before V9.3) locks PWR_CR3 until a power cycle; read it back, use what it holds, count a mismatch | embedded |
@@ -561,6 +562,16 @@ reason = "a pin the PCB does not connect as described is firmware driving the wr
 [lints.brd-7]
 level = "warn"
 reason = "a connected pin the description leaves out is a fact missing, not a fault: the description grows to cover it"
+
+# The assertion policy: what a broken invariant may do depends on the module's task class ([embedded.classes]).
+
+[lints.panic-in-library]
+level = "deny"
+reason = "a service module (LED, log, telemetry) never reaches the panic handler in release: the whole MCU resets for it"
+classes = ["service"]
+methods = ["unwrap", "expect"]
+macros = ["panic", "todo", "unimplemented", "unreachable", "assert", "assert_eq", "assert_ne"]
+bare-macros = []
 
 [clippy.lints]
 undocumented_unsafe_blocks = { level = "deny", reason = "firmware is full of unsafe; every block says in a SAFETY: comment why it is sound" }
