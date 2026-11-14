@@ -352,3 +352,30 @@ fn board_table() {
         "{m:?}"
     );
 }
+
+#[test]
+fn embedded_classes() {
+    let e = load("extends = \"small\"\n").unwrap().embedded;
+    assert!(e.classes.is_empty());
+    let e = load(
+        "extends = \"small\"\n[embedded.classes]\nboot = \"src/main.rs\"\nservice = [\"src/led.rs\"]\n",
+    )
+    .unwrap()
+    .embedded;
+    // table order, not file order
+    assert_eq!(
+        e.classes.globs,
+        [
+            (sl_core::TaskClass::Service, vec!["src/led.rs".to_owned()]),
+            (sl_core::TaskClass::Boot, vec!["src/main.rs".to_owned()]),
+        ]
+    );
+    let m = messages(load(
+        "extends = \"small\"\n[embedded.classes]\ncritical = [\"src/a.rs\"]\n",
+    ));
+    assert!(
+        m.iter()
+            .any(|s| s.contains(":3: unknown key embedded.classes.critical")),
+        "{m:?}"
+    );
+}

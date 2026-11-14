@@ -6,13 +6,16 @@
 //! - [`Diagnostic`], [`Span`], [`Metric`], [`Fix`]: what a lint reports.
 //! - [`Date`], [`Expiry`]: expiries of overrides and waivers.
 //! - [`glob`]: the path patterns of scoped exceptions.
+//! - [`TaskClass`], [`Classes`]: the task classes of firmware modules.
 
+pub mod class;
 pub mod date;
 pub mod diagnostic;
 pub mod glob;
 pub mod meta;
 pub mod params;
 
+pub use class::{Classes, TaskClass};
 pub use date::{Date, Expiry, Version};
 pub use diagnostic::{Confidence, Diagnostic, Edit, Fix, Metric, Span};
 pub use meta::{CODE_GROUPS, FixKind, Level, LintMeta, Need, Source, ToolUse, valid_code};

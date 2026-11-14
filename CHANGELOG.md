@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `[embedded.classes]` table: task classes `control`, `service`, `protocol`, `boot` per module glob (CODE-10).
+
 ## [0.2.8] - 2026-11-14
 
 ### Added

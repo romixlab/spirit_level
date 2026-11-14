@@ -31,6 +31,9 @@
 //!
 //! [board]                             # board descriptions and their chip data (see [`board`])
 //! chip-data = "boards/chips"
+//!
+//! [embedded.classes]                  # task classes of firmware modules (see [`embedded`])
+//! service = ["src/led.rs"]
 //! ```
 
 pub mod board;
@@ -38,6 +41,7 @@ pub mod cli;
 pub mod clippy;
 pub mod dependents;
 pub mod docs;
+pub mod embedded;
 mod error;
 pub mod map;
 mod reader;
@@ -47,6 +51,7 @@ pub use cli::CliProbe;
 pub use clippy::{ClippyConfig, ClippyLint, ClippySet};
 pub use dependents::Dependents;
 pub use docs::Docs;
+pub use embedded::Embedded;
 pub use error::ConfigError;
 pub use map::{External, Layer, Map, MapCrate};
 
@@ -143,6 +148,8 @@ pub struct Config {
     pub cli: CliProbe,
     /// The board descriptions and their chip data: the `[board]` table, or its defaults
     pub board: Board,
+    /// The `[embedded]` table: task classes of firmware modules
+    pub embedded: Embedded,
 }
 
 /// What a resolution needs to know besides the files
@@ -255,6 +262,7 @@ struct Resolver<'a> {
     docs: Docs,
     cli: CliProbe,
     board: Board,
+    embedded: Embedded,
     extends: Vec<String>,
     stack: Vec<String>,
     /// The depth at which an extended name is a top-level one (1 under a project file, 0 for bare tiers)
@@ -291,6 +299,7 @@ impl<'a> Resolver<'a> {
             docs: Docs::default(),
             cli: CliProbe::default(),
             board: Board::default(),
+            embedded: Embedded::default(),
             extends: Vec::new(),
             stack: Vec::new(),
             record_at: 1,
@@ -313,6 +322,7 @@ impl<'a> Resolver<'a> {
             docs: self.docs,
             cli: self.cli,
             board: self.board,
+            embedded: self.embedded,
         })
     }
 
@@ -441,6 +451,9 @@ impl<'a> Resolver<'a> {
             }
             if let Some(b) = r.table("board", &mut errs) {
                 self.board = Board::read(b, &mut errs);
+            }
+            if let Some(e) = r.table("embedded", &mut errs) {
+                self.embedded = Embedded::read(e, &mut errs);
             }
             if let Some(mf) = r.opt_str("map-file", &mut errs) {
                 if self.map.is_some() {
