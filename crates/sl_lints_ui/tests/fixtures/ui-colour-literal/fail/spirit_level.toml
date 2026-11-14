@@ -1,0 +1,7 @@
+[lints.ui-colour-literal]
+level = "deny"
+reason = "fixture"
+constructors = ["Color32::from_*"]
+consts = ["Color32::*"]
+allowed = ["Color32::TRANSPARENT"]
+macros = ["hex_color"]

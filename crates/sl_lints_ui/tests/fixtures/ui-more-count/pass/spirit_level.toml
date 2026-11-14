@@ -1,0 +1,4 @@
+[lints.ui-more-count]
+level = "deny"
+reason = "fixture"
+fold-calls = ["ve_basics::fold_rest"]

@@ -1,0 +1,4 @@
+[lints.ui-debug-text]
+level = "deny"
+reason = "fixture"
+calls = ["label", "button", "RichText::new"]

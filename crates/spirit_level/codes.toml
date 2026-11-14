@@ -2,7 +2,7 @@
 # retired lint keeps its row with status = "retired", so its code stays reserved. `spl codes --check` (in
 # `just lint`) holds the lints and this file to each other, and to main's copy.
 #
-# Groups: M manifest, S size, T state, G graph, C code, P prose, A ai, F firmware, X external tool adapters, D docs.
+# Groups: M manifest, S size, T state, G graph, C code, P prose, A ai, F firmware, U ui, X external tool adapters, D docs.
 # A new lint takes the next free number of its group.
 
 M0001 = { id = "default-features-off", group = "manifest", status = "active" }
@@ -213,6 +213,19 @@ F0095 = { id = "stk-5", group = "firmware", status = "active" }
 F0096 = { id = "stk-6", group = "firmware", status = "active" }
 F0097 = { id = "usb-1", group = "firmware", status = "active" }
 F0098 = { id = "usb-3", group = "firmware", status = "active" }
+U0001 = { id = "ui-raw-spawn", group = "ui", status = "active" }
+U0002 = { id = "ui-blocking-call", group = "ui", status = "active" }
+U0003 = { id = "ui-colour-literal", group = "ui", status = "active" }
+U0004 = { id = "ui-size-literal", group = "ui", status = "active" }
+U0005 = { id = "ui-disabled-without-reason", group = "ui", status = "active" }
+U0006 = { id = "ui-destructive-unconfirmed", group = "ui", status = "active" }
+U0007 = { id = "ui-more-count", group = "ui", status = "active" }
+U0008 = { id = "ui-label-punctuation", group = "ui", status = "active" }
+U0009 = { id = "ui-debug-text", group = "ui", status = "active" }
+U0010 = { id = "egui-shared-theme", group = "ui", status = "active" }
+U0011 = { id = "egui-status-glyph", group = "ui", status = "active" }
+U0012 = { id = "egui-id-in-loop", group = "ui", status = "active" }
+U0013 = { id = "egui-repaint-every-frame", group = "ui", status = "active" }
 X0001 = { id = "audit-unmaintained", group = "external", status = "active" }
 X0002 = { id = "audit-unsound", group = "external", status = "active" }
 X0003 = { id = "audit-vulnerabilities", group = "external", status = "active" }

@@ -112,6 +112,7 @@ sl_lints_dead = { layer = "lints" }
 sl_lints_docs = { layer = "lints" }
 sl_lints_errors = { layer = "lints" }
 sl_lints_surface = { layer = "lints" }
+sl_lints_ui = { layer = "lints" }
 sl_tool_clippy = { layer = "lints" }
 sl_tool_deny = { layer = "lints" }
 sl_tool_machete = { layer = "lints" }

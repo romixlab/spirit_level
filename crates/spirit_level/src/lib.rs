@@ -33,6 +33,8 @@ pub static TIERS: &[(&str, &str)] = &[
     ("big", include_str!("../../../tiers/big.toml")),
     ("ai", include_str!("../../../tiers/ai.toml")),
     ("embedded", include_str!("../../../tiers/embedded.toml")),
+    ("ui", include_str!("../../../tiers/ui.toml")),
+    ("egui", include_str!("../../../tiers/egui.toml")),
 ];
 
 /// The text of a shipped tier
@@ -78,6 +80,7 @@ pub fn analyses() -> Vec<&'static dyn Analysis> {
         &sl_tool_shear::SHEAR,
         &sl_tool_semver::SEMVER,
         &sl_lints_embedded::EMBEDDED,
+        &sl_lints_ui::UI,
     ]
 }
 

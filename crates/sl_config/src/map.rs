@@ -66,6 +66,11 @@ pub struct MapCrate {
     /// Whether its binaries are command-line tools the `cli` lints probe; None: a crate with a binary target that
     /// depends on clap is one
     pub cli: Option<bool>,
+    /// A user interface crate: the UI lints hold it to the UI practices. None: decided by its dependencies (a UI
+    /// toolkit makes it one)
+    pub ui: Option<bool>,
+    /// The theme crate: the one place where colours and sizes are written as values
+    pub theme: bool,
     /// The line of its entry
     pub line: u32,
 }
@@ -150,6 +155,8 @@ impl Map {
                     deterministic: c.opt_bool("deterministic", errs).unwrap_or(false),
                     contract: c.opt_bool("contract", errs).unwrap_or(false),
                     cli: c.opt_bool("cli", errs),
+                    ui: c.opt_bool("ui", errs),
+                    theme: c.opt_bool("theme", errs).unwrap_or(false),
                     line,
                 };
                 c.finish(errs);

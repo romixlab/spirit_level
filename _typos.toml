@@ -24,3 +24,5 @@ hsi = "hsi"
 iin = "iin"
 synopsys = "synopsys"
 pn = "pn"
+# relm4, a GTK toolkit, among the UI lints' toolkits
+relm = "relm"

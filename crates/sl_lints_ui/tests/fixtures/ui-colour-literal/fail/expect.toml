@@ -1,0 +1,12 @@
+[[finding]]
+at = "src/lib.rs:4:13"
+
+[[finding]]
+at = "src/lib.rs:5:13"
+
+[[finding]]
+at = "src/lib.rs:6:13"
+
+[[finding]]
+at = "src/lib.rs:7:13"
+

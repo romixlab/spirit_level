@@ -1,0 +1,5 @@
+[lints.ui-disabled-without-reason]
+level = "deny"
+reason = "fixture"
+disable-calls = ["add_enabled", "add_enabled_ui", "disable"]
+reason-calls = ["on_disabled_hover_text"]

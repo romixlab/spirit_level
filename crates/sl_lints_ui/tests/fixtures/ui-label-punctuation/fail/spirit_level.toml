@@ -1,0 +1,5 @@
+[lints.ui-label-punctuation]
+level = "deny"
+reason = "fixture"
+calls = ["label", "button"]
+button-calls = ["button"]

@@ -1,0 +1,4 @@
+[lints.ui-destructive-unconfirmed]
+level = "deny"
+reason = "fixture"
+calls = ["button", "Button::new"]

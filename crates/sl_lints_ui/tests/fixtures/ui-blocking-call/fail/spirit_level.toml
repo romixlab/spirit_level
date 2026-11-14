@@ -1,0 +1,4 @@
+[lints.ui-blocking-call]
+level = "deny"
+reason = "fixture"
+ui-types = ["Ui"]

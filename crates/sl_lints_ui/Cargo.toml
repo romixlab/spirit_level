@@ -1,0 +1,22 @@
+[package]
+name = "sl_lints_ui"
+description = "spirit_level UI lints: theme colours and sizes, disabled controls with a reason, confirmed destructive actions, no blocking or raw spawns in UI code, wording, egui ids and repaints"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+proc-macro2.workspace = true
+sl_analysis.workspace = true
+sl_core.workspace = true
+sl_model.workspace = true
+syn.workspace = true
+
+[dev-dependencies]
+sl_testkit.workspace = true
+
+[lints]
+workspace = true

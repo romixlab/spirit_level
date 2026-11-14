@@ -1,0 +1,5 @@
+[lints.ui-size-literal]
+level = "deny"
+reason = "fixture"
+calls = ["add_space", "size", "spacing", "Margin::same"]
+fields = ["item_spacing", "button_padding"]

@@ -1,0 +1,24 @@
+[[finding]]
+at = "src/lib.rs:2:18"
+
+[[finding]]
+at = "src/lib.rs:3:39"
+
+[[finding]]
+at = "src/lib.rs:4:50"
+
+[[finding]]
+at = "src/lib.rs:4:55"
+
+[[finding]]
+at = "src/lib.rs:5:43"
+
+[[finding]]
+at = "src/lib.rs:6:32"
+
+[[finding]]
+at = "src/lib.rs:7:35"
+
+[[finding]]
+at = "src/lib.rs:7:41"
+

@@ -1,0 +1,4 @@
+[lints.ui-raw-spawn]
+level = "deny"
+reason = "fixture"
+ui-types = ["Ui"]

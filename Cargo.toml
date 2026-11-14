@@ -72,6 +72,7 @@ sl_lints_errors = { path = "crates/sl_lints_errors" }
 sl_lints_graph = { path = "crates/sl_lints_graph" }
 sl_lints_manifest = { path = "crates/sl_lints_manifest" }
 sl_lints_prose = { path = "crates/sl_lints_prose" }
+sl_lints_ui = { path = "crates/sl_lints_ui" }
 sl_lints_modules = { path = "crates/sl_lints_modules" }
 sl_lints_size = { path = "crates/sl_lints_size" }
 sl_lints_state = { path = "crates/sl_lints_state" }

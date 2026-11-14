@@ -151,6 +151,7 @@ pub const CODE_GROUPS: &[(char, &str)] = &[
     ('P', "prose"),
     ('A', "ai"),
     ('F', "firmware"),
+    ('U', "ui"),
     ('X', "external"),
     ('D', "docs"),
 ];

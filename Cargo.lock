@@ -1238,6 +1238,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "sl_lints_ui"
+version = "0.2.3"
+dependencies = [
+ "proc-macro2",
+ "sl_analysis",
+ "sl_core",
+ "sl_model",
+ "sl_testkit",
+ "syn 3.0.10",
+]
+
+[[package]]
 name = "sl_model"
 version = "0.2.6"
 dependencies = [
@@ -1454,6 +1466,7 @@ dependencies = [
  "sl_lints_size",
  "sl_lints_state",
  "sl_lints_surface",
+ "sl_lints_ui",
  "sl_model",
  "sl_tool_audit",
  "sl_tool_cargo",
