@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-14
+
 ### Added
 
 - `--color auto|always|never`; colour, error line, exit codes and completion from vhrd_cli (CLI-4).
