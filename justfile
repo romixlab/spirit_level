@@ -12,11 +12,10 @@ test-all:
     cargo nextest run --workspace --no-fail-fast
     cargo test --workspace --doc -q
 
-# Format, clippy, spl on itself at the big tier (after installing the tools it needs), the lint codes, book freshness
+# Format, clippy, spl on itself at the big tier (`just tools` installs the tools it needs), the lint codes, book freshness
 lint:
     cargo fmt --check
     cargo clippy --workspace --all-targets --all-features -- -D warnings
-    cargo run -q -p spirit_level_cli -- tools install --needed
     cargo run -q -p spirit_level_cli -- check
     cargo run -q -p spirit_level_cli -- codes --check --base main
     cargo run -q -p spirit_level_cli -- book docs --check
@@ -28,9 +27,11 @@ panic-fixture:
     cp target/panic-fixture/thumbv7em-none-eabihf/release/panic_sites crates/sl_lints_embedded/tests/projects/panic_sites/firmware.elf
     cp target/panic-fixture/thumbv7em-none-eabihf/release/panic_sites crates/sl_lints_embedded/tests/projects/panic_sites_service/firmware.elf
 
-# Install every pinned external tool into the tool cache
+# Install the external tools spl on itself needs that are missing or outside their tested range, with cargo-binstall
+# (cargo-udeps, off here, also needs a nightly toolchain); then list them all
 tools:
-    cargo run -q -p spirit_level_cli -- tools install
+    cargo run -q -p spirit_level_cli -- tools needed --spec --missing | xargs -r cargo binstall -y
+    cargo run -q -p spirit_level_cli -- tools needed
 
 # Regenerate the book's generated pages (lints, tiers, nav)
 book:

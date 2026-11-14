@@ -1,6 +1,6 @@
 [package]
 name = "sl_tools"
-description = "External tools for spirit_level's adapters: the pinned versions, the build cache, finding and running a tool, cargo's JSON messages"
+description = "External tools for spirit_level's adapters: the tested versions, finding a tool on PATH and reading its version, running it, cargo's JSON messages"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -10,7 +10,7 @@ publish = false
 
 [dependencies]
 serde_json.workspace = true
-sha2.workspace = true
+semver.workspace = true
 sl_core.workspace = true
 sl_model.workspace = true
 toml_edit.workspace = true

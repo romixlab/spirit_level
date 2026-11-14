@@ -96,7 +96,7 @@ impl Runner<'_, '_> {
             Err(e) => return Run::NotRun("run:cargo".into(), format!("cannot run cargo: {e}")),
         };
         if let Some(t) = toolchain
-            && is_missing_toolchain(&out.stderr)
+            && sl_tools::rustup::is_missing_toolchain(&out.stderr)
         {
             return Run::NotRun(
                 format!("toolchain:{t}"),
@@ -227,32 +227,10 @@ impl Runner<'_, '_> {
         }
     }
 
-    /// Why the toolchain `version` cannot be selected: not installed, or no rustup (a distribution's cargo
-    /// ignores `RUSTUP_TOOLCHAIN` and would build with itself, so the check would pass on the wrong compiler)
+    /// Why the toolchain `version` cannot be selected: need and reason
     fn wrong_toolchain(&self, version: &str) -> Option<(String, String)> {
-        let env = [("RUSTUP_TOOLCHAIN", version), ("RUSTUP_AUTO_INSTALL", "0")];
-        let out = sl_tools::run(
-            std::path::Path::new("rustc"),
-            &["-V"],
-            &self.cx.project.root,
-            &env,
-        )
-        .ok()?;
-        if is_missing_toolchain(&out.stderr) {
-            return Some((
-                format!("toolchain:{version}"),
-                format!(
-                    "the toolchain {version} is not installed: `rustup toolchain install {version} --profile minimal`"
-                ),
-            ));
-        }
-        let got = out.stdout.trim();
-        (!got.starts_with(&format!("rustc {version}"))).then(|| {
-            (
-                format!("toolchain:{version}"),
-                format!("asked for rust {version}, got `{got}`: the MSRV build needs rustup to select the toolchain"),
-            )
-        })
+        sl_tools::rustup::toolchain_missing(version, &self.cx.project.root)
+            .map(|reason| (format!("toolchain:{version}"), reason))
     }
 
     fn marked(&self, pick: fn(&sl_config::MapCrate) -> bool) -> Vec<&Package> {
@@ -279,23 +257,12 @@ impl Runner<'_, '_> {
         )
     }
 
-    fn installed_targets(&self) -> Option<Vec<String>> {
-        let out = sl_tools::run(
-            std::path::Path::new("rustup"),
-            &["target", "list", "--installed"],
-            &self.cx.project.root,
-            &[],
-        )
-        .ok()?;
-        (out.code == Some(0)).then(|| out.stdout.lines().map(|l| l.trim().to_owned()).collect())
-    }
-
     fn cross(&self, lint: &str, crates: &[&Package], targets: &[String], extra: &[String]) {
         if crates.is_empty() {
             return;
         }
         // without rustup (a distribution's toolchain) cargo says itself when a target is missing
-        let installed = self.installed_targets();
+        let installed = sl_tools::rustup::installed_targets(&self.cx.project.root);
         for t in targets {
             if let Some(i) = &installed
                 && !i.contains(t)
@@ -369,14 +336,6 @@ impl Runner<'_, '_> {
 }
 
 /// Whether rustup refused because the toolchain is not installed
-fn is_missing_toolchain(stderr: &str) -> bool {
-    stderr.lines().any(|l| {
-        let l = l.to_lowercase();
-        (l.contains("toolchain") && l.contains("is not installed"))
-            || l.contains("no such toolchain")
-    })
-}
-
 /// The `error:` lines cargo wrote to stderr (outside the JSON messages), with what follows each on the same
 /// topic, in one line
 fn cargo_errors(stderr: &str) -> Option<String> {
@@ -404,10 +363,12 @@ mod tests {
 
     #[test]
     fn toolchain_missing() {
-        assert!(is_missing_toolchain(include_str!(
+        assert!(sl_tools::rustup::is_missing_toolchain(include_str!(
             "../tests/samples/msrv-missing.txt"
         )));
-        assert!(!is_missing_toolchain("error: could not compile `x`"));
+        assert!(!sl_tools::rustup::is_missing_toolchain(
+            "error: could not compile `x`"
+        ));
     }
 
     #[test]

@@ -1,10 +1,13 @@
-# The external tools spirit_level's adapters run, at the versions their output parsers are tested against.
-# `spl tools install [TOOL]` installs these into the tool cache; a tool found on PATH instead may be another
-# version. Keys:
-#   crate, version     a crates.io crate built with `cargo install --locked --version`
-#   features           cargo features to build it with; default-features = false drops the crate's defaults
+# The external tools spirit_level's adapters run, and the versions their output parsers are tested against.
+# spl finds each on PATH and reads its version; `spl tools needed` lists what a project needs and how to install it.
+# Keys:
+#   crate, version     a crates.io crate; version is the exact one to install (`spl tools needed --spec`)
 #   component          a rustup component instead (`rustup component add`), versioned with the toolchain
+#   tested             the semver range of versions whose output is tested; required for a crate, optional for a
+#                      component (omitted: any version its toolchain brings)
 #   exe                the executable the adapters start
+#   version-args       the arguments that print its version (default ["--version"]); the version is the first
+#                      word of the output shaped like one (`0.20.2`, `1.10.0-stable`), its pre-release part dropped
 #   nightly            the tool runs on a nightly toolchain
 
 [clippy]
@@ -18,42 +21,49 @@ exe = "cargo-fmt"
 [cargo-deny]
 crate = "cargo-deny"
 version = "0.20.2"
+tested = ">=0.20, <0.21"
 exe = "cargo-deny"
 
 [cargo-machete]
 crate = "cargo-machete"
 version = "0.9.2"
+tested = ">=0.9, <0.10"
 exe = "cargo-machete"
 
 [cargo-shear]
 crate = "cargo-shear"
 version = "1.14.1"
+tested = ">=1.14, <1.15"
 exe = "cargo-shear"
 
 [typos]
 crate = "typos-cli"
 version = "1.52.2"
+tested = ">=1.52, <1.53"
 exe = "typos"
 
 [taplo]
 crate = "taplo-cli"
 version = "0.10.0"
-default-features = false
+tested = ">=0.10, <0.11"
 exe = "taplo"
 
 [cargo-semver-checks]
 crate = "cargo-semver-checks"
 version = "0.51.0"
+tested = ">=0.51, <0.52"
 exe = "cargo-semver-checks"
 
 [cargo-udeps]
 crate = "cargo-udeps"
 version = "0.1.61"
+tested = ">=0.1.61, <0.2"
 exe = "cargo-udeps"
+version-args = ["udeps", "--version"]
 nightly = true
 
 [cargo-audit]
 crate = "cargo-audit"
 version = "0.23.0"
-default-features = false
+tested = ">=0.23, <0.24"
 exe = "cargo-audit"

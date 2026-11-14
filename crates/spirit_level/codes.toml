@@ -278,6 +278,7 @@ X0030 = { id = "shear-unused-deps", group = "external", status = "active" }
 X0031 = { id = "taplo-fmt", group = "external", status = "active" }
 X0032 = { id = "typos-misspelling", group = "external", status = "active" }
 X0033 = { id = "udeps-unused-deps", group = "external", status = "active" }
+X0034 = { id = "tool-version", group = "external", status = "active" }
 D0001 = { id = "prose-run-words", group = "docs", status = "active" }
 D0002 = { id = "page-reading-time", group = "docs", status = "active" }
 D0003 = { id = "heading-words", group = "docs", status = "active" }

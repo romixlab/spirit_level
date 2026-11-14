@@ -1,8 +1,8 @@
 //! External tools for `spirit_level`'s adapters.
 //!
-//! - [`pins`]: every tool's pinned version, from `tools.toml` shipped in this crate.
-//! - [`Cache`]: builds of the pinned versions, keyed on crate, version, features and `rustc -vV`.
-//! - [`find`]: a tool's executable, the cache first, then PATH.
+//! - [`pins`]: every tool, from `tools.toml` shipped in this crate: how to install it, its tested versions.
+//! - [`find`]: a tool's executable on PATH; [`detect`] also reads its version against the tested range.
+//! - [`rustup`]: whether a toolchain or target is installed.
 //! - [`run`]: a tool started in the project with the outer cargo's environment removed.
 //! - [`cargo_json`]: compiler messages of `cargo ... --message-format json`.
 //!
@@ -12,33 +12,25 @@
 //! println!("exit {:?}, {} bytes of diagnostics", out.code, out.stderr.len());
 //! ```
 
-pub mod cache;
 pub mod cargo_json;
+mod detect;
 mod pins;
 pub mod rustup;
 
-pub use cache::{Cache, InstallError};
+pub use detect::{Detection, State, detect};
 pub use pins::{Pin, PinKind, pin, pins};
 
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 
-/// The executable of a tool: its pinned build in the tool cache first, then PATH.
+/// The executable of a tool on PATH (or on `path`, which replaces the process's PATH when given).
 ///
-/// `path` replaces the process's PATH when given. `name` is a tool of [`pins`] (`cargo-deny`, `clippy`) or any
-/// executable (`cargo`).
+/// `name` is a tool of [`pins`] (`cargo-deny`, `clippy`) or any executable (`cargo`).
 pub fn find(name: &str, path: Option<&OsStr>) -> Option<PathBuf> {
-    let exe = pin(name).map_or(name, |p| p.exe.as_str());
-    if let Some(p) = pin(name)
-        && let Some(found) = Cache::from_env().find(p)
-    {
-        return Some(found);
-    }
-    on_path(exe, path)
+    on_path(pin(name).map_or(name, |p| p.exe.as_str()), path)
 }
 
-/// An executable on PATH (or on `path`)
-pub fn on_path(exe: &str, path: Option<&OsStr>) -> Option<PathBuf> {
+fn on_path(exe: &str, path: Option<&OsStr>) -> Option<PathBuf> {
     let path = path
         .map(ToOwned::to_owned)
         .or_else(|| std::env::var_os("PATH"))?;
@@ -95,8 +87,8 @@ pub fn run(exe: &Path, args: &[&str], dir: &Path, env: &[(&str, &str)]) -> std::
 
 /// Runs a cargo subcommand the way a person does: `cargo <args>`.
 ///
-/// `args[0]` is the subcommand (`deny`). The directory of its executable `exe` (`.../cargo-deny`, maybe in the tool
-/// cache) comes first on PATH, so cargo finds that build; a subcommand started directly would not know it runs under
+/// `args[0]` is the subcommand (`deny`). The directory of its executable `exe` (`.../cargo-deny`, as [`find`] gave
+/// it) comes first on PATH, so cargo starts that one; a subcommand started directly would not know it runs under
 /// cargo.
 pub fn run_subcommand(
     exe: &Path,
@@ -147,32 +139,12 @@ pub fn run_with_input(
     })
 }
 
-/// `rustc -vV` of the toolchain a tool is built with (the default one, outside any project), read once
-pub fn rustc_vv() -> Option<&'static str> {
-    static VV: std::sync::OnceLock<Option<String>> = std::sync::OnceLock::new();
-    VV.get_or_init(|| {
-        let dir = std::env::temp_dir();
-        let out = sl_model::command("rustc", &dir).arg("-vV").output().ok()?;
-        out.status
-            .success()
-            .then(|| String::from_utf8_lossy(&out.stdout).into_owned())
-    })
-    .as_deref()
-}
-
-/// The `need` and `reason` of a lint whose tool is missing: how to install it
+/// Why a lint whose tool is not on PATH cannot run, and how to install the tool
 pub fn missing_reason(name: &str) -> String {
-    match pin(name).map(|p| &p.kind) {
-        Some(PinKind::Component(c)) => {
-            format!(
-                "{name} is not installed: `rustup component add {c}` (or `spl tools install {name}`)"
-            )
-        }
-        Some(PinKind::Crate { .. }) => {
-            format!("{name} is not installed: `spl tools install {name}` builds the pinned version")
-        }
-        None => format!("{name} is not on PATH"),
-    }
+    pin(name).map_or_else(
+        || format!("{name} is not on PATH"),
+        |p| format!("{name} is not installed: {}", p.install_help()),
+    )
 }
 
 /// The line of a package's `[[package]]` entry in the project's `Cargo.lock` (0 when it is not there): where a

@@ -15,7 +15,7 @@ use sl_config::{Config, ConfigError, Env};
 use sl_core::{Date, LintMeta, Need};
 use sl_engine::{Report, RunOptions};
 use sl_model::Project;
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
 use std::path::{Path, PathBuf};
 
@@ -185,26 +185,41 @@ pub fn config(project: &Project, opts: &Options) -> Result<Config, CheckError> {
 /// What the lints a configuration enables need installed
 #[derive(Debug, Default, PartialEq, Eq)]
 pub struct ToolNeeds {
-    /// Pinned tools (`spl tools list` names them)
-    pub tools: BTreeSet<String>,
+    /// Tools of `tools.toml`, each with the enabled lints that run it
+    pub tools: BTreeMap<&'static str, Vec<&'static str>>,
     /// Toolchains: the members' rust-versions, for `cargo-msrv`
     pub toolchains: BTreeSet<String>,
     /// Targets of the project's toolchain, for `cargo-no-std` and `cargo-wasm` when the map marks crates
     pub targets: BTreeSet<String>,
 }
 
-/// The tools, toolchains and targets the enabled lints of `config` need on `project`
-pub fn tool_needs(project: &Project, config: &Config) -> ToolNeeds {
-    let mut n = ToolNeeds::default();
-    for m in lints().into_iter().filter(|m| config.enabled(m.id)) {
+/// Every tool of `tools.toml` with the lints that run it, enabled or not
+pub fn tool_lints() -> BTreeMap<&'static str, Vec<&'static str>> {
+    lints_by_tool(lints().into_iter())
+}
+
+fn lints_by_tool(
+    lints: impl Iterator<Item = &'static LintMeta>,
+) -> BTreeMap<&'static str, Vec<&'static str>> {
+    let mut by: BTreeMap<&'static str, Vec<&'static str>> = BTreeMap::new();
+    for m in lints {
         for need in m.needs {
             if let Need::Tool(t) = need
                 && sl_tools::pin(t).is_some()
             {
-                n.tools.insert((*t).to_owned());
+                by.entry(t).or_default().push(m.id);
             }
         }
     }
+    by
+}
+
+/// The tools, toolchains and targets the enabled lints of `config` need on `project`
+pub fn tool_needs(project: &Project, config: &Config) -> ToolNeeds {
+    let mut n = ToolNeeds {
+        tools: lints_by_tool(lints().into_iter().filter(|m| config.enabled(m.id))),
+        ..ToolNeeds::default()
+    };
     if config.enabled("cargo-msrv") {
         n.toolchains.extend(
             project
@@ -293,10 +308,15 @@ mod tests {
             "taplo",
             "cargo-semver-checks",
         ] {
-            assert!(n.tools.contains(t), "{t} in {:?}", n.tools);
+            assert!(n.tools.contains_key(t), "{t} in {:?}", n.tools);
         }
+        assert_eq!(n.tools["cargo-machete"], ["machete-unused-deps"]);
         // off at big
-        assert!(!n.tools.contains("cargo-udeps"));
+        assert!(!n.tools.contains_key("cargo-udeps"));
+        // every tool has a lint that runs it
+        let all = tool_lints();
+        assert_eq!(all.len(), sl_tools::pins().len());
+        assert!(all["cargo-udeps"].contains(&"udeps-unused-deps"));
         assert_eq!(n.toolchains, BTreeSet::from(["1.85.0".to_owned()]));
         // no_std is marked, wasm is not
         assert_eq!(

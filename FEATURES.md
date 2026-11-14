@@ -108,7 +108,8 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 
 ## TOOL - external tools
 
-- ✅ `TOOL-1` Adapters for clippy, cargo-deny, machete, shear, typos, taplo, semver-checks, hakari and geiger (linked), udeps, rustfmt, cargo-audit; cargo checks (MSRV, no_std, wasm, doc); tool cache keyed on crate, version and rustc ([tools](docs/tools.md)).
+- ✅ `TOOL-1` Adapters for clippy, cargo-deny, machete, shear, typos, taplo, semver-checks, hakari and geiger (linked), udeps, rustfmt, cargo-audit; cargo checks (MSRV, no_std, wasm, doc) ([tools](docs/tools.md)).
+- ✅ `TOOL-2` `tools-needed`: tools found on PATH with their version checked against a tested range (`tool-version`); `spl tools needed` lists what a project needs, as a table, `crate@version` specs or JSON ([tools](docs/tools.md#installing-the-tools)).
 
 ## BOOK - the book
 

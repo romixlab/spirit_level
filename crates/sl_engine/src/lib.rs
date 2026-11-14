@@ -9,7 +9,7 @@ use sl_analysis::{Analysis, Context};
 use sl_config::Config;
 use sl_core::{Date, Diagnostic, FixKind, Level, LintMeta, Need, Source, Span};
 use sl_model::Project;
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 use std::time::Instant;
 
 /// `waiver-invalid`: built into the engine
@@ -38,8 +38,21 @@ pub static WAIVER_UNUSED: LintMeta = LintMeta {
     source: Source::Native,
 };
 
+/// `tool-version`: built into the engine, which finds the tools
+pub static TOOL_VERSION: LintMeta = LintMeta {
+    code: "X0034",
+    id: "tool-version",
+    category: "tools",
+    summary: "every external tool an enabled lint runs is a version its output is tested against",
+    docs: include_str!("../docs/tool-version.md"),
+    params: &[],
+    needs: &[],
+    fix: FixKind::None,
+    source: Source::Native,
+};
+
 /// The lints of the engine itself
-pub static ENGINE_LINTS: &[&LintMeta] = &[&WAIVER_INVALID, &WAIVER_UNUSED];
+pub static ENGINE_LINTS: &[&LintMeta] = &[&WAIVER_INVALID, &WAIVER_UNUSED, &TOOL_VERSION];
 
 /// What to run
 #[derive(Clone, Debug)]
@@ -48,7 +61,7 @@ pub struct RunOptions {
     pub only: Vec<String>,
     /// Today
     pub today: Date,
-    /// Whether a tool on PATH counts as present (tests set a fake PATH through this)
+    /// The PATH tools are found on instead of the process's (tests set a fake PATH through this)
     pub path: Option<std::ffi::OsString>,
     /// Linked ELFs of the project's firmware (`--elf`), for the lints that need [`Need::Elf`]
     pub elf: Vec<std::path::PathBuf>,
@@ -135,14 +148,42 @@ pub fn all_lints(analyses: &[&dyn Analysis]) -> Vec<&'static LintMeta> {
     v
 }
 
+/// The findings of `waiver-unused`: each waiver that allowed nothing, when every lint it names ran
+fn unused_waivers(
+    waivers: &[waiver::Waiver],
+    used: &[bool],
+    ran: &BTreeSet<String>,
+) -> Vec<Diagnostic> {
+    waivers
+        .iter()
+        .zip(used)
+        // a waiver of a lint that did not run this time is not unused
+        .filter(|(w, u)| !**u && w.lints.iter().all(|l| ran.contains(l)))
+        .map(|(w, _)| {
+            Diagnostic::new(
+                "waiver-unused",
+                format!("{}:{}", w.file, w.line),
+                format!(
+                    "the waiver of {} allows nothing: remove it",
+                    w.lints.join(", ")
+                ),
+            )
+            .span(Span::new(w.file.clone(), w.line))
+        })
+        .collect()
+}
+
+/// The tools of `pins` found on PATH, each detected once per run
+type Tools = BTreeMap<&'static str, sl_tools::Detection>;
+
 /// Why a need is missing, or None when it is met
-pub fn missing(
+fn missing(
     need: Need,
     project: &Project,
     config: &Config,
     opts: &RunOptions,
+    tools: &Tools,
 ) -> Option<String> {
-    let path = opts.path.as_deref();
     match need {
         Need::Resolve => project.resolve().err().map(|e| {
             format!("the dependency graph could not be resolved (full cargo metadata): {e}")
@@ -151,10 +192,13 @@ pub fn missing(
             "no crate map: add [map] or map-file to spirit_level.toml (see the book's map page)"
                 .to_owned()
         }),
-        Need::Tool(t) => find_tool(t, path)
-            .is_none()
-            .then(|| sl_tools::missing_reason(t)),
-        Need::Nightly => (!has_nightly())
+        Need::Tool(t) => match tools.get(t) {
+            Some(d) => d.missing_reason(),
+            None => sl_tools::find(t, opts.path.as_deref())
+                .is_none()
+                .then(|| sl_tools::missing_reason(t)),
+        },
+        Need::Nightly => (!sl_tools::rustup::nightly_installed(&project.root))
             .then(|| "no nightly toolchain: `rustup toolchain install nightly`".to_owned()),
         Need::Elf => opts.elf.is_empty().then(|| {
             "no ELF given: build the firmware and pass --elf target/<triple>/release/<name>"
@@ -163,16 +207,59 @@ pub fn missing(
     }
 }
 
-/// A tool's executable: the tool cache's build of its pinned version, then PATH (or `path`)
-pub fn find_tool(name: &str, path: Option<&std::ffi::OsStr>) -> Option<std::path::PathBuf> {
-    sl_tools::find(name, path)
+/// Detects every tool of `pins` that a lint of `wanted` needs
+fn detect_tools<'m>(
+    wanted: impl Iterator<Item = &'m LintMeta>,
+    project: &Project,
+    opts: &RunOptions,
+) -> Tools {
+    let mut tools = Tools::new();
+    for m in wanted {
+        for need in m.needs {
+            if let Need::Tool(t) = need
+                && let Some(pin) = sl_tools::pin(t)
+                && !tools.contains_key(t)
+            {
+                tools.insert(
+                    t,
+                    sl_tools::detect(pin, opts.path.as_deref(), &project.root),
+                );
+            }
+        }
+    }
+    tools
 }
 
-fn has_nightly() -> bool {
-    std::process::Command::new("rustup")
-        .args(["run", "nightly", "rustc", "-V"])
-        .output()
-        .is_ok_and(|o| o.status.success())
+/// The findings of `tool-version`: each tool that ran outside its tested range or printed no version, with the
+/// lints whose results it makes untested
+fn untested_tools(tools: &Tools, ran: &[String], lints: &[&'static LintMeta]) -> Vec<Diagnostic> {
+    let mut out = Vec::new();
+    for (name, d) in tools {
+        let Some(why) = d.untested_reason() else {
+            continue;
+        };
+        let used: Vec<&str> = lints
+            .iter()
+            .filter(|m| ran.iter().any(|r| r == m.id) && m.needs.contains(&Need::Tool(name)))
+            .map(|m| m.id)
+            .collect();
+        if used.is_empty() {
+            continue;
+        }
+        out.push(
+            Diagnostic::new(
+                "tool-version",
+                format!("tool:{name}"),
+                format!("{why}: the results of {} are untested", used.join(", ")),
+            )
+            .span(Span::new("spirit_level.toml", 0))
+            .help(format!(
+                "{}; `spl tools needed` lists every tool",
+                d.pin.install_help()
+            )),
+        );
+    }
+    out
 }
 
 /// Sets each finding's level from the config and its scoped exceptions; an excepted finding keeps
@@ -209,6 +296,14 @@ pub fn run(
     let mut not_run = Vec::new();
     let mut ran = Vec::new();
     let mut timings = Vec::new();
+    let tools = detect_tools(
+        lints
+            .iter()
+            .copied()
+            .filter(|m| config.enabled(m.id) && selected(m)),
+        project,
+        opts,
+    );
     for a in analyses {
         let mut runnable = Vec::new();
         for m in a.lints() {
@@ -218,7 +313,7 @@ pub fn run(
             match m
                 .needs
                 .iter()
-                .find_map(|n| missing(*n, project, config, opts).map(|r| (n, r)))
+                .find_map(|n| missing(*n, project, config, opts, &tools).map(|r| (n, r)))
             {
                 Some((need, reason)) => not_run.push(NotRun {
                     lint: m.id.to_owned(),
@@ -298,22 +393,11 @@ pub fn run(
     }
     if config.enabled("waiver-unused") && selected(&WAIVER_UNUSED) {
         ran.push("waiver-unused".into());
-        for (w, u) in waivers.iter().zip(&used) {
-            // a waiver of a lint that did not run this time is not unused
-            if !u && w.lints.iter().all(|l| ran_set.contains(l)) {
-                engine.push(
-                    Diagnostic::new(
-                        "waiver-unused",
-                        format!("{}:{}", w.file, w.line),
-                        format!(
-                            "the waiver of {} allows nothing: remove it",
-                            w.lints.join(", ")
-                        ),
-                    )
-                    .span(Span::new(w.file.clone(), w.line)),
-                );
-            }
-        }
+        engine.extend(unused_waivers(&waivers, &used, &ran_set));
+    }
+    if config.enabled("tool-version") && selected(&TOOL_VERSION) {
+        ran.push("tool-version".into());
+        engine.extend(untested_tools(&tools, &ran, &lints));
     }
     for mut d in engine {
         let path = d.primary().map(|s| s.file.clone());

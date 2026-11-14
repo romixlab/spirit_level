@@ -1,132 +1,440 @@
-//! `spl tools`: where each pinned tool is found, and installing the pinned versions
+//! `spl tools needed`: the external tools, toolchains and targets a project's lints need, and how to install them
+#![expect(
+    clippy::let_underscore_must_use,
+    reason = "writing to a String cannot fail"
+)]
 
-use clap::Subcommand;
-use clap_complete::engine::{ArgValueCandidates, CompletionCandidate};
-use std::path::{Path, PathBuf};
+use clap::{ArgGroup, Args, Subcommand};
+use serde_json::{Value, json};
+use sl_tools::{Detection, PinKind, State};
+use std::fmt::Write;
+use std::path::PathBuf;
+use vc_ui::{Exit, Paint};
+
+const NEEDED_HELP: &str = "Examples:
+  spl tools needed
+  spl tools needed --all
+  spl tools needed --spec --missing | xargs -r cargo binstall -y
+  spl tools needed --spec --missing | xargs -r -n1 cargo install --locked
+  spl tools needed --components --missing | xargs -r rustup component add
+  spl tools needed --toolchains --missing | xargs -r -n1 rustup toolchain install --profile minimal
+  spl tools needed --targets --missing | xargs -r rustup target add
+  spl tools needed --json
+
+A tool is found on PATH and its version read. One outside its tested range still runs; `tool-version` reports
+its results as untested.
+
+Exit codes: 0 everything needed is there, 1 something needed is missing, 2 usage or configuration error";
 
 #[derive(Subcommand)]
 pub enum ToolsCmd {
-    /// Every pinned tool: its version and where it is found (the tool cache, PATH, or missing)
-    #[command(after_help = "Examples:\n  spl tools list")]
-    List,
-    /// Install the pinned version of a tool, or of every tool: crates are built into the tool cache, rustup
-    /// components are added to the project's toolchain
-    #[command(
-        after_help = "Examples:\n  spl tools install\n  spl tools install cargo-deny\n  spl tools install --needed\n\nExit codes: 0 installed, 1 an install failed, 2 usage error"
-    )]
-    Install {
-        /// The tool (`spl tools list` names them); none: every tool
-        #[arg(add = ArgValueCandidates::new(tool_candidates), conflicts_with = "needed")]
-        tool: Option<String>,
-        /// The project whose toolchain gets rustup components
-        #[arg(long, default_value = ".")]
-        path: PathBuf,
-        /// Only what the project's enabled lints need: their tools, the rust-version toolchains of `cargo-msrv`,
-        /// the targets of `cargo-no-std` and `cargo-wasm`
-        #[arg(long)]
-        needed: bool,
-    },
+    /// The external tools the project's enabled lints run, with their tested versions and what is found on PATH;
+    /// the toolchains and targets of `cargo-msrv`, `cargo-no-std` and `cargo-wasm`
+    #[command(after_help = NEEDED_HELP)]
+    Needed(NeededArgs),
 }
 
-fn tool_candidates() -> Vec<CompletionCandidate> {
-    sl_tools::pins()
-        .iter()
-        .map(|p| CompletionCandidate::new(&p.name).help(Some(p.version().to_owned().into())))
-        .collect()
+#[derive(Args)]
+#[command(group(ArgGroup::new("output").args(["spec", "components", "toolchains", "targets", "json"])))]
+pub struct NeededArgs {
+    /// The project directory (its tier and `spirit_level.toml` decide the lints)
+    #[arg(default_value = ".")]
+    path: PathBuf,
+    /// Every tool that has an adapter, not only the project's; no project is read
+    #[arg(long, conflicts_with_all = ["toolchains", "targets"])]
+    all: bool,
+    /// Only what is missing, outside its tested range or prints no version
+    #[arg(long)]
+    missing: bool,
+    /// One `crate@version` per line, for `cargo binstall` or `cargo install --locked`
+    #[arg(long)]
+    spec: bool,
+    /// One rustup component per line, for `rustup component add`
+    #[arg(long)]
+    components: bool,
+    /// One toolchain per line (the members' rust-versions, for `cargo-msrv`), for `rustup toolchain install`
+    #[arg(long)]
+    toolchains: bool,
+    /// One target per line (`cargo-no-std`, `cargo-wasm`), for `rustup target add`
+    #[arg(long)]
+    targets: bool,
+    /// Every record as JSON, for scripts and packagers
+    #[arg(long)]
+    json: bool,
+    /// Today's date for expiries in the configuration (YYYY-MM-DD); default: the system clock
+    #[arg(long, env = "SPIRIT_LEVEL_TODAY")]
+    today: Option<String>,
 }
 
-pub fn run(cmd: ToolsCmd) -> Result<vc_ui::Exit, String> {
+/// A tool as found, with the lints that run it
+struct Tool {
+    found: Detection,
+    lints: Vec<&'static str>,
+}
+
+/// A toolchain the MSRV build selects, and why it cannot be selected
+struct Toolchain {
+    version: String,
+    missing: Option<String>,
+}
+
+/// A target the cross builds need; `installed` is None without rustup
+struct Target {
+    name: String,
+    installed: Option<bool>,
+}
+
+/// Everything `needed` lists
+struct Needed {
+    tools: Vec<Tool>,
+    /// A listed tool runs on nightly, and no nightly toolchain is installed
+    nightly_missing: bool,
+    toolchains: Vec<Toolchain>,
+    targets: Vec<Target>,
+}
+
+impl Tool {
+    fn wanted(&self) -> bool {
+        self.found.state() != State::InRange
+    }
+}
+
+impl Target {
+    fn state(&self) -> &'static str {
+        match self.installed {
+            Some(true) => "installed",
+            Some(false) => "missing",
+            None => "unknown (no rustup)",
+        }
+    }
+}
+
+impl Needed {
+    fn load(a: &NeededArgs) -> Result<Self, String> {
+        if a.all {
+            let dir = std::env::current_dir().map_err(|e| e.to_string())?;
+            return Ok(Self::tools(spirit_level::tool_lints(), &dir));
+        }
+        let project = sl_model::Project::load(&a.path).map_err(|e| e.to_string())?;
+        let opts = spirit_level::Options::new(crate::today(a.today.clone())?);
+        let config = spirit_level::config(&project, &opts).map_err(|e| e.to_string())?;
+        let needs = spirit_level::tool_needs(&project, &config);
+        let mut n = Self::tools(needs.tools, &project.root);
+        n.toolchains = needs
+            .toolchains
+            .into_iter()
+            .map(|v| Toolchain {
+                missing: sl_tools::rustup::toolchain_missing(&v, &project.root),
+                version: v,
+            })
+            .collect();
+        let installed = sl_tools::rustup::installed_targets(&project.root);
+        n.targets = needs
+            .targets
+            .into_iter()
+            .map(|t| Target {
+                installed: installed.as_ref().map(|i| i.contains(&t)),
+                name: t,
+            })
+            .collect();
+        Ok(n)
+    }
+
+    /// The tools of `by_tool`, in the order of `tools.toml`, found on PATH
+    fn tools(
+        mut by_tool: std::collections::BTreeMap<&'static str, Vec<&'static str>>,
+        dir: &std::path::Path,
+    ) -> Self {
+        let tools: Vec<Tool> = sl_tools::pins()
+            .iter()
+            .filter_map(|p| {
+                by_tool.remove(p.name.as_str()).map(|lints| Tool {
+                    found: sl_tools::detect(p, None, dir),
+                    lints,
+                })
+            })
+            .collect();
+        let nightly_missing = tools.iter().any(|t: &Tool| t.found.pin.nightly)
+            && !sl_tools::rustup::nightly_installed(dir);
+        Self {
+            tools,
+            nightly_missing,
+            toolchains: Vec::new(),
+            targets: Vec::new(),
+        }
+    }
+
+    /// Keeps only what is missing, out of range or unreadable
+    fn only_wanted(&mut self) {
+        self.tools.retain(Tool::wanted);
+        self.toolchains.retain(|t| t.missing.is_some());
+        self.targets.retain(|t| t.installed == Some(false));
+        self.nightly_missing &= self.tools.iter().any(|t| t.found.pin.nightly);
+    }
+
+    /// Whether something needed is not there at all
+    fn missing(&self) -> bool {
+        self.tools.iter().any(|t| t.found.state() == State::Missing)
+            || self.toolchains.iter().any(|t| t.missing.is_some())
+            || self.targets.iter().any(|t| t.installed == Some(false))
+            || self.nightly_missing
+    }
+}
+
+pub fn run(cmd: ToolsCmd) -> Result<Exit, String> {
     match cmd {
-        ToolsCmd::List => Ok(list()),
-        ToolsCmd::Install {
-            tool,
-            path,
-            needed: false,
-        } => install(tool.as_deref(), &path),
-        ToolsCmd::Install {
-            path, needed: true, ..
-        } => install_needed(&path),
+        ToolsCmd::Needed(a) => needed(&a),
     }
 }
 
-fn list() -> vc_ui::Exit {
-    let cache = sl_tools::Cache::from_env();
-    println!("cache: {}", cache.root.display());
-    for p in sl_tools::pins() {
-        let at = match (cache.find(p), sl_tools::on_path(&p.exe, None)) {
-            (Some(c), _) => format!("cache {}", c.display()),
-            (None, Some(path)) => format!("PATH {}", path.display()),
-            (None, None) => "missing".to_owned(),
-        };
-        let nightly = if p.nightly { " (nightly)" } else { "" };
-        println!("{:20} {:10} {at}{nightly}", p.name, p.version());
+fn needed(a: &NeededArgs) -> Result<Exit, String> {
+    let mut n = Needed::load(a)?;
+    if a.missing {
+        n.only_wanted();
     }
-    vc_ui::Exit::SUCCESS
-}
-
-fn install(tool: Option<&str>, path: &Path) -> Result<vc_ui::Exit, String> {
-    let pins: Vec<&sl_tools::Pin> = match tool {
-        Some(t) => vec![
-            sl_tools::pin(t).ok_or_else(|| format!("no tool {t} (`spl tools list` names them)"))?,
-        ],
-        None => sl_tools::pins().iter().collect(),
+    let out = if a.spec {
+        lines(n.tools.iter().filter_map(|t| t.found.pin.spec()))
+    } else if a.components {
+        lines(n.tools.iter().filter_map(|t| match &t.found.pin.kind {
+            PinKind::Component(c) => Some(c.clone()),
+            PinKind::Crate { .. } => None,
+        }))
+    } else if a.toolchains {
+        lines(n.toolchains.iter().map(|t| t.version.clone()))
+    } else if a.targets {
+        lines(n.targets.iter().map(|t| t.name.clone()))
+    } else if a.json {
+        let v = to_json(&n);
+        format!(
+            "{}\n",
+            serde_json::to_string_pretty(&v).map_err(|e| e.to_string())?
+        )
+    } else {
+        table(&n, Paint::stdout())
     };
-    Ok(failed_if(install_pins(&pins, path) > 0))
+    print!("{out}");
+    Ok(if n.missing() {
+        Exit::FAILURE
+    } else {
+        Exit::SUCCESS
+    })
 }
 
-fn install_needed(path: &Path) -> Result<vc_ui::Exit, String> {
-    let project = sl_model::Project::load(path).map_err(|e| e.to_string())?;
-    let opts = spirit_level::Options::new(sl_core::Date::today_utc());
-    let config = spirit_level::config(&project, &opts).map_err(|e| e.to_string())?;
-    let needs = spirit_level::tool_needs(&project, &config);
-    let pins: Vec<&sl_tools::Pin> = needs
+fn lines(items: impl Iterator<Item = String>) -> String {
+    items.map(|l| l + "\n").collect()
+}
+
+fn to_json(n: &Needed) -> Value {
+    let tools: Vec<Value> = n
         .tools
         .iter()
-        .filter_map(|t| sl_tools::pin(t))
+        .map(|t| {
+            let d = &t.found;
+            let p = d.pin;
+            let (kind, krate, component) = match &p.kind {
+                PinKind::Crate { krate, .. } => ("crate", Some(krate.as_str()), None),
+                PinKind::Component(c) => ("component", None, Some(c.as_str())),
+            };
+            json!({
+                "name": p.name,
+                "kind": kind,
+                "crate": krate,
+                "version": krate.map(|_| p.version()),
+                "spec": p.spec(),
+                "component": component,
+                "tested": p.tested.as_ref().map(ToString::to_string),
+                "exe": p.exe,
+                "nightly": p.nightly,
+                "path": d.exe.as_ref().map(|e| e.display().to_string()),
+                "found_version": d.version.as_ref().ok().map(ToString::to_string),
+                "state": d.state().as_str(),
+                "reason": d.missing_reason().or_else(|| d.untested_reason()),
+                "install": p.install_help(),
+                "lints": t.lints,
+            })
+        })
         .collect();
-    let mut failed = install_pins(&pins, path);
-    let toolchains = needs.toolchains.iter().map(|v| {
-        let r = sl_tools::rustup::install_toolchain(v, path);
-        (format!("toolchain {v}"), r)
-    });
-    let targets = needs.targets.iter().map(|t| {
-        let r = sl_tools::rustup::add_target(t, path);
-        (format!("target {t}"), r)
-    });
-    for (what, r) in toolchains.chain(targets) {
-        match r {
-            Ok(()) => println!("{what}: installed"),
-            Err(e) => {
-                failed += 1;
-                eprintln!("{what}: {e}");
-            }
-        }
-    }
-    Ok(failed_if(failed > 0))
+    let toolchains: Vec<Value> = n
+        .toolchains
+        .iter()
+        .map(|t| {
+            json!({
+                "version": t.version,
+                "state": if t.missing.is_some() { "missing" } else { "installed" },
+                "reason": t.missing,
+            })
+        })
+        .collect();
+    let targets: Vec<Value> = n
+        .targets
+        .iter()
+        .map(|t| json!({ "target": t.name, "state": t.state() }))
+        .collect();
+    json!({
+        "schema": "spirit_level.tools/1",
+        "tools": tools,
+        "toolchains": toolchains,
+        "targets": targets,
+        "nightly_missing": n.nightly_missing,
+        "missing": n.missing(),
+    })
 }
 
-fn failed_if(failed: bool) -> vc_ui::Exit {
-    if failed {
-        vc_ui::Exit::FAILURE
-    } else {
-        vc_ui::Exit::SUCCESS
+fn state_cell(p: Paint, s: State) -> String {
+    match s {
+        State::InRange => p.good(s.as_str()),
+        State::Missing => p.err(s.as_str()),
+        State::OutOfRange | State::Unreadable => p.warn(s.as_str()),
     }
 }
 
-/// Installs each pin; the number that failed
-fn install_pins(pins: &[&sl_tools::Pin], path: &Path) -> usize {
-    let cache = sl_tools::Cache::from_env();
-    let mut failed = 0;
-    for p in pins {
-        eprintln!("{} {}", p.name, p.version());
-        match cache.install(p, path) {
-            Ok((exe, true)) => println!("{}: cached {}", p.name, exe.display()),
-            Ok((exe, false)) => println!("{}: installed {}", p.name, exe.display()),
-            Err(e) => {
-                failed += 1;
-                eprintln!("{}: {e}", p.name);
+/// Columns padded to their widest cell, colour codes not counted
+fn columns(rows: &[Vec<String>]) -> String {
+    let n = rows.iter().map(Vec::len).max().unwrap_or(0);
+    let widths: Vec<usize> = (0..n)
+        .map(|i| {
+            rows.iter()
+                .filter_map(|r| r.get(i))
+                .map(|c| vc_ui::visible_width(c))
+                .max()
+                .unwrap_or(0)
+        })
+        .collect();
+    let mut s = String::new();
+    for r in rows {
+        let mut line = String::new();
+        for (i, c) in r.iter().enumerate() {
+            line.push_str(c);
+            if i + 1 < r.len() {
+                let pad = widths[i].saturating_sub(vc_ui::visible_width(c)) + 2;
+                line.push_str(&" ".repeat(pad));
             }
         }
+        s.push_str(line.trim_end());
+        s.push('\n');
     }
-    failed
+    s
+}
+
+fn table(n: &Needed, p: Paint) -> String {
+    let mut s = String::new();
+    if n.tools.is_empty() && n.toolchains.is_empty() && n.targets.is_empty() {
+        return "nothing to list\n".to_owned();
+    }
+    if !n.tools.is_empty() {
+        let mut rows = vec![
+            [
+                "tool", "tested", "found", "state", "nightly", "path", "lints",
+            ]
+            .map(|h| p.paint(vc_ui::HEADING, h))
+            .to_vec(),
+        ];
+        for t in &n.tools {
+            let d = &t.found;
+            rows.push(vec![
+                p.id(&d.pin.name),
+                d.pin.tested_text(),
+                d.version
+                    .as_ref()
+                    .map_or_else(|_| "-".to_owned(), ToString::to_string),
+                state_cell(p, d.state()),
+                if d.pin.nightly { "nightly" } else { "" }.to_owned(),
+                d.exe
+                    .as_ref()
+                    .map_or_else(|| "-".to_owned(), |e| e.display().to_string()),
+                t.lints.join(", "),
+            ]);
+        }
+        s.push_str(&columns(&rows));
+    }
+    if !n.toolchains.is_empty() {
+        let _ = writeln!(
+            s,
+            "\n{}",
+            p.paint(vc_ui::HEADING, "toolchains (cargo-msrv)")
+        );
+        let rows: Vec<Vec<String>> = n
+            .toolchains
+            .iter()
+            .map(|t| {
+                vec![
+                    format!("  {}", p.id(&t.version)),
+                    t.missing
+                        .as_ref()
+                        .map_or_else(|| p.good("installed"), |m| p.err(m)),
+                ]
+            })
+            .collect();
+        s.push_str(&columns(&rows));
+    }
+    if !n.targets.is_empty() {
+        let _ = writeln!(
+            s,
+            "\n{}",
+            p.paint(vc_ui::HEADING, "targets (cargo-no-std, cargo-wasm)")
+        );
+        let rows: Vec<Vec<String>> = n
+            .targets
+            .iter()
+            .map(|t| {
+                let st = match t.installed {
+                    Some(true) => p.good(t.state()),
+                    Some(false) => p.err(t.state()),
+                    None => p.warn(t.state()),
+                };
+                vec![format!("  {}", p.id(&t.name)), st]
+            })
+            .collect();
+        s.push_str(&columns(&rows));
+    }
+    s.push_str(&next_hints(n, p));
+    s
+}
+
+/// The commands that install what is missing or untested
+fn next_hints(n: &Needed, p: Paint) -> String {
+    let wanted: Vec<&Tool> = n.tools.iter().filter(|t| t.wanted()).collect();
+    let mut hints = Vec::new();
+    if wanted
+        .iter()
+        .any(|t| matches!(t.found.pin.kind, PinKind::Crate { .. }))
+    {
+        hints.push("spl tools needed --spec --missing | xargs -r cargo binstall -y".to_owned());
+    }
+    let components: Vec<&str> = wanted
+        .iter()
+        .filter_map(|t| match &t.found.pin.kind {
+            PinKind::Component(c) => Some(c.as_str()),
+            PinKind::Crate { .. } => None,
+        })
+        .collect();
+    if !components.is_empty() {
+        hints.push(format!("rustup component add {}", components.join(" ")));
+    }
+    for t in n.toolchains.iter().filter(|t| t.missing.is_some()) {
+        hints.push(format!(
+            "rustup toolchain install {} --profile minimal",
+            t.version
+        ));
+    }
+    let targets: Vec<&str> = n
+        .targets
+        .iter()
+        .filter(|t| t.installed == Some(false))
+        .map(|t| t.name.as_str())
+        .collect();
+    if !targets.is_empty() {
+        hints.push(format!("rustup target add {}", targets.join(" ")));
+    }
+    if n.nightly_missing {
+        hints.push("rustup toolchain install nightly --profile minimal".to_owned());
+    }
+    let mut s = String::new();
+    if !hints.is_empty() {
+        s.push('\n');
+    }
+    for h in hints {
+        let _ = writeln!(s, "{}", p.next_hint(&format!("next: {h}")));
+    }
+    s
 }

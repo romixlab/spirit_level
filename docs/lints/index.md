@@ -531,6 +531,12 @@ Every lint, grouped by category, with its stable code and its level in each ship
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
 | [X0031](X0031.md) | [taplo-fmt](X0031.md) | every TOML file parses and is formatted as taplo writes it | off | warn | warn | deny | off | off | off | off | off | off |
 
+## tools
+
+| Code | Lint | Rule | small | small-workspace | medium | big | ai | embedded | ui | egui | units-strict | units-paranoid |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| [X0034](X0034.md) | [tool-version](X0034.md) | every external tool an enabled lint runs is a version its output is tested against | warn | warn | warn | warn | off | off | off | off | off | off |
+
 ## typos
 
 | Code | Lint | Rule | small | small-workspace | medium | big | ai | embedded | ui | egui | units-strict | units-paranoid |

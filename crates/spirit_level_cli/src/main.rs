@@ -116,7 +116,7 @@ enum Cmd {
     /// and task class
     #[command(after_help = panics::AFTER_HELP)]
     Panics(panics::PanicsArgs),
-    /// The external tools of the adapters: where each is found, and installing the pinned versions
+    /// The external tools of the adapters: what the project needs, the tested versions, what is found on PATH
     #[command(subcommand)]
     Tools(tools::ToolsCmd),
     /// Write the book's generated pages (lints, tiers, nav) from the lints' metadata

@@ -326,6 +326,7 @@ nav = [
         "lints/X0031.md",
         "lints/X0032.md",
         "lints/X0033.md",
+        "lints/X0034.md",
     ] },
 ]
 # spirit-level:book-nav-end

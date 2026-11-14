@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+### Added
+
+- `spl tools needed`: the tools, toolchains and targets a project needs; table, `--spec`, `--components`, `--json`, `--missing`, `--all` (TOOL-2).
+- `tool-version` (X0034, warn from small): a tool outside its tested version range runs, its results reported untested (TOOL-2).
+
+### Changed
+
+- Tools are found on PATH only, their version read; a missing tool's reason names the `crate@version` to install (TOOL-2).
+
+### Removed
+
+- **Breaking:** `spl tools install` and the tool cache; install with `spl tools needed --spec | xargs cargo binstall -y` (TOOL-2).
+- `spl tools list`: `spl tools needed --all` lists every tool (TOOL-2).
+
 ## [0.3.1] - 2026-11-14
 
 ### Added

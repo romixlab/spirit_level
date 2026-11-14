@@ -24,7 +24,7 @@ Working name. Private for now.
 | [`sl_docs`](crates/sl_docs) | model | Markdown pages as a reader meets them: their shape, reading metrics, and the Zensical book they belong to |
 | [`sl_firmware`](crates/sl_firmware) | model | spirit_level's model of bare-metal firmware crates: cargo configuration, build script, memory.x, bedrock_fw.json, source facts, the linked ELF with frames and calls |
 | [`sl_model`](crates/sl_model) | model | spirit_level's project model: cargo metadata, manifests with spans, Rust sources parsed with syn, line counts |
-| [`sl_tools`](crates/sl_tools) | model | External tools for spirit_level's adapters: the pinned versions, the build cache, finding and running a tool, cargo's JSON messages |
+| [`sl_tools`](crates/sl_tools) | model | External tools for spirit_level's adapters: the tested versions, finding a tool on PATH and reading its version, running it, cargo's JSON messages |
 | [`sl_analysis`](crates/sl_analysis) | analysis | The one trait every spirit_level analysis implements, its run context, and syntax helpers shared by the source analyses |
 | [`sl_lints_ai`](crates/sl_lints_ai) | lints | spirit_level lints for code written with agents: stop-gap comments, commented-out code, near-duplicate functions, dead features, committed agent secrets and transcripts |
 | [`sl_lints_board`](crates/sl_lints_board) | lints | spirit_level board lints: the board description board.toml against itself, the chip's data and the PCB's nets, for every revision and rework |

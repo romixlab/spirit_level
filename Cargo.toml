@@ -37,7 +37,7 @@ hakari = { version = "0.18", default-features = false, features = ["cli-support"
 proc-macro2 = { version = "1", default-features = false, features = ["span-locations"] }
 serde = { version = "1", default-features = false, features = ["std", "derive"] }
 serde_json = { version = "1", default-features = false, features = ["std"] }
-sha2 = { version = "0.11", default-features = false }
+semver = { version = "1", default-features = false }
 syn = { version = "3", default-features = false, features = [
   "full",
   "visit",

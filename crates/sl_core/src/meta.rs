@@ -85,7 +85,7 @@ pub enum Need {
     Resolve,
     /// The workspace's crate map (`[map]` or `map-file` in `spirit_level.toml`)
     Map,
-    /// An executable on PATH or in the tool cache
+    /// An executable on PATH
     Tool(&'static str),
     /// A nightly toolchain (`cargo +nightly`)
     Nightly,

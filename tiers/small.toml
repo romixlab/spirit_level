@@ -10,6 +10,10 @@ reason = "a waiver without a reason, for an unknown lint, or expired hides a fin
 level = "warn"
 reason = "a waiver that allows nothing is left over from changed code"
 
+[lints.tool-version]
+level = "warn"
+reason = "an external tool outside its tested range may print a shape the adapter misreads, so its results are untested"
+
 [lints.package-description]
 level = "warn"
 reason = "the crate's one-line description is written once, in Cargo.toml; tables and READMEs are made from it"

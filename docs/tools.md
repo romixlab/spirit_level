@@ -2,11 +2,14 @@
 
 spirit_level reuses established Rust lint tools instead of reimplementing them. Each tool sits behind an adapter: an analysis like any other, whose lints carry the tool's prefix (`clippy-`, `deny-`, `machete-`, ...) and are configured, overridden, excepted and waived in `spirit_level.toml` like native ones.
 
+## How tools are run
+
 - **Library or executable.** A tool with a library on stable Rust that does the whole job is linked. The others run as executables, and the adapter reads their machine-readable output (JSON where the tool has it, its stable text where not).
 - **Optional.** A linked tool is a cargo feature of `spirit_level` and `spirit_level_cli` (`hakari`, `geiger`), off by default. An executable adapter costs nothing to build, so it is always compiled in; it runs only when one of its lints is on.
-- **Missing tools.** A lint whose executable is not installed, or whose feature was not built, is reported as not run with the reason and the command that installs it. At `deny` the run then exits with code 3: it never passes green.
-- **Pinned versions.** `crates/sl_tools/tools.toml` pins each tool at the version its parser is tested against. `spl tools install [TOOL]` installs it, `spl tools list` shows where each is found.
-- **What a project needs.** `spl tools install --needed` installs only what the project's enabled lints need: their tools, the toolchain of each `rust-version` for `cargo-msrv`, and the targets of `cargo-no-std` and `cargo-wasm` when the map marks crates. Run it before `check` in CI, so no lint is left not run.
+- **Found on PATH.** spl installs nothing. Each tool is found on PATH and its version read, so it comes from whatever installs tools here: `cargo binstall`, `cargo install`, a distribution's package, mise.
+- **Missing tools.** A lint whose executable is not installed, or whose feature was not built, is reported as not run with the reason and the `crate@version` that installs it. At `deny` the run then exits with code 3: it never passes green.
+- **Tested versions.** `crates/sl_tools/tools.toml` gives each tool the range of versions its parser is tested against. A tool outside that range still runs; `tool-version` reports its results as untested.
+- **What a project needs.** `spl tools needed` lists what the project's enabled lints need: their tools, the toolchain of each `rust-version` for `cargo-msrv`, and the targets of `cargo-no-std` and `cargo-wasm` when the map marks crates. Install them before `check` in CI, so no lint is left not run.
 
 ## Library or executable
 
@@ -126,6 +129,24 @@ Builds that cargo does itself, reported from `--message-format json`. Other tool
 - **`cargo-wasm`:** `cargo check -p <crate> --target wasm32-unknown-unknown` for each crate the map marks `wasm = true`.
 - **`cargo-doc`:** `cargo doc`; every rustdoc warning is a finding, as `RUSTDOCFLAGS=-D warnings` would fail.
 
-## The tool cache
+## Installing the tools
 
-`spl tools install` builds each pinned crate with `cargo install --locked --version <v> --root <dir>`. The directory is keyed on the crate, its version, its features and `rustc -vV` (sha2), so a new compiler gets a new build and an old one is found again: `<cache>/<tool>/<version>-<key>/bin`. The cache is `$SPIRIT_LEVEL_TOOLS`, else `$XDG_CACHE_HOME/spirit_level/tools`, else `~/.cache/spirit_level/tools`. Adapters look in the cache first, then on PATH; a tool on PATH may be another version than the pin. rustup components (clippy, rustfmt) are added to the project's toolchain instead.
+`spl tools needed` shows each tool the project needs: its tested range, the version found and where, whether it is in range, whether it runs on nightly, and the lints that run it. It exits with 1 while something needed is missing. Its other outputs feed an installer:
+
+| Flag | Prints | For |
+|---|---|---|
+| `--spec` | one `crate@version` per line | `xargs -r cargo binstall -y`, `xargs -r -n1 cargo install --locked` |
+| `--components` | one rustup component per line | `xargs -r rustup component add` |
+| `--toolchains` | one toolchain per line (`cargo-msrv`) | `xargs -r -n1 rustup toolchain install --profile minimal` |
+| `--targets` | one target per line (`cargo-no-std`, `cargo-wasm`) | `xargs -r rustup target add` |
+| `--json` | every record: crate, version, tested range, path, version found, state, lints | scripts and packagers |
+
+`--missing` keeps only what is missing, outside its tested range or prints no version. `--all` lists every tool that has an adapter, without reading a project. For example, in CI:
+
+```sh
+spl tools needed --spec --missing | xargs -r cargo binstall -y
+spl tools needed --components --missing | xargs -r rustup component add
+spl check
+```
+
+The version in `--spec` is the one the parser is tested at. A tool's version is the first word shaped like one in the output of its `version-args` (default `--version`); `cargo-udeps` runs on a nightly toolchain, which `rustup toolchain install nightly --profile minimal` adds.
