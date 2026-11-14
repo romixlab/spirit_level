@@ -26,7 +26,7 @@ Result first, then only what the reader must decide or do. Bullets for lists, ta
 | `sl_lints_*` | lints | one crate per analysis family; each lint's docs in `docs/<id>.md`, fixtures in `tests/fixtures/<id>/` |
 | `sl_engine` | engine | runs analyses, needs, levels, exceptions, waivers, fixes; its own lints `waiver-*` |
 | `sl_report` | engine | text and JSON output |
-| `spirit_level` | app | the registry of analyses and the shipped tiers (`crates/spirit_level/tiers/*.toml`) |
+| `spirit_level` | app | the registry of analyses and the shipped tiers (`tiers/*.toml` at the root) |
 | `sl_book` | app | generated book pages |
 | `spirit_level_cli` | app | the `spl` binary |
 | `sl_testkit` | tests | the golden fixture harness |

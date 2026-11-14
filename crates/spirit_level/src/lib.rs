@@ -24,15 +24,15 @@ pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// The shipped tiers, in the order they extend each other, then the ones that stand beside them
 pub static TIERS: &[(&str, &str)] = &[
-    ("small", include_str!("../tiers/small.toml")),
+    ("small", include_str!("../../../tiers/small.toml")),
     (
         "small-workspace",
-        include_str!("../tiers/small-workspace.toml"),
+        include_str!("../../../tiers/small-workspace.toml"),
     ),
-    ("medium", include_str!("../tiers/medium.toml")),
-    ("big", include_str!("../tiers/big.toml")),
-    ("ai", include_str!("../tiers/ai.toml")),
-    ("embedded", include_str!("../tiers/embedded.toml")),
+    ("medium", include_str!("../../../tiers/medium.toml")),
+    ("big", include_str!("../../../tiers/big.toml")),
+    ("ai", include_str!("../../../tiers/ai.toml")),
+    ("embedded", include_str!("../../../tiers/embedded.toml")),
 ];
 
 /// The text of a shipped tier

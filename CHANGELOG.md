@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Tier TOMLs moved to `tiers/` at the repo root.
+
 ## [0.2.0] - 2026-11-14
 
 ### Added
