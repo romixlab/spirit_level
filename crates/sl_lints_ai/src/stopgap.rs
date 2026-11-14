@@ -102,7 +102,7 @@ fn markers(cx: &Context<'_>) {
     }
 }
 
-/// FIXME notes: a candidate while the branch is in work, a finding when it lands
+/// `FIXME` notes: a candidate while the branch is in work, a finding when it lands
 fn fixmes(cx: &Context<'_>) {
     let id = "fixme-before-land";
     for pkg in &cx.project.packages {
@@ -116,7 +116,7 @@ fn fixmes(cx: &Context<'_>) {
                     let Some(what) = p
                         .list("markers")
                         .iter()
-                        .find(|m| find_marker(line, m).is_some())
+                        .find(|m| find_marker(&outside_code(line), m).is_some())
                     else {
                         continue;
                     };
@@ -137,6 +137,23 @@ fn fixmes(cx: &Context<'_>) {
             }
         }
     }
+}
+
+/// The line with its inline code spans (between backticks) blanked: a marker named in code is documentation
+fn outside_code(line: &str) -> String {
+    let mut inside = false;
+    line.chars()
+        .map(|c| {
+            if c == '`' {
+                inside = !inside;
+                ' '
+            } else if inside {
+                ' '
+            } else {
+                c
+            }
+        })
+        .collect()
 }
 
 fn key(line: &str) -> String {
