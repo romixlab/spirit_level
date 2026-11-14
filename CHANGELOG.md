@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Added
+
+- Board lints `brd-1`..`brd-7` (F0099-F0105) check `board.toml` against chip data and PCB nets, in the embedded tier (TIER-5).
+- `[board]` table: where descriptions and stm32-data chip JSON are (TIER-5).
+
 ## [0.2.7] - 2026-11-14
 
 ### Added
