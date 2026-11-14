@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-11-14
+
 ### Added
 
 - `exact-units-quantity` (C0033, warn from small): unit- and quantity-named plain numbers get their exact_units type (CODE-11).
