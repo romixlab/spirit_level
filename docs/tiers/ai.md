@@ -42,6 +42,8 @@ Use it with `extends = "ai"` in `spirit_level.toml`.
 | [P0016](../lints/P0016.md) | thinking-comments | `deny` | a comment holds the conclusion, not the reasoning that led to it | ai |
 | [P0017](../lints/P0017.md) | fixes-tag | `deny` | an agent copies the culprit's hash and subject from git; a wrong one sends the next reader astray | ai |
 | [P0018](../lints/P0018.md) | fix-without-test | `warn` | an agent writes the failing test first; a warning, since a fix is judged from its subject | ai |
+| [P0019](../lints/P0019.md) | commit-tested-line | `warn` | an agent says how it tested, or that it did not; a warning while branches begun before the rule land | ai |
+| [P0020](../lints/P0020.md) | commit-mixed-move | `warn` | a move edited in the same commit cuts every line's history; a warning, since it judges lines by their start | ai |
 
 ## Clippy set (with what it extends)
 
@@ -122,6 +124,14 @@ reason = "an agent copies the culprit's hash and subject from git; a wrong one s
 [lints.fix-without-test]
 level = "warn"
 reason = "an agent writes the failing test first; a warning, since a fix is judged from its subject"
+
+[lints.commit-tested-line]
+level = "warn"
+reason = "an agent says how it tested, or that it did not; a warning while branches begun before the rule land"
+
+[lints.commit-mixed-move]
+level = "warn"
+reason = "a move edited in the same commit cuts every line's history; a warning, since it judges lines by their start"
 
 [lints.sentence-words]
 level = "warn"

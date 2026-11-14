@@ -54,6 +54,14 @@ reason = "an agent copies the culprit's hash and subject from git; a wrong one s
 level = "warn"
 reason = "an agent writes the failing test first; a warning, since a fix is judged from its subject"
 
+[lints.commit-tested-line]
+level = "warn"
+reason = "an agent says how it tested, or that it did not; a warning while branches begun before the rule land"
+
+[lints.commit-mixed-move]
+level = "warn"
+reason = "a move edited in the same commit cuts every line's history; a warning, since it judges lines by their start"
+
 [lints.sentence-words]
 level = "warn"
 reason = "short sentences are read once and understood"

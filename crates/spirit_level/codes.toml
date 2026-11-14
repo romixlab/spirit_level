@@ -92,6 +92,8 @@ P0015 = { id = "sentence-words", group = "prose", status = "active" }
 P0016 = { id = "thinking-comments", group = "prose", status = "active" }
 P0017 = { id = "fixes-tag", group = "prose", status = "active" }
 P0018 = { id = "fix-without-test", group = "prose", status = "active" }
+P0019 = { id = "commit-tested-line", group = "prose", status = "active" }
+P0020 = { id = "commit-mixed-move", group = "prose", status = "active" }
 A0001 = { id = "agent-config-permissions", group = "ai", status = "active" }
 A0002 = { id = "agent-config-secrets", group = "ai", status = "active" }
 A0003 = { id = "agent-session-files", group = "ai", status = "active" }

@@ -7,6 +7,7 @@ mod agents;
 mod changelog;
 mod commits;
 mod fixes;
+mod hygiene;
 mod style;
 mod text;
 mod units;
@@ -102,6 +103,15 @@ lint!(FIX_WITHOUT_TEST, "P0018", "fix-without-test", "commits", "a commit that f
              ("markers", StrList, "[\"#[test]\", \"#[tokio::test\", \"#[test_case\", \"#[rstest\", \"proptest!\"]", "text of an added line that counts as a test"),
              ("base", Str, "\"main\"", "the branch work merges into; commits in base..HEAD are checked")],
     needs: [Need::Tool("git")], fix: None);
+lint!(COMMIT_TESTED_LINE, "P0019", "commit-tested-line", "commits", "a commit says how it was tested in a Tested: trailer",
+    params: [("trailer", Str, "\"Tested\"", "the trailer key that says how the commit was tested"),
+             ("base", Str, "\"main\"", "the branch work merges into; commits in base..HEAD are checked")],
+    needs: [Need::Tool("git")], fix: None);
+lint!(COMMIT_MIXED_MOVE, "P0020", "commit-mixed-move", "commits", "a commit that moves a file does not also edit it beyond its paths",
+    params: [("files", StrList, "[\"**/*.rs\"]", "globs of the moved files checked"),
+             ("path-lines", StrList, "[\"use \", \"pub use \", \"pub(crate) use \", \"mod \", \"pub mod \", \"pub(crate) mod \", \"#[path\", \"//!\"]", "starts of changed lines that only follow the move"),
+             ("base", Str, "\"main\"", "the branch work merges into; commits in base..HEAD are checked")],
+    needs: [Need::Tool("git")], fix: None);
 
 /// The prose analysis; the commit lints read the history with git and need it
 pub struct Prose;
@@ -128,6 +138,8 @@ static PROSE_LINTS: &[&LintMeta] = &[
     &COMMIT_PROSE,
     &FIXES_TAG,
     &FIX_WITHOUT_TEST,
+    &COMMIT_TESTED_LINE,
+    &COMMIT_MIXED_MOVE,
 ];
 
 impl Analysis for Prose {
@@ -145,5 +157,6 @@ impl Analysis for Prose {
         style::run(cx);
         commits::run(cx);
         fixes::run(cx);
+        hygiene::run(cx);
     }
 }

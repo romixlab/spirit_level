@@ -1,0 +1,5 @@
+[[commit]]
+message = "Add the parser\n\nTested: just test --changed"
+
+[[commit]]
+message = "Document the parser\n\nTested: not tested, docs only\nCo-Authored-By: A <a@example.org>"

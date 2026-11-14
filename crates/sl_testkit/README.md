@@ -16,7 +16,7 @@ confidence = "estimate"      # optional: estimate or candidate; absent means cer
 
 `pass/` expects no finding. A case may bring its own `spirit_level.toml` (for a crate map); then that file is the configuration and `params` is not used. `check(&ANALYSIS, "tests/fixtures")` runs every case with only that lint enabled at `deny` and today fixed at 2026-11-13, and fails with a list of every difference. It also fails when a lint of the analysis has no `pass` and `fail` case.
 
-A case with a `git.toml` runs on a temporary copy made into a git repository: every file but those in `untracked` is committed on `main`, then each `[[commit]]` is a commit on a branch `work` with its `message` (`{sha:N}` is the 12-hex hash of commit N, 0 the initial one) and the files of its `files` table (path and text; none: an empty commit). Lints that read the history or the tracked files test this way.
+A case with a `git.toml` runs on a temporary copy made into a git repository: every file but those in `untracked` is committed on `main`, then each `[[commit]]` is a commit on a branch `work` with its `message` (`{sha:N}` is the 12-hex hash of commit N, 0 the initial one) and the files of its `files` table (path and text) written and its `remove` list deleted (neither: an empty commit). Lints that read the history or the tracked files test this way.
 
 ```toml
 untracked = ["scratch.txt"]

@@ -11,6 +11,8 @@
 - sized-ints-in-contracts (C0017): serde types of a crate the map marks `contract` use sized integers (CODE-8).
 - unit-suffix (C0018): numeric fields and constants named for a time or size carry a unit (CODE-8).
 - unbounded-read (C0019): `read_to_end` and `read_to_string` are bounded with `take()`; candidates (CODE-8).
+- commit-tested-line (P0019): each branch commit carries a `Tested:` trailer (PROSE-4).
+- commit-mixed-move (P0020): a commit that moves a Rust file edits only its paths (PROSE-4).
 - orphan-source-file (C0016): every `.rs` file under `src/` is reached by a `mod` declaration (CODE-7).
 
 ### Changed

@@ -1,0 +1,12 @@
+[[commit]]
+message = "Add the parser"
+files = { "src/parse.rs" = "//! Parsing.\n\nuse crate::lex::Token;\n\n/// Parses\npub fn parse(t: &[Token]) -> usize {\n    let mut n = 0;\n    for _ in t {\n        n += 1;\n    }\n    n\n}\n" }
+
+[[commit]]
+message = "Move the parser into syntax"
+files = { "src/syntax/parse.rs" = "//! Parsing.\n\nuse crate::syntax::lex::Token;\n\n/// Parses\npub fn parse(t: &[Token]) -> usize {\n    let mut n = 0;\n    for _ in t {\n        n += 1;\n    }\n    n\n}\n" }
+remove = ["src/parse.rs"]
+
+[[commit]]
+message = "Count tokens twice"
+files = { "src/syntax/parse.rs" = "//! Parsing.\n\nuse crate::syntax::lex::Token;\n\n/// Parses\npub fn parse(t: &[Token]) -> usize {\n    let mut n = 0;\n    for _ in t {\n        n += 2;\n    }\n    n\n}\n" }

@@ -111,6 +111,8 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [P0007](P0007.md) | [commit-subject-length](P0007.md) | a commit subject stays under its length limit | off | off | warn | warn | deny | off |
 | [P0017](P0017.md) | [fixes-tag](P0017.md) | a Fixes: trailer names its culprit by a hash that resolves and the culprit's subject | off | off | warn | warn | deny | off |
 | [P0018](P0018.md) | [fix-without-test](P0018.md) | a commit that fixes code adds a test | off | off | off | warn | warn | off |
+| [P0019](P0019.md) | [commit-tested-line](P0019.md) | a commit says how it was tested in a Tested: trailer | off | off | off | off | warn | off |
+| [P0020](P0020.md) | [commit-mixed-move](P0020.md) | a commit that moves a file does not also edit it beyond its paths | off | off | off | off | warn | off |
 
 ## dead-code
 

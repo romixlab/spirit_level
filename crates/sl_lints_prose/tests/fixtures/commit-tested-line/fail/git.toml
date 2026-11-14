@@ -1,0 +1,8 @@
+[[commit]]
+message = "Add the parser"
+
+[[commit]]
+message = "Fix the parser\n\nTested: in the body is no trailer.\n\nCo-Authored-By: A <a@example.org>"
+
+[[commit]]
+message = "Speed up the parser\n\nTested:"

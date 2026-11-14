@@ -505,7 +505,8 @@ struct GitCase {
 impl GitCase {
     /// Copies `project` into a fresh directory, commits every file but the `untracked` ones on `main`, then
     /// adds each `[[commit]]` on a branch `work`: its `message`, where `{sha:N}` is the 12-hex hash of commit N (0 is
-    /// the initial one), writing its `files` table of path and text (none: an empty commit)
+    /// the initial one), writing its `files` table of path and text and deleting its `remove` list (none: an empty
+    /// commit)
     fn make(case_dir: &Path, project: &Path, id: &str) -> Result<Self, String> {
         let spec: toml_edit::DocumentMut = std::fs::read_to_string(case_dir.join("git.toml"))
             .map_err(|e| format!("git.toml: {e}"))?
@@ -557,6 +558,12 @@ impl GitCase {
                             std::fs::create_dir_all(parent).map_err(|e| format!("{path}: {e}"))?;
                         }
                         std::fs::write(&p, text.as_str().unwrap_or_default())
+                            .map_err(|e| format!("{path}: {e}"))?;
+                    }
+                }
+                if let Some(gone) = c.get("remove").and_then(|r| r.as_array()) {
+                    for path in gone.iter().filter_map(|v| v.as_str()) {
+                        std::fs::remove_file(repo.dir.join(path))
                             .map_err(|e| format!("{path}: {e}"))?;
                     }
                 }
