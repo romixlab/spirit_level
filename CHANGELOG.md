@@ -9,6 +9,10 @@
 - `exact-units-plain-number` (C0034): indices, counts, sequence numbers and `Duration` as exact_units types; tier `units-strict` (CODE-11).
 - `exact-units-in-bodies` (C0036): unit-named locals, literals, casts, float maths, comparisons, conversions; tier `units-paranoid` (CODE-11).
 
+### Changed
+
+- `unit-suffix` runs only where `exact-units-quantity` is turned off: the unit goes into the type (CODE-11).
+
 ## [0.3.0] - 2026-11-14
 
 ### Added

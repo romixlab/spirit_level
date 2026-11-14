@@ -29,3 +29,5 @@ When the crate gives the value a range, the suggestion carries it as bounds. A r
 1. Add `exact_units` to the crate's dependencies, with the feature of the unit group (`time`, `electrical`, `dimensionless`).
 2. Replace the plain type with the suggested one, and drop the unit word from the name: `timeout: Millis<u32>`.
 3. Where the suggestion leaves `P`, pick the scale the value is stored in: `One`, `Milli`, `Micro`, or a `Rational` for a register step.
+
+A project that keeps units in names instead turns this lint off. Then [unit-suffix](C0018.md) runs and checks that each name carries its unit.

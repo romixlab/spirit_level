@@ -11,6 +11,8 @@ use syn::visit::Visit;
 const CONTRACTS: &str = "sized-ints-in-contracts";
 const UNITS: &str = "unit-suffix";
 const READS: &str = "unbounded-read";
+/// The lint that asks for the unit in the type; `unit-suffix` runs only where a project turned it off
+const TYPED: &str = "exact-units-quantity";
 
 const NUMERIC: &[&str] = &[
     "u8", "u16", "u32", "u64", "u128", "usize", "i8", "i16", "i32", "i64", "i128", "isize", "f32",
@@ -42,6 +44,7 @@ pub(crate) fn run(cx: &Context<'_>, pkg: &Package) {
             units: units.list("units"),
             methods: reads.list("methods"),
             bounds: reads.list("bounds"),
+            suffix: cx.enabled(UNITS) && !cx.enabled(TYPED),
             found: Vec::new(),
         };
         v.visit_file(&ast);
@@ -72,6 +75,8 @@ struct V<'p> {
     units: &'p [String],
     methods: &'p [String],
     bounds: &'p [String],
+    /// Whether `unit-suffix` runs: it is on and the unit does not go into the type
+    suffix: bool,
     found: Vec<Found>,
 }
 
@@ -114,7 +119,7 @@ fn is_numeric(ty: &syn::Type) -> bool {
 
 impl V<'_> {
     fn unit(&mut self, name: &syn::Ident, ty: &syn::Type, what: &str) {
-        if !is_numeric(ty) {
+        if !self.suffix || !is_numeric(ty) {
             return;
         }
         let n = name.to_string();
