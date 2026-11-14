@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-11-14
+
 ### Added
 
 - Each tier declares its Clippy set; `tier-clippy-set` (M0025) checks `[lints.clippy]` and `clippy.toml` (TIER-4).
@@ -10,7 +12,6 @@
 
 - spirit_level runs the big tier's Clippy set itself (TIER-4).
 - Multi-line help is indented in text output (TIER-4).
-
 - function-complexity (S0002) limit 25 -> 15.
 - Theme overrides folder renamed `docs-overrides/`.
 - Tier TOMLs moved to `tiers/` at the repo root.
