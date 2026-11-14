@@ -1,0 +1,10 @@
+[lints.workspace-lints]
+level = "deny"
+reason = "fixture"
+
+[map.layers.utils]
+allow = ["utils"]
+
+[map.crates]
+fx_a = { layer = "utils" }
+fx_ffi = { layer = "utils", unsafe = true }

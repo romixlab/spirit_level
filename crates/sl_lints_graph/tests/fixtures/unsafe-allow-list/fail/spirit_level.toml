@@ -11,3 +11,4 @@ allow = ["utils", "model"]
 [map.crates]
 ffi = { layer = "utils", unsafe = true }
 safe = { layer = "utils" }
+cmds = { layer = "utils" }

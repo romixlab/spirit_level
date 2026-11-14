@@ -1,0 +1,8 @@
+[package]
+name = "registry"
+version = "0.1.0"
+edition = "2024"
+description = "commands registered with linkme, marked unsafe in the map"
+
+[lints.rust]
+unsafe_code = "deny"

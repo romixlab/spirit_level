@@ -1,0 +1,10 @@
+[package]
+name = "fx_ffi"
+version = "0.1.0"
+edition.workspace = true
+
+[lints.rust]
+unsafe_code = "deny"
+
+[lints.clippy]
+dbg_macro = "deny"

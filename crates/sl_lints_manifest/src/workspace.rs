@@ -3,7 +3,7 @@
 use crate::at;
 use sl_analysis::Context;
 use sl_core::{Diagnostic, Edit, Fix, Span};
-use sl_model::{Package, TomlFile};
+use sl_model::{Package, TomlFile, toml_edit};
 
 pub(crate) fn run(cx: &Context<'_>) {
     let p = cx.project;
@@ -68,6 +68,15 @@ pub(crate) fn run(cx: &Context<'_>) {
             .and_then(|v| v.as_bool())
             == Some(true)
         {
+            continue;
+        }
+        if cx
+            .map()
+            .and_then(|m| m.crates.get(&pkg.name))
+            .is_some_and(|c| c.r#unsafe)
+            && pkg.manifest.get(&["lints"]).is_some()
+        {
+            copied_lints(cx, root, pkg);
             continue;
         }
         let mut d = Diagnostic::new(
@@ -211,7 +220,7 @@ fn inherit_fix(m: &TomlFile, key: &str) -> Option<Fix> {
 }
 
 /// Every dependency entry of a manifest: (table path, key, item)
-pub(crate) fn dep_entries(m: &TomlFile) -> Vec<(Vec<&str>, &str, &sl_model::toml_edit::Item)> {
+pub(crate) fn dep_entries(m: &TomlFile) -> Vec<(Vec<&str>, &str, &toml_edit::Item)> {
     let mut out = Vec::new();
     for table in ["dependencies", "dev-dependencies", "build-dependencies"] {
         if let Some(t) = m.get(&[table]).and_then(|t| t.as_table_like()) {
@@ -232,4 +241,53 @@ pub(crate) fn dep_entries(m: &TomlFile) -> Vec<(Vec<&str>, &str, &sl_model::toml
         }
     }
     out
+}
+
+/// A lint's level and priority as written: `"deny"` or `{ level = "deny", priority = -1 }`
+fn level(item: &toml_edit::Item) -> Option<(String, i64)> {
+    if let Some(l) = item.as_str() {
+        return Some((l.to_owned(), 0));
+    }
+    let level = item.get("level")?.as_str()?.to_owned();
+    let priority = item
+        .get("priority")
+        .and_then(toml_edit::Item::as_integer)
+        .unwrap_or(0);
+    Some((level, priority))
+}
+
+/// A crate the map marks unsafe cannot inherit a forbidden `unsafe_code` (cargo takes `workspace = true` or a
+/// table of its own, never both), so it copies the workspace lints: every one at the same level, except
+/// `rust.unsafe_code`
+fn copied_lints(cx: &Context<'_>, root: &TomlFile, pkg: &Package) {
+    let Some(groups) = root
+        .get(&["workspace", "lints"])
+        .and_then(|t| t.as_table_like())
+    else {
+        return;
+    };
+    for (group, lints) in groups.iter() {
+        let Some(lints) = lints.as_table_like() else {
+            continue;
+        };
+        for (lint, want) in lints.iter() {
+            if group == "rust" && lint == "unsafe_code" {
+                continue;
+            }
+            let have = pkg.manifest.get(&["lints", group, lint]).and_then(level);
+            if have.is_some() && have == level(want) {
+                continue;
+            }
+            cx.emit(
+                Diagnostic::new(
+                    "workspace-lints",
+                    format!("{}:lints.{group}.{lint}", pkg.name),
+                    format!("{} is marked unsafe and copies the workspace lints, but not {group}.{lint} as the workspace sets it", pkg.name),
+                )
+                .span(at(pkg, &["lints", group, lint]))
+                .krate(&pkg.name)
+                .help(format!("copy `{lint}` from [workspace.lints.{group}] into its [lints.{group}] at the same level")),
+            );
+        }
+    }
 }

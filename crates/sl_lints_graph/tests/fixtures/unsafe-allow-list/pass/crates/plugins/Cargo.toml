@@ -1,0 +1,5 @@
+[package]
+name = "plugins"
+version = "0.1.0"
+edition = "2024"
+description = "plugins registered with inventory, which compiles under forbid(unsafe_code)"

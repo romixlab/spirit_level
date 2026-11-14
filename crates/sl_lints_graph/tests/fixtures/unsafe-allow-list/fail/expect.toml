@@ -4,6 +4,10 @@ at = "Cargo.toml"
 contains = "does not set unsafe_code"
 
 [[finding]]
+at = "crates/cmds/src/lib.rs:2"
+contains = "a linkme distributed_slice element"
+
+[[finding]]
 at = "crates/safe/src/lib.rs:3"
 contains = "has an unsafe impl"
 

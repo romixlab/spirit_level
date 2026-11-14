@@ -8,6 +8,27 @@ use sl_model::{FileKind, Project};
 use syn::spanned::Spanned;
 use syn::visit::Visit;
 
+/// An attribute rustc's `unsafe_code` lint fires on: `no_mangle`, `export_name`, `link_section` (bare or in
+/// `unsafe(...)`), and a linkme `distributed_slice(NAME)` element, which expands to a `link_section`
+fn unsafe_attribute(a: &syn::Attribute) -> Option<&'static str> {
+    let path = a.path();
+    if path.is_ident("unsafe") {
+        return Some("an unsafe attribute");
+    }
+    if ["no_mangle", "export_name", "link_section"]
+        .iter()
+        .any(|n| path.is_ident(n))
+    {
+        return Some("a no_mangle, export_name or link_section attribute");
+    }
+    let element = path
+        .segments
+        .last()
+        .is_some_and(|s| s.ident == "distributed_slice")
+        && matches!(a.meta, syn::Meta::List(_));
+    element.then_some("a linkme distributed_slice element")
+}
+
 /// The first `unsafe` of a file: (line, what)
 fn first_unsafe(file: &syn::File) -> Option<(u32, &'static str)> {
     struct V(Option<(u32, &'static str)>);
@@ -40,6 +61,9 @@ fn first_unsafe(file: &syn::File) -> Option<(u32, &'static str)> {
             syn::visit::visit_item_trait(self, t);
         }
         fn visit_attribute(&mut self, a: &'ast syn::Attribute) {
+            if let Some(what) = unsafe_attribute(a) {
+                self.0.get_or_insert((a.span().start().line as u32, what));
+            }
             if (a.path().is_ident("allow") || a.path().is_ident("expect"))
                 && a.meta
                     .require_list()

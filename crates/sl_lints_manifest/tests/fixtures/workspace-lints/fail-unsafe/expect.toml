@@ -1,0 +1,7 @@
+[[finding]]
+at = "crates/fx_ffi/Cargo.toml:6"
+contains = "not rust.missing_docs"
+
+[[finding]]
+at = "crates/fx_ffi/Cargo.toml:10"
+contains = "not clippy.dbg_macro"

@@ -11,3 +11,5 @@ allow = ["utils", "model"]
 [map.crates]
 ffi = { layer = "utils", unsafe = true }
 safe = { layer = "utils" }
+registry = { layer = "utils", unsafe = true }
+plugins = { layer = "utils" }
