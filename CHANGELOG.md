@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.2.7] - 2026-11-14
+
 ### Added
 
 - Tiers `ui` and `egui`: 13 UI lints (U0001-U0013) and the "UI practices" catalogue page (UI-1).
