@@ -1,0 +1,14 @@
+[package]
+name = "fx"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.88"
+description = "fixture"
+license = "MIT"
+publish = false
+
+[dependencies]
+a = { git = "https://example.org/a", branch = "main", default-features = false }
+b = { version = "1", default-features = false }
+
+[workspace]

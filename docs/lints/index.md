@@ -126,7 +126,7 @@ Every lint, grouped by category, with its stable code and its level in each ship
 |---|---|---|---|---|---|---|---|---|
 | [M0001](M0001.md) | [default-features-off](M0001.md) | third-party dependencies are declared with default-features = false | warn | warn | warn | deny | off | off |
 | [M0002](M0002.md) | [duplicate-versions](M0002.md) | no crate is in the dependency graph in two versions | off | warn | warn | deny | off | off |
-| [M0003](M0003.md) | [git-dependency-pins](M0003.md) | git dependencies follow a branch, with no rev or tag pin | warn | warn | deny | deny | off | off |
+| [M0003](M0003.md) | [git-dependency-pins](M0003.md) | git dependencies are pinned the way the project's policy says: a branch by default | warn | warn | deny | deny | off | off |
 | [M0004](M0004.md) | [no-sys-crates](M0004.md) | the dependency graph has no -sys crates and no C build steps | deny | deny | deny | deny | off | off |
 | [M0005](M0005.md) | [path-outside-workspace](M0005.md) | path dependencies stay inside the workspace | deny | deny | deny | deny | off | off |
 

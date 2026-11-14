@@ -39,10 +39,12 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 ## MAN - manifest and repo lints
 
 - ✅ `MAN-1` 25 lints: metadata, inheritance, workspace lints and deps, default features, -sys, duplicates, pins, paths, profiles, toolchain, repo files, changelog, justfile, feature docs, naming.
+- ✅ `MAN-2` Pin policy per project: `git-dependency-pins` checks branch, default-branch, dev-branch, tag, release or any, separately for own repos.
 
 ## GRAPH - crate graph and map
 
 - ✅ `GRAPH-1` Map completeness, layer edges, forbidden closures, external form, third-party placement, `_core` rules, crate cycles, crate table, unsafe allow-list (`sl_lints_graph`).
+- ✅ `GRAPH-2` linkme elements and unsafe attributes count as unsafe; crates marked unsafe copy the workspace lints.
 
 ## SIZE - size and complexity
 

@@ -43,14 +43,14 @@ wgpu = ["foo_gpu"]                  # only these crates may depend on wgpu direc
 | `crates.<name>.layer` | the crate's layer (required) |
 | `crates.<name>.deps` | the workspace crates it may depend on; absent: any its layer allows |
 | `crates.<name>.desc` | its description, when the map is where it is written |
-| `unsafe` | may allow `unsafe` code; every other crate forbids it |
+| `unsafe` | may allow `unsafe` code, in a `[lints]` table of its own that copies the workspace lints; every other crate forbids it |
 | `generated` | generated code, checked in: exempt from size limits |
 | `stable` | a published, stable API: semver-checked |
 | `no_std` | builds without std |
 | `wasm` | builds for `wasm32-unknown-unknown` |
 | `deterministic` | promises bit-identical results on every platform |
 | `forbid.<crate>` | crates (workspace or third-party) its closure must never reach |
-| `external.<crate>` | a crate of another project taken by git: its URL, branch and the layer that may use it |
+| `external.<crate>` | a crate of another project taken by git: its URL, its branch (optional) and the layer that may use it; how it is pinned is `git-dependency-pins`' policy |
 | `third-party.<crate>` | workspace crates that alone may depend on a heavy third-party crate |
 
 Unknown keys are errors, like everywhere in the configuration. Dev-dependencies are exempt from the layer rule but not from `forbid`. To fix an edge that points the wrong way, move a crate; do not reorder the layers.

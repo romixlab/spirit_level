@@ -1,0 +1,4 @@
+[params]
+policy = "tag"
+own = ["github.com/acme"]
+own-policy = "default-branch"

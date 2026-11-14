@@ -39,8 +39,14 @@ lint!(NO_SYS_CRATES, "M0004", "no-sys-crates", "dependencies", "the dependency g
     needs: [Need::Resolve], fix: None);
 lint!(DUPLICATE_VERSIONS, "M0002", "duplicate-versions", "dependencies", "no crate is in the dependency graph in two versions",
     params: [("allow", StrList, "[]", "crates allowed in several versions")], needs: [Need::Resolve], fix: None);
-lint!(GIT_DEPENDENCY_PINS, "M0003", "git-dependency-pins", "dependencies", "git dependencies follow a branch, with no rev or tag pin",
-    params: [("forbid", StrList, "[\"rev\", \"tag\"]", "the pins that are refused")], needs: [], fix: None);
+lint!(GIT_DEPENDENCY_PINS, "M0003", "git-dependency-pins", "dependencies", "git dependencies are pinned the way the project's policy says: a branch by default",
+    params: [
+        ("policy", Choice["branch", "default-branch", "dev-branch", "tag", "release", "any"], "\"branch\"", "how a git dependency on another project's repo is pinned"),
+        ("own", StrList, "[]", "git URL prefixes of the project's own repos (`github.com/org`, a host)"),
+        ("own-policy", Choice["branch", "default-branch", "dev-branch", "tag", "release", "any"], "\"branch\"", "how a git dependency on one of the project's own repos is pinned"),
+        ("dev-branch", Str, "\"dev\"", "the branch the `dev-branch` policy follows"),
+    ],
+    needs: [], fix: None);
 lint!(PATH_OUTSIDE_WORKSPACE, "M0005", "path-outside-workspace", "dependencies", "path dependencies stay inside the workspace",
     params: [], needs: [], fix: None);
 lint!(PROFILE_DEFAULTS, "M0017", "profile-defaults", "repo", "the dev profile splits debug info and a deploy profile builds incrementally",

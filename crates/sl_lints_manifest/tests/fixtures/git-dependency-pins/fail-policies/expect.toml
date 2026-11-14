@@ -1,0 +1,16 @@
+[params]
+policy = "tag"
+own = ["github.com/acme"]
+own-policy = "default-branch"
+
+[[finding]]
+at = "Cargo.toml:11"
+contains = "the `default-branch` policy for the project's own repos"
+
+[[finding]]
+at = "Cargo.toml:12"
+contains = "the `tag` policy for other projects' repos"
+
+[[finding]]
+at = "Cargo.toml:13"
+contains = "comes from git with no pin"

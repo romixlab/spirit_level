@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+### Added
+
+- Choice parameters: a value outside the listed strings is a configuration error (MAN-2).
+
+### Changed
+
+- git-dependency-pins (M0003) checks a per-project pin policy, separately for own repos (MAN-2).
+- external-form (G0005) leaves rev and tag to git-dependency-pins (MAN-2).
+- workspace-lints (M0024) accepts a copied lint table in crates the map marks unsafe (GRAPH-2).
+
+### Fixed
+
+- unsafe-allow-list (G0010) sees linkme elements and no_mangle, export_name, link_section (GRAPH-2).
+
 ## [0.2.1] - 2026-11-14
 
 ### Added

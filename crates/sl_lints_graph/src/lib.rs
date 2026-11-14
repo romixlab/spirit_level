@@ -7,7 +7,7 @@ mod table;
 use sl_analysis::{Analysis, Context, lint};
 use sl_config::Map;
 use sl_core::{Diagnostic, LintMeta, Need, Span};
-use sl_model::{DepKind, Package, Project};
+use sl_model::{DepKind, Package, Project, git_url_key};
 use std::collections::{BTreeMap, BTreeSet};
 
 pub use scc::strongly_connected;
@@ -194,17 +194,6 @@ fn layer_edges(cx: &Context<'_>, p: &Project, map: &Map) {
     }
 }
 
-fn norm_url(u: &str) -> String {
-    let u = u.trim_end_matches('/').trim_end_matches(".git");
-    let u = u.strip_prefix("ssh://").unwrap_or(u);
-    let u = u
-        .strip_prefix("https://")
-        .or_else(|| u.strip_prefix("http://"))
-        .unwrap_or(u);
-    let u = u.strip_prefix("git@").unwrap_or(u);
-    u.replacen(':', "/", 1).to_ascii_lowercase()
-}
-
 fn external_form(cx: &Context<'_>, p: &Project, map: &Map) {
     let mut seen = BTreeSet::new();
     for pkg in &p.packages {
@@ -231,15 +220,10 @@ fn external_form(cx: &Context<'_>, p: &Project, map: &Map) {
                 continue;
             };
             let mut why = Vec::new();
-            if norm_url(url) != norm_url(&ext.git) {
+            if git_url_key(url) != git_url_key(&ext.git) {
                 why.push(format!("it comes from {url}, the map says {}", ext.git));
             }
             let pins = d.git_pins();
-            for (k, v) in &pins {
-                if k == "rev" || k == "tag" {
-                    why.push(format!("it is pinned by {k} = {v:?}"));
-                }
-            }
             let branch = pins
                 .iter()
                 .find(|(k, _)| k == "branch")
@@ -268,7 +252,7 @@ fn external_form(cx: &Context<'_>, p: &Project, map: &Map) {
                         .span(dep_span(pkg, d))
                         .span(Span::new(map.file.clone(), ext.line).label("[map.external] entry"))
                         .krate(&pkg.name)
-                        .help("take it by git on the listed branch with no rev or tag (Cargo.lock fixes the commit), from a layer that may see its role"),
+                        .help("take it by git from the listed URL (and branch, when it names one), from a layer that may see its role; `git-dependency-pins` checks rev and tag"),
                 );
             }
         }

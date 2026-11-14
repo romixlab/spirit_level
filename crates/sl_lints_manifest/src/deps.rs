@@ -23,7 +23,6 @@ pub(crate) fn run(cx: &Context<'_>) {
     let p = cx.project;
     let mut seen = BTreeSet::new();
     let allow_default = cx.params("default-features-off").list("allow");
-    let forbid_pins = cx.params("git-dependency-pins").list("forbid");
     for pkg in &p.packages {
         for d in &pkg.deps {
             if d.member {
@@ -56,20 +55,16 @@ pub(crate) fn run(cx: &Context<'_>) {
                 }
                 cx.emit(diag);
             }
-            let pins: Vec<(String, String)> = d
-                .git_pins()
-                .into_iter()
-                .filter(|(k, _)| forbid_pins.contains(k))
-                .collect();
-            if !pins.is_empty() && seen.insert(("pin", item.clone())) {
-                let what: Vec<String> = pins.iter().map(|(k, v)| format!("{k} = {v:?}")).collect();
+            if let Some(why) = pin_policy(cx, d)
+                && seen.insert(("pin", item.clone()))
+            {
                 let mut diag = Diagnostic::new(
                     "git-dependency-pins",
                     &item,
-                    format!("{} is pinned by {}", d.name, what.join(", ")),
+                    format!("{} {}", d.name, why.message),
                 )
                 .span(span.clone())
-                .help("drop the pin and follow the branch: Cargo.lock fixes the commit, and `cargo update -p` moves it on");
+                .help(why.help);
                 if let Some(k) = &krate {
                     diag = diag.krate(k);
                 }
@@ -95,6 +90,65 @@ pub(crate) fn run(cx: &Context<'_>) {
     }
 
     resolved(cx);
+}
+
+/// A git dependency that breaks the pin policy: what it names and what the policy asks for
+struct PinBreak {
+    message: String,
+    help: String,
+}
+
+/// Checks a git dependency against `policy`, or `own-policy` when its URL is under one of `own`
+fn pin_policy(cx: &Context<'_>, d: &Dep) -> Option<PinBreak> {
+    d.git_url()?;
+    let params = cx.params("git-dependency-pins");
+    let own = params.list("own").iter().any(|o| d.git_under(o));
+    let (key, whose) = if own {
+        ("own-policy", "the project's own repos")
+    } else {
+        ("policy", "other projects' repos")
+    };
+    let policy = params.str(key);
+    let pins = d.git_pins();
+    let pin = |k: &str| pins.iter().find(|(p, _)| p == k).map(|(_, v)| v.as_str());
+    let unpinned = pin("rev").is_none() && pin("tag").is_none();
+    let dev = params.str("dev-branch");
+    let (ok, want) = match policy {
+        "any" => return None,
+        "branch" => (
+            unpinned,
+            "a branch or the default branch, with no rev or tag".to_owned(),
+        ),
+        "default-branch" => (
+            pins.is_empty(),
+            "the default branch, with no branch, rev or tag".to_owned(),
+        ),
+        "dev-branch" => (
+            unpinned && pin("branch") == Some(dev),
+            format!("branch = {dev:?}, with no rev or tag"),
+        ),
+        "tag" => (
+            pin("tag").is_some() && pin("rev").is_none() && pin("branch").is_none(),
+            "a tag, with no rev or branch".to_owned(),
+        ),
+        // release
+        _ => (false, "a release from the registry, not git".to_owned()),
+    };
+    if ok {
+        return None;
+    }
+    let named: Vec<String> = pins.iter().map(|(k, v)| format!("{k} = {v:?}")).collect();
+    let named = if named.is_empty() {
+        "comes from git with no pin".to_owned()
+    } else {
+        format!("is pinned by {}", named.join(", "))
+    };
+    Some(PinBreak {
+        message: format!("{named}; the `{policy}` policy for {whose} asks for {want}"),
+        help: format!(
+            "write it as {want}; the project sets this as `{key}` under [lints.git-dependency-pins]"
+        ),
+    })
 }
 
 /// The lints on the resolved graph: -sys crates and C build steps, duplicate versions

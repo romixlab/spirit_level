@@ -1,0 +1,6 @@
+[params]
+policy = "release"
+
+[[finding]]
+at = "Cargo.toml:11"
+contains = "a release from the registry"

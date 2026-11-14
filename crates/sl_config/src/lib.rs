@@ -607,7 +607,7 @@ fn params_of(
             }
             _ => errs.push(t.err(
                 &k,
-                format!("{}.{k} must be a {}", meta.id, spec.kind.name()),
+                format!("{}.{k} must be {}", meta.id, spec.kind.expected()),
             )),
         }
     }
@@ -649,11 +649,11 @@ pub fn default_params(meta: &LintMeta) -> Params {
             }
             // spirit-level: allow(panic-in-library) a default that does not fit its kind is a declaration bug; the registry test resolves every lint's defaults
             _ => panic!(
-                "lint {}: the default of {} ({}) is not a {}",
+                "lint {}: the default of {} ({}) is not {}",
                 meta.id,
                 spec.name,
                 spec.default,
-                spec.kind.name()
+                spec.kind.expected()
             ),
         }
     }

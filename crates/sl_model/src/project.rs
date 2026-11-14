@@ -75,6 +75,19 @@ pub struct Dep {
     pub member: bool,
 }
 
+/// A git URL as `host/path`, lower case: `https://`, `ssh://`, `git@host:`, a trailing `/` and `.git` dropped, so
+/// two spellings of one repo compare equal
+pub fn git_url_key(url: &str) -> String {
+    let u = url.trim_end_matches('/').trim_end_matches(".git");
+    let u = u.strip_prefix("ssh://").unwrap_or(u);
+    let u = u
+        .strip_prefix("https://")
+        .or_else(|| u.strip_prefix("http://"))
+        .unwrap_or(u);
+    let u = u.strip_prefix("git@").unwrap_or(u);
+    u.replacen(':', "/", 1).to_ascii_lowercase()
+}
+
 impl Dep {
     /// The key it is declared under in the manifest
     pub fn key(&self) -> &str {
@@ -107,6 +120,16 @@ impl Dep {
             .filter_map(|kv| kv.split_once('='))
             .map(|(k, v)| (k.to_owned(), v.to_owned()))
             .collect()
+    }
+
+    /// Whether its git URL is under `prefix` (`github.com/org`, a host), compared as [`git_url_key`]s
+    pub fn git_under(&self, prefix: &str) -> bool {
+        let (Some(url), prefix) = (self.git_url(), git_url_key(prefix)) else {
+            return false;
+        };
+        git_url_key(url)
+            .strip_prefix(&prefix)
+            .is_some_and(|rest| rest.is_empty() || rest.starts_with('/') || prefix.ends_with('/'))
     }
 
     /// Whether it comes from a registry (crates.io or another)
@@ -615,5 +638,9 @@ mod tests {
         };
         assert_eq!(d.git_url(), Some("https://github.com/a/b"));
         assert_eq!(d.git_pins(), vec![("tag".to_owned(), "v1".to_owned())]);
+        assert!(d.git_under("github.com/a"));
+        assert!(d.git_under("git@github.com:A/"));
+        assert!(!d.git_under("github.com/ab"));
+        assert_eq!(git_url_key("git@github.com:a/b.git"), "github.com/a/b");
     }
 }

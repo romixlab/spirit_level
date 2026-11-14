@@ -1,6 +1,7 @@
 //! Lint parameters: their declared kind and default, and the values a configuration gives them.
 
 use serde::Serialize;
+use std::borrow::Cow;
 use std::collections::BTreeMap;
 use std::fmt;
 
@@ -18,19 +19,39 @@ pub enum ParamKind {
     Str,
     /// A list of strings
     StrList,
+    /// One string of a fixed set (a policy, a mode)
+    Choice(&'static [&'static str]),
 }
 
 impl ParamKind {
     /// How the book names it
-    pub fn name(self) -> &'static str {
+    pub fn name(self) -> Cow<'static, str> {
         match self {
-            Self::Int => "integer",
-            Self::Float => "number",
-            Self::Bool => "boolean",
-            Self::Str => "string",
-            Self::StrList => "list of strings",
+            Self::Int => "integer".into(),
+            Self::Float => "number".into(),
+            Self::Bool => "boolean".into(),
+            Self::Str => "string".into(),
+            Self::StrList => "list of strings".into(),
+            Self::Choice(c) => format!("one of {}", quoted(c)).into(),
         }
     }
+
+    /// How an error names it: with its article
+    pub fn expected(self) -> Cow<'static, str> {
+        match self {
+            Self::Int => "an integer".into(),
+            Self::Choice(_) => self.name(),
+            other => format!("a {}", other.name()).into(),
+        }
+    }
+}
+
+/// `"a", "b", "c"`
+fn quoted(c: &[&str]) -> String {
+    c.iter()
+        .map(|s| format!("{s:?}"))
+        .collect::<Vec<_>>()
+        .join(", ")
 }
 
 /// One declared parameter of a lint
@@ -72,7 +93,7 @@ impl ParamValue {
                 | (Self::Bool(_), ParamKind::Bool)
                 | (Self::Str(_), ParamKind::Str)
                 | (Self::StrList(_), ParamKind::StrList)
-        )
+        ) || matches!((self, kind), (Self::Str(v), ParamKind::Choice(c)) if c.contains(&v.as_str()))
     }
 }
 

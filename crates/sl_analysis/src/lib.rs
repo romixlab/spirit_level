@@ -185,6 +185,9 @@ impl<'a> Context<'a> {
 ///     needs: [], fix: None);
 /// ```
 ///
+/// A parameter that takes one of a fixed set of strings lists them after `Choice`:
+/// `("policy", Choice["branch", "tag"], "\"branch\"", "what a git dependency may name")`.
+///
 /// An adapter of an external tool names the tool and how it is used after the summary:
 ///
 /// ```ignore
@@ -194,7 +197,7 @@ impl<'a> Context<'a> {
 #[macro_export]
 macro_rules! lint {
     ($name:ident, $code:literal, $id:literal, $cat:literal, $summary:literal, tool: ($tool:literal, $use:ident),
-     params: [$(($p:literal, $k:ident, $d:literal, $doc:literal)),* $(,)?],
+     params: [$(($p:literal, $k:ident $([$($c:literal),+ $(,)?])?, $d:literal, $doc:literal)),* $(,)?],
      needs: [$($need:expr),* $(,)?], fix: $fix:ident) => {
         #[doc = concat!("`", $code, "` `", $id, "`: ", $summary)]
         pub static $name: $crate::reexport::LintMeta = $crate::reexport::LintMeta {
@@ -205,7 +208,7 @@ macro_rules! lint {
             docs: include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/", $id, ".md")),
             params: &[$($crate::reexport::ParamSpec {
                 name: $p,
-                kind: $crate::reexport::ParamKind::$k,
+                kind: $crate::reexport::ParamKind::$k $((&[$($c),+]))?,
                 default: $d,
                 doc: $doc,
             }),*],
@@ -218,7 +221,7 @@ macro_rules! lint {
         };
     };
     ($name:ident, $code:literal, $id:literal, $cat:literal, $summary:literal,
-     params: [$(($p:literal, $k:ident, $d:literal, $doc:literal)),* $(,)?],
+     params: [$(($p:literal, $k:ident $([$($c:literal),+ $(,)?])?, $d:literal, $doc:literal)),* $(,)?],
      needs: [$($need:expr),* $(,)?], fix: $fix:ident) => {
         #[doc = concat!("`", $code, "` `", $id, "`: ", $summary)]
         pub static $name: $crate::reexport::LintMeta = $crate::reexport::LintMeta {
@@ -229,7 +232,7 @@ macro_rules! lint {
             docs: include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/", $id, ".md")),
             params: &[$($crate::reexport::ParamSpec {
                 name: $p,
-                kind: $crate::reexport::ParamKind::$k,
+                kind: $crate::reexport::ParamKind::$k $((&[$($c),+]))?,
                 default: $d,
                 doc: $doc,
             }),*],

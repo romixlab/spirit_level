@@ -1,7 +1,7 @@
 
 [[finding]]
 at = "crates/a/Cargo.toml:8"
-contains = "pinned by tag"
+contains = "follows branch dev, the map says main"
 
 [[finding]]
 at = "crates/a/Cargo.toml:9"

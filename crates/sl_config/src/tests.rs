@@ -24,6 +24,12 @@ static A: LintMeta = LintMeta {
             default: "0.5",
             doc: "",
         },
+        ParamSpec {
+            name: "mode",
+            kind: ParamKind::Choice(&["lines", "bytes"]),
+            default: "\"lines\"",
+            doc: "",
+        },
     ],
     needs: &[],
     fix: FixKind::None,
@@ -129,9 +135,25 @@ fn reasons_types_and_levels_are_checked() {
     assert!(m.iter().any(|s| s.contains("level = \"error\"")), "{m:?}");
     assert!(
         m.iter()
-            .any(|s| s.contains("must be a integer") || s.contains("must be a")),
+            .any(|s| s.contains("crate-lines.warn-above must be an integer")),
         "{m:?}"
     );
+}
+
+#[test]
+fn a_choice_takes_only_its_strings() {
+    let m = messages(load(
+        "extends = \"small\"\n[lints.crate-lines]\nlevel = \"warn\"\nreason = \"r\"\nmode = \"words\"\n",
+    ));
+    assert!(
+        m.iter()
+            .any(|s| s.contains("crate-lines.mode must be one of \"lines\", \"bytes\"")),
+        "{m:?}"
+    );
+    let ok = load(
+        "extends = \"small\"\n[lints.crate-lines]\nlevel = \"warn\"\nreason = \"r\"\nmode = \"bytes\"\n",
+    );
+    assert!(ok.is_ok(), "{:?}", messages(ok));
 }
 
 #[test]

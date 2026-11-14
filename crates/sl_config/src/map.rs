@@ -70,7 +70,7 @@ pub struct MapCrate {
 pub struct External {
     /// The git URL
     pub git: String,
-    /// The branch it follows (no rev, no tag)
+    /// The branch it follows, when the entry names one
     pub branch: Option<String>,
     /// The layer whose crates may use it (and the layers above that allow that layer)
     pub role: Option<String>,

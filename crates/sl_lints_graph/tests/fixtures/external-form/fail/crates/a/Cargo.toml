@@ -5,5 +5,5 @@ edition = "2024"
 description = "the a crate"
 
 [dependencies]
-exact_units = { git = "https://github.com/romixlab/exact_units", tag = "v1" }
+exact_units = { git = "https://github.com/romixlab/exact_units", branch = "dev" }
 napier = { git = "https://github.com/romixlab/napier" }
