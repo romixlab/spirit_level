@@ -251,11 +251,11 @@ nav = [
 # spirit-level:book-nav-end
 
 # The look: the logo (assets/logo, copied into docs/assets/logo by `just docs-assets`), its lime as the accent
-# (docs/stylesheets/brand.css), apple-touch and ICO links in overrides/main.html
+# (docs/stylesheets/brand.css), apple-touch and ICO links in docs-overrides/main.html
 extra_css = ["stylesheets/brand.css"]
 
 [project.theme]
-custom_dir = "overrides"
+custom_dir = "docs-overrides"
 favicon = "assets/logo/icon-small.svg"
 logo = "assets/logo/mark-light.svg"
 language = "en"
