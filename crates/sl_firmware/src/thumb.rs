@@ -19,6 +19,9 @@ pub struct Code {
     pub calls: Vec<u64>,
     /// `blx rN`: calls through a pointer
     pub indirect: u32,
+    /// Each call instruction of [`Self::calls`] with its target, in code order: `(address of the instruction,
+    /// target)`
+    pub sites: Vec<(u64, u64)>,
 }
 
 fn hw(code: &[u8], i: usize) -> Option<u16> {
@@ -94,6 +97,7 @@ pub fn read(addr: u64, code: &[u8], literal: impl Fn(u64) -> Option<u32>) -> Cod
                 // a b.w inside the function is a jump, not a call
                 if link || !(addr..end).contains(&t) {
                     out.calls.push(t);
+                    out.sites.push((pc, t));
                 }
             }
             i += 4;
@@ -108,6 +112,7 @@ pub fn read(addr: u64, code: &[u8], literal: impl Fn(u64) -> Option<u32>) -> Cod
                 let t = (addr as i64 + i as i64 + 4 + off) as u64;
                 if !(addr..end).contains(&t) {
                     out.calls.push(t);
+                    out.sites.push((addr + i as u64, t));
                 }
             }
             i += 2;

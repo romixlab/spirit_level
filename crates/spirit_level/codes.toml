@@ -227,6 +227,7 @@ F0106 = { id = "cls-1", group = "firmware", status = "active" }
 F0107 = { id = "cls-2", group = "firmware", status = "active" }
 F0108 = { id = "flt-11", group = "firmware", status = "active" }
 F0109 = { id = "flt-12", group = "firmware", status = "active" }
+F0110 = { id = "pan-1", group = "firmware", status = "active" }
 U0001 = { id = "ui-raw-spawn", group = "ui", status = "active" }
 U0002 = { id = "ui-blocking-call", group = "ui", status = "active" }
 U0003 = { id = "ui-colour-literal", group = "ui", status = "active" }

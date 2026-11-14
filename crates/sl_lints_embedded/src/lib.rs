@@ -3,6 +3,9 @@
 //! firmware crate of the project once ([`sl_firmware::Firmware`]) and runs the enabled checks on it.
 
 mod checks;
+mod panic_sites;
+
+pub use panic_sites::{FirmwarePanics, report as panic_report};
 
 use sl_analysis::{Analysis, Context, lint};
 use sl_core::{Diagnostic, LintMeta, Params, Span};
@@ -62,7 +65,7 @@ macro_rules! declare_checks {
             run: $m::run,
         }),*];
         /// The lints of the checks and of the analysis itself
-        pub(crate) static LINTS: &[&sl_core::LintMeta] = &[&$crate::FIRMWARE_READABLE, $(&$m::META),*];
+        pub(crate) static LINTS: &[&sl_core::LintMeta] = &[&$crate::FIRMWARE_READABLE, &$crate::panic_sites::PAN_1, $(&$m::META),*];
     };
 }
 pub(crate) use declare_checks;
@@ -97,6 +100,9 @@ impl Analysis for Embedded {
                     .krate(fw.name.clone())
                     .help("fix the file: the embedded lints that read it find nothing in it until then"),
                 );
+            }
+            if fw.elf.is_some() && cx.enabled(panic_sites::PAN_1.id) {
+                panic_sites::run(cx, &fw);
             }
             for c in checks::CHECKS {
                 if !cx.enabled(c.meta.id) || !c.needs.iter().all(|n| n.met(&fw)) {

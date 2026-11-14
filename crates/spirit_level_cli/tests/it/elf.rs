@@ -62,3 +62,66 @@ fn a_missing_elf_is_a_usage_error() {
     assert_eq!(out.status.code(), Some(2));
     assert!(String::from_utf8_lossy(&out.stderr).contains("--elf no/such/file.elf: no such file"));
 }
+
+fn panics(project: &str, extra: &[&str]) -> (i32, String) {
+    let dir = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../sl_lints_embedded/tests/projects")
+        .join(project);
+    let elf = dir.join("firmware.elf");
+    let out = Command::new(env!("CARGO_BIN_EXE_spl"))
+        .arg("panics")
+        .arg(&dir)
+        .arg("--elf")
+        .arg(&elf)
+        .args(extra)
+        .env("SPIRIT_LEVEL_TODAY", "2026-11-13")
+        .output()
+        .expect("run spl");
+    (
+        out.status.code().unwrap_or(-1),
+        String::from_utf8_lossy(&out.stdout).into_owned(),
+    )
+}
+
+#[test]
+fn panics_lists_every_site_of_the_elf() {
+    let (code, text) = panics("panic_sites_service", &[]);
+    assert_eq!(code, 0, "{text}");
+    assert!(
+        text.contains("panic_sites (firmware.elf): 16 panic sites"),
+        "{text}"
+    );
+    assert!(text.contains("src/power.rs:17:5"), "{text}");
+    assert!(
+        text.contains("panic 0    panic_sites::power::duty  assert!  [control]"),
+        "{text}"
+    );
+    assert!(
+        text.contains("unwrap 0   panic_sites::led::brightness  [service]"),
+        "{text}"
+    );
+    assert!(
+        text.contains("(folded: no line)            bounds 0   _start"),
+        "{text}"
+    );
+    assert!(text.contains("by kind: bounds 2, division 1, expect 1, overflow 5, panic 4, refcell 1, slice 1, unwrap 1"), "{text}");
+}
+
+#[test]
+fn panics_as_json_and_as_acknowledgement_entries() {
+    let (code, text) = panics("panic_sites", &["--tier", "embedded", "--format", "json"]);
+    assert_eq!(code, 0, "{text}");
+    let v: serde_json::Value = serde_json::from_str(&text).unwrap();
+    assert_eq!(v["schema"], "spirit_level.panics/1");
+    let sites = v["firmware"][0]["sites"].as_array().unwrap();
+    assert_eq!(sites.len(), 16, "{v}");
+    let expect = sites.iter().find(|s| s["kind"] == "expect").unwrap();
+    assert_eq!(expect["function"], "panic_sites::power::duty");
+    assert_eq!(expect["rel"], "src/power.rs");
+    assert_eq!(expect["place"]["line"], 21);
+
+    let (code, toml) = panics("panic_sites", &["--tier", "embedded", "--ack"]);
+    assert_eq!(code, 0, "{toml}");
+    assert_eq!(toml.matches("[[site]]").count(), 16, "{toml}");
+    assert!(toml.contains("# src/power.rs:21\n[[site]]\nfunction = \"panic_sites::power::duty\"\nkind = \"expect\"\nindex = 0\nreason = \"\"\n"), "{toml}");
+}

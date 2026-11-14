@@ -25,6 +25,7 @@ pub mod build_script;
 pub mod context;
 pub mod elf;
 pub mod memory_x;
+pub mod panics;
 pub mod scan;
 mod source;
 #[cfg(feature = "synth")]

@@ -4,6 +4,8 @@
 
 ### Added
 
+- `spl panics --elf`: each panic site of a release ELF with function, kind, place and class; JSON, `--ack` (TIER-6).
+- `pan-1` (F0110, off): every panic site of the release ELF acknowledged with a reason in `panics.toml` (TIER-6).
 - `compound-assert` (C0030): `assert!(a && b)` outside tests; warn in big and embedded (CODE-10).
 - `assert-message` (C0031): `assert!` or `debug_assert!` without a message; warn in big and embedded (CODE-10).
 - `float-partial-cmp-unwrap` (C0032): `partial_cmp(..).unwrap()` panics on NaN; warn from small (CODE-10).

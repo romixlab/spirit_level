@@ -50,7 +50,8 @@ pulldown-cmark = { version = "0.13", default-features = false }
 # sl_board_model (the board description, read with spans):
 toml = { version = "1", default-features = false, features = ["parse", "serde"] }
 toml_edit = { version = "0.25", default-features = false, features = ["parse", "display"] }
-# sl_firmware (the linked ELF; synthetic fixture ELFs with `write`):
+# sl_firmware (the linked ELF; synthetic fixture ELFs with `write`; its DWARF for the panic sites):
+addr2line = { version = "0.27", default-features = false, features = ["std"] }
 object = { version = "0.38", default-features = false, features = ["read_core", "elf", "std"] }
 quote = { version = "1", default-features = false }
 rustc-demangle = { version = "0.1", default-features = false }

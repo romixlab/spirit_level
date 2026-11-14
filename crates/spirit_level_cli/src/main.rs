@@ -14,6 +14,7 @@ use vc_ui::{Exit, Paint};
 
 mod dependents;
 mod pages;
+mod panics;
 mod tools;
 
 /// The tool's name, in front of its error lines
@@ -111,6 +112,10 @@ enum Cmd {
     /// sentences, figures, headings, links, code
     #[command(after_help = pages::AFTER_HELP)]
     Pages(pages::PagesArgs),
+    /// What can panic in a firmware release: every panic site of the linked ELF with its function, kind, place
+    /// and task class
+    #[command(after_help = panics::AFTER_HELP)]
+    Panics(panics::PanicsArgs),
     /// The external tools of the adapters: where each is found, and installing the pinned versions
     #[command(subcommand)]
     Tools(tools::ToolsCmd),
@@ -238,6 +243,7 @@ fn run(cli: Cli) -> Result<Exit, String> {
         Cmd::Init { path, tier } => init(&path, &tier),
         Cmd::Dependents(a) => dependents::run(a),
         Cmd::Pages(a) => pages::run(a),
+        Cmd::Panics(a) => panics::run(a),
         Cmd::Tools(cmd) => tools::run(cmd),
         Cmd::Book {
             docs,

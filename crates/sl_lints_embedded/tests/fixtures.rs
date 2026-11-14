@@ -1,9 +1,14 @@
 //! Every lint of the embedded analysis against its pass and fail cases. The cases run the firmware projects under
-//! `tests/projects/` (`embedded_bedrock`'s `bedrock_lint` fixtures); a project's `elf.toml` becomes its linked ELF.
+//! `tests/projects/` (`embedded_bedrock`'s `bedrock_lint` fixtures); a project's `elf.toml` becomes its linked ELF,
+//! or its `firmware.elf` is one (built from its source for a thumb target, with debug info).
 
 use std::path::Path;
 
 fn elf(project: &Path) -> Option<Vec<u8>> {
+    // a real ELF, built from the project's source and checked in
+    if let Ok(bytes) = std::fs::read(project.join("firmware.elf")) {
+        return Some(bytes);
+    }
     let text = std::fs::read_to_string(project.join("elf.toml")).ok()?;
     let spec = sl_firmware::synth::Spec::parse(&text)
         .unwrap_or_else(|e| panic!("{}: {e}", project.display()));

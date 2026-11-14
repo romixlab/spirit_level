@@ -1,0 +1,39 @@
+# Acknowledges some sites of the panic_sites firmware: the rest are findings, and the last entries are wrong
+
+[[site]]
+function = "panic_sites::power::duty"
+kind = "panic"
+index = 0
+reason = "a zero period is a broken config table"
+
+[[site]]
+function = "panic_sites::power::duty"
+kind = "panic"
+index = 1
+reason = "on is clamped to the period by the caller"
+
+[[site]]
+function = "panic_sites::led::brightness"
+kind = "bounds"
+index = 0
+reason = "an entry cannot acknowledge a site in a service module"
+
+[[site]]
+function = "panic_sites::power::duty"
+kind = "panic"
+index = 2
+reason = "a stale entry: duty has two panic sites"
+
+[[site]]
+function = "panic_sites::power::arm"
+kind = "refcell"
+index = 0
+reason = ""
+
+[[crate]]
+name = "panic_sites"
+reason = "the project's own crates are acknowledged site by site"
+
+[[crate]]
+name = "embassy_stm32"
+reason = "not linked into this firmware"

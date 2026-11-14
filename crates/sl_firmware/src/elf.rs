@@ -117,6 +117,9 @@ pub struct FnCode {
     pub calls: Vec<usize>,
     /// Calls through a pointer
     pub indirect: u32,
+    /// Each call instruction to a function symbol: the address of the instruction and the callee's index into
+    /// [`Elf::symbols`]
+    pub sites: Vec<(u64, usize)>,
 }
 
 /// The ELF as the checks see it
@@ -136,6 +139,18 @@ pub struct Elf {
     pub symbols: Vec<Symbol>,
     /// Arm Thumb only: one per function symbol with a size, by address
     pub code: Vec<FnCode>,
+    /// The file's bytes, for the DWARF read on demand ([`crate::panics`])
+    pub data: Bytes,
+}
+
+/// The bytes of a file, shared and shown by length only
+#[derive(Clone)]
+pub struct Bytes(pub std::sync::Arc<[u8]>);
+
+impl std::fmt::Debug for Bytes {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{} bytes", self.0.len())
+    }
 }
 
 impl Elf {
@@ -225,6 +240,7 @@ impl Elf {
             segments,
             symbols,
             code: Vec::new(),
+            data: Bytes(data.into()),
         };
         if machine == Machine::Arm {
             out.code = out.read_code(data, &table, endian);
@@ -287,6 +303,11 @@ impl Elf {
                     .filter_map(|t| by_addr.get(t).copied())
                     .collect(),
                 indirect: c.indirect,
+                sites: c
+                    .sites
+                    .iter()
+                    .filter_map(|(pc, t)| Some((*pc, *by_addr.get(t)?)))
+                    .collect(),
             });
         }
         out

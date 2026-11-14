@@ -1,0 +1,113 @@
+# The panic sites of the release ELF, each acknowledged with a reason (spl explain pan-1)
+
+# folded by the optimizer
+[[site]]
+function = "_start"
+kind = "bounds"
+index = 0
+reason = "fixture: acknowledged"
+
+# folded by the optimizer
+[[site]]
+function = "_start"
+kind = "overflow"
+index = 0
+reason = "fixture: acknowledged"
+
+# src/led.rs:8
+[[site]]
+function = "panic_sites::led::brightness"
+kind = "unwrap"
+index = 0
+reason = "fixture: acknowledged"
+
+# src/led.rs:7
+[[site]]
+function = "panic_sites::led::brightness"
+kind = "bounds"
+index = 0
+reason = "fixture: acknowledged"
+
+# src/power.rs:40
+[[site]]
+function = "panic_sites::power::arm"
+kind = "panic"
+index = 0
+reason = "fixture: acknowledged"
+
+# src/power.rs:41
+[[site]]
+function = "panic_sites::power::arm"
+kind = "panic"
+index = 1
+reason = "fixture: acknowledged"
+
+# src/power.rs:38
+[[site]]
+function = "panic_sites::power::arm"
+kind = "refcell"
+index = 0
+reason = "fixture: acknowledged"
+
+# src/power.rs:21
+[[site]]
+function = "panic_sites::power::duty"
+kind = "expect"
+index = 0
+reason = "fixture: acknowledged"
+
+# src/power.rs:17
+[[site]]
+function = "panic_sites::power::duty"
+kind = "panic"
+index = 0
+reason = "fixture: acknowledged"
+
+# src/power.rs:18
+[[site]]
+function = "panic_sites::power::duty"
+kind = "panic"
+index = 1
+reason = "fixture: acknowledged"
+
+# src/power.rs:18
+[[site]]
+function = "panic_sites::power::duty"
+kind = "overflow"
+index = 0
+reason = "fixture: acknowledged"
+
+# src/power.rs:19
+[[site]]
+function = "panic_sites::power::duty"
+kind = "overflow"
+index = 1
+reason = "fixture: acknowledged"
+
+# src/power.rs:20
+[[site]]
+function = "panic_sites::power::duty"
+kind = "division"
+index = 0
+reason = "fixture: acknowledged"
+
+# src/power.rs:26
+[[site]]
+function = "panic_sites::power::window"
+kind = "slice"
+index = 0
+reason = "fixture: acknowledged"
+
+# src/power.rs:26
+[[site]]
+function = "panic_sites::power::window"
+kind = "overflow"
+index = 0
+reason = "fixture: acknowledged"
+
+# src/power.rs:26
+[[site]]
+function = "panic_sites::power::window"
+kind = "overflow"
+index = 1
+reason = "fixture: acknowledged"

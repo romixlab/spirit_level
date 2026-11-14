@@ -448,6 +448,10 @@ reason = "a panic in control code turns the outputs off before it records and re
 level = "warn"
 reason = "a crash loop must not re-enable the outputs on every boot; an estimate by statement order, and no firmware reads boots_since at boot yet"
 
+[lints.pan-1]
+level = "allow"
+reason = "the strict level: every panic site of the release ELF acknowledged in panics.toml; a firmware turns it on for releases, with `spl panics --ack` to start the file"
+
 [lints.panic-in-library]
 level = "deny"
 reason = "a service module (LED, log, telemetry) never reaches the panic handler in release: the whole MCU resets for it"

@@ -11,7 +11,9 @@ publish = false
 [dependencies]
 proc-macro2.workspace = true
 quote.workspace = true
+serde.workspace = true
 serde_json.workspace = true
+sl_config.workspace = true
 sl_analysis.workspace = true
 sl_core.workspace = true
 sl_firmware.workspace = true

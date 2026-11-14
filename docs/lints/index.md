@@ -373,6 +373,12 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [F0072](F0072.md) | [mem-6](F0072.md) | .cnt_bkp_buffer sits at the backup-register address | off | off | off | off | off | warn | off | off |
 | [F0073](F0073.md) | [mem-7](F0073.md) | embassy-boot partition symbols are offsets from the flash origin | off | off | off | off | off | warn | off | off |
 
+## pan
+
+| Code | Lint | Rule | small | small-workspace | medium | big | ai | embedded | ui | egui |
+|---|---|---|---|---|---|---|---|---|---|---|
+| [F0110](F0110.md) | [pan-1](F0110.md) | every panic site of the release ELF is acknowledged with a reason | off | off | off | off | off | off | off | off |
+
 ## perf
 
 | Code | Lint | Rule | small | small-workspace | medium | big | ai | embedded | ui | egui |

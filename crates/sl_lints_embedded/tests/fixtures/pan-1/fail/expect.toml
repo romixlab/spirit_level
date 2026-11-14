@@ -1,0 +1,66 @@
+project = "../../../projects/panic_sites_service"
+
+[[finding]]
+at = "<elf>"
+contains = "in _start is not acknowledged"
+
+[[finding]]
+at = "<elf>"
+contains = "in _start is not acknowledged"
+
+[[finding]]
+at = "panics.toml:21"
+contains = "which the ELF no longer has"
+
+[[finding]]
+at = "panics.toml:27"
+contains = "gives no reason"
+
+[[finding]]
+at = "panics.toml:33"
+contains = "site by site"
+
+[[finding]]
+at = "panics.toml:37"
+contains = "has no panic site in the ELF"
+
+[[finding]]
+at = "src/led.rs:7:16"
+contains = "bounds 0 in panic_sites::led::brightness is in a service module"
+
+[[finding]]
+at = "src/led.rs:8:65"
+contains = "unwrap 0"
+
+[[finding]]
+at = "src/power.rs:18:19"
+
+[[finding]]
+at = "src/power.rs:19:13"
+
+[[finding]]
+at = "src/power.rs:20:17"
+contains = "division 0"
+
+[[finding]]
+at = "src/power.rs:21:40"
+contains = "expect 0 in panic_sites::power::duty is not acknowledged"
+
+[[finding]]
+at = "src/power.rs:26:12"
+contains = "slice 0"
+
+[[finding]]
+at = "src/power.rs:26:19"
+
+[[finding]]
+at = "src/power.rs:26:59"
+
+[[finding]]
+at = "src/power.rs:40:25"
+contains = "panic! (panic 0) in panic_sites::power::arm"
+
+[[finding]]
+at = "src/power.rs:41:27"
+contains = "unreachable! (panic 1)"
+

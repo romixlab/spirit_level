@@ -21,6 +21,13 @@ lint:
     cargo run -q -p spirit_level_cli -- codes --check --base main
     cargo run -q -p spirit_level_cli -- book docs --check
 
+# Rebuild the checked-in firmware ELF of the panic-site fixtures (needs the thumbv7em-none-eabihf target); the
+# checkout's path is remapped, so the DWARF does not depend on where it was built
+panic-fixture:
+    RUSTFLAGS="--remap-path-prefix={{justfile_directory()}}=/spirit_level" cargo build --release --target thumbv7em-none-eabihf --manifest-path crates/sl_lints_embedded/tests/projects/panic_sites/Cargo.toml --target-dir target/panic-fixture
+    cp target/panic-fixture/thumbv7em-none-eabihf/release/panic_sites crates/sl_lints_embedded/tests/projects/panic_sites/firmware.elf
+    cp target/panic-fixture/thumbv7em-none-eabihf/release/panic_sites crates/sl_lints_embedded/tests/projects/panic_sites_service/firmware.elf
+
 # Install every pinned external tool into the tool cache
 tools:
     cargo run -q -p spirit_level_cli -- tools install

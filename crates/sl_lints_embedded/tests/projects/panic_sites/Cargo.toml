@@ -1,0 +1,20 @@
+[package]
+name = "panic_sites"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[[bin]]
+name = "panic_sites"
+test = false
+bench = false
+
+[profile.release]
+opt-level = "s"
+lto = "fat"
+codegen-units = 1
+debug = 2
+panic = "abort"
+overflow-checks = true
+
+[workspace]

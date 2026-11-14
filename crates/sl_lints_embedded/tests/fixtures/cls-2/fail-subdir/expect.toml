@@ -3,3 +3,4 @@ project = "../../../projects/classes_subdir"
 [[finding]]
 at = "fw/src/led.rs:1:1"
 contains = "does not deny clippy::unwrap_used"
+
