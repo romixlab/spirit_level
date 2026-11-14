@@ -55,10 +55,11 @@ enum GroupByArg {
 enum Cmd {
     /// Check the project: run every lint its configuration enables
     #[command(
-        after_help = "Exit codes: 0 clean, 1 a denied finding, 2 a configuration or usage error, 3 a denied lint could not run"
+        after_help = "Examples:\n  spl check\n  spl check --all --group-by crate\n  spl check --tier small --only cli ../other_repo\n  spl check --format json --fix\n\nExit codes: 0 clean, 1 a denied finding, 2 a configuration or usage error, 3 a denied lint could not run"
     )]
     Check(CheckArgs),
     /// Show a lint's page: its rule, why, parameters and level in every tier
+    #[command(after_help = "Examples:\n  spl explain crate-lines\n  spl explain S0001")]
     Explain {
         /// The lint: its code (`S0001`, `X-clippy:needless_return`) or its id (`crate-lines`)
         #[arg(add = ArgValueCandidates::new(lint_candidates))]
@@ -79,17 +80,21 @@ enum Cmd {
         base: Option<String>,
     },
     /// List every lint with its level in each shipped tier
+    #[command(after_help = "Examples:\n  spl lints\n  spl lints --format json")]
     Lints {
         /// Output for people or for machines
         #[arg(long, value_enum, default_value = "text")]
         format: Format,
     },
     /// List the shipped tiers
+    #[command(after_help = "Examples:\n  spl tiers")]
     Tiers,
     /// Show the project's resolved configuration: levels with where they were set, overrides and exceptions with
     /// their reasons and expiries
+    #[command(after_help = "Examples:\n  spl config\n  spl config --all ../other_repo")]
     Config(ConfigArgs),
     /// Write a `spirit_level.toml` extending a tier
+    #[command(after_help = "Examples:\n  spl init\n  spl init --tier medium --tier ai")]
     Init {
         /// The project directory
         #[arg(default_value = ".")]
@@ -110,6 +115,7 @@ enum Cmd {
     #[command(subcommand)]
     Tools(tools::ToolsCmd),
     /// Write the book's generated pages (lints, tiers, nav) from the lints' metadata
+    #[command(after_help = "Examples:\n  spl book\n  spl book docs --check")]
     Book {
         /// The docs directory
         #[arg(default_value = "docs")]

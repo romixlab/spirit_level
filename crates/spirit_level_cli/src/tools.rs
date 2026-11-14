@@ -7,10 +7,13 @@ use std::path::{Path, PathBuf};
 #[derive(Subcommand)]
 pub enum ToolsCmd {
     /// Every pinned tool: its version and where it is found (the tool cache, PATH, or missing)
+    #[command(after_help = "Examples:\n  spl tools list")]
     List,
     /// Install the pinned version of a tool, or of every tool: crates are built into the tool cache, rustup
     /// components are added to the project's toolchain
-    #[command(after_help = "Exit codes: 0 installed, 1 an install failed, 2 usage error")]
+    #[command(
+        after_help = "Examples:\n  spl tools install\n  spl tools install cargo-deny\n  spl tools install --needed\n\nExit codes: 0 installed, 1 an install failed, 2 usage error"
+    )]
     Install {
         /// The tool (`spl tools list` names them); none: every tool
         #[arg(add = ArgValueCandidates::new(tool_candidates), conflicts_with = "needed")]
