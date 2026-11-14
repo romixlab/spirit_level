@@ -14,6 +14,7 @@
 //! [map.crates]
 //! foo_core = { layer = "core" }
 //! foo_cli = { layer = "app", deps = ["foo_core"], cli = true }
+//! foo_fw = { layer = "app", tiers = ["embedded"] }
 //!
 //! [map.forbid]
 //! foo_cli = ["foo_gpu"]
@@ -71,6 +72,8 @@ pub struct MapCrate {
     pub ui: Option<bool>,
     /// The theme crate: the one place where colours and sizes are written as values
     pub theme: bool,
+    /// Tiers that hold this crate beside the project's own (`embedded` for a firmware crate)
+    pub tiers: Vec<String>,
     /// The line of its entry
     pub line: u32,
 }
@@ -157,6 +160,7 @@ impl Map {
                     cli: c.opt_bool("cli", errs),
                     ui: c.opt_bool("ui", errs),
                     theme: c.opt_bool("theme", errs).unwrap_or(false),
+                    tiers: c.opt_list("tiers", true, errs).unwrap_or_default(),
                     line,
                 };
                 c.finish(errs);

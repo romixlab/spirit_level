@@ -176,3 +176,31 @@ fn contract_snapshot_explain_names_the_fix() {
     assert!(text.contains("schema/v{version}.json"), "{text}");
     assert!(text.contains("bump `VERSION`"), "{text}");
 }
+
+#[test]
+fn crate_tiers_hold_only_their_crates() {
+    let p = copy("crate_tiers", "crate_tiers");
+    let (code, report, err) = spl(
+        &p,
+        &["check", "--format", "json", "--only", "readme-per-crate"],
+    );
+    assert_eq!(code, 1, "{err}{report}");
+    assert_eq!(denied(&report), ["readme-per-crate fw"], "{report}");
+
+    let out = Command::new(env!("CARGO_BIN_EXE_spl"))
+        .arg("config")
+        .current_dir(&*p)
+        .env("SPIRIT_LEVEL_TODAY", "2026-11-13")
+        .output()
+        .expect("spl starts");
+    let text = String::from_utf8_lossy(&out.stdout);
+    assert!(
+        text.contains("crates fw also extend embedded, strict.toml:"),
+        "{text}"
+    );
+    assert!(
+        text.lines()
+            .any(|l| l.trim_start().starts_with("deny  firmware-readable")),
+        "{text}"
+    );
+}

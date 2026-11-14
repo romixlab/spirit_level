@@ -12,6 +12,11 @@ max-lines = 15000                    # a parameter of the lint
 reason = "this repo splits early"    # required
 expires = "2027-06-30"               # optional: a date, or a release such as "v0.5.0"
 
+[[crate-tiers]]                      # tiers that hold some crates beside the project's own
+tiers = ["embedded"]
+crates = ["foo_fw"]
+reason = "the firmware; the host crates are not judged as firmware"
+
 [[exceptions]]                       # an override for some crates or paths only
 lint = "crate-lines"
 crates = ["foo_sdk_types"]           # and/or paths = ["crates/foo/src/generated/**"]
@@ -42,9 +47,35 @@ timeout-secs = 20
 - **Levels:** `allow` (off), `warn` (reported), `deny` (reported, fails the run). A lint that no extended tier enables needs a `level` when a project first sets it.
 - **Parameters** are the lint's own keys, listed on its page with their type and default. An unknown parameter or a value of the wrong type is an error.
 - **Expiries:** a date (expired from that day on) or a release (expired once the project's version, from `[workspace.package]` or `[package]`, reaches it). An expired override or exception is an error: fix what it allowed and remove it, or renew it with a new reason and expiry.
+- **Crate tiers** hold some crates to more tiers than the project's own: see below.
 - **Exceptions** apply to findings about the listed crates or whose file matches a path pattern (`*` within a segment, `**` across segments). They change the level, parameters, or both. Their parameters apply to the crates they name.
 - **Unknown keys fail.** A typo in a key, a lint id or a tier name stops the run with the file and line, before any lint runs. In a map file, keys another tool owns are named in `[map-file] foreign` ([The crate map](map.md#a-map-another-tool-owns)).
 - **Codes or ids.** A lint is named by its id or its code: `[lints.S0001]` is `[lints.crate-lines]`, in exceptions (`lint = "S0001"`), waivers and `--only` too.
+
+## Tiers for some crates
+
+`extends` holds every crate. A workspace that mixes kinds of crates (firmware beside host tools, an egui app beside its CLI) puts the tiers of one kind on those crates only, so the others are not judged by rules that are not theirs:
+
+```toml
+extends = ["big", "ai"]
+
+[[crate-tiers]]
+tiers = ["embedded"]
+crates = ["foo_fw", "foo_boot"]
+reason = "the firmware crates"
+
+[[crate-tiers]]
+tiers = ["ui", "egui"]
+crates = ["foo_app"]
+reason = "the egui app"
+```
+
+With a crate map, the map key `tiers` says the same per crate: `foo_fw = { layer = "app", tiers = ["embedded"] }` ([The crate map](map.md)). Both may be used; a crate's tiers are the map's, then the entries', in order.
+
+- For a finding about such a crate, levels and parameters are resolved as if the project file extended its tiers after its own `extends`. The project's `[lints]` and `[[exceptions]]` still apply on top.
+- A finding about any other crate, or about no crate, keeps the project's level. A lint that only a crate's tiers enable runs, and its findings elsewhere are allowed.
+- A tier is a shipped name or a path to a `.toml` file, as in `extends`. An entry needs `tiers`, `crates` and a `reason`; an unknown tier is an error.
+- `spl config` lists each set of crates with the lints whose level differs for them.
 
 ## Tables beside the lints
 

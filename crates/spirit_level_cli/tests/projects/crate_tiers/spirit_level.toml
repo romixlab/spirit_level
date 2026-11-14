@@ -1,0 +1,13 @@
+# fw is held to the embedded tier (map key) and to strict.toml (crate-tiers); host only to the project's own.
+
+[[crate-tiers]]
+tiers = ["strict.toml"]
+crates = ["fw"]
+reason = "the firmware crate is held to more"
+
+[map.layers.app]
+allow = ["app"]
+
+[map.crates]
+fw = { layer = "app", tiers = ["embedded"] }
+host = { layer = "app" }

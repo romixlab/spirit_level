@@ -274,7 +274,7 @@ fn apply_levels(diagnostics: &mut [Diagnostic], config: &Config) {
         d.level = d.at_most.map_or(level, |cap| level.min(cap));
         if level == Level::Allow {
             d.allowed = Some(exc.map_or_else(|| "allowed".to_owned(), |e| e.reason.clone()));
-            d.level = config.lint(&d.lint).level;
+            d.level = config.highest_level(&d.lint);
         }
     }
 }
@@ -321,7 +321,7 @@ pub fn run(
                 Some((need, reason)) => not_run.push(NotRun {
                     lint: m.id.to_owned(),
                     code: m.code.to_owned(),
-                    level: config.lint(m.id).level,
+                    level: config.highest_level(m.id),
                     need: need.name(),
                     reason,
                 }),
@@ -344,7 +344,7 @@ pub fn run(
                 .map(|s| s.to_string()),
         );
         not_run.extend(out.skipped.into_iter().map(|s| NotRun {
-            level: config.lint(&s.lint).level,
+            level: config.highest_level(&s.lint),
             code: code_of(&s.lint),
             lint: s.lint,
             need: s.need,

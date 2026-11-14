@@ -14,6 +14,11 @@
 //! [clippy.lints]                      # the Clippy set expected in [workspace.lints.clippy] (see [`clippy`])
 //! unwrap_used = { level = "warn", reason = "errors are returned or expected with a message" }
 //!
+//! [[crate-tiers]]                     # tiers that hold some crates beside the project's own
+//! tiers = ["embedded"]
+//! crates = ["foo_fw"]
+//! reason = "the firmware"
+//!
 //! [[exceptions]]                      # scoped to crates and/or paths
 //! lint = "crate-lines"
 //! crates = ["foo_sdk_types"]
@@ -125,6 +130,19 @@ impl Exception {
     }
 }
 
+/// Crates held to tiers beside the project's own: their lints resolved as if the project extended those tiers too,
+/// after its own and before its `[lints]`
+#[derive(Clone, Debug, serde::Serialize)]
+pub struct CrateTiers {
+    /// The tiers, in the order they apply
+    pub tiers: Vec<String>,
+    /// The crates
+    pub crates: Vec<String>,
+    /// Every lint as configured for these crates
+    #[serde(skip)]
+    pub lints: BTreeMap<String, LintSetting>,
+}
+
 /// The resolved configuration
 #[derive(Clone, Debug, Default, serde::Serialize)]
 pub struct Config {
@@ -136,6 +154,8 @@ pub struct Config {
     pub lints: BTreeMap<String, LintSetting>,
     /// Scoped exceptions in file order
     pub exceptions: Vec<Exception>,
+    /// Crates held to more tiers than the project's own, one entry per distinct list of tiers
+    pub crate_tiers: Vec<CrateTiers>,
     /// The crate map
     #[serde(skip)]
     pub map: Option<Map>,
@@ -179,9 +199,13 @@ impl Config {
                 format!("cannot read it ({e}); `spl init --tier small` writes one"),
             )]
         })?;
+        let source = Source::File(path, rel.clone());
         let mut r = Resolver::new(env, root);
-        r.layer(&Source::File(path, rel.clone()), text, true);
-        r.finish(Some(rel))
+        r.layer(&source, text.clone(), true);
+        let entries = std::mem::take(&mut r.tier_entries);
+        let mut c = r.finish(Some(rel))?;
+        c.crate_tiers = crate_tiers(c.map.as_ref(), &entries, env, root, &source, &text)?;
+        Ok(c)
     }
 
     /// The configuration of shipped tiers alone, without a project file (`spl check --tier big`)
@@ -206,13 +230,37 @@ impl Config {
             .unwrap_or_else(|| panic!("lint {id} is not registered"))
     }
 
-    /// Whether a lint runs at all: its level, or an exception's, is above allow
+    /// The setting of a lint for one crate: the crate's tiers' when it has more than the project's own
+    pub fn lint_for(&self, id: &str, krate: Option<&str>) -> &LintSetting {
+        krate
+            .and_then(|k| {
+                self.crate_tiers
+                    .iter()
+                    .find(|t| t.crates.iter().any(|c| c == k))
+            })
+            .and_then(|t| t.lints.get(id))
+            .unwrap_or_else(|| self.lint(id))
+    }
+
+    /// The highest level a lint has anywhere: the project's, a crate's tiers', an exception's
+    pub fn highest_level(&self, id: &str) -> Level {
+        let tiers = self
+            .crate_tiers
+            .iter()
+            .filter_map(|t| t.lints.get(id).map(|l| l.level));
+        let exceptions = self
+            .exceptions
+            .iter()
+            .filter(|e| e.lint == id)
+            .filter_map(|e| e.level);
+        tiers
+            .chain(exceptions)
+            .fold(self.lint(id).level, Level::max)
+    }
+
+    /// Whether a lint runs at all: its level, a crate's tiers', or an exception's is above allow
     pub fn enabled(&self, id: &str) -> bool {
-        self.lint(id).level > Level::Allow
-            || self
-                .exceptions
-                .iter()
-                .any(|e| e.lint == id && e.level.is_some_and(|l| l > Level::Allow))
+        self.highest_level(id) > Level::Allow
     }
 
     /// The level of a lint for a finding about `krate` at `path`, and the exception that set it
@@ -222,7 +270,7 @@ impl Config {
         krate: Option<&str>,
         path: Option<&str>,
     ) -> (Level, Option<&Exception>) {
-        let base = self.lint(id).level;
+        let base = self.lint_for(id, krate).level;
         self.exceptions
             .iter()
             .rev()
@@ -230,9 +278,10 @@ impl Config {
             .map_or((base, None), |e| (e.level.unwrap_or(base), Some(e)))
     }
 
-    /// The parameters of a lint for one crate: the lint's, with those of exceptions naming the crate on top
+    /// The parameters of a lint for one crate: the lint's (of the crate's tiers), with those of exceptions naming
+    /// the crate on top
     pub fn params_for(&self, id: &str, krate: &str) -> Params {
-        let mut p = self.lint(id).params.clone();
+        let mut p = self.lint_for(id, Some(krate)).params.clone();
         for e in &self.exceptions {
             if e.lint == id && e.crates.iter().any(|c| c == krate) {
                 for (k, v) in &e.params {
@@ -256,11 +305,101 @@ enum Source {
     Tier(String),
 }
 
+/// A `[[crate-tiers]]` entry: its tiers (shipped names, or absolute paths) and crates, and where it is written
+struct TierEntry {
+    tiers: Vec<String>,
+    crates: Vec<String>,
+    at: ConfigError,
+}
+
+/// Whether an extended name is a path to a file rather than a shipped tier
+fn is_path(name: &str) -> bool {
+    name.contains('/')
+        || Path::new(name)
+            .extension()
+            .is_some_and(|e| e.eq_ignore_ascii_case("toml"))
+}
+
+/// Resolves the project file once more for each distinct list of tiers some crates are held to
+fn crate_tiers(
+    map: Option<&Map>,
+    entries: &[TierEntry],
+    env: &Env<'_>,
+    root: &Path,
+    source: &Source,
+    text: &str,
+) -> Result<Vec<CrateTiers>, Vec<ConfigError>> {
+    let mut errs = Vec::new();
+    let mut per: BTreeMap<String, (Vec<String>, ConfigError)> = BTreeMap::new();
+    let mut add = |krate: &str, tiers: &[String], at: &ConfigError| {
+        let slot = per
+            .entry(krate.to_owned())
+            .or_insert_with(|| (Vec::new(), at.clone()));
+        for t in tiers {
+            if !slot.0.contains(t) {
+                slot.0.push(t.clone());
+            }
+        }
+    };
+    if let Some(m) = map {
+        for (name, c) in m.crates.iter().filter(|(_, c)| !c.tiers.is_empty()) {
+            let at = ConfigError::new(&m.file, c.line, "");
+            for t in c
+                .tiers
+                .iter()
+                .filter(|t| !is_path(t) && (env.tier)(t).is_none())
+            {
+                errs.push(ConfigError::new(&at.file, at.line, unknown_tier(t)));
+            }
+            add(name, &c.tiers, &at);
+        }
+    }
+    for e in entries {
+        for k in &e.crates {
+            add(k, &e.tiers, &e.at);
+        }
+    }
+    let mut groups: BTreeMap<Vec<String>, (Vec<String>, ConfigError)> = BTreeMap::new();
+    for (krate, (tiers, at)) in per {
+        groups
+            .entry(tiers)
+            .or_insert_with(|| (Vec::new(), at))
+            .0
+            .push(krate);
+    }
+    let mut out = Vec::new();
+    for (tiers, (crates, at)) in groups {
+        let mut r = Resolver::new(env, root);
+        r.extra = tiers.iter().map(|t| (t.clone(), at.clone())).collect();
+        r.layer(source, text.to_owned(), true);
+        for e in r.errs.drain(..) {
+            if !errs.contains(&e) {
+                errs.push(e);
+            }
+        }
+        out.push(CrateTiers {
+            tiers,
+            crates,
+            lints: r.lints,
+        });
+    }
+    if errs.is_empty() { Ok(out) } else { Err(errs) }
+}
+
+fn unknown_tier(name: &str) -> String {
+    format!(
+        "extends {name:?}, which is not a shipped tier (`spl tiers` lists them) nor a path to a .toml file"
+    )
+}
+
 struct Resolver<'a> {
     env: &'a Env<'a>,
     root: PathBuf,
     lints: BTreeMap<String, LintSetting>,
     exceptions: Vec<Exception>,
+    tier_entries: Vec<TierEntry>,
+    /// Tiers applied after the project file's own extends: a crate's tiers
+    extra: Vec<(String, ConfigError)>,
     map: Option<Map>,
     clippy: ClippySet,
     dependents: Option<Dependents>,
@@ -298,6 +437,8 @@ impl<'a> Resolver<'a> {
             root: root.to_path_buf(),
             lints,
             exceptions: Vec::new(),
+            tier_entries: Vec::new(),
+            extra: Vec::new(),
             map: None,
             clippy: ClippySet::default(),
             dependents: None,
@@ -321,6 +462,7 @@ impl<'a> Resolver<'a> {
             extends: self.extends,
             lints: self.lints,
             exceptions: self.exceptions,
+            crate_tiers: Vec::new(),
             map: self.map,
             clippy: self.clippy,
             dependents: self.dependents,
@@ -338,10 +480,7 @@ impl<'a> Resolver<'a> {
 
     /// Applies one extended name: a shipped tier, or a path relative to the extending file's directory
     fn extend(&mut self, name: &str, at: &ConfigError, dir: &Path) {
-        let is_path = name.contains('/')
-            || Path::new(name)
-                .extension()
-                .is_some_and(|e| e.eq_ignore_ascii_case("toml"));
+        let is_path = is_path(name);
         let key = if is_path {
             dir.join(name).display().to_string()
         } else {
@@ -374,13 +513,9 @@ impl<'a> Resolver<'a> {
         } else {
             match (self.env.tier)(name) {
                 Some(text) => self.layer(&Source::Tier(name.to_owned()), text.to_owned(), false),
-                None => self.errs.push(ConfigError::new(
-                    &at.file,
-                    at.line,
-                    format!(
-                        "extends {name:?}, which is not a shipped tier (`spl tiers` lists them) nor a path to a .toml file"
-                    ),
-                )),
+                None => self
+                    .errs
+                    .push(ConfigError::new(&at.file, at.line, unknown_tier(name))),
             }
         }
     }
@@ -417,6 +552,11 @@ impl<'a> Resolver<'a> {
         for name in &extends {
             self.extend(name, &at, &dir);
         }
+        if project {
+            for (name, at) in std::mem::take(&mut self.extra) {
+                self.extend(&name, &at, &dir);
+            }
+        }
         if tier && let Some(mut t) = r.table("tier", &mut errs) {
             t.opt_str("description", &mut errs);
             t.finish(&mut errs);
@@ -428,19 +568,11 @@ impl<'a> Resolver<'a> {
             self.clippy.read(c, &mut errs);
         }
         if !tier {
-            if let Some(item) = r.item("exceptions") {
-                match item.as_array_of_tables() {
-                    Some(arr) => {
-                        for (i, t) in arr.iter().enumerate() {
-                            let er = Reader::new(&file, vec![format!("exceptions[{i}]")], t);
-                            self.exception(er, &mut errs);
-                        }
-                    }
-                    None => errs.push(r.err(
-                        "exceptions",
-                        "exceptions must be an array of tables ([[exceptions]])",
-                    )),
-                }
+            for t in tables(&mut r, "exceptions", &mut errs) {
+                self.exception(t, &mut errs);
+            }
+            for t in tables(&mut r, "crate-tiers", &mut errs) {
+                self.tier_entry(t, &dir, &mut errs);
             }
             if let Some(m) = r.table("map", &mut errs) {
                 self.map = Some(Map::read(m, &mut errs));
@@ -573,6 +705,46 @@ impl<'a> Resolver<'a> {
         }
     }
 
+    /// A `[[crate-tiers]]` entry: tiers, crates, reason
+    fn tier_entry(&mut self, mut t: Reader<'_>, dir: &Path, errs: &mut Vec<ConfigError>) {
+        let at = ConfigError::new(&t.file.rel, t.line("").max(t.line("tiers")), "");
+        let tiers = t.opt_list("tiers", true, errs).unwrap_or_default();
+        let crates = t.opt_list("crates", true, errs).unwrap_or_default();
+        let reason = t.opt_str("reason", errs).unwrap_or_default();
+        t.finish(errs);
+        if tiers.is_empty() || crates.is_empty() {
+            errs.push(ConfigError::new(
+                &at.file,
+                at.line,
+                "a crate-tiers entry names its tiers and its crates",
+            ));
+        }
+        if reason.trim().is_empty() {
+            errs.push(ConfigError::new(
+                &at.file,
+                at.line,
+                "a crate-tiers entry needs a reason: say why these crates are held to these tiers",
+            ));
+        }
+        let mut resolved = Vec::new();
+        for name in tiers {
+            if is_path(&name) {
+                let path = dir.join(&name);
+                let rel = path.strip_prefix(&self.root).unwrap_or(&path);
+                resolved.push(rel.display().to_string());
+            } else if (self.env.tier)(&name).is_some() {
+                resolved.push(name);
+            } else {
+                errs.push(ConfigError::new(&at.file, at.line, unknown_tier(&name)));
+            }
+        }
+        self.tier_entries.push(TierEntry {
+            tiers: resolved,
+            crates,
+            at,
+        });
+    }
+
     fn exception(&mut self, mut t: Reader<'_>, errs: &mut Vec<ConfigError>) {
         let line = t.line("").max(t.line("lint"));
         let origin = Origin {
@@ -659,6 +831,23 @@ impl<'a> Resolver<'a> {
             }
         }
         Some(e)
+    }
+}
+
+/// A reader for each table of the array of tables `key` (`[[exceptions]]`)
+fn tables<'a>(r: &mut Reader<'a>, key: &str, errs: &mut Vec<ConfigError>) -> Vec<Reader<'a>> {
+    let file = r.file;
+    let Some(item) = r.item(key) else {
+        return Vec::new();
+    };
+    if let Some(arr) = item.as_array_of_tables() {
+        arr.iter()
+            .enumerate()
+            .map(|(i, t)| Reader::new(file, vec![format!("{key}[{i}]")], t))
+            .collect()
+    } else {
+        errs.push(r.err(key, format!("{key} must be an array of tables ([[{key}]])")));
+        Vec::new()
     }
 }
 

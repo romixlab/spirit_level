@@ -57,6 +57,9 @@ fn tier(name: &str) -> Option<&'static str> {
             "extends = \"small\"\n[lints.crate-lines]\nlevel = \"warn\"\nreason = \"r\"\n[lints.readme-per-crate]\nlevel = \"deny\"\nreason = \"r2\"\n",
         ),
         "loop" => Some("extends = \"loop\"\n"),
+        "fw" => Some(
+            "[lints.crate-lines]\nlevel = \"deny\"\nwarn-above = 64\nreason = \"flash is small\"\n",
+        ),
         _ => None,
     }
 }
@@ -451,5 +454,82 @@ fn embedded_classes() {
         m.iter()
             .any(|s| s.contains(":3: unknown key embedded.classes.critical")),
         "{m:?}"
+    );
+}
+
+#[test]
+fn crate_tiers_hold_only_their_crates() {
+    let c = load(
+        "extends = \"small\"\n[[crate-tiers]]\ntiers = \"fw\"\ncrates = [\"a\"]\nreason = \"the firmware\"\n",
+    )
+    .unwrap();
+    assert!(c.enabled("crate-lines"));
+    assert_eq!(c.level("crate-lines", Some("a"), None).0, Level::Deny);
+    assert_eq!(c.level("crate-lines", Some("b"), None).0, Level::Allow);
+    assert_eq!(c.level("crate-lines", None, None).0, Level::Allow);
+    assert_eq!(c.params_for("crate-lines", "a").int("warn-above"), 64);
+    assert_eq!(c.params_for("crate-lines", "b").int("warn-above"), 20000);
+    assert_eq!(c.highest_level("crate-lines"), Level::Deny);
+    assert_eq!(c.extends, ["small"]);
+}
+
+#[test]
+fn crate_tiers_sit_under_the_project_file() {
+    let c = load(
+        "extends = \"small\"\n[[crate-tiers]]\ntiers = [\"fw\"]\ncrates = [\"a\"]\nreason = \"r\"\n[lints.crate-lines]\nlevel = \"warn\"\nreason = \"not yet\"\n[[exceptions]]\nlint = \"crate-lines\"\ncrates = [\"a\"]\nwarn-above = 99\nreason = \"r\"\n",
+    )
+    .unwrap();
+    assert_eq!(c.level("crate-lines", Some("a"), None).0, Level::Warn);
+    assert_eq!(c.params_for("crate-lines", "a").int("warn-above"), 99);
+}
+
+#[test]
+fn map_key_tiers_and_entries_combine() {
+    let c = load(
+        "extends = \"small\"\n[map.layers.core]\nallow = [\"core\"]\n[map.crates]\na = { layer = \"core\", tiers = [\"fw\"] }\nb = { layer = \"core\" }\n[[crate-tiers]]\ntiers = [\"big\"]\ncrates = [\"a\", \"b\"]\nreason = \"r\"\n",
+    )
+    .unwrap();
+    let lists: Vec<(Vec<String>, Vec<String>)> = c
+        .crate_tiers
+        .iter()
+        .map(|t| (t.tiers.clone(), t.crates.clone()))
+        .collect();
+    assert_eq!(
+        lists,
+        [
+            (vec!["big".to_owned()], vec!["b".to_owned()]),
+            (
+                vec!["fw".to_owned(), "big".to_owned()],
+                vec!["a".to_owned()]
+            ),
+        ]
+    );
+    assert_eq!(c.level("readme-per-crate", Some("b"), None).0, Level::Deny);
+    assert_eq!(c.level("readme-per-crate", Some("c"), None).0, Level::Warn);
+}
+
+#[test]
+fn crate_tiers_are_checked() {
+    let e = messages(load(
+        "extends = \"small\"\n[map.layers.core]\nallow = [\"core\"]\n[map.crates]\na = { layer = \"core\", tiers = [\"fv\"] }\n[[crate-tiers]]\ntiers = [\"nope\"]\ncrates = [\"a\"]\n",
+    ));
+    assert!(
+        e.iter()
+            .any(|s| s.starts_with("spirit_level.toml:7:") && s.contains("needs a reason")),
+        "{e:?}"
+    );
+    assert!(
+        e.iter()
+            .any(|s| s.starts_with("spirit_level.toml:7:") && s.contains("extends \"nope\"")),
+        "{e:?}"
+    );
+    let e = messages(load(
+        "extends = \"small\"\n[map.layers.core]\nallow = [\"core\"]\n[map.crates]\na = { layer = \"core\", tiers = [\"fv\"] }\n",
+    ));
+    assert_eq!(
+        e,
+        [
+            "spirit_level.toml:5: extends \"fv\", which is not a shipped tier (`spl tiers` lists them) nor a path to a .toml file"
+        ]
     );
 }

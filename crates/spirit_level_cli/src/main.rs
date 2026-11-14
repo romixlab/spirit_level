@@ -514,6 +514,20 @@ fn show_config(a: ConfigArgs) -> Result<Exit, String> {
                 .map_or(String::new(), |x| format!(" (expires {x})"))
         );
     }
+    for t in &c.crate_tiers {
+        println!(
+            "crates {} also extend {}:",
+            t.crates.join(", "),
+            t.tiers.join(", ")
+        );
+        for (id, l) in t.lints.iter().filter(|(id, l)| l.level != c.lint(id).level) {
+            let at = l
+                .origin
+                .as_ref()
+                .map_or_else(|| "-".to_owned(), ToString::to_string);
+            println!("  {:5} {id:30} {at:28} {}", l.level.name(), l.reason);
+        }
+    }
     if let Some(m) = &c.map {
         println!(
             "map: {} ({} layers, {} crates)",

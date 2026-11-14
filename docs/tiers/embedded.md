@@ -139,7 +139,8 @@ The project turns these on in its own `[workspace.lints.clippy]` (`allow` rows a
 ```toml
 # Beside the size tiers: a firmware extends ["small", "embedded"]. Every automatic check of embedded_bedrock's
 # firmware check catalogue, at bedrock's severity: error is deny, warning is warn, suggestion is warn (reported,
-# so the size and speed levers stay visible, but never failing the run on its own).
+# so the size and speed levers stay visible, but never failing the run on its own). A workspace with host crates
+# beside its firmware puts this tier on the firmware crates only: [[crate-tiers]] or the map key tiers.
 [tier]
 description = "Bare-metal firmware: executors, interrupts, DMA, stack, memory, size, faults, boot, power, flash, pins, clocks, errata, USB, host input, logging, counters, build configuration"
 

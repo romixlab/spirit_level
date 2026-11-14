@@ -10,6 +10,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `CFG-4` Scoped exceptions by crate or path glob: level and/or parameters, reason, expiry.
 - ✅ `CFG-5` The crate map: layers with allow lists, crates with layer and flags, forbid, external, third-party.
 - ✅ `CFG-6` `foreign-map-keys`: `[map-file] foreign` names the key paths the map's owner checks; spl leaves them unread, and a typo in an spl key stays an error.
+- ✅ `CFG-7` `per-crate-tiers`: `[[crate-tiers]]` and the map key `tiers` hold chosen crates to more tiers; their levels and parameters resolve per crate.
 
 ## ENG - engine and output
 

@@ -26,6 +26,7 @@ foo_proto_types = { layer = "utils", contract = true }
 foo_cli = { layer = "app", cli = true }
 foo_ui = { layer = "app", ui = true }
 foo_theme = { layer = "app", theme = true }
+foo_fw = { layer = "app", tiers = ["embedded"] }
 
 [map.forbid]
 foo_cli = ["foo_gpu", "wgpu"]       # the CLI never reaches these, directly or through others
@@ -56,6 +57,7 @@ wgpu = ["foo_gpu"]                  # only these crates may depend on wgpu direc
 | `cli` | its binaries are command-line tools the [CLI checks](cli.md) build and run; `false` leaves them out. Absent: a crate with a binary target that depends on `clap` is one |
 | `ui` | a user interface crate, held to the [UI practices](ui.md); absent: a crate that depends on a UI toolkit is one, `false` exempts such a crate |
 | `theme` | the theme crate: colours and sizes are written as values here and nowhere else in UI code |
+| `tiers` | tiers that hold this crate beside the project's own, such as `["embedded"]` for a firmware crate ([Tiers for some crates](configuration.md#tiers-for-some-crates)) |
 | `forbid.<crate>` | crates (workspace or third-party) its closure must never reach |
 | `external.<crate>` | a crate of another project taken by git: its URL, its branch (optional) and the layer that may use it; how it is pinned is `git-dependency-pins`' policy |
 | `third-party.<crate>` | workspace crates that alone may depend on a heavy third-party crate |
