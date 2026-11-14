@@ -47,9 +47,8 @@ timeout-secs = 20
 - **Levels:** `allow` (off), `warn` (reported), `deny` (reported, fails the run). A lint that no extended tier enables needs a `level` when a project first sets it.
 - **Parameters** are the lint's own keys, listed on its page with their type and default. An unknown parameter or a value of the wrong type is an error.
 - **Expiries:** a date (expired from that day on) or a release (expired once the project's version, from `[workspace.package]` or `[package]`, reaches it). An expired override or exception is an error: fix what it allowed and remove it, or renew it with a new reason and expiry.
-- **Crate tiers** hold some crates to more tiers than the project's own: see below.
 - **Exceptions** apply to findings about the listed crates or whose file matches a path pattern (`*` within a segment, `**` across segments). They change the level, parameters, or both. Their parameters apply to the crates they name.
-- **Unknown keys fail.** A typo in a key, a lint id or a tier name stops the run with the file and line, before any lint runs. In a map file, keys another tool owns are named in `[map-file] foreign` ([The crate map](map.md#a-map-another-tool-owns)).
+- **Unknown keys fail.** A typo in a key, a lint id or a tier name stops the run with the file and line, before any lint runs. Map keys another tool owns: [map-file foreign](map.md#a-map-another-tool-owns).
 - **Codes or ids.** A lint is named by its id or its code: `[lints.S0001]` is `[lints.crate-lines]`, in exceptions (`lint = "S0001"`), waivers and `--only` too.
 
 ## Tiers for some crates
