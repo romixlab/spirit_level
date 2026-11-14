@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-11-14
+
 ### Added
 
 - `spl panics --elf`: each panic site of a release ELF with function, kind, place and class; JSON, `--ack` (TIER-6).
