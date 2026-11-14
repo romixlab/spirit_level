@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.2.3] - 2026-11-14
+
 ### Added
 
 - `spl dependents`: dependent repos and the crates in them to retest; `[dependents]` turns it on (DEP-1).
