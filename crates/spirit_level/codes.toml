@@ -70,6 +70,7 @@ C0012 = { id = "waiver-invalid", group = "code", status = "active" }
 C0013 = { id = "waiver-unused", group = "code", status = "active" }
 C0014 = { id = "build-info-env", group = "code", status = "active" }
 C0015 = { id = "test-support-gated", group = "code", status = "active" }
+C0016 = { id = "orphan-source-file", group = "code", status = "active" }
 P0001 = { id = "agent-file-lines", group = "prose", status = "active" }
 P0002 = { id = "agent-file-links", group = "prose", status = "active" }
 P0003 = { id = "agent-rules-match-lints", group = "prose", status = "active" }

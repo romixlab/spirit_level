@@ -108,6 +108,10 @@ reason = "crates the map marks deterministic iterate in the same order every run
 level = "deny"
 reason = "no stop-gaps: a TODO or a 'for now' names its tracker id or goes"
 
+[lints.orphan-source-file]
+level = "deny"
+reason = "a file no mod reaches is never compiled or tested, yet reads like live code"
+
 [lints.fixme-before-land]
 level = "deny"
 reason = "a FIXME is a note for the branch; a candidate while it is in work, refused when it lands"

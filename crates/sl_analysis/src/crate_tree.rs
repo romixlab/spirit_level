@@ -88,6 +88,15 @@ impl CrateTree<'_> {
 /// The crates of a package (library first, then binaries), each with its module tree. Files that fail to parse
 /// are left out with their modules
 pub fn crates<'a>(project: &'a Project, pkg: &'a Package) -> Vec<CrateTree<'a>> {
+    build(project, pkg, false)
+}
+
+/// The same trees with the test-only modules kept: every file rustc may compile for the crate
+pub fn crates_with_tests<'a>(project: &'a Project, pkg: &'a Package) -> Vec<CrateTree<'a>> {
+    build(project, pkg, true)
+}
+
+fn build<'a>(project: &'a Project, pkg: &'a Package, tests: bool) -> Vec<CrateTree<'a>> {
     let sources = project.sources(pkg);
     let mut roots: Vec<&SourceFile> = sources
         .iter()
@@ -123,7 +132,13 @@ pub fn crates<'a>(project: &'a Project, pkg: &'a Package) -> Vec<CrateTree<'a>> 
             let total = root.lines.total;
             tree.modules
                 .push(module(String::new(), root, items, None, false, (1, total)));
-            walk(&mut tree, 0, sources, &dir_of(&root.in_package, true));
+            walk(
+                &mut tree,
+                0,
+                sources,
+                &dir_of(&root.in_package, true),
+                tests,
+            );
             Some(tree)
         })
         .collect()
@@ -188,12 +203,18 @@ fn dir_of(in_package: &str, owns_dir: bool) -> String {
     }
 }
 
-fn walk<'a>(tree: &mut CrateTree<'a>, idx: usize, sources: &'a [SourceFile], dir: &str) {
+fn walk<'a>(
+    tree: &mut CrateTree<'a>,
+    idx: usize,
+    sources: &'a [SourceFile],
+    dir: &str,
+    tests: bool,
+) {
     let m = &tree.modules[idx];
     let (file, items, prefix) = (m.file, m.items, m.path.clone());
     for item in items {
         let Item::Mod(im) = item else { continue };
-        if is_test(&im.attrs) {
+        if !tests && is_test(&im.attrs) {
             continue;
         }
         let name = im.ident.to_string();
@@ -213,7 +234,7 @@ fn walk<'a>(tree: &mut CrateTree<'a>, idx: usize, sources: &'a [SourceFile], dir
             let c = tree.modules.len();
             tree.modules
                 .push(module(path, file, inner, Some(idx), public, lines));
-            walk(tree, c, sources, &sub);
+            walk(tree, c, sources, &sub, tests);
             c
         } else {
             let candidates = match &attr_path {
@@ -240,7 +261,7 @@ fn walk<'a>(tree: &mut CrateTree<'a>, idx: usize, sources: &'a [SourceFile], dir
                 (1, f.lines.total),
             ));
             // a `#[path]` file owns no directory of its own name unless it is a mod.rs
-            walk(tree, c, sources, &dir_of(&f.in_package, false));
+            walk(tree, c, sources, &dir_of(&f.in_package, false), tests);
             c
         };
         tree.modules[idx].children.push((name, child));

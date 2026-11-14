@@ -180,6 +180,8 @@ pub struct Package {
     pub deps: Vec<Dep>,
     /// Its targets' kinds and names
     pub targets: Vec<(TargetKind, String)>,
+    /// Its targets' root files, relative to its directory (`src/lib.rs`, `examples/demo.rs`)
+    pub target_roots: Vec<String>,
     /// Its features and what each turns on
     pub features: BTreeMap<String, Vec<String>>,
     /// `links`
@@ -377,6 +379,12 @@ impl Project {
                     (k, t.name.clone())
                 })
                 .collect();
+            let pkg_dir = root.join(&dir);
+            let target_roots = p
+                .targets
+                .iter()
+                .map(|t| rel_path(&pkg_dir, t.src_path.as_std_path()))
+                .collect();
             packages.push(Package {
                 name: p.name.to_string(),
                 version: p.version.to_string(),
@@ -389,6 +397,7 @@ impl Project {
                 publish: p.publish.as_ref().is_none_or(|r| !r.is_empty()),
                 deps,
                 targets,
+                target_roots,
                 features: p.features.clone(),
                 links: p.links.clone(),
                 sources: OnceLock::new(),

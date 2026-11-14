@@ -1,7 +1,8 @@
 //! Module-graph lints. One analysis, [`MODULES`], builds each crate's module graph from its paths and `use` items
-//! and reports `module-graph-scc`.
+//! and reports `module-graph-scc`; `orphan-source-file` finds files no module tree reaches.
 
 mod graph;
+mod orphan;
 mod scc;
 
 use sl_analysis::crate_tree::{CrateKind, crates};
@@ -18,13 +19,17 @@ lint!(MODULE_GRAPH_SCC, "C0011", "module-graph-scc", "structure", "no module cyc
     ],
     needs: [], fix: None);
 
+lint!(ORPHAN_SOURCE_FILE, "C0016", "orphan-source-file", "structure", "every .rs file under src/ is reached by a mod declaration",
+    params: [("skip", StrList, "[]", "globs, relative to the package, of files that are compiled another way")],
+    needs: [], fix: None);
+
 /// The module-graph analysis
 pub struct Modules;
 
 /// The registered instance
 pub static MODULES: Modules = Modules;
 
-static LINTS: &[&LintMeta] = &[&MODULE_GRAPH_SCC];
+static LINTS: &[&LintMeta] = &[&MODULE_GRAPH_SCC, &ORPHAN_SOURCE_FILE];
 
 impl Analysis for Modules {
     fn name(&self) -> &'static str {
@@ -36,6 +41,7 @@ impl Analysis for Modules {
     }
 
     fn run(&self, cx: &Context<'_>) {
+        orphan::run(cx);
         let p = cx.project;
         for pkg in &p.packages {
             if cx
