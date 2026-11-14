@@ -11,6 +11,7 @@ publish = false
 [dependencies]
 sl_analysis.workspace = true
 sl_core.workspace = true
+sl_docs.workspace = true
 sl_model.workspace = true
 
 [dev-dependencies]

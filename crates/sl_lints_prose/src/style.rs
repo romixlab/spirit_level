@@ -1,11 +1,12 @@
 //! Text lints over documents and comments: filler, narration, stream-of-thought, emoji, comments that restate
 //! the code, sentence and paragraph length.
 
-use crate::text::{emoji, find_phrase, sentences, words};
+use crate::text::{emoji, find_phrase};
 use crate::units::{self, From, Line};
 use sl_analysis::Context;
 use sl_analysis::comments::{CommentKind, comments, line_comment_blocks};
 use sl_core::{Diagnostic, Span};
+use sl_docs::text::{sentences, words};
 use std::collections::HashMap;
 
 pub(crate) fn run(cx: &Context<'_>) {

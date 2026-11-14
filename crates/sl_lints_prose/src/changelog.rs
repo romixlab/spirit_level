@@ -1,8 +1,8 @@
 //! CHANGELOG entries: their length, and entries that describe the diff instead of the change.
 
-use crate::text::words;
 use sl_analysis::Context;
 use sl_core::{Confidence, Diagnostic, Span};
+use sl_docs::text::words;
 
 /// One bullet of a CHANGELOG
 pub struct Entry {
