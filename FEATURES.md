@@ -41,10 +41,16 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `MAN-1` 25 lints: metadata, inheritance, workspace lints and deps, default features, -sys, duplicates, pins, paths, profiles, toolchain, repo files, changelog, justfile, feature docs, naming.
 - ✅ `MAN-2` Pin policy per project: `git-dependency-pins` checks branch, default-branch, dev-branch, tag, release or any, separately for own repos.
 - ✅ `MAN-3` Survey gaps: `profile-no-lto`, `patch-outside-workspace`, `test-binaries`, `macro-compile-fail`; medium's Clippy set caps bool parameters at one.
+- 📋 `MAN-4` `contract-snapshot`: a crate the map marks contract carries a VERSION and a schema snapshot per version; a changed snapshot needs a bump against the base.
+- 📋 `MAN-5` `git-dependency-pins` also holds git `[patch]` overrides to the pin policy.
+- 📋 `MAN-6` `default-members`: a workspace past a size parameter names its main binary in `default-members`.
+- 📋 `MAN-7` `example-metadata`: every example carries name, description and category in the manifest; the examples index is generated.
+- 📋 `MAN-8` Markdown check of READMEs and docs as a tool adapter.
 
 ## GRAPH - crate graph and map
 
 - ✅ `GRAPH-1` Map completeness, layer edges, forbidden closures, external form, third-party placement, `_core` rules, crate cycles, crate table, unsafe allow-list (`sl_lints_graph`).
+- 📋 `GRAPH-3` `clippy-policy-bans`: map roles `ui` and `theme`; clippy.toml bans raw spawns and blocking Command in UI crates, colours outside the theme, unbounded channels, wall-clock timers in tests.
 - ✅ `GRAPH-2` linkme elements and unsafe attributes count as unsafe; crates marked unsafe copy the workspace lints.
 
 ## SIZE - size and complexity
@@ -57,6 +63,8 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `CODE-3` `allow-without-reason` looks inside `cfg_attr(predicate, allow(...))`.
 - ✅ `CODE-2` Module-graph SCC share, dead pub items, error enum growth, pub surface (`sl_lints_modules`, `sl_lints_dead`, `sl_lints_errors`, `sl_lints_surface`).
 - ✅ `CODE-4` `build-info-env` and `test-support-gated`: build info and test fakes stay out of library builds.
+- 📋 `CODE-5` `build-script-clock`: build.rs reads no clock and finds git through the real git dir, so worktree builds stay clean.
+- 📋 `CODE-6` `command-registry`: a CLI past a size parameter registers commands per module, not in one central Subcommand enum (estimate).
 
 ## STATE - shared state (fewer-locks)
 
