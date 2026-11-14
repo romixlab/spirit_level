@@ -170,8 +170,8 @@ mod linked {
                 let path = existing.toml_path();
                 let rel = path
                     .strip_prefix(p.root.to_string_lossy().as_ref())
-                    .map(|r| r.as_str().to_string())
-                    .unwrap_or_else(|_| path.as_str().to_string());
+                    .map(|r| r.as_str().to_owned())
+                    .unwrap_or_else(|_| path.as_str().to_owned());
                 let (start, end) = existing.generated_offsets();
                 let line = existing.contents()[..start].lines().count() as u32 + 1;
                 let changed = existing
@@ -184,7 +184,7 @@ mod linked {
                 let krate = hakari
                     .builder()
                     .hakari_package()
-                    .map(|k| k.name().to_string());
+                    .map(|k| k.name().to_owned());
                 let mut d = Diagnostic::new(
                     "hakari-generate",
                     "workspace-hack:generated",

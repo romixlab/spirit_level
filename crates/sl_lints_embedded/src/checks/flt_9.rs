@@ -16,7 +16,7 @@ pub(crate) const NEEDS: &[FwNeed] = &[FwNeed::Sources];
 
 /// The firmware waits for a healthy mark (`healthy_watch`) and runs a USB device (`embassy_usb`, `UsbDevice`),
 /// but never calls `usb_configured()`: every boot waits the whole timeout before it counts as healthy, and a
-/// few quick re-flashes land in the ROM bootloader (embedded_bedrock TPL-64).
+/// few quick re-flashes land in the ROM bootloader (`embedded_bedrock` TPL-64).
 pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
     let idents = scan::code_idents(fw);
     let Some(watch) = scan::first_ident(&idents, &["healthy_watch"]) else {

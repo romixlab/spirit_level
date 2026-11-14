@@ -63,8 +63,8 @@ impl Analysis for Semver {
                     .collect(),
             };
         }
-        let rev = params.str("baseline-rev").to_string();
-        let base_root = params.str("baseline-root").to_string();
+        let rev = params.str("baseline-rev").to_owned();
+        let base_root = params.str("baseline-root").to_owned();
         let base_root =
             (!base_root.is_empty()).then(|| p.root.join(&base_root).display().to_string());
         for krate in crates {
@@ -146,7 +146,7 @@ pub fn parse(text: &str) -> Vec<Failure> {
         {
             check = rest
                 .split_once(": ")
-                .map(|(c, w)| (c.to_string(), w.to_string()));
+                .map(|(c, w)| (c.to_owned(), w.to_owned()));
             in_places = false;
         } else if line.trim() == "Failed in:" {
             in_places = check.is_some();
@@ -163,12 +163,12 @@ pub fn parse(text: &str) -> Vec<Failure> {
             let (file, line_no) = place
                 .and_then(|p| p.rsplit_once(':'))
                 .map_or((None, 0), |(f, l)| {
-                    (Some(f.to_string()), l.parse().unwrap_or(0))
+                    (Some(f.to_owned()), l.parse().unwrap_or(0))
                 });
             out.push(Failure {
                 check: c,
                 what: w,
-                item: item.to_string(),
+                item: item.to_owned(),
                 file,
                 line: line_no,
             });
@@ -184,7 +184,7 @@ pub fn summary(text: &str) -> Option<String> {
     let l = text
         .lines()
         .find_map(|l| l.trim().strip_prefix("Summary "))?;
-    Some(l.split(':').next().unwrap_or(l).trim().to_string())
+    Some(l.split(':').next().unwrap_or(l).trim().to_owned())
 }
 
 #[cfg(test)]

@@ -15,7 +15,7 @@ lint!(META, "F0085", "pwr-4", "pwr", "a firmware that keeps state in the backup 
 pub(crate) const NEEDS: &[FwNeed] = &[FwNeed::Sources];
 
 
-/// Families where embassy-stm32 0.6 resets the backup domain when RCC_BDCR differs from `config.rcc.ls` (`rcc/bd.rs`
+/// Families where embassy-stm32 0.6 resets the backup domain when `RCC_BDCR` differs from `config.rcc.ls` (`rcc/bd.rs`
 /// leaves it alone on L0, L1, H5, H7RS, C0 and N6)
 fn resets_domain(family: &str) -> bool {
     family.starts_with("stm32")
@@ -25,7 +25,7 @@ fn resets_domain(family: &str) -> bool {
         )
 }
 
-/// Setters of RCC_BDCR's clock fields that embassy compares at the next boot
+/// Setters of `RCC_BDCR`'s clock fields that embassy compares at the next boot
 const BDCR_SETTERS: &[&str] = &[
     "set_rtcsel",
     "set_rtcen",
@@ -34,9 +34,9 @@ const BDCR_SETTERS: &[&str] = &[
     "set_lsedrv",
 ];
 
-/// embassy-stm32's `init` compares RTCSEL, RTCEN and the LSE bits of RCC_BDCR with `config.rcc.ls` and pulses
+/// embassy-stm32's `init` compares RTCSEL, RTCEN and the LSE bits of `RCC_BDCR` with `config.rcc.ls` and pulses
 /// BDRST when they differ, which clears the backup registers. In a firmware that keeps state there (backup
-/// registers, `bkp_cnt!`, bedrock_rom_boot's boot word), a write of those bits by hand is certain to cost it at
+/// registers, `bkp_cnt!`, `bedrock_rom_boot`'s boot word), a write of those bits by hand is certain to cost it at
 /// the next boot; an RTC source other than embassy's default LSI costs it once whenever a firmware with another
 /// source ran before (an estimate).
 pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {

@@ -61,7 +61,7 @@ impl TomlExt for TomlFile {
                     continue;
                 };
                 let name = if prefix.is_empty() {
-                    k.to_string()
+                    k.to_owned()
                 } else {
                     format!("{prefix}.{k}")
                 };

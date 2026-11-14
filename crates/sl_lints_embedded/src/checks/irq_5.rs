@@ -20,7 +20,7 @@ const HELP: &str = "enable every routed line and bind a handler to every enabled
 
 
 /// `NVIC::unmask(Interrupt::X)` / `interrupt::X.enable()` with no `#[interrupt] fn X` and no binding of X; an
-/// M_CAN `.ils()` write (interrupt line select) with no `.ile()` write (interrupt line enable) anywhere
+/// `M_CAN` `.ils()` write (interrupt line select) with no `.ile()` write (interrupt line enable) anywhere
 pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
     let facts = &fw.facts;
     let has_handler = |vector: &str| {
@@ -59,7 +59,7 @@ pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
             }
             Expr::Call(c) => {
                 let Expr::Path(p) = &*c.func else { return };
-                if !p.path.segments.last().is_some_and(|s| s.ident == "unmask") {
+                if p.path.segments.last().is_none_or(|s| s.ident != "unmask") {
                     return;
                 }
                 let is_nvic = p.path.segments.len() >= 2
@@ -78,8 +78,7 @@ pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
                         format!("{}:{vector}", fb.path),
                         format!(
                             "{vector} is unmasked (NVIC::unmask) but no #[interrupt] fn {vector} and no \
-                             bind_interrupts! binding of it are in the source seen: it stays unanswered",
-                            vector = vector
+                             bind_interrupts! binding of it are in the source seen: it stays unanswered"
                         ),
                     )
                     .help(HELP)

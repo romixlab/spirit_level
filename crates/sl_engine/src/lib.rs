@@ -1,4 +1,4 @@
-//! A spirit_level run: [`run`] turns a project, a configuration and the registered analyses into a [`Report`];
+//! A `spirit_level` run: [`run`] turns a project, a configuration and the registered analyses into a [`Report`];
 //! [`fix::apply`] applies the exact fixes of a report.
 
 pub mod fix;
@@ -147,16 +147,16 @@ pub fn missing(
         }),
         Need::Map => config.map.is_none().then(|| {
             "no crate map: add [map] or map-file to spirit_level.toml (see the book's map page)"
-                .to_string()
+                .to_owned()
         }),
         Need::Tool(t) => find_tool(t, path)
             .is_none()
             .then(|| sl_tools::missing_reason(t)),
         Need::Nightly => (!has_nightly())
-            .then(|| "no nightly toolchain: `rustup toolchain install nightly`".to_string()),
+            .then(|| "no nightly toolchain: `rustup toolchain install nightly`".to_owned()),
         Need::Elf => opts.elf.is_empty().then(|| {
             "no ELF given: build the firmware and pass --elf target/<triple>/release/<name>"
-                .to_string()
+                .to_owned()
         }),
     }
 }
@@ -181,7 +181,7 @@ fn apply_levels(diagnostics: &mut [Diagnostic], config: &Config) {
         let (level, exc) = config.level(&d.lint, d.krate.as_deref(), path.as_deref());
         d.level = level;
         if level == Level::Allow {
-            d.allowed = Some(exc.map_or_else(|| "allowed".to_string(), |e| e.reason.clone()));
+            d.allowed = Some(exc.map_or_else(|| "allowed".to_owned(), |e| e.reason.clone()));
             d.level = config.lint(&d.lint).level;
         }
     }
@@ -199,7 +199,7 @@ pub fn run(
         lints
             .iter()
             .find(|m| m.id == id)
-            .map_or_else(String::new, |m| m.code.to_string())
+            .map_or_else(String::new, |m| m.code.to_owned())
     };
     let selected =
         |m: &LintMeta| opts.only.is_empty() || opts.only.iter().any(|o| m.is(o) || o == m.category);
@@ -219,8 +219,8 @@ pub fn run(
                 .find_map(|n| missing(*n, project, config, opts).map(|r| (n, r)))
             {
                 Some((need, reason)) => not_run.push(NotRun {
-                    lint: m.id.to_string(),
-                    code: m.code.to_string(),
+                    lint: m.id.to_owned(),
+                    code: m.code.to_owned(),
                     level: config.lint(m.id).level,
                     need: need.name(),
                     reason,
@@ -250,7 +250,7 @@ pub fn run(
         }));
         diagnostics.extend(out.diagnostics);
         timings.push(Timing {
-            analysis: a.name().to_string(),
+            analysis: a.name().to_owned(),
             ms: start.elapsed().as_millis(),
         });
     }

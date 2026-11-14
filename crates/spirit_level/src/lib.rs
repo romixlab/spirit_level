@@ -1,4 +1,4 @@
-//! spirit_level as a library.
+//! `spirit_level` as a library.
 //!
 //! ```no_run
 //! let opts = spirit_level::Options::new(sl_core::Date::today_utc());
@@ -19,7 +19,7 @@ use std::collections::BTreeSet;
 use std::fmt;
 use std::path::{Path, PathBuf};
 
-/// The version of spirit_level
+/// The version of `spirit_level`
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
 /// The shipped tiers, in the order they extend each other, then the ones that stand beside them
@@ -44,7 +44,7 @@ pub fn tier(name: &str) -> Option<&'static str> {
 pub fn tier_description(text: &str) -> String {
     text.lines()
         .find_map(|l| l.trim().strip_prefix("description = "))
-        .map(|d| d.trim_matches('"').to_string())
+        .map(|d| d.trim_matches('"').to_owned())
         .unwrap_or_default()
 }
 
@@ -107,8 +107,8 @@ pub struct Options {
 
 impl Options {
     /// The defaults with today's date
-    pub fn new(today: Date) -> Options {
-        Options {
+    pub fn new(today: Date) -> Self {
+        Self {
             today,
             config: None,
             tiers: Vec::new(),
@@ -132,14 +132,14 @@ pub enum CheckError {
 impl fmt::Display for CheckError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            CheckError::Load(e) => e.fmt(f),
-            CheckError::Config(errs) => {
+            Self::Load(e) => e.fmt(f),
+            Self::Config(errs) => {
                 for e in errs {
                     writeln!(f, "{e}")?;
                 }
                 Ok(())
             }
-            CheckError::UnknownOnly(o) => write!(f, "--only {o}: no lint or category of that name"),
+            Self::UnknownOnly(o) => write!(f, "--only {o}: no lint or category of that name"),
         }
     }
 }
@@ -183,7 +183,7 @@ pub fn tool_needs(project: &Project, config: &Config) -> ToolNeeds {
             if let Need::Tool(t) = need
                 && sl_tools::pin(t).is_some()
             {
-                n.tools.insert((*t).to_string());
+                n.tools.insert((*t).to_owned());
             }
         }
     }
@@ -215,7 +215,7 @@ pub fn tool_needs(project: &Project, config: &Config) -> ToolNeeds {
     }
     if config.enabled("cargo-wasm") && marked(|c| c.wasm) {
         n.targets
-            .insert(config.lint("cargo-wasm").params.str("target").to_string());
+            .insert(config.lint("cargo-wasm").params.str("target").to_owned());
     }
     n
 }
@@ -245,6 +245,10 @@ pub fn check(dir: &Path, opts: &Options) -> Result<(Project, Report), CheckError
 }
 
 #[cfg(test)]
+#[expect(
+    clippy::let_underscore_must_use,
+    reason = "a test removes its scratch directory as far as it can"
+)]
 mod tests {
     use super::*;
 
@@ -274,11 +278,11 @@ mod tests {
         }
         // off at big
         assert!(!n.tools.contains("cargo-udeps"));
-        assert_eq!(n.toolchains, BTreeSet::from(["1.85.0".to_string()]));
+        assert_eq!(n.toolchains, BTreeSet::from(["1.85.0".to_owned()]));
         // no_std is marked, wasm is not
         assert_eq!(
             n.targets,
-            BTreeSet::from(["thumbv7em-none-eabihf".to_string()])
+            BTreeSet::from(["thumbv7em-none-eabihf".to_owned()])
         );
     }
 
@@ -286,7 +290,7 @@ mod tests {
     fn registry_is_consistent() {
         let all = lints();
         let mut ids: Vec<&str> = all.iter().map(|m| m.id).collect();
-        ids.sort();
+        ids.sort_unstable();
         let n = ids.len();
         ids.dedup();
         assert_eq!(n, ids.len(), "duplicate lint ids");

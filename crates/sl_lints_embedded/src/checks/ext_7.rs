@@ -30,7 +30,7 @@ pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
                 if name.starts_with("set_") || name == "bits" {
                     for a in &m.args {
                         minus_literal(a, &mut |v, e| {
-                            subs.push((v, scan::loc(f.file, syn::spanned::Spanned::span(e))))
+                            subs.push((v, scan::loc(f.file, syn::spanned::Spanned::span(e))));
                         });
                     }
                 }
@@ -40,7 +40,7 @@ pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
             }
             Node::Expr(Expr::Binary(b)) => match b.op {
                 BinOp::Shl(_) => minus_literal(&b.left, &mut |v, e| {
-                    subs.push((v, scan::loc(f.file, syn::spanned::Spanned::span(e))))
+                    subs.push((v, scan::loc(f.file, syn::spanned::Spanned::span(e))));
                 }),
                 BinOp::Lt(_)
                 | BinOp::Le(_)

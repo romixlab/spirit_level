@@ -74,7 +74,7 @@ impl TextFile {
     }
 }
 
-/// `bedrock_fw.json`: what the embedded_bedrock template generated the firmware with
+/// `bedrock_fw.json`: what the `embedded_bedrock` template generated the firmware with
 #[derive(Clone, Debug)]
 pub struct BedrockFw {
     /// The file
@@ -107,19 +107,19 @@ pub struct Chip {
 
 impl Chip {
     /// The chip of a name, with its family
-    pub fn new(name: &str) -> Chip {
+    pub fn new(name: &str) -> Self {
         let l = name.to_ascii_lowercase();
         let family = if let Some(rest) = l.strip_prefix("stm32") {
             format!("stm32{}", rest.get(..2).unwrap_or(rest))
         } else if l.starts_with("rp235") {
-            "rp235x".to_string()
+            "rp235x".to_owned()
         } else if let Some(rest) = l.strip_prefix("nrf") {
             format!("nrf{}", rest.get(..2).unwrap_or(rest))
         } else {
             l.clone()
         };
-        Chip {
-            name: name.to_string(),
+        Self {
+            name: name.to_owned(),
             family,
         }
     }
@@ -165,7 +165,7 @@ pub struct Firmware<'p> {
 impl<'p> Firmware<'p> {
     /// Every firmware crate of the project, each with the ELF of `elfs` that is its own: the one named after one of
     /// its binaries, or the only ELF when the project has one firmware crate
-    pub fn load_all(project: &'p Project, elfs: &[PathBuf]) -> Vec<Firmware<'p>> {
+    pub fn load_all(project: &'p Project, elfs: &[PathBuf]) -> Vec<Self> {
         let crates: Vec<&Package> = project
             .packages
             .iter()
@@ -188,7 +188,7 @@ impl<'p> Firmware<'p> {
     }
 
     /// Reads one firmware crate of the project
-    pub fn load(project: &'p Project, package: &'p Package, elf: Option<&Path>) -> Firmware<'p> {
+    pub fn load(project: &'p Project, package: &'p Package, elf: Option<&Path>) -> Self {
         let root = absolute(&project.root);
         let dir = root.join(&package.dir);
         let mut notes = Vec::new();
@@ -210,8 +210,7 @@ impl<'p> Firmware<'p> {
             .and_then(
                 |file| match serde_json::from_str::<serde_json::Value>(&file.text) {
                     Ok(json) => {
-                        let s =
-                            |a: &str, b: &str| json.get(a)?.get(b)?.as_str().map(str::to_string);
+                        let s = |a: &str, b: &str| json.get(a)?.get(b)?.as_str().map(str::to_owned);
                         Some(BedrockFw {
                             chip: s("answers", "chip").map(|c| Chip::new(&c)),
                             framework: s("answers", "framework"),
@@ -312,7 +311,7 @@ impl<'p> Firmware<'p> {
         let (file, v) = self.cargo_config(&["build", "target"])?;
         let t = match v.as_value()? {
             sl_model::toml_edit::Value::String(s) => s.value().clone(),
-            sl_model::toml_edit::Value::Array(a) => a.get(0)?.as_str()?.to_string(),
+            sl_model::toml_edit::Value::Array(a) => a.get(0)?.as_str()?.to_owned(),
             _ => return None,
         };
         Some((file, t))
@@ -336,14 +335,14 @@ impl<'p> Firmware<'p> {
         let mut tables: Vec<(Vec<String>, &dyn sl_model::toml_edit::TableLike)> = Vec::new();
         for kind in kinds {
             if let Some(t) = m.root().get(kind).and_then(Item::as_table_like) {
-                tables.push((vec![kind.to_string()], t));
+                tables.push((vec![kind.to_owned()], t));
             }
         }
         if let Some(targets) = m.root().get("target").and_then(Item::as_table_like) {
             for (cfg, tv) in targets.iter() {
                 for kind in kinds {
                     if let Some(t) = tv.get(kind).and_then(Item::as_table_like) {
-                        tables.push((vec!["target".into(), cfg.to_string(), kind.into()], t));
+                        tables.push((vec!["target".into(), cfg.to_owned(), kind.into()], t));
                     }
                 }
             }
@@ -365,7 +364,7 @@ impl<'p> Firmware<'p> {
                 out.push(Dependency {
                     file: m,
                     table: table.clone(),
-                    name: name.to_string(),
+                    name: name.to_owned(),
                     value,
                     inherited,
                 });
@@ -420,7 +419,7 @@ impl Dependency<'_> {
                 line = file.line_of(&path);
             }
             for f in a.iter().filter_map(|f| f.as_str()) {
-                out.push((f.to_string(), file, line));
+                out.push((f.to_owned(), file, line));
             }
         }
         out
@@ -555,7 +554,7 @@ fn sources(
                     let in_package = rel
                         .strip_prefix(&format!("{path}/"))
                         .unwrap_or(&rel)
-                        .to_string();
+                        .to_owned();
                     sl_model::SourceFile::read(root, &rel, &d.name, &in_package).ok()
                 })
                 .collect();
@@ -596,7 +595,7 @@ pub fn rel_path(base: &Path, p: &Path) -> String {
     let target: Vec<_> = p.components().collect();
     let common = base.iter().zip(&target).take_while(|(a, b)| a == b).count();
     let mut parts: Vec<String> =
-        std::iter::repeat_n("..".to_string(), base.len() - common).collect();
+        std::iter::repeat_n("..".to_owned(), base.len() - common).collect();
     parts.extend(
         target[common..]
             .iter()

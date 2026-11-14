@@ -1,6 +1,7 @@
-//! The Clippy set a configuration expects: the lints of the project's `[workspace.lints.clippy]` and the
-//! settings of its `clippy.toml`. A layer writes it in a `[clippy]` table; later layers override earlier ones
-//! entry by entry.
+//! The Clippy set a configuration expects.
+//!
+//! The lints of the project's `[workspace.lints.clippy]` and the settings of its `clippy.toml`. A layer writes it in
+//! a `[clippy]` table; later layers override earlier ones entry by entry.
 //!
 //! ```toml
 //! [clippy.lints]
@@ -156,7 +157,10 @@ impl ClippySet {
 fn reason(e: &mut Reader<'_>, what: &str, errs: &mut Vec<ConfigError>) -> String {
     let r = e.opt_str("reason", errs).unwrap_or_default();
     if r.trim().is_empty() {
-        errs.push(e.err("", format!("{what} needs a reason: say why it is set this way")));
+        errs.push(e.err(
+            "",
+            format!("{what} needs a reason: say why it is set this way"),
+        ));
     }
     r
 }

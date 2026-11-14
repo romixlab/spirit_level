@@ -1,4 +1,4 @@
-//! The cargo-deny adapter: one spirit_level lint per cargo-deny check.
+//! The cargo-deny adapter: one `spirit_level` lint per cargo-deny check.
 //!
 //! Each enabled check runs as `cargo deny --format json --color never check <check>`, so every diagnostic belongs
 //! to the check that produced it. cargo-deny writes JSON lines to stderr: `"type": "diagnostic"` objects carry a
@@ -122,7 +122,7 @@ pub fn parse(stderr: &str) -> Vec<Finding> {
             v.get(k)
                 .and_then(Value::as_str)
                 .unwrap_or_default()
-                .to_string()
+                .to_owned()
         };
         let severity = s(f, "severity");
         if severity != "error" && severity != "warning" {
@@ -176,7 +176,7 @@ fn errors(stderr: &str) -> Option<String> {
         .filter(|v| v.get("type").and_then(Value::as_str) == Some("log"))
         .filter_map(|v| v.get("fields").cloned())
         .filter(|f| f.get("level").and_then(Value::as_str) == Some("ERROR"))
-        .filter_map(|f| f.get("message").and_then(Value::as_str).map(str::to_string))
+        .filter_map(|f| f.get("message").and_then(Value::as_str).map(str::to_owned))
         .collect();
     (!v.is_empty()).then(|| v.join(" | "))
 }
@@ -208,7 +208,7 @@ impl Finding {
             _ => self.message.clone(),
         };
         if let Some(id) = &self.advisory {
-            msg.push_str(&format!(" ({id})"));
+            msg = format!("{msg} ({id})");
         }
         let help = match (lint, &self.advisory) {
             (_, Some(id)) => format!(
@@ -253,7 +253,7 @@ mod tests {
         let b = parse(include_str!("../tests/samples/deny-bans.jsonl"));
         assert_eq!(b.len(), 1);
         assert_eq!(b[0].item(), "banned:itoa@1.0.19");
-        assert_eq!(b[0].labels, vec!["banned here".to_string()]);
+        assert_eq!(b[0].labels, vec!["banned here".to_owned()]);
         let l = parse(include_str!("../tests/samples/deny-licenses.jsonl"));
         assert_eq!(l.len(), 2);
         assert!(l.iter().all(|f| f.code == "rejected"));
@@ -267,6 +267,6 @@ mod tests {
         let e =
             r#"{"fields":{"level":"ERROR","message":"failed to parse deny.toml"},"type":"log"}"#;
         assert_eq!(errors(e).as_deref(), Some("failed to parse deny.toml"));
-        assert!(parse(e).is_empty());
+        assert_eq!(parse(e), [] as [Finding; 0]);
     }
 }

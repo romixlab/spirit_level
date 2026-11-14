@@ -20,12 +20,12 @@ fn tracked(cx: &Context<'_>) -> Result<Vec<String>, String> {
         .output()
         .map_err(|e| format!("cannot run git: {e}"))?;
     if !out.status.success() {
-        return Err(String::from_utf8_lossy(&out.stderr).trim().to_string());
+        return Err(String::from_utf8_lossy(&out.stderr).trim().to_owned());
     }
     Ok(String::from_utf8_lossy(&out.stdout)
         .split('\0')
         .filter(|s| !s.is_empty())
-        .map(str::to_string)
+        .map(str::to_owned)
         .collect())
 }
 
@@ -50,11 +50,11 @@ pub(crate) fn run(cx: &Context<'_>) {
     matching(cx, &files, "leftover-files", |f| {
         (
             format!("{f} is a leftover (merge, patch, editor or scratch file)"),
-            "delete it and add the pattern to .gitignore".to_string(),
+            "delete it and add the pattern to .gitignore".to_owned(),
         )
     });
     matching(cx, &files, "agent-session-files", |f| {
-        (format!("{f} is an agent session file (transcript, history or per-person settings)"), "remove it from git (`git rm --cached`) and ignore it; transcripts hold private context and secrets".to_string())
+        (format!("{f} is an agent session file (transcript, history or per-person settings)"), "remove it from git (`git rm --cached`) and ignore it; transcripts hold private context and secrets".to_owned())
     });
     secrets(cx, &files);
     permissions(cx, &files);
@@ -111,7 +111,7 @@ fn pairs(line: &str) -> Vec<(String, String)> {
             .find(|k| !k.is_empty())
             .unwrap_or("")
             .trim_matches(['"', '\''])
-            .to_string();
+            .to_owned();
         let after = rest[i + 1..].trim_start();
         let (val, next) = if let Some(nested) = after.strip_prefix(['{', '[']) {
             (String::new(), nested)
@@ -156,10 +156,10 @@ fn secrets(cx: &Context<'_>, files: &[String]) {
                 keys.iter()
                     .any(|s| kl.contains(s.as_str()))
                     .then_some(())
-                    .filter(|_| {
+                    .filter(|()| {
                         !placeholder(&v) && !v.split_whitespace().last().is_some_and(placeholder)
                     })
-                    .map(|_| format!("`{k}` with a literal value"))
+                    .map(|()| format!("`{k}` with a literal value"))
             });
             if let Some(why) = by_prefix.or(by_key) {
                 cx.emit(

@@ -1,6 +1,7 @@
-//! The compiler messages of `cargo check|clippy|doc --message-format json`: one JSON object per line on stdout;
-//! the objects with `"reason": "compiler-message"` carry a rustc diagnostic, `"build-finished"` says whether the
-//! build succeeded.
+//! The compiler messages of `cargo check|clippy|doc --message-format json`.
+//!
+//! One JSON object per line on stdout; the objects with `"reason": "compiler-message"` carry a rustc diagnostic,
+//! `"build-finished"` says whether the build succeeded.
 
 use serde_json::Value;
 use sl_core::Span;
@@ -68,7 +69,7 @@ pub fn parse(stdout: &str) -> Messages {
                         .get("code")
                         .and_then(|c| c.get("code"))
                         .and_then(Value::as_str)
-                        .map(str::to_string),
+                        .map(str::to_owned),
                     message: str_of(m, "message"),
                     span: primary(m),
                     help: help(m),
@@ -87,7 +88,7 @@ fn str_of(v: &Value, k: &str) -> String {
     v.get(k)
         .and_then(Value::as_str)
         .unwrap_or_default()
-        .to_string()
+        .to_owned()
 }
 
 fn primary(m: &Value) -> Option<MessageSpan> {
@@ -112,7 +113,7 @@ fn primary(m: &Value) -> Option<MessageSpan> {
                 .take(b.saturating_sub(a))
                 .collect::<String>()
                 .trim()
-                .to_string()
+                .to_owned()
         })
         .unwrap_or_default();
     Some(MessageSpan {
@@ -153,7 +154,7 @@ fn help(m: &Value) -> Option<String> {
         && !r.is_empty()
         && !r.contains('\n')
     {
-        h.push_str(&format!(": `{r}`"));
+        h = format!("{h}: `{r}`");
     }
     Some(h)
 }

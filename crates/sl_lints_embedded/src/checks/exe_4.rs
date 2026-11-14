@@ -187,7 +187,7 @@ fn binding_wakers(facts: &Facts, own: &str, used: &BTreeSet<String>) -> Vec<Wake
             .handlers
             .split(|c: char| !(c.is_ascii_alphanumeric() || c == '_'))
             .filter(|w| sl_firmware::is_upper_name(w))
-            .map(str::to_string)
+            .map(str::to_owned)
             .collect();
         wakers.push(Waker {
             name: b.vector.clone(),

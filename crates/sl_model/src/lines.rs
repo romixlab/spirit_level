@@ -14,7 +14,7 @@ pub struct LineCount {
 }
 
 impl std::ops::AddAssign for LineCount {
-    fn add_assign(&mut self, o: LineCount) {
+    fn add_assign(&mut self, o: Self) {
         self.total += o.total;
         self.code += o.code;
         self.comment += o.comment;
@@ -22,9 +22,11 @@ impl std::ops::AddAssign for LineCount {
     }
 }
 
-/// Counts the lines of Rust source. Block comments (`/* */`, nested) are followed across lines; a line with code
-/// and a comment counts as code. String literals that contain `/*` or `//` are not told apart from comments: an
-/// estimate good to a few lines in a thousand
+/// Counts the lines of Rust source.
+///
+/// Block comments (`/* */`, nested) are followed across lines; a line with code and a comment counts as code. String
+/// literals that contain `/*` or `//` are not told apart from comments: an estimate good to a few lines in a
+/// thousand.
 pub fn count_lines(text: &str) -> LineCount {
     let mut c = LineCount::default();
     let mut depth = 0u32;

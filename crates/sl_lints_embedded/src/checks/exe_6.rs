@@ -42,10 +42,9 @@ pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
     let mut out = Vec::new();
     for st in &facts.statics {
         let kind = match st.raw_mutex() {
-            Some(m @ ("ThreadModeRawMutex" | "NoopRawMutex")) => m.to_string(),
-            Some(_) => continue,
-            None if st.mutable && !st.is_interrupt_executor() => "static mut".to_string(),
-            None => continue,
+            Some(m @ ("ThreadModeRawMutex" | "NoopRawMutex")) => m.to_owned(),
+            None if st.mutable && !st.is_interrupt_executor() => "static mut".to_owned(),
+            Some(_) | None => continue,
         };
         let uses = |side| first_use(facts, side, &st.name);
         let (Some((iu, ir)), Some((tu, tr))) = (uses(&cx.interrupt), uses(&cx.thread)) else {

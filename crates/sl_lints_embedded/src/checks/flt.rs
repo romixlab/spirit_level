@@ -33,7 +33,7 @@ pub fn nesting_macro(name: &str) -> bool {
     ) || scan::COUNT_MACROS.contains(&name)
 }
 
-/// Whether the firmware's core has the configurable faults (UsageFault, MemManage, BusFault): Armv7-M and Armv8-M
+/// Whether the firmware's core has the configurable faults (`UsageFault`, `MemManage`, BusFault): Armv7-M and Armv8-M
 /// Mainline, by target triple, else by chip family. `None` when neither tells.
 pub fn has_configurable_faults(fw: &Firmware<'_>) -> Option<bool> {
     if let Some(core) = scan::core(fw) {

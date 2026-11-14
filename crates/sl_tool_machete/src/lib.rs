@@ -58,7 +58,7 @@ impl Analysis for Machete {
             }
         };
         for (manifest, dep) in parse(&out.stdout) {
-            let manifest = manifest.trim_start_matches("./").to_string();
+            let manifest = manifest.trim_start_matches("./").to_owned();
             let dir = manifest
                 .strip_suffix("Cargo.toml")
                 .unwrap_or("")
@@ -92,12 +92,12 @@ pub fn parse(stdout: &str) -> Vec<(String, String)> {
     for line in stdout.lines() {
         if let Some(dep) = line.strip_prefix('\t') {
             if let Some(m) = &manifest {
-                out.push((m.clone(), dep.trim().to_string()));
+                out.push((m.clone(), dep.trim().to_owned()));
             }
         } else if let Some((_, m)) = line.split_once(" -- ")
             && let Some(m) = m.strip_suffix(':')
         {
-            manifest = Some(m.to_string());
+            manifest = Some(m.to_owned());
         } else {
             manifest = None;
         }
@@ -113,8 +113,8 @@ mod tests {
         assert_eq!(
             got,
             vec![
-                ("./crates/a/Cargo.toml".to_string(), "itoa".to_string()),
-                ("./crates/b/Cargo.toml".to_string(), "ryu".to_string()),
+                ("./crates/a/Cargo.toml".to_owned(), "itoa".to_owned()),
+                ("./crates/b/Cargo.toml".to_owned(), "ryu".to_owned()),
             ]
         );
     }

@@ -1,5 +1,5 @@
 //! `dma-6` Erratum asks for DMA where the code polls: G0 UCPD TX written by software instead of DMA
-//! (ES0548 2.17.1, STM32G0B1xB/xC/xE and G0C1xx)
+//! (ES0548 2.17.1, STM32G0B1xB/xC/xE and `G0C1xx`)
 
 use crate::FwNeed;
 use sl_analysis::lint;
@@ -26,7 +26,7 @@ const TXDR: &[&str] = &["txdr", "TXDR"];
 /// `<reg>.txdr().write(..)` / `.write_value(..)` on a G0B1 / G0C1: ES0548 Rev 4 2.17.1 "TXHRST upon write data
 /// underflow corrupting the CRC of the next packet" (status A, every silicon revision) — "TXHRST command
 /// issued at the instant of detecting write data underflow during a packet transmission can cause a corrupt
-/// CRC of the following packet". Workaround: "Use DMA (TXDMAEN) rather than software writing to UCPD_TXDR.
+/// CRC of the following packet". Workaround: "Use DMA (TXDMAEN) rather than software writing to `UCPD_TXDR`.
 /// Normally, this prevents write data underflow. Should a corrupt CRC event still occur, the DMA transfer
 /// method retransmits the packet until the CRC is correct and the packet acknowledged by the receiver."
 pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {

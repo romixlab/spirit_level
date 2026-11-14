@@ -17,10 +17,10 @@ pub(crate) const NEEDS: &[FwNeed] = &[FwNeed::Sources];
 /// probe-rs switches an RTT channel to blocking on attach, and a probe that stops reading (halted host, a
 /// closed `probe-rs run`) then stops the firmware in the logger:
 /// - `defmt_rtt` without its `disable-blocking-mode` feature: it blocks whenever the channel is in
-///   BlockIfFull (`defmt-rtt` 1.3 `channel.rs`);
+///   `BlockIfFull` (`defmt-rtt` 1.3 `channel.rs`);
 /// - `BlockIfFull` named anywhere (a channel set up or switched to it);
 /// - rtt-target's `rtt_init_print!` / `rtt_init_default!` / `rtt_init_defmt!` without `ww_defmt_logger` (which
-///   writes each frame whole or skips it, whatever the mode): an estimate, the channel starts NoBlockSkip and
+///   writes each frame whole or skips it, whatever the mode): an estimate, the channel starts `NoBlockSkip` and
 ///   only the probe changes it.
 pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
     let words = scan::words(fw);

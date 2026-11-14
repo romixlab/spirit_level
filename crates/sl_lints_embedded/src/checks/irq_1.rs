@@ -69,11 +69,10 @@ pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
                 let Expr::Path(p) = strip(&c.func) else {
                     return;
                 };
-                if !p
+                if p
                     .path
                     .segments
-                    .last()
-                    .is_some_and(|s| s.ident == "write_volatile")
+                    .last().is_none_or(|s| s.ident != "write_volatile")
                     || c.args.len() != 2
                 {
                     return;
@@ -84,11 +83,10 @@ pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
                 let Expr::Path(rp) = strip(&rc.func) else {
                     return;
                 };
-                if !rp
+                if rp
                     .path
                     .segments
-                    .last()
-                    .is_some_and(|s| s.ident == "read_volatile")
+                    .last().is_none_or(|s| s.ident != "read_volatile")
                     || rc.args.len() != 1
                     || text(ptr) != text(&rc.args[0])
                 {

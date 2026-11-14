@@ -64,8 +64,8 @@ fn parse(text: &str) -> Result<Vec<Pin>, String> {
         let t = item
             .as_table()
             .ok_or_else(|| format!("{name} is not a table"))?;
-        let s = |k: &str| t.get(k).and_then(|v| v.as_str()).map(str::to_string);
-        for (k, _) in t.iter() {
+        let s = |k: &str| t.get(k).and_then(|v| v.as_str()).map(str::to_owned);
+        for (k, _) in t {
             if ![
                 "crate",
                 "version",
@@ -93,7 +93,7 @@ fn parse(text: &str) -> Result<Vec<Pin>, String> {
                     .and_then(|v| v.as_array())
                     .map(|a| {
                         a.iter()
-                            .filter_map(|v| v.as_str().map(str::to_string))
+                            .filter_map(|v| v.as_str().map(str::to_owned))
                             .collect()
                     })
                     .unwrap_or_default(),
@@ -102,7 +102,7 @@ fn parse(text: &str) -> Result<Vec<Pin>, String> {
             _ => return Err(format!("{name}: give crate and version, or component")),
         };
         out.push(Pin {
-            name: name.to_string(),
+            name: name.to_owned(),
             kind,
             exe: s("exe").ok_or_else(|| format!("{name}: no exe"))?,
             nightly: t.get("nightly").and_then(|v| v.as_bool()).unwrap_or(false),

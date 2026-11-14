@@ -1,4 +1,8 @@
 //! Golden fixtures for analyses: see the README for the layout.
+#![expect(
+    clippy::let_underscore_must_use,
+    reason = "fmt::Write into a String cannot fail; scratch files are removed as far as possible, a leftover is overwritten next run"
+)]
 
 use sl_analysis::Analysis;
 use sl_config::{Config, Env};
@@ -33,10 +37,12 @@ pub fn check_with(analysis: &dyn Analysis, dir: &Path, hooks: &Hooks<'_>) {
     check_impl(analysis, dir, hooks, false);
 }
 
-/// Like [`check`], for an adapter that runs an external tool: each case runs on a copy in the temporary
-/// directory (the tool may write `Cargo.lock` or `target/`), and a case whose lint cannot run because the tool,
-/// a toolchain, a target or a cargo feature is missing is skipped with a `skipped:` line on stderr instead of
-/// failing. `SPIRIT_LEVEL_REQUIRE_TOOLS=1` turns those skips into failures (for a run that must cover them)
+/// Like [`check`], for an adapter that runs an external tool.
+///
+/// Each case runs on a copy in the temporary directory (the tool may write `Cargo.lock` or `target/`), and a case
+/// whose lint cannot run because the tool, a toolchain, a target or a cargo feature is missing is skipped with a
+/// `skipped:` line on stderr instead of failing. `SPIRIT_LEVEL_REQUIRE_TOOLS=1` turns those skips into failures (for
+/// a run that must cover them).
 pub fn check_tools(analysis: &dyn Analysis, dir: &Path) {
     check_impl(analysis, dir, &Hooks::default(), true);
 }
@@ -44,7 +50,7 @@ pub fn check_tools(analysis: &dyn Analysis, dir: &Path) {
 /// The needs whose absence skips a tool fixture
 const SKIPPABLE: &[&str] = &["tool:", "nightly", "toolchain:", "target:", "feature:"];
 
-/// How a case that needs the network is skipped, unless SPIRIT_LEVEL_NETWORK is set
+/// How a case that needs the network is skipped, unless `SPIRIT_LEVEL_NETWORK` is set
 const NETWORK_SKIP: &str =
     "needs the network (`network = true` in expect.toml; SPIRIT_LEVEL_NETWORK=1 runs it)";
 
@@ -86,7 +92,11 @@ fn check_impl(analysis: &dyn Analysis, dir: &Path, hooks: &Hooks<'_>, tools: boo
         .collect();
     lint_dirs.sort();
     for ld in lint_dirs {
-        let id = ld.file_name().unwrap().to_string_lossy().to_string();
+        let id = ld
+            .file_name()
+            .expect("a fixture directory has a name")
+            .to_string_lossy()
+            .to_string();
         if !lints.iter().any(|m| m.id == id) {
             let _ = writeln!(
                 problems,
@@ -105,7 +115,11 @@ fn check_impl(analysis: &dyn Analysis, dir: &Path, hooks: &Hooks<'_>, tools: boo
             .collect();
         cases.sort();
         for case in cases {
-            let name = case.file_name().unwrap().to_string_lossy().to_string();
+            let name = case
+                .file_name()
+                .expect("a case directory has a name")
+                .to_string_lossy()
+                .to_string();
             match run_case(analysis, &id, &case, hooks, tools) {
                 Ok(None) => {}
                 Ok(Some(reason)) => skipped.push(format!("{id}/{name}: {reason}")),
@@ -115,6 +129,10 @@ fn check_impl(analysis: &dyn Analysis, dir: &Path, hooks: &Hooks<'_>, tools: boo
             }
         }
     }
+    #[expect(
+        clippy::print_stderr,
+        reason = "a skipped case is shown on stderr, as the test runner shows it"
+    )]
     for s in &skipped {
         eprintln!("skipped: {s}"); // spirit-level: allow(print-in-library) a skipped case is shown on stderr, as the test runner shows it
     }
@@ -132,16 +150,29 @@ fn check_impl(analysis: &dyn Analysis, dir: &Path, hooks: &Hooks<'_>, tools: boo
 }
 
 /// Copies a case to a fixed place in the temporary directory (fixed, so a build directory keyed on the path is
-/// reused from run to run), without `target/`
+/// reused from run to run), without `target/`. The place is keyed on the case's own path, so two checkouts testing
+/// at once never share a copy.
 fn copy_case(analysis: &str, id: &str, case: &Path) -> Result<PathBuf, String> {
     let dest = std::env::temp_dir()
         .join("sl_testkit")
+        .join(path_key(case))
         .join(analysis)
         .join(id)
         .join(case.file_name().unwrap_or_default());
     let _ = std::fs::remove_dir_all(&dest);
     copy_dir(case, &dest, true).map_err(|e| format!("copying the case: {e}"))?;
     Ok(dest)
+}
+
+/// A short stable key of a path (FNV-1a), the same from run to run
+fn path_key(path: &Path) -> String {
+    let h = path
+        .to_string_lossy()
+        .bytes()
+        .fold(0xcbf2_9ce4_8422_2325_u64, |h, b| {
+            (h ^ u64::from(b)).wrapping_mul(0x0100_0000_01b3)
+        });
+    format!("{h:016x}")
 }
 
 /// Copies a directory without `target/`; at the top, without the harness's `expect.toml` (a tool that walks
@@ -196,7 +227,7 @@ fn run_case(
         .map_err(|e| format!("expect.toml: {e}"))?;
     let network = expect.get("network").and_then(toml_edit::Item::as_bool) == Some(true);
     if network && std::env::var_os("SPIRIT_LEVEL_NETWORK").is_none() {
-        return Ok(Some(NETWORK_SKIP.to_string()));
+        return Ok(Some(NETWORK_SKIP.to_owned()));
     }
     // `project = "..."` runs a project shared by several cases, named relative to the case in the source tree
     let shared = match expect.get("project").and_then(|p| p.as_str()) {
@@ -232,7 +263,11 @@ fn run_case(
         None
     };
     let project = repo.as_ref().map_or(project, |r| r.dir.clone());
-    let name = case.file_name().unwrap().to_string_lossy().to_string();
+    let name = case
+        .file_name()
+        .expect("a case directory has a name")
+        .to_string_lossy()
+        .to_string();
     let elf_dir_name = format!("sl_testkit_elf_{}_{id}_{name}", std::process::id());
     let elf_dir = std::env::temp_dir().join(&elf_dir_name);
     let mut elf = Vec::new();
@@ -284,7 +319,7 @@ fn run_project(analysis: &dyn Analysis, c: &Case<'_>) -> Result<Option<String>, 
         &config,
         &analyses,
         &RunOptions {
-            only: vec![id.to_string()],
+            only: vec![id.to_owned()],
             today,
             path: None,
             elf: c.elf.clone(),
@@ -302,7 +337,7 @@ fn run_project(analysis: &dyn Analysis, c: &Case<'_>) -> Result<Option<String>, 
         .filter(|d| d.lint == id && d.allowed.is_none())
         .map(|d| {
             let at = d.primary().map_or_else(
-                || "-".to_string(),
+                || "-".to_owned(),
                 |s| {
                     if s.file.contains(&c.elf_marker) {
                         let mut s = s.clone();
@@ -359,16 +394,16 @@ fn case_config(c: &Case<'_>, env: &Env<'_>) -> Result<Config, String> {
 fn wanted(expect: &toml_edit::DocumentMut) -> Result<Vec<Want>, String> {
     let mut want: Vec<Want> = Vec::new();
     if let Some(arr) = expect.get("finding").and_then(|f| f.as_array_of_tables()) {
-        for t in arr.iter() {
+        for t in arr {
             let at = t
                 .get("at")
                 .and_then(|v| v.as_str())
                 .unwrap_or("-")
-                .to_string();
+                .to_owned();
             let contains = t
                 .get("contains")
                 .and_then(|v| v.as_str())
-                .map(str::to_string);
+                .map(str::to_owned);
             let confidence = match t.get("confidence").and_then(|v| v.as_str()) {
                 None | Some("certain") => Confidence::Certain,
                 Some("estimate") => Confidence::Estimate,
@@ -466,7 +501,7 @@ struct GitCase {
 impl GitCase {
     /// Copies `project` into a fresh directory, commits every file but the `untracked` ones on `main`, then
     /// adds each `[[commit]]` on a branch `work` (empty commits with the given message, or writing `files`)
-    fn make(case_dir: &Path, project: &Path, id: &str) -> Result<GitCase, String> {
+    fn make(case_dir: &Path, project: &Path, id: &str) -> Result<Self, String> {
         let spec: toml_edit::DocumentMut = std::fs::read_to_string(case_dir.join("git.toml"))
             .map_err(|e| format!("git.toml: {e}"))?
             .parse()
@@ -474,18 +509,21 @@ impl GitCase {
         let dir = std::env::temp_dir().join(format!(
             "sl_testkit_git_{}_{id}_{}",
             std::process::id(),
-            case_dir.file_name().unwrap().to_string_lossy()
+            case_dir
+                .file_name()
+                .expect("a case directory has a name")
+                .to_string_lossy()
         ));
         let _ = std::fs::remove_dir_all(&dir);
         copy_dir(project, &dir, true).map_err(|e| format!("copy: {e}"))?;
         let _ = std::fs::remove_file(dir.join("git.toml"));
-        let repo = GitCase { dir };
+        let repo = Self { dir };
         let untracked: Vec<String> = spec
             .get("untracked")
             .and_then(|v| v.as_array())
             .map(|a| {
                 a.iter()
-                    .filter_map(|v| v.as_str().map(str::to_string))
+                    .filter_map(|v| v.as_str().map(str::to_owned))
                     .collect()
             })
             .unwrap_or_default();
@@ -497,7 +535,7 @@ impl GitCase {
         repo.git(&["commit", "-q", "--allow-empty", "-m", "initial"])?;
         repo.git(&["switch", "-q", "-c", "work"])?;
         if let Some(commits) = spec.get("commit").and_then(|c| c.as_array_of_tables()) {
-            for c in commits.iter() {
+            for c in commits {
                 let msg = c
                     .get("message")
                     .and_then(|m| m.as_str())

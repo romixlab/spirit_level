@@ -8,7 +8,7 @@ use syn::spanned::Spanned;
 use syn::visit::Visit;
 use syn::{Expr, Pat, Stmt};
 
-/// Methods that take a lock (not `borrow`: a second RefCell borrow is common and safe)
+/// Methods that take a lock (not `borrow`: a second `RefCell` borrow is common and safe)
 const LOCK_METHODS: &[&str] = &[
     "lock",
     "read",
@@ -41,7 +41,7 @@ pub(crate) struct Guards<'a> {
 }
 
 impl<'a> Guards<'a> {
-    pub(crate) fn new(file: &'a str, io: &'a [String]) -> Guards<'a> {
+    pub(crate) fn new(file: &'a str, io: &'a [String]) -> Self {
         Guards {
             file,
             io,
@@ -59,7 +59,7 @@ fn guard_call(mut e: &Expr) -> Option<&syn::ExprMethodCall> {
                 if ["unwrap", "expect", "unwrap_or_else"]
                     .contains(&m.method.to_string().as_str()) =>
             {
-                e = &m.receiver
+                e = &m.receiver;
             }
             Expr::Try(t) => e = &t.expr,
             Expr::Await(a) => e = &a.base,

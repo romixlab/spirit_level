@@ -18,7 +18,7 @@ pub(crate) const NEEDS: &[FwNeed] = &[FwNeed::Sources];
 /// On STM32G0: a `set_ucpdN_strobe(false)` hands the UCPD pins back to the dead-battery pull-down (certain). A
 /// pin read (`is_high()`, `is_low()`, `get_level()`) before the strobe is set in the same function is an
 /// estimate. Reads in a G0 firmware that never sets a strobe and runs no UCPD driver are one candidate: a read on
-/// a DBCC pin sees the pull-down (typec_dongle FW-22: PA10, UCPD1's DBCC2, read low on every board).
+/// a DBCC pin sees the pull-down (`typec_dongle` FW-22: PA10, UCPD1's DBCC2, read low on every board).
 pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
     if scan::family(fw).as_deref() != Some("stm32g0") {
         return Vec::new();

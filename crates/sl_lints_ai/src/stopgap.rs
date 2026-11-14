@@ -249,7 +249,7 @@ fn dead_features(cx: &Context<'_>) {
     }
 }
 
-/// Whether a source mentions `feature = "name"` (in cfg, cfg_attr or cfg!)
+/// Whether a source mentions `feature = "name"` (in cfg, `cfg_attr` or cfg!)
 fn mentions_feature(text: &str, name: &str) -> bool {
     let quoted = format!("\"{name}\"");
     text.match_indices(&quoted).any(|(i, _)| {

@@ -15,9 +15,9 @@ pub(crate) const NEEDS: &[FwNeed] = &[FwNeed::Sources];
 
 
 /// On RP2350, `CHIP_ID.REVISION` read (`chip_id().read().revision()`) in a firmware that never reads the
-/// bootrom's version byte: RP2350 datasheet appendix C, "Stepping A3 is identified by a CHIP_ID.REVISION value
+/// bootrom's version byte: RP2350 datasheet appendix C, "Stepping A3 is identified by a `CHIP_ID.REVISION` value
 /// of 0x3, and a bootrom version byte at offset 0x00000013 of 0x3", "Stepping A4 is identified by a
-/// CHIP_ID.REVISION value of 0x3, and a bootrom version byte at offset 0x00000013 of 0x4".
+/// `CHIP_ID.REVISION` value of 0x3, and a bootrom version byte at offset 0x00000013 of 0x4".
 pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
     if !scan::family_in(fw, &["rp235x"]) {
         return Vec::new();

@@ -33,19 +33,19 @@ pub fn entries(text: &str) -> Vec<Entry> {
     let mut open = false;
     for (i, l) in text.lines().enumerate() {
         if l.starts_with("## ") {
-            section = l.trim().to_string();
+            section = l.trim().to_owned();
             open = false;
         } else if let Some(rest) = l.strip_prefix("- ").or_else(|| l.strip_prefix("* ")) {
             out.push(Entry {
                 line: i as u32 + 1,
-                lines: vec![rest.to_string()],
+                lines: vec![rest.to_owned()],
                 section: section.clone(),
             });
             open = true;
         } else if l.trim().is_empty() || l.starts_with('#') {
             open = false;
         } else if open && let Some(e) = out.last_mut() {
-            e.lines.push(l.to_string());
+            e.lines.push(l.to_owned());
         }
     }
     out
@@ -53,7 +53,7 @@ pub fn entries(text: &str) -> Vec<Entry> {
 
 fn checked(cx: &Context<'_>, id: &str) -> Option<(String, Vec<Entry>)> {
     let p = cx.params(id);
-    let file = p.str("file").to_string();
+    let file = p.str("file").to_owned();
     let text = cx.project.read(&file)?;
     let all = p.bool("all-sections");
     let es = entries(&text)
@@ -73,12 +73,12 @@ pub(crate) fn run(cx: &Context<'_>) {
         && let Some((file, es)) = checked(cx, "changelog-entry-length")
     {
         let p = cx.params("changelog-entry-length");
-        let (max_lines, max_words) = (p.int("max-lines"), p.int("max-words"));
+        let (max_lines, max_words) = (p.count("max-lines"), p.count("max-words"));
         for e in &es {
             let text = e.text();
-            let n = words(&text).len() as i64;
+            let n = words(&text).len();
             let item = format!("{file}:{}", key(&text));
-            if e.lines.len() as i64 > max_lines {
+            if e.lines.len() > max_lines {
                 cx.emit(
                     Diagnostic::new(
                         "changelog-entry-length",

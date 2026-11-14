@@ -1,4 +1,4 @@
-//! `flt-3` `bedrock_crash::exc_return!()` not the first statement of HardFault
+//! `flt-3` `bedrock_crash::exc_return!()` not the first statement of `HardFault`
 
 use crate::FwNeed;
 use sl_analysis::lint;
@@ -16,8 +16,8 @@ lint!(META, "F0050", "flt-3", "flt", "bedrock_crash::exc_return!() is the first 
 pub(crate) const NEEDS: &[FwNeed] = &[FwNeed::Sources];
 
 
-/// An `exc_return!()` in the HardFault handler that is not in its first statement: anything before it may
-/// call a function and change LR, so the EXC_RETURN it reads is not the fault's.
+/// An `exc_return!()` in the `HardFault` handler that is not in its first statement: anything before it may
+/// call a function and change LR, so the `EXC_RETURN` it reads is not the fault's.
 pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
     let fns = scan::functions(fw);
     let Some(h) = flt::handler(&fns, "HardFault") else {

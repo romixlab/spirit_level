@@ -28,7 +28,7 @@ pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
         let t = line.trim();
         let Some((name, in_body)) = &mut section else {
             if t.contains("(NOLOAD)") {
-                let name = t.split_whitespace().next().unwrap_or("").to_string();
+                let name = t.split_whitespace().next().unwrap_or("").to_owned();
                 section = Some((name, false));
             }
             continue;

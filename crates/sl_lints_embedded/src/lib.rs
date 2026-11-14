@@ -1,5 +1,5 @@
-//! Lints on bare-metal firmware: every automatic check of embedded_bedrock's firmware check catalogue
-//! (bedrock_lint), keeping its ids in kebab-case (`EXE-3` is `exe-3`). One analysis, [`EMBEDDED`], reads each
+//! Lints on bare-metal firmware: every automatic check of `embedded_bedrock`'s firmware check catalogue
+//! (`bedrock_lint`), keeping its ids in kebab-case (`EXE-3` is `exe-3`). One analysis, [`EMBEDDED`], reads each
 //! firmware crate of the project once ([`sl_firmware::Firmware`]) and runs the enabled checks on it.
 
 mod checks;
@@ -33,13 +33,13 @@ pub(crate) enum FwNeed {
 impl FwNeed {
     fn met(self, fw: &Firmware<'_>) -> bool {
         match self {
-            FwNeed::Sources => !fw.sources.is_empty(),
-            FwNeed::BuildScript => fw.build_script.is_some(),
-            FwNeed::MemoryX => fw.memory_x.is_some(),
-            FwNeed::Chip => fw.chip().is_some(),
-            FwNeed::Elf => fw.elf.is_some(),
-            FwNeed::Thumb => fw.elf.as_ref().is_some_and(|e| !e.code.is_empty()),
-            FwNeed::Regions => !fw.memory.is_empty(),
+            Self::Sources => !fw.sources.is_empty(),
+            Self::BuildScript => fw.build_script.is_some(),
+            Self::MemoryX => fw.memory_x.is_some(),
+            Self::Chip => fw.chip().is_some(),
+            Self::Elf => fw.elf.is_some(),
+            Self::Thumb => fw.elf.as_ref().is_some_and(|e| !e.code.is_empty()),
+            Self::Regions => !fw.memory.is_empty(),
         }
     }
 }

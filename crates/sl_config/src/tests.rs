@@ -1,3 +1,7 @@
+#![expect(
+    clippy::let_underscore_must_use,
+    reason = "a test removes its scratch directory as far as it can"
+)]
 use super::*;
 use sl_core::{FixKind, ParamSpec, Source};
 
@@ -237,8 +241,23 @@ fn clippy_entries_need_a_level_and_a_reason() {
         "[clippy.lints]\nunwrap_used = { level = \"loud\" }\nx = \"warn\"\n[clippy.config]\nt = { reason = \"r\" }\n[clippy.other]\n",
     ));
     assert!(m.iter().any(|e| e.contains("level = \"loud\"")), "{m:?}");
-    assert!(m.iter().any(|e| e.contains("clippy.lints.unwrap_used needs a reason")), "{m:?}");
-    assert!(m.iter().any(|e| e.contains("clippy.lints.x must be a table")), "{m:?}");
-    assert!(m.iter().any(|e| e.contains("clippy.config.t.value is missing")), "{m:?}");
-    assert!(m.iter().any(|e| e.contains("unknown key clippy.other")), "{m:?}");
+    assert!(
+        m.iter()
+            .any(|e| e.contains("clippy.lints.unwrap_used needs a reason")),
+        "{m:?}"
+    );
+    assert!(
+        m.iter()
+            .any(|e| e.contains("clippy.lints.x must be a table")),
+        "{m:?}"
+    );
+    assert!(
+        m.iter()
+            .any(|e| e.contains("clippy.config.t.value is missing")),
+        "{m:?}"
+    );
+    assert!(
+        m.iter().any(|e| e.contains("unknown key clippy.other")),
+        "{m:?}"
+    );
 }

@@ -106,11 +106,11 @@ pub(crate) fn run(fw: &Firmware<'_>, params: &Params) -> Vec<Diagnostic> {
             d.path_names(reset).join(" → ")
         );
         if let Some(r) = top_root {
-            msg.push_str(&format!(
-                ", plus {} for {}",
+            msg = format!(
+                "{msg}, plus {} for {}",
                 bytes(deepest + EXCEPTION_FRAME),
                 d.path_names(r).join(" → ")
-            ));
+            );
         }
         out.push(
             Diagnostic::new("stk-6", "elf:stack-depth", msg)
@@ -141,7 +141,7 @@ pub(crate) fn run(fw: &Firmware<'_>, params: &Params) -> Vec<Diagnostic> {
                 format!("elf:recursion:{name}"),
                 format!("`{name}` calls itself (directly or through others): its stack depth has no bound the tool can see"),
             )
-            .span(fw.elf_span(name.to_string()))
+            .span(fw.elf_span(name.to_owned()))
             .help("bound the recursion (a depth limit) or turn it into a loop")
             .confidence(Confidence::Candidate),
         );

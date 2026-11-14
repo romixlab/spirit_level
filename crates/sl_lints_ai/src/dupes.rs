@@ -30,7 +30,7 @@ pub fn tokens(text: &str) -> Vec<String> {
                     let s = i.to_string();
                     let called = matches!(trees.get(k + 1), Some(TokenTree::Group(g)) if g.delimiter() == proc_macro2::Delimiter::Parenthesis)
                         && !matches!(out.last().map(String::as_str), Some("fn"));
-                    let reached = matches!(out.last().map(String::as_str), Some(".") | Some(":"));
+                    let reached = matches!(out.last().map(String::as_str), Some("." | ":"));
                     out.push(if KEYWORDS.contains(&s.as_str()) || called || reached {
                         s
                     } else {

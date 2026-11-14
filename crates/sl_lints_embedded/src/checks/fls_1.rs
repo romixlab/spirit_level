@@ -22,7 +22,7 @@ const ECC_FLASH: &[&str] = &[
 
 /// A flash driver built (`Flash::new`, `Flash::new_blocking`: settings, the embassy-boot state, a log) on an ECC
 /// part with no `ww_ecc_flash` in the firmware: a word half-programmed by a power cut has a double ECC error,
-/// and reading it raw is an NMI (G0) or a BusFault (H7) on every boot. On G0 the wrapper also needs its hook,
+/// and reading it raw is an NMI (G0) or a `BusFault` (H7) on every boot. On G0 the wrapper also needs its hook,
 /// `ww_ecc_flash::on_nmi()`, in the NMI handler.
 pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
     if !scan::family_in(fw, ECC_FLASH) {

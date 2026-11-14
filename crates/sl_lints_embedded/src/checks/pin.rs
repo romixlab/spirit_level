@@ -24,5 +24,5 @@ pub fn driver_new(e: &Expr) -> Option<String> {
     let name = scan::call_name(e)?;
     let mut segs = name.rsplit("::");
     let (last, ty) = (segs.next()?, segs.next()?);
-    (last == "new" && DRIVERS.contains(&ty)).then(|| ty.to_string())
+    (last == "new" && DRIVERS.contains(&ty)).then(|| ty.to_owned())
 }

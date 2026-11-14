@@ -1,4 +1,4 @@
-//! `flt-2` Logging, counting or a possible panic inside HardFault / DefaultHandler
+//! `flt-2` Logging, counting or a possible panic inside `HardFault` / `DefaultHandler`
 
 use crate::FwNeed;
 use sl_analysis::lint;
@@ -19,7 +19,7 @@ pub(crate) const NEEDS: &[FwNeed] = &[FwNeed::Sources];
 
 /// In `HardFault` and `DefaultHandler`: defmt logging (`info!` .. `error!`, `Debug2Format`), `cnt!` counters,
 /// `unwrap` / `expect`, `panic!` and `assert!`. Each can nest into a log that was interrupted or panic inside
-/// the handler (typec_dongle FW-48). In HardFault, after the crash record is saved (`capture_fault`) it is an
+/// the handler (`typec_dongle` FW-48). In `HardFault`, after the crash record is saved (`capture_fault`) it is an
 /// estimate: the record is already safe, only the reset is at stake.
 pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
     let fns = scan::functions(fw);

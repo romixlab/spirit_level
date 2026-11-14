@@ -1,4 +1,4 @@
-//! `boot-1` Firmware entered by a jump (ROM DfuSe leave, bootloader) not detected
+//! `boot-1` Firmware entered by a jump (ROM `DfuSe` leave, bootloader) not detected
 
 use crate::FwNeed;
 use sl_analysis::lint;
@@ -14,7 +14,7 @@ lint!(META, "F0001", "boot-1", "boot", "a firmware entered by a jump detects it 
 pub(crate) const NEEDS: &[FwNeed] = &[FwNeed::Sources];
 
 
-/// Ways into the STM32 ROM bootloader by hand: its DfuSe leave then jumps back into this image without a reset
+/// Ways into the STM32 ROM bootloader by hand: its `DfuSe` leave then jumps back into this image without a reset
 const ROM_ENTRY: &[&str] = &[
     "bootload",
     "jump_to_bootloader",
@@ -24,12 +24,12 @@ const ROM_ENTRY: &[&str] = &[
     "ROM_BOOTLOADER",
 ];
 
-/// bedrock_rom_boot's functions that look at how the firmware was entered
+/// `bedrock_rom_boot`'s functions that look at how the firmware was entered
 const DETECT: &[&str] = &["early", "early_with", "entered"];
 
 /// A firmware that can send itself into the STM32 ROM bootloader (`cortex_m::asm::bootload`, a jump to system
-/// memory, bedrock_rom_boot) comes back by the ROM's jump, not a reset, and has to see that: through
-/// bedrock_rom_boot's `early()` / `entered()`, or by reading VTOR or RCC_CFGR.SWS itself. RP, nRF and ESP ROMs
+/// memory, `bedrock_rom_boot`) comes back by the ROM's jump, not a reset, and has to see that: through
+/// `bedrock_rom_boot`'s `early()` / `entered()`, or by reading VTOR or `RCC_CFGR.SWS` itself. RP, nRF and ESP ROMs
 /// reset on the way out, so they are left alone.
 pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
     if scan::family(fw).is_some_and(|f| !f.starts_with("stm32")) {
@@ -59,7 +59,7 @@ pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
     ]
 }
 
-/// Whether some function reads VTOR or RCC_CFGR.SWS: the firmware looks at how it was entered itself
+/// Whether some function reads VTOR or `RCC_CFGR.SWS`: the firmware looks at how it was entered itself
 fn reads_entry_state(fw: &Firmware<'_>) -> bool {
     scan::functions(fw).iter().any(|f| {
         let calls = scan::method_calls(f);

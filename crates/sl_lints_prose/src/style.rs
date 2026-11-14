@@ -17,7 +17,7 @@ pub(crate) fn run(cx: &Context<'_>) {
             |p| {
                 (
                     format!("filler phrase `{p}`"),
-                    "delete it; the sentence says the same without it".to_string(),
+                    "delete it; the sentence says the same without it".to_owned(),
                 )
             },
         );
@@ -26,7 +26,7 @@ pub(crate) fn run(cx: &Context<'_>) {
         phrases(cx, "narration", &units::lines(cx, "narration"), |p| {
             (
                 format!("narration `{p}`: the text tells how it was written"),
-                "state the fact or the rule; drop who did what in which order".to_string(),
+                "state the fact or the rule; drop who did what in which order".to_owned(),
             )
         });
     }
@@ -89,7 +89,7 @@ fn thinking(cx: &Context<'_>) {
     phrases(cx, id, &lines, |p| {
         (
             format!("stream-of-thought comment (`{p}`)"),
-            "write the conclusion: what the code does or why, as a statement".to_string(),
+            "write the conclusion: what the code does or why, as a statement".to_owned(),
         )
     });
     if p.bool("questions") {
@@ -157,7 +157,7 @@ fn stem(w: &str) -> String {
         if let Some(s) = w.strip_suffix(suf)
             && s.len() >= 3
         {
-            return s.to_string();
+            return s.to_owned();
         }
     }
     w
@@ -334,7 +334,7 @@ fn paragraphs(lines: &[Line]) -> Vec<Paragraph> {
             }
             _ => out.push(Paragraph {
                 file: l.file.clone(),
-                text: body.to_string(),
+                text: body.to_owned(),
                 starts: vec![(0, l.line)],
             }),
         }
@@ -352,8 +352,8 @@ fn lengths(cx: &Context<'_>) {
         for para in paragraphs(&units::doc_lines(cx, p)) {
             let ss = sentences(&para.text);
             if sentences_too {
-                let max = p.int("max-sentences");
-                if ss.len() as i64 > max {
+                let max = p.count("max-sentences");
+                if ss.len() > max {
                     cx.emit(
                         Diagnostic::new(id, format!("{}:{}", para.file, first_words(&para.text, 6)), format!("a paragraph of {} sentences (limit {max})", ss.len()))
                             .span(Span::new(para.file.clone(), para.line_of(0)))
@@ -363,10 +363,10 @@ fn lengths(cx: &Context<'_>) {
                 }
                 continue;
             }
-            let max = p.int("max-words");
+            let max = p.count("max-words");
             for s in ss {
                 let n = words(s).len();
-                if n as i64 > max {
+                if n > max {
                     let off = s.as_ptr() as usize - para.text.as_ptr() as usize;
                     cx.emit(
                         Diagnostic::new(

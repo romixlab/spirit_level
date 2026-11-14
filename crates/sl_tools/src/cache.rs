@@ -35,12 +35,12 @@ pub enum InstallError {
 impl fmt::Display for InstallError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            InstallError::NoRoot => {
+            Self::NoRoot => {
                 write!(f, "no cache directory: set SPIRIT_LEVEL_TOOLS or HOME")
             }
-            InstallError::NoRustc => write!(f, "`rustc -vV` failed: no Rust toolchain on PATH"),
-            InstallError::Io(e) => write!(f, "{e}"),
-            InstallError::Failed(s) => write!(f, "{s}"),
+            Self::NoRustc => write!(f, "`rustc -vV` failed: no Rust toolchain on PATH"),
+            Self::Io(e) => write!(f, "{e}"),
+            Self::Failed(s) => write!(f, "{s}"),
         }
     }
 }
@@ -49,7 +49,7 @@ impl std::error::Error for InstallError {}
 
 impl Cache {
     /// The cache of this environment
-    pub fn from_env() -> Cache {
+    pub fn from_env() -> Self {
         let root = std::env::var_os("SPIRIT_LEVEL_TOOLS")
             .map(PathBuf::from)
             .or_else(|| {
@@ -60,7 +60,7 @@ impl Cache {
                 std::env::var_os("HOME").map(|h| PathBuf::from(h).join(".cache/spirit_level/tools"))
             })
             .unwrap_or_default();
-        Cache { root }
+        Self { root }
     }
 
     /// The cache key of a crate tool built with the compiler `rustc_vv` describes; None for a component
@@ -80,7 +80,14 @@ impl Cache {
             features.join(",")
         ));
         let d = h.finalize();
-        Some(d.iter().take(8).map(|b| format!("{b:02x}")).collect())
+        const HEX: &[u8; 16] = b"0123456789abcdef";
+        Some(
+            d.iter()
+                .take(8)
+                .flat_map(|b| [HEX[usize::from(b >> 4)], HEX[usize::from(b & 15)]])
+                .map(char::from)
+                .collect(),
+        )
     }
 
     /// The directory of a build (`--root` of its `cargo install`)
@@ -97,7 +104,7 @@ impl Cache {
             return None;
         }
         if let Some(vv) = crate::rustc_vv()
-            && let Some(key) = Cache::key(pin, vv)
+            && let Some(key) = Self::key(pin, vv)
         {
             let exe = self.dir(pin, &key).join("bin").join(&pin.exe);
             if exe.is_file() {
@@ -146,7 +153,7 @@ impl Cache {
                     return Err(InstallError::NoRoot);
                 }
                 let vv = crate::rustc_vv().ok_or(InstallError::NoRustc)?;
-                let key = Cache::key(pin, vv).ok_or(InstallError::NoRustc)?;
+                let key = Self::key(pin, vv).ok_or(InstallError::NoRustc)?;
                 let dir = self.dir(pin, &key);
                 let exe = dir.join("bin").join(&pin.exe);
                 if exe.is_file() {
@@ -155,6 +162,10 @@ impl Cache {
                 let parent = self.root.join(&pin.name);
                 std::fs::create_dir_all(&parent).map_err(InstallError::Io)?;
                 let tmp = parent.join(format!(".build-{}", std::process::id()));
+                #[expect(
+                    clippy::let_underscore_must_use,
+                    reason = "a leftover build directory may not be there"
+                )]
                 let _ = std::fs::remove_dir_all(&tmp);
                 let mut cmd: Command = sl_model::command("cargo", &parent);
                 cmd.arg("install")
@@ -171,6 +182,10 @@ impl Cache {
                 cmd.arg(krate);
                 let st = cmd.status().map_err(InstallError::Io)?;
                 if !st.success() {
+                    #[expect(
+                        clippy::let_underscore_must_use,
+                        reason = "the install already failed; its error is the one reported"
+                    )]
                     let _ = std::fs::remove_dir_all(&tmp);
                     return Err(InstallError::Failed(format!(
                         "`cargo install --locked --version {version} {krate}` failed ({st})"

@@ -1,6 +1,8 @@
-//! Applying exact fixes: every edit of every fixable finding that is not allowed, file by file, from the end of
-//! the file backwards so earlier offsets stay valid. Overlapping edits are not applied; the second one is
-//! reported as skipped and shows up again on the next run.
+//! Applying exact fixes.
+//!
+//! Every edit of every fixable finding that is not allowed, file by file, from the end of the file backwards so
+//! earlier offsets stay valid. Overlapping edits are not applied; the second one is reported as skipped and shows up
+//! again on the next run.
 
 use sl_core::{Diagnostic, Edit};
 use std::collections::BTreeMap;
@@ -42,7 +44,7 @@ pub fn apply(root: &Path, diagnostics: &[Diagnostic]) -> std::io::Result<Applied
                         && e.replacement == k.replacement)
             });
             if overlaps || e.end > text.len() || e.start > e.end {
-                out.skipped.push((file.clone(), desc.to_string()));
+                out.skipped.push((file.clone(), desc.to_owned()));
             } else {
                 kept.push((e, desc));
             }

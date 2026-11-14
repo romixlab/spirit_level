@@ -1,6 +1,10 @@
 //! The report for people: findings grouped by lint (or crate, or file), denied groups first, each with up to a
 //! few places, a source excerpt and the command that lists the rest; then the lints that did not run, and the
 //! summary line last.
+#![expect(
+    clippy::let_underscore_must_use,
+    reason = "fmt::Write into a String cannot fail"
+)]
 
 use crate::excerpt;
 use sl_core::{Confidence, Diagnostic, Level, LintMeta};
@@ -42,8 +46,8 @@ pub struct TextOptions {
 }
 
 impl Default for TextOptions {
-    fn default() -> TextOptions {
-        TextOptions {
+    fn default() -> Self {
+        Self {
             show_allowed: false,
             timings: false,
             all: false,
@@ -65,21 +69,21 @@ enum Kind {
 }
 
 impl Kind {
-    fn of(d: &Diagnostic) -> Kind {
+    fn of(d: &Diagnostic) -> Self {
         match (d.allowed.is_some(), d.level, d.confidence) {
-            (true, _, _) => Kind::Allowed,
-            (_, _, Confidence::Candidate) => Kind::Candidate,
-            (_, Level::Deny, _) => Kind::Deny,
-            _ => Kind::Warn,
+            (true, _, _) => Self::Allowed,
+            (_, _, Confidence::Candidate) => Self::Candidate,
+            (_, Level::Deny, _) => Self::Deny,
+            _ => Self::Warn,
         }
     }
 
     fn word(self, p: Paint) -> String {
         let (st, w) = match self {
-            Kind::Deny => (ERR, "deny"),
-            Kind::Warn => (WARN, "warn"),
-            Kind::Candidate => (WARN, "candidate"),
-            Kind::Allowed => (DIM, "allowed"),
+            Self::Deny => (ERR, "deny"),
+            Self::Warn => (WARN, "warn"),
+            Self::Candidate => (WARN, "candidate"),
+            Self::Allowed => (DIM, "allowed"),
         };
         p.paint(st, w)
     }
@@ -239,7 +243,7 @@ fn group(s: &mut String, g: &Grp<'_>, lints: &[&LintMeta], root: &Path, o: TextO
 fn place(s: &mut String, d: &Diagnostic, by_lint: bool, p: Paint) {
     let at = d
         .primary()
-        .map_or_else(|| "-".to_string(), ToString::to_string);
+        .map_or_else(|| "-".to_owned(), ToString::to_string);
     let lead = if by_lint {
         String::new()
     } else {
@@ -323,7 +327,7 @@ fn summary(s: &mut String, r: &Report, o: TextOptions) {
         r.ran.len(),
         r.root,
         if r.extends.is_empty() {
-            "no tier".to_string()
+            "no tier".to_owned()
         } else {
             r.extends.join(" + ")
         },

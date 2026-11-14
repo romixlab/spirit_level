@@ -16,7 +16,7 @@ pub(crate) const NEEDS: &[FwNeed] = &[FwNeed::Sources];
 const FIX: &str = "start the executor on the vector of a peripheral the firmware doesn't use (a software interrupt such as SWI_IRQ_n on RP, or an unused timer or serial port's vector on STM32), and say so in a comment";
 
 /// The peripherals a vector's name stands for: `TIM7_LPTIM2` → TIM7, LPTIM2; `USART3_4_5_6_LPUART1` → USART3,
-/// USART4, USART5, USART6, LPUART1; `DMA1_CHANNEL2_3` → DMA1, DMA1_CH2, DMA1_CH3
+/// USART4, USART5, USART6, LPUART1; `DMA1_CHANNEL2_3` → DMA1, `DMA1_CH2`, `DMA1_CH3`
 pub fn vector_peripherals(vector: &str) -> Vec<String> {
     let mut out = Vec::new();
     let mut prefix = String::new();
@@ -41,14 +41,13 @@ pub fn vector_peripherals(vector: &str) -> Vec<String> {
             continue;
         }
         prefix = part
-            .trim_end_matches(|c: char| c.is_ascii_digit())
-            .to_string();
+            .trim_end_matches(|c: char| c.is_ascii_digit()).to_owned();
         if part != prefix {
-            base = part.to_string();
+            base = part.to_owned();
         }
-        out.push(part.to_string());
+        out.push(part.to_owned());
     }
-    out.push(vector.to_string());
+    out.push(vector.to_owned());
     out.retain(|p| !p.starts_with("IRQ") && p != "SWI");
     out.dedup();
     out

@@ -107,7 +107,10 @@ fn has_id(c: &str) -> bool {
             w.strip_prefix(p)
                 .is_some_and(|n| !n.is_empty() && n.chars().all(|c| c.is_ascii_digit()))
         });
-        let efton = w.contains("efton") || (w.starts_with("g") && w.ends_with(".html"));
+        let efton = w.contains("efton") || (w.starts_with('g')
+                && std::path::Path::new(w)
+                    .extension()
+                    .is_some_and(|e| e.eq_ignore_ascii_case("html")));
         rp || efton
     })
 }

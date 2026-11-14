@@ -64,7 +64,7 @@ impl Analysis for Audit {
         };
         for f in found {
             let help = if f.patched.is_empty() {
-                "no patched version: replace the crate, or ignore the advisory in .cargo/audit.toml with a reason".to_string()
+                "no patched version: replace the crate, or ignore the advisory in .cargo/audit.toml with a reason".to_owned()
             } else {
                 format!(
                     "update to a patched version ({}): `cargo update -p {}`",
@@ -73,7 +73,7 @@ impl Analysis for Audit {
                 )
             };
             let what = if f.id.is_empty() {
-                "yanked".to_string()
+                "yanked".to_owned()
             } else {
                 f.id.clone()
             };
@@ -128,13 +128,13 @@ pub fn parse(stdout: &str) -> Option<Vec<Finding>> {
             v.and_then(|v| v.get(k))
                 .and_then(Value::as_str)
                 .unwrap_or_default()
-                .to_string()
+                .to_owned()
         };
         let adv = e.get("advisory").filter(|a| !a.is_null());
         Finding {
             lint,
             id: s(adv, "id"),
-            title: adv.map_or_else(|| "version is yanked".to_string(), |_| s(adv, "title")),
+            title: adv.map_or_else(|| "version is yanked".to_owned(), |_| s(adv, "title")),
             package: s(e.get("package"), "name"),
             version: s(e.get("package"), "version"),
             patched: e
@@ -143,7 +143,7 @@ pub fn parse(stdout: &str) -> Option<Vec<Finding>> {
                 .and_then(Value::as_array)
                 .map(|p| {
                     p.iter()
-                        .filter_map(|x| x.as_str().map(str::to_string))
+                        .filter_map(|x| x.as_str().map(str::to_owned))
                         .collect()
                 })
                 .unwrap_or_default(),
@@ -182,7 +182,7 @@ mod tests {
         );
         assert_eq!(
             f[0].patched,
-            vec![">=0.6.14, <1.0.0".to_string(), ">=1.6.1".to_string()]
+            vec![">=0.6.14, <1.0.0".to_owned(), ">=1.6.1".to_owned()]
         );
         assert_eq!(f[1].lint, "audit-unmaintained");
         assert_eq!(f[1].package, "ansi_term");

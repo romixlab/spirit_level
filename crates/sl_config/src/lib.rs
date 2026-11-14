@@ -131,11 +131,7 @@ pub struct Env<'a> {
 
 impl Config {
     /// Reads `spirit_level.toml` at `root` (or `file` when given) and everything it extends
-    pub fn load(
-        root: &Path,
-        file: Option<&Path>,
-        env: &Env<'_>,
-    ) -> Result<Config, Vec<ConfigError>> {
+    pub fn load(root: &Path, file: Option<&Path>, env: &Env<'_>) -> Result<Self, Vec<ConfigError>> {
         let path = file.map_or_else(|| root.join(FILE), Path::to_path_buf);
         let rel = path
             .strip_prefix(root)
@@ -148,12 +144,12 @@ impl Config {
             )]
         })?;
         let mut r = Resolver::new(env, root);
-        r.layer(Source::File(path, rel.clone()), text, true);
+        r.layer(&Source::File(path, rel.clone()), text, true);
         r.finish(Some(rel))
     }
 
     /// The configuration of shipped tiers alone, without a project file (`spl check --tier big`)
-    pub fn from_tiers(tiers: &[&str], env: &Env<'_>) -> Result<Config, Vec<ConfigError>> {
+    pub fn from_tiers(tiers: &[&str], env: &Env<'_>) -> Result<Self, Vec<ConfigError>> {
         let mut r = Resolver::new(env, Path::new("."));
         r.record_at = 0;
         for t in tiers {
@@ -235,13 +231,13 @@ struct Resolver<'a> {
 }
 
 impl<'a> Resolver<'a> {
-    fn new(env: &'a Env<'a>, root: &Path) -> Resolver<'a> {
+    fn new(env: &'a Env<'a>, root: &Path) -> Self {
         let lints = env
             .lints
             .iter()
             .map(|m| {
                 (
-                    m.id.to_string(),
+                    m.id.to_owned(),
                     LintSetting {
                         level: Level::Allow,
                         params: default_params(m),
@@ -287,7 +283,10 @@ impl<'a> Resolver<'a> {
 
     /// Applies one extended name: a shipped tier, or a path relative to the extending file's directory
     fn extend(&mut self, name: &str, at: &ConfigError, dir: &Path) {
-        let is_path = name.contains('/') || name.ends_with(".toml");
+        let is_path = name.contains('/')
+            || Path::new(name)
+                .extension()
+                .is_some_and(|e| e.eq_ignore_ascii_case("toml"));
         let key = if is_path {
             dir.join(name).display().to_string()
         } else {
@@ -302,7 +301,7 @@ impl<'a> Resolver<'a> {
             return;
         }
         if self.stack.len() == self.record_at {
-            self.extends.push(name.to_string());
+            self.extends.push(name.to_owned());
         }
         if is_path {
             let path = dir.join(name);
@@ -310,7 +309,7 @@ impl<'a> Resolver<'a> {
                 .strip_prefix(&self.root)
                 .map_or_else(|_| path.display().to_string(), |p| p.display().to_string());
             match std::fs::read_to_string(&path) {
-                Ok(text) => self.layer(Source::File(path, rel), text, false),
+                Ok(text) => self.layer(&Source::File(path, rel), text, false),
                 Err(e) => self.errs.push(ConfigError::new(
                     &at.file,
                     at.line,
@@ -319,7 +318,7 @@ impl<'a> Resolver<'a> {
             }
         } else {
             match (self.env.tier)(name) {
-                Some(text) => self.layer(Source::Tier(name.to_string()), text.to_string(), false),
+                Some(text) => self.layer(&Source::Tier(name.to_owned()), text.to_owned(), false),
                 None => self.errs.push(ConfigError::new(
                     &at.file,
                     at.line,
@@ -331,8 +330,8 @@ impl<'a> Resolver<'a> {
         }
     }
 
-    fn layer(&mut self, source: Source, text: String, project: bool) {
-        let (key, rel, dir, tier) = match &source {
+    fn layer(&mut self, source: &Source, text: String, project: bool) {
+        let (key, rel, dir, tier) = match source {
             Source::File(p, rel) => (
                 p.display().to_string(),
                 rel.clone(),
@@ -486,7 +485,7 @@ impl<'a> Resolver<'a> {
             }
             return;
         };
-        let lint = meta.id.to_string();
+        let lint = meta.id.to_owned();
         let crates = t.opt_list("crates", true, errs).unwrap_or_default();
         let paths = t.opt_list("paths", true, errs).unwrap_or_default();
         if crates.is_empty() && paths.is_empty() {
@@ -558,15 +557,14 @@ impl<'a> Resolver<'a> {
 
 fn level_of(t: &mut Reader<'_>, errs: &mut Vec<ConfigError>) -> Option<Level> {
     let s = t.opt_str("level", errs)?;
-    match Level::from_name(&s) {
-        Some(l) => Some(l),
-        None => {
-            errs.push(t.err(
-                "level",
-                format!("level = {s:?}: use \"allow\", \"warn\" or \"deny\""),
-            ));
-            None
-        }
+    if let Some(l) = Level::from_name(&s) {
+        Some(l)
+    } else {
+        errs.push(t.err(
+            "level",
+            format!("level = {s:?}: use \"allow\", \"warn\" or \"deny\""),
+        ));
+        None
     }
 }
 
@@ -624,7 +622,7 @@ fn value_of(v: &Value) -> Option<ParamValue> {
         Value::String(s) => ParamValue::Str(s.value().clone()),
         Value::Array(a) => ParamValue::StrList(
             a.iter()
-                .map(|x| x.as_str().map(str::to_string))
+                .map(|x| x.as_str().map(str::to_owned))
                 .collect::<Option<Vec<_>>>()?,
         ),
         _ => return None,
@@ -647,7 +645,7 @@ pub fn default_params(meta: &LintMeta) -> Params {
                     (ParamValue::Int(i), ParamKind::Float) => ParamValue::Float(i as f64),
                     (v, _) => v,
                 };
-                p.0.insert(spec.name.to_string(), v);
+                p.0.insert(spec.name.to_owned(), v);
             }
             // spirit-level: allow(panic-in-library) a default that does not fit its kind is a declaration bug; the registry test resolves every lint's defaults
             _ => panic!(

@@ -22,7 +22,7 @@ const BUSES: &[&str] = &[
     "i2c", "spi", "bus", "uart", "usart", "sd", "sdmmc", "flash", "eeprom", "can", "qspi", "ospi",
 ];
 
-/// Types that implement a WireWeaver API backend (`impl WireWeaverAsyncApiBackend for ServerState`)
+/// Types that implement a `WireWeaver` API backend (`impl WireWeaverAsyncApiBackend for ServerState`)
 fn server_types(fw: &Firmware<'_>) -> Vec<String> {
     struct V(Vec<String>);
     impl<'a> Visit<'a> for V {
@@ -67,10 +67,10 @@ fn is_bus(recv: &Expr) -> Option<String> {
                     .is_some_and(|n| n.chars().all(|c| c.is_ascii_digit()))
             })
         })
-        .map(str::to_string)
+        .map(str::to_owned)
 }
 
-/// In the async methods of a type that implements a WireWeaver API backend (the request handlers): an awaited
+/// In the async methods of a type that implements a `WireWeaver` API backend (the request handlers): an awaited
 /// method call on a receiver named after a bus (`self.i2c.write_read(..).await`): an estimate
 pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
     let types = server_types(fw);

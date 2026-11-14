@@ -1,9 +1,14 @@
 //! `spl`: a linter for Rust projects of every size. See the README for the commands.
+#![expect(
+    clippy::print_stdout,
+    clippy::print_stderr,
+    reason = "the binary: printing its report and errors is its job"
+)]
 
 use clap::{Parser, Subcommand, ValueEnum};
 use clap_complete::engine::{ArgValueCandidates, CompletionCandidate};
 use sl_core::{Date, Level};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 use vc_ui::{Exit, Paint};
 
@@ -58,7 +63,7 @@ enum Cmd {
         lint: String,
     },
     /// List every lint code ever given, with its lint id, group and status; `--check` holds the registry to the
-    /// lints (for spirit_level's own `just lint`)
+    /// lints (for `spirit_level`'s own `just lint`)
     #[command(
         after_help = "Examples:\n  spl codes\n  spl codes --check --base main\n\nA code is never reused or changed; a retired lint keeps its code reserved."
     )]
@@ -82,7 +87,7 @@ enum Cmd {
     /// Show the project's resolved configuration: levels with where they were set, overrides and exceptions with
     /// their reasons and expiries
     Config(ConfigArgs),
-    /// Write a spirit_level.toml extending a tier
+    /// Write a `spirit_level.toml` extending a tier
     Init {
         /// The project directory
         #[arg(default_value = ".")]
@@ -206,18 +211,18 @@ fn main() -> ExitCode {
 fn run(cli: Cli) -> Result<Exit, String> {
     match cli.cmd {
         Cmd::Check(a) => check(a),
-        Cmd::Explain { lint } => explain(lint),
-        Cmd::Codes { check, base } => codes(check, base),
+        Cmd::Explain { lint } => explain(&lint),
+        Cmd::Codes { check, base } => codes(check, base.as_deref()),
         Cmd::Lints { format } => list_lints(format),
-        Cmd::Tiers => tiers(),
+        Cmd::Tiers => Ok(tiers()),
         Cmd::Config(a) => show_config(a),
-        Cmd::Init { path, tier } => init(path, tier),
+        Cmd::Init { path, tier } => init(&path, &tier),
         Cmd::Tools(cmd) => tools::run(cmd),
         Cmd::Book {
             docs,
             zensical,
             check,
-        } => book(docs, zensical, check),
+        } => book(&docs, &zensical, check),
     }
 }
 
@@ -306,13 +311,13 @@ fn check(a: CheckArgs) -> Result<Exit, String> {
     })
 }
 
-fn explain(lint: String) -> Result<Exit, String> {
-    if spirit_level::lint(&lint).is_none()
+fn explain(lint: &str) -> Result<Exit, String> {
+    if spirit_level::lint(lint).is_none()
         && let Some((tool, rule)) = lint.strip_prefix("X-").and_then(|r| r.split_once(':'))
     {
         return adapter_rule(tool, rule);
     }
-    let m = spirit_level::lint(&lint)
+    let m = spirit_level::lint(lint)
         .ok_or_else(|| format!("no lint {lint} (`spl lints` lists them)"))?;
     let tiers = sl_book::tier_levels()?;
     print!("{}", sl_book::lint_text(m, &tiers));
@@ -340,7 +345,7 @@ fn adapter_rule(tool: &str, rule: &str) -> Result<Exit, String> {
     Ok(Exit::SUCCESS)
 }
 
-fn codes(check: bool, base: Option<String>) -> Result<Exit, String> {
+fn codes(check: bool, base: Option<&str>) -> Result<Exit, String> {
     use spirit_level::codes;
     if !check {
         for r in codes::rows() {
@@ -417,11 +422,11 @@ fn list_lints(format: Format) -> Result<Exit, String> {
     Ok(Exit::SUCCESS)
 }
 
-fn tiers() -> Result<Exit, String> {
+fn tiers() -> Exit {
     for (n, t) in spirit_level::TIERS {
         println!("{n:16} {}", spirit_level::tier_description(t));
     }
-    Ok(Exit::SUCCESS)
+    Exit::SUCCESS
 }
 
 fn show_config(a: ConfigArgs) -> Result<Exit, String> {
@@ -448,7 +453,7 @@ fn show_config(a: ConfigArgs) -> Result<Exit, String> {
         let at = l
             .origin
             .as_ref()
-            .map_or_else(|| "-".to_string(), ToString::to_string);
+            .map_or_else(|| "-".to_owned(), ToString::to_string);
         let exp = l
             .expires
             .map_or(String::new(), |e| format!(" (expires {e})"));
@@ -485,12 +490,12 @@ fn show_config(a: ConfigArgs) -> Result<Exit, String> {
     Ok(Exit::SUCCESS)
 }
 
-fn init(path: PathBuf, tier: Vec<String>) -> Result<Exit, String> {
+fn init(path: &Path, tier: &[String]) -> Result<Exit, String> {
     let file = path.join(sl_config::FILE);
     if file.exists() {
         return Err(format!("{} exists already", file.display()));
     }
-    for t in &tier {
+    for t in tier {
         if spirit_level::tier(t).is_none() {
             return Err(format!("no tier {t} (`spl tiers` lists them)"));
         }
@@ -514,8 +519,8 @@ fn init(path: PathBuf, tier: Vec<String>) -> Result<Exit, String> {
     Ok(Exit::SUCCESS)
 }
 
-fn book(docs: PathBuf, zensical: PathBuf, check: bool) -> Result<Exit, String> {
-    let changed = sl_book::write(&docs, &zensical, check).map_err(|e| e.to_string())?;
+fn book(docs: &Path, zensical: &Path, check: bool) -> Result<Exit, String> {
+    let changed = sl_book::write(docs, zensical, check).map_err(|e| e.to_string())?;
     for c in &changed {
         println!("{} {c}", if check { "stale" } else { "wrote" });
     }

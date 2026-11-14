@@ -163,7 +163,7 @@ fn flash_op(e: &Expr) -> Option<String> {
         }
         Expr::Call(_) => {
             let name = scan::call_name(e)?;
-            let last = name.rsplit("::").next()?.to_string();
+            let last = name.rsplit("::").next()?.to_owned();
             ROM_OPS.contains(&last.as_str()).then_some(last)
         }
         _ => None,
@@ -181,7 +181,7 @@ fn names_called(e: &Expr, out: &mut BTreeSet<String>) {
                 .rsplit("::")
                 .next()
                 .unwrap_or_default();
-            out.insert(last.to_string());
+            out.insert(last.to_owned());
         }
     });
 }

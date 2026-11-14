@@ -65,10 +65,10 @@ pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
             let Lit::Str(s) = &l.lit else { return };
             let asm = s.value();
             if disable.is_none() && asm.contains("cpsid") {
-                disable = Some((fb.loc(m.span()), "asm!(\"cpsid ..\")".to_string()));
+                disable = Some((fb.loc(m.span()), "asm!(\"cpsid ..\")".to_owned()));
             }
             if enable.is_none() && asm.contains("cpsie") {
-                enable = Some((fb.loc(m.span()), "asm!(\"cpsie ..\")".to_string()));
+                enable = Some((fb.loc(m.span()), "asm!(\"cpsie ..\")".to_owned()));
             }
         });
         let (Some((dloc, dtext)), Some((eloc, etext))) = (disable, enable) else {

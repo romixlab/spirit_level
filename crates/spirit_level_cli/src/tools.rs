@@ -28,51 +28,51 @@ pub enum ToolsCmd {
 fn tool_candidates() -> Vec<CompletionCandidate> {
     sl_tools::pins()
         .iter()
-        .map(|p| CompletionCandidate::new(&p.name).help(Some(p.version().to_string().into())))
+        .map(|p| CompletionCandidate::new(&p.name).help(Some(p.version().to_owned().into())))
         .collect()
 }
 
 pub fn run(cmd: ToolsCmd) -> Result<vc_ui::Exit, String> {
     match cmd {
-        ToolsCmd::List => list(),
+        ToolsCmd::List => Ok(list()),
         ToolsCmd::Install {
             tool,
             path,
             needed: false,
-        } => install(tool, path),
+        } => install(tool.as_deref(), &path),
         ToolsCmd::Install {
             path, needed: true, ..
-        } => install_needed(path),
+        } => install_needed(&path),
     }
 }
 
-fn list() -> Result<vc_ui::Exit, String> {
+fn list() -> vc_ui::Exit {
     let cache = sl_tools::Cache::from_env();
     println!("cache: {}", cache.root.display());
     for p in sl_tools::pins() {
         let at = match (cache.find(p), sl_tools::on_path(&p.exe, None)) {
             (Some(c), _) => format!("cache {}", c.display()),
             (None, Some(path)) => format!("PATH {}", path.display()),
-            (None, None) => "missing".to_string(),
+            (None, None) => "missing".to_owned(),
         };
         let nightly = if p.nightly { " (nightly)" } else { "" };
         println!("{:20} {:10} {at}{nightly}", p.name, p.version());
     }
-    Ok(vc_ui::Exit::SUCCESS)
+    vc_ui::Exit::SUCCESS
 }
 
-fn install(tool: Option<String>, path: PathBuf) -> Result<vc_ui::Exit, String> {
-    let pins: Vec<&sl_tools::Pin> = match &tool {
+fn install(tool: Option<&str>, path: &Path) -> Result<vc_ui::Exit, String> {
+    let pins: Vec<&sl_tools::Pin> = match tool {
         Some(t) => vec![
             sl_tools::pin(t).ok_or_else(|| format!("no tool {t} (`spl tools list` names them)"))?,
         ],
         None => sl_tools::pins().iter().collect(),
     };
-    Ok(failed_if(install_pins(&pins, &path) > 0))
+    Ok(failed_if(install_pins(&pins, path) > 0))
 }
 
-fn install_needed(path: PathBuf) -> Result<vc_ui::Exit, String> {
-    let project = sl_model::Project::load(&path).map_err(|e| e.to_string())?;
+fn install_needed(path: &Path) -> Result<vc_ui::Exit, String> {
+    let project = sl_model::Project::load(path).map_err(|e| e.to_string())?;
     let opts = spirit_level::Options::new(sl_core::Date::today_utc());
     let config = spirit_level::config(&project, &opts).map_err(|e| e.to_string())?;
     let needs = spirit_level::tool_needs(&project, &config);
@@ -81,13 +81,13 @@ fn install_needed(path: PathBuf) -> Result<vc_ui::Exit, String> {
         .iter()
         .filter_map(|t| sl_tools::pin(t))
         .collect();
-    let mut failed = install_pins(&pins, &path);
+    let mut failed = install_pins(&pins, path);
     let toolchains = needs.toolchains.iter().map(|v| {
-        let r = sl_tools::rustup::install_toolchain(v, &path);
+        let r = sl_tools::rustup::install_toolchain(v, path);
         (format!("toolchain {v}"), r)
     });
     let targets = needs.targets.iter().map(|t| {
-        let r = sl_tools::rustup::add_target(t, &path);
+        let r = sl_tools::rustup::add_target(t, path);
         (format!("target {t}"), r)
     });
     for (what, r) in toolchains.chain(targets) {

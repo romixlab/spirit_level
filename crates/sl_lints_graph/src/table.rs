@@ -38,13 +38,14 @@ pub fn render(cx: &Context<'_>, p: &Project) -> String {
         } else {
             format!("[`{}`]({})", k.name, k.dir)
         };
-        match map {
+        let row = match map {
             Some(m) => {
                 let layer = m.crates.get(&k.name).map_or("", |c| c.layer.as_str());
-                s.push_str(&format!("| {link} | {layer} | {desc} |\n"));
+                format!("| {link} | {layer} | {desc} |\n")
             }
-            None => s.push_str(&format!("| {link} | {desc} |\n")),
-        }
+            None => format!("| {link} | {desc} |\n"),
+        };
+        s.push_str(&row);
     }
     s
 }
@@ -54,7 +55,7 @@ fn m_index(map: Option<&sl_config::Map>, layer: &str) -> Option<usize> {
 }
 
 pub(crate) fn check(cx: &Context<'_>, p: &Project) {
-    let file = cx.params("crate-table").str("file").to_string();
+    let file = cx.params("crate-table").str("file").to_owned();
     let Some(text) = p.read(&file) else {
         cx.emit(
             Diagnostic::new(

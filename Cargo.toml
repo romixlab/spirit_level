@@ -142,6 +142,7 @@ many_single_char_names = "allow" # r, g, b and x, y, z are fine
 map_unwrap_or = "allow" # `.map(f).unwrap_or(x)` often reads better than map_or
 missing_errors_doc = "allow" # the error type documents its cases
 missing_panics_doc = "allow" # too noisy: most panics are invariants, not inputs
+too_many_lines = "allow" # spl's function-lines measures function length, with a limit per crate and expiring exceptions
 multiple_crate_versions = "allow" # spl's duplicate-versions checks this, with a reasoned allow list
 must_use_candidate = "allow" # thousands of hits; must_use goes where ignoring the value is a bug
 needless_raw_string_hashes = "allow" # r#"..."# keeps a string editable when a quote is added

@@ -49,10 +49,10 @@ pub struct Loc {
 
 impl Loc {
     /// The start of a span in a file
-    pub fn of(file: &str, span: proc_macro2::Span) -> Loc {
+    pub fn of(file: &str, span: proc_macro2::Span) -> Self {
         let s = span.start();
-        Loc {
-            file: file.to_string(),
+        Self {
+            file: file.to_owned(),
             line: s.line as u32,
             column: s.column as u32 + 1,
         }
@@ -290,8 +290,8 @@ pub struct Facts {
 
 impl Facts {
     /// Draws the facts from the parsed files
-    pub fn extract(files: &[SourceFile]) -> Facts {
-        let mut facts = Facts::default();
+    pub fn extract(files: &[SourceFile]) -> Self {
+        let mut facts = Self::default();
         // statics first: whether `X.start(..)` starts an interrupt executor depends on X's type
         for f in files {
             let mut v = Walker::new(f, &mut facts, Pass::Statics, BTreeSet::new());
@@ -358,12 +358,12 @@ impl<'a> Walker<'a> {
         facts: &'a mut Facts,
         pass: Pass,
         executors: BTreeSet<String>,
-    ) -> Walker<'a> {
+    ) -> Self {
         let module = file
             .module
             .split("::")
             .filter(|s| !s.is_empty())
-            .map(str::to_string)
+            .map(str::to_owned)
             .collect();
         Walker {
             file,
@@ -388,7 +388,7 @@ impl<'a> Walker<'a> {
         if let Some(t) = &self.self_ty {
             p.push(t.clone());
         }
-        p.push(name.to_string());
+        p.push(name.to_owned());
         p.join("::")
     }
 
@@ -469,7 +469,7 @@ impl<'a> Walker<'a> {
             .inputs
             .iter()
             .map(|a| match a {
-                syn::FnArg::Receiver(_) => "self".to_string(),
+                syn::FnArg::Receiver(_) => "self".to_owned(),
                 syn::FnArg::Typed(t) => pat_name(&t.pat).unwrap_or_default(),
             })
             .collect();
@@ -695,14 +695,14 @@ impl<'ast> Visit<'ast> for Walker<'_> {
     fn visit_item_fn(&mut self, f: &'ast syn::ItemFn) {
         self.function(&f.attrs, &f.sig, f.sig.ident.span(), |w| {
             w.awaits(&f.block);
-            visit::visit_item_fn(w, f)
+            visit::visit_item_fn(w, f);
         });
     }
 
     fn visit_impl_item_fn(&mut self, f: &'ast syn::ImplItemFn) {
         self.function(&f.attrs, &f.sig, f.sig.ident.span(), |w| {
             w.awaits(&f.block);
-            visit::visit_impl_item_fn(w, f)
+            visit::visit_impl_item_fn(w, f);
         });
     }
 

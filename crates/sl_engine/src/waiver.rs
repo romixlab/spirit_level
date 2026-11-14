@@ -85,7 +85,7 @@ pub fn collect(
     (ws, ps)
 }
 
-#[allow(
+#[expect(
     clippy::too_many_arguments,
     reason = "one internal call site; a struct would only rename the arguments"
 )]
@@ -120,7 +120,7 @@ fn parse(
         let own_line = before[..cpos].trim().is_empty();
         let rest = l[at + MARK.len()..].trim();
         let problem = |m: String| Problem {
-            file: rel.to_string(),
+            file: rel.to_owned(),
             line,
             message: m,
         };
@@ -160,7 +160,7 @@ fn parse(
         let mut lints = Vec::new();
         for name in named {
             match resolve(name) {
-                Some(id) => lints.push(id.to_string()),
+                Some(id) => lints.push(id.to_owned()),
                 None => ps.push(problem(format!(
                     "the waiver names {name}, which is not a lint"
                 ))),
@@ -188,10 +188,10 @@ fn parse(
             (line, line)
         };
         ws.push(Waiver {
-            file: rel.to_string(),
+            file: rel.to_owned(),
             line,
             lints,
-            reason: tail.to_string(),
+            reason: tail.to_owned(),
             expires,
             covers,
         });
@@ -318,7 +318,9 @@ mod tests {
     }
 
     fn run(rel: &str, text: &str) -> (Vec<Waiver>, Vec<Problem>) {
-        let rust = rel.ends_with(".rs");
+        let rust = std::path::Path::new(rel)
+            .extension()
+            .is_some_and(|e| e == "rs");
         let ext = if rust {
             extents(&syn::parse_file(text).unwrap())
         } else {

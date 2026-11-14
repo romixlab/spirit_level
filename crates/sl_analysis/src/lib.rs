@@ -94,7 +94,7 @@ impl<'a> Context<'a> {
         config: &'a Config,
         today: Date,
         runnable: Vec<&'static str>,
-    ) -> Context<'a> {
+    ) -> Self {
         Context {
             project,
             config,
@@ -107,7 +107,7 @@ impl<'a> Context<'a> {
     }
 
     /// The same context with the linked ELFs given for the run (`--elf`)
-    pub fn with_elf(mut self, elf: &'a [PathBuf]) -> Context<'a> {
+    pub fn with_elf(mut self, elf: &'a [PathBuf]) -> Self {
         self.elf = elf;
         self
     }
@@ -150,7 +150,7 @@ impl<'a> Context<'a> {
     pub fn not_run(&self, lint: &str, need: impl Into<String>, reason: impl Into<String>) {
         if self.enabled(lint) && !self.skipped.borrow().iter().any(|s| s.lint == lint) {
             self.skipped.borrow_mut().push(Skipped {
-                lint: lint.to_string(),
+                lint: lint.to_owned(),
                 need: need.into(),
                 reason: reason.into(),
             });

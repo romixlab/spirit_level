@@ -31,7 +31,7 @@ fn version_req(v: &Item) -> Option<&str> {
 fn req(d: &Dependency<'_>) -> Option<String> {
     version_req(d.value)
         .or_else(|| d.inherited.and_then(|(_, v)| version_req(v)))
-        .map(str::to_string)
+        .map(str::to_owned)
 }
 
 fn span_of(d: &Dependency<'_>) -> Span {

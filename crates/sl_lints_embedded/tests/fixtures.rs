@@ -1,5 +1,5 @@
 //! Every lint of the embedded analysis against its pass and fail cases. The cases run the firmware projects under
-//! `tests/projects/` (embedded_bedrock's bedrock_lint fixtures); a project's `elf.toml` becomes its linked ELF.
+//! `tests/projects/` (`embedded_bedrock`'s `bedrock_lint` fixtures); a project's `elf.toml` becomes its linked ELF.
 
 use std::path::Path;
 

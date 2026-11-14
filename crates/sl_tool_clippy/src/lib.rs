@@ -1,7 +1,7 @@
 //! The clippy adapter: `cargo clippy --message-format json`, each finding under the lint of its clippy group.
 //!
 //! Which clippy lints run, and at which rustc level, is the project's own `[lints.clippy]` table: the adapter
-//! passes no `-W` flags, so it never overrides an `allow` the project wrote. The spirit_level level of a group
+//! passes no `-W` flags, so it never overrides an `allow` the project wrote. The `spirit_level` level of a group
 //! decides whether its findings warn or fail the run, and waivers, exceptions and expiries apply as to any lint.
 
 use sl_analysis::{Analysis, Context, lint};
@@ -142,7 +142,7 @@ fn diagnostic(
             "see https://rust-lang.github.io/rust-clippy/master/index.html#{}",
             &c["clippy::".len()..]
         ),
-        _ => "fix the code the compiler points at".to_string(),
+        _ => "fix the code the compiler points at".to_owned(),
     });
     let code = m.code.as_deref().unwrap_or(&m.level);
     // clippy's own lint (`clippy::needless_return`), or rustc's (`unused_variables`, `E0308`)

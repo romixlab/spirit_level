@@ -14,7 +14,7 @@ lint!(META, "F0081", "pin-8", "pin", "unused pins are analog or pulled, never fl
 pub(crate) const NEEDS: &[FwNeed] = &[FwNeed::Sources];
 
 
-/// STM32 families whose GPIOs come out of reset as floating inputs (GPIOx_MODER reset value 0 on most ports);
+/// STM32 families whose GPIOs come out of reset as floating inputs (`GPIOx_MODER` reset value 0 on most ports);
 /// the newer ones (G0, G4, L0, L4, L5, H7, U5, WB, ...) reset to analog, where an unused pin is already fine
 const FLOATING_AT_RESET: &[&str] = &[
     "stm32f0", "stm32f1", "stm32f2", "stm32f3", "stm32f4", "stm32f7", "stm32l1",

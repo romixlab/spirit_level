@@ -26,7 +26,7 @@ pub enum CommentKind {
 impl CommentKind {
     /// A doc comment (`///`, `//!`, `/** */`, `/*! */`)
     pub fn is_doc(self) -> bool {
-        matches!(self, CommentKind::OuterDoc | CommentKind::InnerDoc)
+        matches!(self, Self::OuterDoc | Self::InnerDoc)
     }
 }
 
@@ -76,7 +76,7 @@ pub fn comments(src: &str) -> Vec<Comment> {
                     kind,
                     line,
                     end_line: line,
-                    text: text.trim().to_string(),
+                    text: text.trim().to_owned(),
                     trailing: code_on_line,
                     offset: i,
                 });
@@ -116,7 +116,7 @@ pub fn comments(src: &str) -> Vec<Comment> {
                     .collect::<Vec<_>>()
                     .join("\n")
                     .trim()
-                    .to_string();
+                    .to_owned();
                 out.push(Comment {
                     kind,
                     line: first,

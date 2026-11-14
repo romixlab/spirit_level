@@ -111,7 +111,7 @@ pub fn crates<'a>(project: &'a Project, pkg: &'a Package) -> Vec<CrateTree<'a>> 
                         .trim_start_matches("src/bin/")
                         .trim_end_matches("/main.rs")
                         .trim_end_matches(".rs");
-                    (stem.to_string(), CrateKind::Bin)
+                    (stem.to_owned(), CrateKind::Bin)
                 }
             };
             let items = &root.ast().ok()?.items;
@@ -182,7 +182,7 @@ fn dir_of(in_package: &str, owns_dir: bool) -> String {
     let (dir, file) = in_package.rsplit_once('/').unwrap_or(("", in_package));
     let stem = file.trim_end_matches(".rs");
     if owns_dir || matches!(stem, "mod" | "lib" | "main") {
-        dir.to_string()
+        dir.to_owned()
     } else {
         format!("{dir}/{stem}")
     }
@@ -267,7 +267,7 @@ fn path_attr(attrs: &[syn::Attribute]) -> Option<String> {
 
 fn join_dir(dir: &str, rest: &str) -> String {
     if dir.is_empty() {
-        rest.to_string()
+        rest.to_owned()
     } else {
         format!("{dir}/{rest}")
     }

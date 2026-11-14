@@ -15,7 +15,7 @@ lint!(META, "F0029", "exe-1", "exe", "a task with a hard answer deadline runs on
 pub(crate) const NEEDS: &[FwNeed] = &[FwNeed::Sources];
 
 
-/// What marks work with an answer deadline: embassy's USB PD PHY (GoodCRC within the spec's turnaround; the
+/// What marks work with an answer deadline: embassy's USB PD PHY (`GoodCRC` within the spec's turnaround; the
 /// UCPD register block alone is no PHY), a DMA ring consumer that must keep up with the ring
 const DEADLINE: &[&str] = &[
     "PdPhy",

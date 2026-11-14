@@ -102,7 +102,7 @@ fn git_toml_files(root: &Path) -> Option<Vec<String>> {
         out.stdout
             .lines()
             .filter(|l| !l.is_empty() && root.join(l).is_file())
-            .map(str::to_string)
+            .map(str::to_owned)
             .collect()
     })
 }
@@ -115,7 +115,7 @@ fn formatted(exe: &Path, root: &Path, rel: &str) -> Option<Fix> {
     (out.code == Some(0) && !out.stdout.is_empty() && out.stdout != text).then(|| Fix {
         description: format!("format {rel}"),
         edits: vec![Edit {
-            file: rel.to_string(),
+            file: rel.to_owned(),
             start: 0,
             end: text.len(),
             replacement: out.stdout,
@@ -145,7 +145,7 @@ pub fn parse(log: &str) -> Vec<Reported> {
     for (i, l) in lines.iter().enumerate() {
         if let Some(rest) = l.split("the file is not properly formatted path=").nth(1) {
             out.push(Reported {
-                path: rest.trim().trim_matches('"').to_string(),
+                path: rest.trim().trim_matches('"').to_owned(),
                 invalid: false,
                 line: 0,
                 column: 0,
@@ -157,7 +157,7 @@ pub fn parse(log: &str) -> Vec<Reported> {
             let mut parts = place.trim().rsplitn(3, ':');
             let column = parts.next().and_then(|c| c.parse().ok()).unwrap_or(0);
             let line = parts.next().and_then(|c| c.parse().ok()).unwrap_or(0);
-            let path = parts.next().unwrap_or_default().to_string();
+            let path = parts.next().unwrap_or_default().to_owned();
             // the message is at the end of the report's last line (`╰^ expected value`)
             let detail = lines[i + 1..]
                 .iter()
@@ -166,7 +166,7 @@ pub fn parse(log: &str) -> Vec<Reported> {
                 .and_then(|n| n.rsplit('^').next())
                 .unwrap_or_default()
                 .trim()
-                .to_string();
+                .to_owned();
             if !out.iter().any(|r| r.path == path) {
                 out.push(Reported {
                     path,

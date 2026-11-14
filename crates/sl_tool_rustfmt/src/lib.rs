@@ -74,12 +74,11 @@ pub fn parse(stdout: &str, root: &Path) -> Vec<String> {
     stdout
         .lines()
         .map(str::trim)
-        .filter(|l| l.ends_with(".rs"))
+        .filter(|l| Path::new(l).extension().is_some_and(|e| e == "rs"))
         .map(|l| {
-            Path::new(l).strip_prefix(root).map_or_else(
-                |_| l.to_string(),
-                |r| r.to_string_lossy().replace('\\', "/"),
-            )
+            Path::new(l)
+                .strip_prefix(root)
+                .map_or_else(|_| l.to_owned(), |r| r.to_string_lossy().replace('\\', "/"))
         })
         .collect()
 }
@@ -92,6 +91,6 @@ mod tests {
             include_str!("../tests/samples/fmt-short.txt"),
             std::path::Path::new("/work/sample"),
         );
-        assert_eq!(got, vec!["src/lib.rs".to_string()]);
+        assert_eq!(got, vec!["src/lib.rs".to_owned()]);
     }
 }

@@ -26,7 +26,7 @@ fn git(cx: &Context<'_>, args: &[&str]) -> Result<String, String> {
     if out.status.success() {
         Ok(String::from_utf8_lossy(&out.stdout).into_owned())
     } else {
-        Err(String::from_utf8_lossy(&out.stderr).trim().to_string())
+        Err(String::from_utf8_lossy(&out.stderr).trim().to_owned())
     }
 }
 
@@ -41,7 +41,7 @@ pub fn commits(cx: &Context<'_>, base: &str) -> Result<Vec<Commit>, String> {
             &format!("{base}^{{commit}}"),
         ],
     )
-    .map_err(|_| format!("the base `{base}` is not a commit here"))?;
+    .map_err(|e| format!("the base `{base}` is not a commit here: {e}"))?;
     let log = git(
         cx,
         &[
@@ -57,11 +57,11 @@ pub fn commits(cx: &Context<'_>, base: &str) -> Result<Vec<Commit>, String> {
         .filter_map(|rec| {
             let (hash, msg) = rec.trim_start_matches('\n').split_once('\x1f')?;
             let mut lines = msg.trim_end().lines();
-            let subject = lines.next()?.to_string();
+            let subject = lines.next()?.to_owned();
             let body = lines
                 .skip_while(|l| l.trim().is_empty())
                 .filter(|l| !is_trailer(l))
-                .map(str::to_string)
+                .map(str::to_owned)
                 .collect::<Vec<_>>();
             let body = trim_blank_end(body);
             Some(Commit {
@@ -98,7 +98,7 @@ pub(crate) fn run(cx: &Context<'_>) {
         if !cx.enabled(id) {
             continue;
         }
-        let base = cx.params(id).str("base").to_string();
+        let base = cx.params(id).str("base").to_owned();
         let list = match commits(cx, &base) {
             Ok(l) => l,
             Err(e) => {
@@ -122,8 +122,8 @@ pub(crate) fn run(cx: &Context<'_>) {
 }
 
 fn subject(cx: &Context<'_>, c: &Commit) {
-    let max = cx.params("commit-subject-length").int("max-chars");
-    let n = c.subject.chars().count() as i64;
+    let max = cx.params("commit-subject-length").count("max-chars");
+    let n = c.subject.chars().count();
     if n > max {
         cx.emit(
             Diagnostic::new(
@@ -142,8 +142,8 @@ fn subject(cx: &Context<'_>, c: &Commit) {
 }
 
 fn body(cx: &Context<'_>, c: &Commit) {
-    let max = cx.params("commit-body-lines").int("max-lines");
-    let n = c.body.len() as i64;
+    let max = cx.params("commit-body-lines").count("max-lines");
+    let n = c.body.len();
     if n > max {
         cx.emit(
             Diagnostic::new(

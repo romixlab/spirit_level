@@ -19,20 +19,20 @@ pub enum Level {
 
 impl Level {
     /// Every level, mildest first
-    pub const ALL: [Level; 3] = [Level::Allow, Level::Warn, Level::Deny];
+    pub const ALL: [Self; 3] = [Self::Allow, Self::Warn, Self::Deny];
 
     /// `allow`, `warn`, `deny`
     pub fn name(self) -> &'static str {
         match self {
-            Level::Allow => "allow",
-            Level::Warn => "warn",
-            Level::Deny => "deny",
+            Self::Allow => "allow",
+            Self::Warn => "warn",
+            Self::Deny => "deny",
         }
     }
 
     /// The level of a name as written in a TOML file
-    pub fn from_name(s: &str) -> Option<Level> {
-        Level::ALL.into_iter().find(|l| l.name() == s)
+    pub fn from_name(s: &str) -> Option<Self> {
+        Self::ALL.into_iter().find(|l| l.name() == s)
     }
 }
 
@@ -66,7 +66,7 @@ pub enum ToolUse {
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
 #[serde(rename_all = "lowercase", tag = "kind")]
 pub enum Source {
-    /// spirit_level's own analysis
+    /// `spirit_level`'s own analysis
     Native,
     /// An established tool behind an adapter (clippy, cargo-deny, typos, ...)
     Tool {
@@ -97,11 +97,11 @@ impl Need {
     /// A short name for reports (`resolve`, `map`, `tool:cargo-deny`)
     pub fn name(self) -> String {
         match self {
-            Need::Resolve => "resolve".into(),
-            Need::Map => "map".into(),
-            Need::Tool(t) => format!("tool:{t}"),
-            Need::Nightly => "nightly".into(),
-            Need::Elf => "elf".into(),
+            Self::Resolve => "resolve".into(),
+            Self::Map => "map".into(),
+            Self::Tool(t) => format!("tool:{t}"),
+            Self::Nightly => "nightly".into(),
+            Self::Elf => "elf".into(),
         }
     }
 }

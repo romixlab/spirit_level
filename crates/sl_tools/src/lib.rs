@@ -1,4 +1,4 @@
-//! External tools for spirit_level's adapters.
+//! External tools for `spirit_level`'s adapters.
 //!
 //! - [`pins`]: every tool's pinned version, from `tools.toml` shipped in this crate.
 //! - [`Cache`]: builds of the pinned versions, keyed on crate, version, features and `rustc -vV`.
@@ -23,8 +23,10 @@ pub use pins::{Pin, PinKind, pin, pins};
 use std::ffi::OsStr;
 use std::path::{Path, PathBuf};
 
-/// The executable of a tool: the tool cache's build of its pinned version first, then PATH (`path` instead of the
-/// process's PATH when given). `name` is a tool of [`pins`] (`cargo-deny`, `clippy`) or any executable (`cargo`)
+/// The executable of a tool: its pinned build in the tool cache first, then PATH.
+///
+/// `path` replaces the process's PATH when given. `name` is a tool of [`pins`] (`cargo-deny`, `clippy`) or any
+/// executable (`cargo`).
 pub fn find(name: &str, path: Option<&OsStr>) -> Option<PathBuf> {
     let exe = pin(name).map_or(name, |p| p.exe.as_str());
     if let Some(p) = pin(name)
@@ -71,7 +73,7 @@ impl Output {
     pub fn failure(&self) -> String {
         let code = self
             .code
-            .map_or_else(|| "killed by a signal".to_string(), |c| format!("exit {c}"));
+            .map_or_else(|| "killed by a signal".to_owned(), |c| format!("exit {c}"));
         format!("{code}: {}", self.stderr_tail(3))
     }
 }
@@ -91,9 +93,11 @@ pub fn run(exe: &Path, args: &[&str], dir: &Path, env: &[(&str, &str)]) -> std::
     })
 }
 
-/// Runs a cargo subcommand the way a person does: `cargo <args>` (`args[0]` is the subcommand, `deny`), with
-/// the directory of its executable `exe` (`.../cargo-deny`, maybe in the tool cache) first on PATH, so cargo
-/// finds that build; a subcommand started directly would not know it runs under cargo
+/// Runs a cargo subcommand the way a person does: `cargo <args>`.
+///
+/// `args[0]` is the subcommand (`deny`). The directory of its executable `exe` (`.../cargo-deny`, maybe in the tool
+/// cache) comes first on PATH, so cargo finds that build; a subcommand started directly would not know it runs under
+/// cargo.
 pub fn run_subcommand(
     exe: &Path,
     args: &[&str],
@@ -130,12 +134,12 @@ pub fn run_with_input(
         .stdin
         .take()
         .ok_or_else(|| std::io::Error::other("no stdin"))?;
-    let text = input.to_string();
+    let text = input.to_owned();
     let writer = std::thread::spawn(move || stdin.write_all(text.as_bytes()));
     let out = child.wait_with_output()?;
     writer
         .join()
-        .map_err(|_| std::io::Error::other("stdin writer panicked"))??;
+        .map_err(|_panic| std::io::Error::other("stdin writer panicked"))??;
     Ok(Output {
         code: out.status.code(),
         stdout: String::from_utf8_lossy(&out.stdout).into_owned(),

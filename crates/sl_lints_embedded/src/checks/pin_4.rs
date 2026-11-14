@@ -18,10 +18,10 @@ pub(crate) const NEEDS: &[FwNeed] = &[FwNeed::Sources];
 
 const FIX: &str = "leave FUNCSEL on the peripheral and drive the pad with OEOVER / OUTOVER (IO_BANK0 GPIOx_CTRL), or disable the peripheral before the pins change hands";
 
-/// On RP2040 / RP235x: a FUNCSEL write (`set_funcsel(..)`) outside a function named `new` / `init` / `setup`, and
+/// On RP2040 / `RP235x`: a FUNCSEL write (`set_funcsel(..)`) outside a function named `new` / `init` / `setup`, and
 /// not beside `set_oeover` / `set_outover`, is an estimate; a GPIO driver built on a pin taken with `steal()` (the peripheral's pin borrowed behind its back)
 /// is a candidate. The RP2350 I2C block reads the OR of every pad with its FUNCSEL, so a pin switched to GPIO
-/// and back showed it a start without a stop (usb_io_fw IF-2).
+/// and back showed it a start without a stop (`usb_io_fw` IF-2).
 pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
     if !scan::family(fw).is_some_and(|f| f.starts_with("rp")) {
         return Vec::new();

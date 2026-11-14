@@ -15,7 +15,7 @@ lint!(META, "F0016", "dma-1", "dma", "DMA buffers sit in memory the DMA master c
 pub(crate) const NEEDS: &[FwNeed] = &[FwNeed::Elf, FwNeed::Chip];
 
 
-/// Memory the DMA controllers of a family can't reach, by family: on the H7 the DTCM (0x2000_0000, 128 KiB) sits on
+/// Memory the DMA controllers of a family can't reach, by family: on the H7 the DTCM (`0x2000_0000`, 128 KiB) sits on
 /// the Cortex-M7's own bus and is reached from outside only through its AHBS port by the MDMA; DMA1 / DMA2, BDMA and
 /// the bus-master peripherals (SDMMC IDMA, USB OTG, Ethernet) have no path to it (RM0433 / RM0468, system
 /// architecture). A memory.x region named `DTCM*` overrides the default range.

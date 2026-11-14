@@ -40,14 +40,14 @@ pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
     let (span, what) = match portable_atomic {
         None => (
             Span::new(&fw.manifest.rel, 0),
-            "no portable-atomic dependency".to_string(),
+            "no portable-atomic dependency".to_owned(),
         ),
         Some(d) => {
             let mut path: Vec<&str> = d.table.iter().map(String::as_str).collect();
             path.push(&d.name);
             (
                 Span::new(&d.file.rel, d.file.line_of(&path)),
-                "portable-atomic without its critical-section feature".to_string(),
+                "portable-atomic without its critical-section feature".to_owned(),
             )
         }
     };

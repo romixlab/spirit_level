@@ -92,7 +92,7 @@ pub fn parse(stdout: &str) -> Option<Vec<(String, String, String)>> {
                 .flatten()
             {
                 if let Some(d) = d.as_str() {
-                    out.push((manifest.to_string(), kind.to_string(), d.to_string()));
+                    out.push((manifest.to_owned(), kind.to_owned(), d.to_owned()));
                 }
             }
         }
@@ -108,9 +108,9 @@ mod tests {
         assert_eq!(
             got,
             vec![(
-                "/work/sample/Cargo.toml".to_string(),
-                "normal".to_string(),
-                "itoa".to_string()
+                "/work/sample/Cargo.toml".to_owned(),
+                "normal".to_owned(),
+                "itoa".to_owned()
             )]
         );
         assert!(super::parse("error").is_none());

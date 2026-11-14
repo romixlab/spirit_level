@@ -90,10 +90,8 @@ pub(crate) fn cut(nodes: &[usize], w: &BTreeMap<(usize, usize), u32>) -> Vec<(us
             .map(|v| {
                 let class = if out_w[v] == 0 {
                     2
-                } else if in_w[v] == 0 {
-                    1
                 } else {
-                    0
+                    i32::from(in_w[v] == 0)
                 };
                 (v, class)
             })
@@ -157,7 +155,7 @@ mod tests {
         // a -> b heavily, b -> a once: cut b -> a
         let w = BTreeMap::from([((0, 1), 10), ((1, 0), 1), ((1, 2), 5), ((2, 1), 2)]);
         let mut c = cut(&[0, 1, 2], &w);
-        c.sort();
+        c.sort_unstable();
         assert_eq!(c, vec![(1, 0), (2, 1)]);
     }
 }

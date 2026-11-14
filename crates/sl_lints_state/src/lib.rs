@@ -98,8 +98,8 @@ impl Analysis for State {
                     );
                 }
             }
-            let max = cx.params_for("lock-unwrap", pkg).int("max");
-            if unwraps.len() as i64 > max {
+            let max = cx.params_for("lock-unwrap", pkg).count("max");
+            if unwraps.len() > max {
                 let n = unwraps.len();
                 let mut d = Diagnostic::new(
                     "lock-unwrap",

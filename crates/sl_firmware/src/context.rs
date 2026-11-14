@@ -1,6 +1,8 @@
-//! Where code runs: the call graph by name, the executor each task is spawned on, and which functions run in
-//! interrupt context (tasks of an interrupt executor, `#[interrupt]` handlers) or in thread mode (entries, tasks of
-//! the thread executor). Also the function bodies as syntax, for checks that look at what a body does.
+//! Where code runs: the call graph, executors, interrupt and thread context.
+//!
+//! The call graph by name, the executor each task is spawned on, and which functions run in interrupt context (tasks
+//! of an interrupt executor, `#[interrupt]` handlers) or in thread mode (entries, tasks of the thread executor). Also
+//! the function bodies as syntax, for checks that look at what a body does.
 //!
 //! Calls are resolved by name, without types: a path call (`led::led_task`) to the functions whose path ends with
 //! what is written, a method call on `self` to the caller's type's method of that name, another method call only
@@ -42,7 +44,7 @@ pub fn bodies(files: &[SourceFile]) -> Vec<FnBody<'_>> {
                 .module
                 .split("::")
                 .filter(|s| !s.is_empty())
-                .map(str::to_string)
+                .map(str::to_owned)
                 .collect(),
             self_ty: None,
             out: &mut out,
@@ -59,14 +61,14 @@ struct Bodies<'a, 'o> {
     out: &'o mut Vec<FnBody<'a>>,
 }
 
-impl<'a> Bodies<'a, '_> {
+impl Bodies<'_, '_> {
     fn path(&self, name: &str) -> String {
         let mut p = vec![self.file.krate.clone()];
         p.extend(self.module.iter().cloned());
         if let Some(t) = &self.self_ty {
             p.push(t.clone());
         }
-        p.push(name.to_string());
+        p.push(name.to_owned());
         p.join("::")
     }
 }
@@ -167,7 +169,7 @@ pub struct Context<'a> {
 
 impl<'a> Context<'a> {
     /// Builds the call graph and traces the contexts
-    pub fn new(facts: &'a Facts) -> Context<'a> {
+    pub fn new(facts: &'a Facts) -> Self {
         let mut by_name: BTreeMap<&str, Vec<usize>> = BTreeMap::new();
         for (i, f) in facts.functions.iter().enumerate() {
             by_name.entry(f.name.as_str()).or_default().push(i);
@@ -485,13 +487,13 @@ async fn slow() { io::helper(); }
         assert_eq!(f.functions[helper].statics[0].name, "SHARED");
         let fast = f.functions.iter().find(|x| x.name == "fast").unwrap();
         assert!(!fast.awaits);
-        assert!(
+        assert_eq!(
             f.functions
                 .iter()
                 .find(|x| x.name == "main")
                 .unwrap()
-                .params
-                == ["spawner"]
+                .params,
+            ["spawner"]
         );
     }
 }

@@ -1,5 +1,9 @@
 //! The `spl` binary driven as a person or CI would: exit codes, text and JSON output, `--fix`,
 //! configuration errors, expiries, `explain`, `lints`, `init`.
+#![expect(
+    clippy::let_underscore_must_use,
+    reason = "a test removes its scratch directory as far as it can"
+)]
 
 use std::path::{Path, PathBuf};
 use std::process::{Command, Output};
@@ -8,19 +12,20 @@ use std::process::{Command, Output};
 struct Scratch(PathBuf);
 
 impl Scratch {
-    fn new(name: &str, files: &[(&str, &str)]) -> Scratch {
+    fn new(name: &str, files: &[(&str, &str)]) -> Self {
         let dir = std::env::temp_dir().join(format!("sl_cli_{}_{name}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         for (p, t) in files {
             let f = dir.join(p);
-            std::fs::create_dir_all(f.parent().unwrap()).unwrap();
-            std::fs::write(f, t).unwrap();
+            std::fs::create_dir_all(f.parent().expect("a file path has a parent"))
+                .expect("create the scratch directory");
+            std::fs::write(f, t).expect("write a scratch file");
         }
-        Scratch(dir)
+        Self(dir)
     }
 
     fn read(&self, p: &str) -> String {
-        std::fs::read_to_string(self.0.join(p)).unwrap()
+        std::fs::read_to_string(self.0.join(p)).expect("read a scratch file")
     }
 }
 
@@ -37,7 +42,7 @@ fn run(dir: &Path, args: &[&str]) -> Output {
         .env("SPIRIT_LEVEL_TODAY", "2026-11-13")
         .env("NO_COLOR", "1")
         .output()
-        .unwrap()
+        .expect("spl starts")
 }
 
 fn text(o: &Output) -> String {

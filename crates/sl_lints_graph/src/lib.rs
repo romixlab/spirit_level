@@ -167,7 +167,7 @@ fn layer_edges(cx: &Context<'_>, p: &Project, map: &Map) {
                     me.layer,
                     to.layer,
                     if layer.allow.is_empty() {
-                        "none".to_string()
+                        "none".to_owned()
                     } else {
                         layer.allow.join(", ")
                     }
@@ -394,7 +394,7 @@ fn cycles(cx: &Context<'_>, p: &Project) {
             continue;
         }
         let mut members: Vec<&str> = comp.iter().map(|&i| names[i]).collect();
-        members.sort();
+        members.sort_unstable();
         let Some(first) = p.package(members[0]) else {
             continue;
         };

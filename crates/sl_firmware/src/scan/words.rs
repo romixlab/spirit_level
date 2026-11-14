@@ -269,14 +269,14 @@ pub fn comment_above(file: &SourceFile, line: u32) -> String {
     if let Some(l) = lines.get(idx)
         && let Some(p) = l.find("//")
     {
-        parts.push(l[p + 2..].trim().to_string());
+        parts.push(l[p + 2..].trim().to_owned());
     }
     let mut i = idx;
     while i > 0 {
         i -= 1;
         let t = lines[i].trim_start();
         if let Some(c) = t.strip_prefix("//") {
-            parts.push(c.trim_start_matches(['/', '!']).trim().to_string());
+            parts.push(c.trim_start_matches(['/', '!']).trim().to_owned());
         } else {
             break;
         }
@@ -336,7 +336,7 @@ mod tests {
         let e: Expr = syn::parse_str("(0x200u16)").unwrap();
         assert_eq!(int_value(&e, &BTreeMap::new()), Some(512));
         let mut c = BTreeMap::new();
-        c.insert("MPS".to_string(), syn::parse_str::<Expr>("64").unwrap());
+        c.insert("MPS".to_owned(), syn::parse_str::<Expr>("64").unwrap());
         let e: Expr = syn::parse_str("crate::usb::MPS as u16").unwrap();
         assert_eq!(int_value(&e, &c), Some(64));
         let file = SourceFile {

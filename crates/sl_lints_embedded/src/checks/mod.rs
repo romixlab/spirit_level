@@ -1,4 +1,4 @@
-//! The checks, one file per bedrock_lint catalogue id, and the helpers they share.
+//! The checks, one file per `bedrock_lint` catalogue id, and the helpers they share.
 
 pub(crate) mod flt;
 pub(crate) mod host;

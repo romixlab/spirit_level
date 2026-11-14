@@ -33,14 +33,14 @@ pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
         .and_then(|p| p.get("release"))
         .and_then(Item::as_table_like);
     let mut missing = Vec::new();
-    if !release.is_some_and(|p| p.get("codegen-units").and_then(|v| v.as_integer()) == Some(1))
+    if release.is_none_or(|p| p.get("codegen-units").and_then(|v| v.as_integer()) != Some(1))
     {
         missing.push("codegen-units = 1");
     }
     if !release.is_some_and(|p| has_lto(p.get("lto"))) {
         missing.push("lto");
     }
-    if !release.is_some_and(|p| p.get("panic").and_then(|v| v.as_str()) == Some("abort")) {
+    if release.is_none_or(|p| p.get("panic").and_then(|v| v.as_str()) != Some("abort")) {
         missing.push("panic = \"abort\"");
     }
     if missing.is_empty() {

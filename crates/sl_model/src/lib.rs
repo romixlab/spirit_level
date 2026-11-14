@@ -1,4 +1,4 @@
-//! The project model of a spirit_level run.
+//! The project model of a `spirit_level` run.
 //!
 //! ```no_run
 //! let p = sl_model::Project::load(std::path::Path::new(".")).unwrap();

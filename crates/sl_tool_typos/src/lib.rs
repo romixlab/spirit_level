@@ -46,13 +46,13 @@ impl Analysis for Typos {
             }
         };
         for t in parse(&out.stdout) {
-            let file = t.path.trim_start_matches("./").to_string();
+            let file = t.path.trim_start_matches("./").to_owned();
             let fix = match t.corrections.as_slice() {
                 [one] => p.read(&file).and_then(|text| t.fix(&file, &text, one)),
                 _ => None,
             };
             let help = match t.corrections.as_slice() {
-                [] => "the word is known to be wrong and has no correction: reword it".to_string(),
+                [] => "the word is known to be wrong and has no correction: reword it".to_owned(),
                 c => format!(
                     "write {}; a word that is right here goes into typos.toml's [default.extend-words]",
                     c.join(" or ")
@@ -106,10 +106,10 @@ impl Typo {
         (text.get(start..end) == Some(self.typo.as_str())).then(|| Fix {
             description: format!("{} -> {correction}", self.typo),
             edits: vec![Edit {
-                file: file.to_string(),
+                file: file.to_owned(),
                 start,
                 end,
-                replacement: correction.to_string(),
+                replacement: correction.to_owned(),
             }],
         })
     }
@@ -122,15 +122,15 @@ pub fn parse(stdout: &str) -> Vec<Typo> {
         .filter_map(|l| serde_json::from_str::<Value>(l).ok())
         .filter(|v| v.get("type").and_then(Value::as_str) == Some("typo"))
         .map(|v| Typo {
-            path: v["path"].as_str().unwrap_or_default().to_string(),
+            path: v["path"].as_str().unwrap_or_default().to_owned(),
             line: v["line_num"].as_u64().unwrap_or(0) as u32,
             offset: v["byte_offset"].as_u64().unwrap_or(0) as usize,
-            typo: v["typo"].as_str().unwrap_or_default().to_string(),
+            typo: v["typo"].as_str().unwrap_or_default().to_owned(),
             corrections: v["corrections"]
                 .as_array()
                 .map(|c| {
                     c.iter()
-                        .filter_map(|s| s.as_str().map(str::to_string))
+                        .filter_map(|s| s.as_str().map(str::to_owned))
                         .collect()
                 })
                 .unwrap_or_default(),
@@ -148,7 +148,7 @@ mod tests {
         assert_eq!(t.len(), 9);
         assert_eq!(t[1].path, "./src/lib.rs");
         assert_eq!((t[1].line, t[1].column()), (1, 7));
-        assert_eq!(t[1].corrections, vec!["sample".to_string()]);
+        assert_eq!(t[1].corrections, vec!["sample".to_owned()]);
     }
 
     #[test]

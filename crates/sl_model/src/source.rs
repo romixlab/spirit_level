@@ -22,7 +22,7 @@ pub enum FileKind {
 impl FileKind {
     /// Test, bench or example code, not shipped
     pub fn is_test_like(self) -> bool {
-        matches!(self, FileKind::Test | FileKind::Bench | FileKind::Example)
+        matches!(self, Self::Test | Self::Bench | Self::Example)
     }
 }
 
@@ -49,28 +49,23 @@ pub struct SourceFile {
 
 impl SourceFile {
     /// Reads and parses one file
-    pub fn read(
-        root: &Path,
-        rel: &str,
-        package: &str,
-        in_package: &str,
-    ) -> std::io::Result<SourceFile> {
+    pub fn read(root: &Path, rel: &str, package: &str, in_package: &str) -> std::io::Result<Self> {
         let text = std::fs::read_to_string(root.join(rel))?;
-        Ok(SourceFile::from_text(rel, package, in_package, text))
+        Ok(Self::from_text(rel, package, in_package, text))
     }
 
     /// A file from its text (fixtures and tests)
-    pub fn from_text(rel: &str, package: &str, in_package: &str, text: String) -> SourceFile {
+    pub fn from_text(rel: &str, package: &str, in_package: &str, text: String) -> Self {
         let kind = kind_of(in_package);
         let module = if kind == FileKind::Src {
             module_of(in_package)
         } else {
             String::new()
         };
-        SourceFile {
-            rel: rel.to_string(),
-            in_package: in_package.to_string(),
-            package: package.to_string(),
+        Self {
+            rel: rel.to_owned(),
+            in_package: in_package.to_owned(),
+            package: package.to_owned(),
             kind,
             module,
             lines: count_lines(&text),

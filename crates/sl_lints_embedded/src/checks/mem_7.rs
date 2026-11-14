@@ -48,9 +48,9 @@ fn consts(text: &str) -> Vec<Const> {
             .rsplit_once("- ORIGIN(")
             .and_then(|(_, r)| r.split(')').next());
         out.push(Const {
-            symbol: lhs.trim().to_string(),
-            region: region.to_string(),
-            shift_base: shift_base.map(str::to_string),
+            symbol: lhs.trim().to_owned(),
+            region: region.to_owned(),
+            shift_base: shift_base.map(str::to_owned),
             line: i as u32 + 1,
         });
     }

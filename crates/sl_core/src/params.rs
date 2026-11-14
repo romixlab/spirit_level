@@ -24,11 +24,11 @@ impl ParamKind {
     /// How the book names it
     pub fn name(self) -> &'static str {
         match self {
-            ParamKind::Int => "integer",
-            ParamKind::Float => "number",
-            ParamKind::Bool => "boolean",
-            ParamKind::Str => "string",
-            ParamKind::StrList => "list of strings",
+            Self::Int => "integer",
+            Self::Float => "number",
+            Self::Bool => "boolean",
+            Self::Str => "string",
+            Self::StrList => "list of strings",
         }
     }
 }
@@ -67,11 +67,11 @@ impl ParamValue {
     pub fn fits(&self, kind: ParamKind) -> bool {
         matches!(
             (self, kind),
-            (ParamValue::Int(_), ParamKind::Int | ParamKind::Float)
-                | (ParamValue::Float(_), ParamKind::Float)
-                | (ParamValue::Bool(_), ParamKind::Bool)
-                | (ParamValue::Str(_), ParamKind::Str)
-                | (ParamValue::StrList(_), ParamKind::StrList)
+            (Self::Int(_), ParamKind::Int | ParamKind::Float)
+                | (Self::Float(_), ParamKind::Float)
+                | (Self::Bool(_), ParamKind::Bool)
+                | (Self::Str(_), ParamKind::Str)
+                | (Self::StrList(_), ParamKind::StrList)
         )
     }
 }
@@ -79,11 +79,11 @@ impl ParamValue {
 impl fmt::Display for ParamValue {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            ParamValue::Int(v) => write!(f, "{v}"),
-            ParamValue::Float(v) => write!(f, "{v}"),
-            ParamValue::Bool(v) => write!(f, "{v}"),
-            ParamValue::Str(v) => write!(f, "{v:?}"),
-            ParamValue::StrList(v) => {
+            Self::Int(v) => write!(f, "{v}"),
+            Self::Float(v) => write!(f, "{v}"),
+            Self::Bool(v) => write!(f, "{v}"),
+            Self::Str(v) => write!(f, "{v:?}"),
+            Self::StrList(v) => {
                 f.write_str("[")?;
                 for (i, s) in v.iter().enumerate() {
                     if i > 0 {
@@ -125,6 +125,11 @@ impl Params {
             ParamValue::Int(v) => *v,
             other => misuse(name, "an integer", Some(other)),
         }
+    }
+
+    /// An integer parameter used as a count or a limit of one; a negative value counts as 0
+    pub fn count(&self, name: &str) -> usize {
+        usize::try_from(self.int(name)).unwrap_or(0)
     }
 
     /// A number parameter

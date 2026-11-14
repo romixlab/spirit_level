@@ -70,8 +70,8 @@ pub(crate) fn unsafe_allow_list(cx: &Context<'_>, p: &Project, map: &Map) {
     let item = root.get(&path);
     let level = item.and_then(|i| {
         i.as_str()
-            .map(str::to_string)
-            .or_else(|| i.get("level").and_then(|l| l.as_str()).map(str::to_string))
+            .map(str::to_owned)
+            .or_else(|| i.get("level").and_then(|l| l.as_str()).map(str::to_owned))
     });
     if level.as_deref() != Some("forbid") {
         cx.emit(
@@ -118,7 +118,7 @@ pub(crate) fn core_types(cx: &Context<'_>, p: &Project) {
     let io: Vec<Vec<String>> = params
         .list("io")
         .iter()
-        .map(|s| s.split("::").map(str::to_string).collect())
+        .map(|s| s.split("::").map(str::to_owned).collect())
         .collect();
     struct V<'a> {
         io: &'a [Vec<String>],

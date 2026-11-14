@@ -134,8 +134,8 @@ impl Analysis for Code {
                         .map(|(l, what)| (f.rel.clone(), l, what)),
                 );
             }
-            let max = cx.params_for("panic-in-library", pkg).int("max");
-            if panics.len() as i64 > max {
+            let max = cx.params_for("panic-in-library", pkg).count("max");
+            if panics.len() > max {
                 let n = panics.len();
                 for (file, r, what) in panics {
                     let line = r.0.0;
@@ -298,7 +298,7 @@ impl<'ast> Visit<'ast> for Calls<'_> {
                 .cx
                 .params("float-determinism")
                 .str("replacement")
-                .to_string();
+                .to_owned();
             self.found.push(("float-determinism", line, format!(".{name}() has unspecified precision: results differ between platforms and Rust versions "), format!("call {rep}'s {name} instead, so every platform computes the same bits"), Confidence::Estimate));
         }
         syn::visit::visit_expr_method_call(self, e);
@@ -343,7 +343,7 @@ impl<'ast> Visit<'ast> for Calls<'_> {
                 .iter()
                 .map(|s| s.ident.to_string())
                 .collect();
-            if segs.ends_with(&["Command".to_string(), "new".to_string()])
+            if segs.ends_with(&["Command".to_owned(), "new".to_owned()])
                 && let Some(syn::Expr::Lit(syn::ExprLit {
                     lit: syn::Lit::Str(s),
                     ..

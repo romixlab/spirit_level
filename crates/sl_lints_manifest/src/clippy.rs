@@ -1,6 +1,10 @@
 //! tier-clippy-set: the project turns on the Clippy set its tiers expect, in its own `[lints.clippy]` table and
-//! `clippy.toml`, and says why at every opt-out. spirit_level reads the files; it never runs Clippy with flags of
+//! `clippy.toml`, and says why at every opt-out. `spirit_level` reads the files; it never runs Clippy with flags of
 //! its own, so `cargo clippy` gives the same answer with or without it.
+#![expect(
+    clippy::let_underscore_must_use,
+    reason = "fmt::Write into a String cannot fail"
+)]
 
 use sl_analysis::Context;
 use sl_config::clippy::{ClippySet, is_group};
@@ -118,7 +122,10 @@ fn check_table(cx: &Context<'_>, set: &ClippySet, t: &Table<'_>) {
             format!(
                 "{} of the {} Clippy lints the tier expects are not on in {header}: {}",
                 names.len(),
-                set.lints.values().filter(|l| l.level > Level::Allow).count(),
+                set.lints
+                    .values()
+                    .filter(|l| l.level > Level::Allow)
+                    .count(),
                 list(&names)
             ),
         )
@@ -138,12 +145,21 @@ fn check_table(cx: &Context<'_>, set: &ClippySet, t: &Table<'_>) {
         let mut d = Diagnostic::new(
             ID,
             format!("{scope}:clippy.{}", e.name),
-            format!("clippy::{} is turned off in {header} without a reason", e.name),
+            format!(
+                "clippy::{} is turned off in {header} without a reason",
+                e.name
+            ),
         )
         .span(Span::new(t.file.rel.clone(), line))
         .help(match why {
-            Some(l) => format!("say why after it, e.g. `{} = \"allow\" # {}`", e.name, l.reason),
-            None => format!("say why after it: `{} = \"allow\" # why this lint does not fit here`", e.name),
+            Some(l) => format!(
+                "say why after it, e.g. `{} = \"allow\" # {}`",
+                e.name, l.reason
+            ),
+            None => format!(
+                "say why after it: `{} = \"allow\" # why this lint does not fit here`",
+                e.name
+            ),
         });
         if let Some(k) = t.krate {
             d = d.krate(k);
@@ -157,13 +173,24 @@ fn check_table(cx: &Context<'_>, set: &ClippySet, t: &Table<'_>) {
 fn paste(set: &ClippySet, header: &str, missing: &[&str], low: &[&str], have: &[Entry]) -> String {
     let mut s = String::new();
     if !missing.is_empty() {
-        let _ = writeln!(s, "add to {header} (each line says why in a comment):\n\n{header}");
+        let _ = writeln!(
+            s,
+            "add to {header} (each line says why in a comment):\n\n{header}"
+        );
         let (groups, single): (Vec<&str>, Vec<&str>) = missing.iter().partition(|n| is_group(n));
-        for (name, prio) in groups.iter().map(|g| (g, true)).chain(single.iter().map(|n| (n, false))) {
+        for (name, prio) in groups
+            .iter()
+            .map(|g| (g, true))
+            .chain(single.iter().map(|n| (n, false)))
+        {
             let l = &set.lints[*name];
             let level = l.level.to_string();
             if prio {
-                let _ = writeln!(s, "{name} = {{ level = \"{level}\", priority = -1 }} # {}", l.reason);
+                let _ = writeln!(
+                    s,
+                    "{name} = {{ level = \"{level}\", priority = -1 }} # {}",
+                    l.reason
+                );
             } else {
                 let _ = writeln!(s, "{name} = \"{level}\" # {}", l.reason);
             }
@@ -182,7 +209,7 @@ fn paste(set: &ClippySet, header: &str, missing: &[&str], low: &[&str], have: &[
         }
         let _ = write!(s, "raise to deny in {header}: {}", low.join(", "));
     }
-    s.trim_end().to_string()
+    s.trim_end().to_owned()
 }
 
 /// Whether an opt-out says why: a comment after it on its line, or a comment line right above it
@@ -217,7 +244,11 @@ fn list(names: &[&str]) -> String {
     if names.len() <= SHOWN {
         names.join(", ")
     } else {
-        format!("{} and {} more", names[..SHOWN].join(", "), names.len() - SHOWN)
+        format!(
+            "{} and {} more",
+            names[..SHOWN].join(", "),
+            names.len() - SHOWN
+        )
     }
 }
 
@@ -237,9 +268,13 @@ fn check_config(cx: &Context<'_>, set: &ClippySet) {
         Ok(f) => f,
         Err(e) => {
             cx.emit(
-                Diagnostic::new(ID, format!("{rel}:parse"), format!("{rel} does not parse: {e}"))
-                    .span(Span::new(rel, 0))
-                    .help("Clippy refuses it too; fix the TOML"),
+                Diagnostic::new(
+                    ID,
+                    format!("{rel}:parse"),
+                    format!("{rel} does not parse: {e}"),
+                )
+                .span(Span::new(rel, 0))
+                .help("Clippy refuses it too; fix the TOML"),
             );
             return;
         }
@@ -250,16 +285,29 @@ fn check_config(cx: &Context<'_>, set: &ClippySet) {
             (None, _) => format!("{rel} does not set {key}"),
             (Some(v), ParamValue::Int(max)) => match v.as_integer() {
                 Some(n) if n <= *max => continue,
-                _ => format!("{rel} sets {key} = {}, above the tier's {max}", v.to_string().trim()),
+                _ => format!(
+                    "{rel} sets {key} = {}, above the tier's {max}",
+                    v.to_string().trim()
+                ),
             },
             (Some(v), w) if same(v, w) => continue,
-            (Some(v), w) => format!("{rel} sets {key} = {}; the tier expects {w}", v.to_string().trim()),
+            (Some(v), w) => format!(
+                "{rel} sets {key} = {}; the tier expects {w}",
+                v.to_string().trim()
+            ),
         };
-        let bound = if matches!(want.value, ParamValue::Int(_)) { " (or lower)" } else { "" };
+        let bound = if matches!(want.value, ParamValue::Int(_)) {
+            " (or lower)"
+        } else {
+            ""
+        };
         cx.emit(
             Diagnostic::new(ID, format!("{rel}:{key}"), msg)
                 .span(file.span(&[key]))
-                .help(format!("write in {rel}{bound}:\n\n{key} = {} # {}", want.value, want.reason)),
+                .help(format!(
+                    "write in {rel}{bound}:\n\n{key} = {} # {}",
+                    want.value, want.reason
+                )),
         );
     }
 }
@@ -271,7 +319,9 @@ fn same(v: &toml_edit::Value, w: &ParamValue) -> bool {
         ParamValue::Bool(b) => v.as_bool() == Some(*b),
         ParamValue::Str(s) => v.as_str() == Some(s.as_str()),
         ParamValue::StrList(l) => v.as_array().is_some_and(|a| {
-            a.iter().map(toml_edit::Value::as_str).eq(l.iter().map(|s| Some(s.as_str())))
+            a.iter()
+                .map(toml_edit::Value::as_str)
+                .eq(l.iter().map(|s| Some(s.as_str())))
         }),
     }
 }

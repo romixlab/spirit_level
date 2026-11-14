@@ -1,4 +1,4 @@
-//! `stk-4` cortex-m-rt `paint-stack` on before its BusFault is understood
+//! `stk-4` cortex-m-rt `paint-stack` on before its `BusFault` is understood
 
 use crate::FwNeed;
 use sl_analysis::lint;
@@ -21,7 +21,7 @@ const FIX: &str = "drop the `paint-stack` feature of cortex-m-rt; turn it on aga
 /// otherwise (it is on only when the feature is chosen)
 pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
     let mut out = Vec::new();
-    let mut dep_names = vec!["cortex-m-rt".to_string()];
+    let mut dep_names = vec!["cortex-m-rt".to_owned()];
     for d in fw.dependencies() {
         if d.package() != "cortex-m-rt" {
             continue;
@@ -57,7 +57,7 @@ pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
                     "stk-4",
                     format!("Cargo.toml:features.{name}:paint-stack"),
                     if name == "default" {
-                        "cortex-m-rt's paint-stack is on by default: it caused a BusFault at boot on usb_io_fw".to_string()
+                        "cortex-m-rt's paint-stack is on by default: it caused a BusFault at boot on usb_io_fw".to_owned()
                     } else {
                         format!("feature `{name}` turns on cortex-m-rt's paint-stack: it caused a BusFault at boot on usb_io_fw")
                     },

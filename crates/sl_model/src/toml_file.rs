@@ -17,10 +17,10 @@ pub struct TomlFile {
 
 impl TomlFile {
     /// Parses `text`; the error carries the line
-    pub fn parse(rel: impl Into<String>, text: String) -> Result<TomlFile, String> {
+    pub fn parse(rel: impl Into<String>, text: String) -> Result<Self, String> {
         let rel = rel.into();
         match Document::parse(text.clone()) {
-            Ok(doc) => Ok(TomlFile { rel, text, doc }),
+            Ok(doc) => Ok(Self { rel, text, doc }),
             Err(e) => {
                 let line = e.span().map_or(0, |s| line_of(&text, s.start));
                 Err(format!("{rel}:{line}: {}", e.message()))
@@ -98,6 +98,10 @@ pub fn line_col(text: &str, offset: usize) -> (u32, u32) {
 }
 
 /// The 1-based line of a byte offset in `text`
+#[expect(
+    clippy::naive_bytecount,
+    reason = "counts the lines of one manifest; the bytecount crate is not worth a dependency"
+)]
 pub fn line_of(text: &str, offset: usize) -> u32 {
     let end = offset.min(text.len());
     text.as_bytes()[..end]

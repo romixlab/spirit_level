@@ -23,12 +23,12 @@ pub(crate) fn run(cx: &Context<'_>) {
 
 fn lines(cx: &Context<'_>) {
     let p = cx.params("agent-file-lines");
-    let max = p.int("max-lines");
+    let max = p.count("max-lines");
     for f in p.list("files") {
         let Some(text) = cx.project.read(f) else {
             continue;
         };
-        let n = text.lines().count() as i64;
+        let n = text.lines().count();
         if n > max {
             cx.emit(
                 Diagnostic::new("agent-file-lines", format!("file:{f}"), format!("{f} has {n} lines (limit {max})"))
@@ -108,7 +108,7 @@ fn targets(raw: &str) -> Vec<(usize, String)> {
             .split_whitespace()
             .next()
             .unwrap_or("");
-        out.push((start, t.trim_matches(['<', '>']).to_string()));
+        out.push((start, t.trim_matches(['<', '>']).to_owned()));
         from = start + len;
     }
     let masked = mask(raw);
@@ -120,7 +120,7 @@ fn targets(raw: &str) -> Vec<(usize, String)> {
             .chars()
             .take_while(|c| !c.is_whitespace() && !matches!(c, ')' | ',' | ';'))
             .collect();
-        let t = t.trim_end_matches(['.', ':']).to_string();
+        let t = t.trim_end_matches(['.', ':']).to_owned();
         if t.contains('.') || t.contains('/') {
             out.push((i + 1, t));
         }
@@ -151,7 +151,7 @@ fn links(cx: &Context<'_>) {
                     continue;
                 }
                 let rel = match path.strip_prefix('/') {
-                    Some(abs) => abs.to_string(),
+                    Some(abs) => abs.to_owned(),
                     None => dir.join(path).to_string_lossy().replace('\\', "/"),
                 };
                 if !cx.project.exists(&rel) {
@@ -302,7 +302,10 @@ mod tests {
             ]
         );
         assert_eq!(stated("| Commit body | 5 lines |")[0].3, 5);
-        assert!(stated("Run 3 tests, then commit.").is_empty());
+        assert_eq!(
+            stated("Run 3 tests, then commit."),
+            [] as [(usize, &str, &str, i64); 0]
+        );
     }
 
     #[test]

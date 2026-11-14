@@ -49,7 +49,7 @@ pub(super) fn regions(text: &str) -> Vec<Region> {
             continue;
         };
         out.push(Region {
-            name: name.to_string(),
+            name: name.to_owned(),
             origin,
             length,
             line: i as u32 + 1,

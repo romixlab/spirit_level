@@ -14,9 +14,9 @@ lint!(META, "F0098", "usb-3", "usb", "bulk endpoints on a hot path are double-bu
 pub(crate) const NEEDS: &[FwNeed] = &[FwNeed::Sources];
 
 
-/// On the G0 (STM32 usb_v4, the part it was measured on), an embassy-usb bulk endpoint made with
+/// On the G0 (STM32 `usb_v4`, the part it was measured on), an embassy-usb bulk endpoint made with
 /// `endpoint_bulk_in` / `endpoint_bulk_out` instead of the `_double_buffered` variants: behind a hub's
-/// transaction translator the peripheral NAKs while one buffer is processed (typec_dongle FW-24: 500 vs
+/// transaction translator the peripheral NAKs while one buffer is processed (`typec_dongle` FW-24: 500 vs
 /// 947 kB/s). Endpoints off the hot path (a control-like side channel) take a waiver.
 pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
     if !scan::family_in(fw, &["stm32g0"]) {

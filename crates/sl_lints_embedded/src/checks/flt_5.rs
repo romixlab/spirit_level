@@ -14,8 +14,8 @@ lint!(META, "F0052", "flt-5", "flt", "the reset cause is read and reported at bo
 pub(crate) const NEEDS: &[FwNeed] = &[FwNeed::Sources];
 
 
-/// Names that read a reset cause: the template's and bedrock_crash's, the reset flag registers of STM32 (RCC_CSR,
-/// RCC_RSR), RP (CHIP_RESET, WATCHDOG.REASON), nRF (RESETREAS), ESP (reset_reason)
+/// Names that read a reset cause: the template's and `bedrock_crash`'s, the reset flag registers of STM32 (`RCC_CSR`,
+/// `RCC_RSR`), RP (`CHIP_RESET`, WATCHDOG.REASON), nRF (RESETREAS), ESP (`reset_reason`)
 const READS: &[&str] = &[
     "reset_cause",
     "ResetCause",

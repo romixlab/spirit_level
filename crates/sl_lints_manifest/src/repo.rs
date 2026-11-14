@@ -100,11 +100,11 @@ pub(crate) fn run(cx: &Context<'_>) {
             );
         }
     }
-    let max = cx.params("justfile-simple").int("max-lines");
+    let max = cx.params("justfile-simple").count("max-lines");
     for r in &recipes {
         let why = if r.shebang {
-            Some("is an inline script (a shebang recipe)".to_string())
-        } else if r.commands as i64 > max {
+            Some("is an inline script (a shebang recipe)".to_owned())
+        } else if r.commands > max {
             Some(format!("has {} command lines (limit {max})", r.commands))
         } else {
             None
@@ -125,7 +125,7 @@ pub(crate) fn run(cx: &Context<'_>) {
         let Some(t) = pkg.manifest.get(&["features"]).and_then(|t| t.as_table()) else {
             continue;
         };
-        for (k, _) in t.iter() {
+        for (k, _) in t {
             if skip.iter().any(|s| s == k) {
                 continue;
             }
@@ -206,7 +206,7 @@ fn recipes(text: &str) -> Vec<Recipe> {
             continue;
         }
         out.push(Recipe {
-            name: name.to_string(),
+            name: name.to_owned(),
             line: i as u32 + 1,
             commands: 0,
             shebang: false,

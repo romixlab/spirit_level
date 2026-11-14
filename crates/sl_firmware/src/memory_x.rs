@@ -44,13 +44,13 @@ impl Region {
         false
     }
 
-    /// Registers in the peripheral area (0x4000_0000..0x6000_0000), like the backup registers the template gives
+    /// Registers in the peripheral area (`0x4000_0000..0x6000_0000`), like the backup registers the template gives
     /// the BKP counters as a region
     pub fn is_registers(&self) -> bool {
         (0x4000_0000..0x6000_0000).contains(&self.origin)
     }
 
-    /// RAM by its name or its address (the Cortex-M SRAM area 0x2000_0000..0x4000_0000, the RP2040 striped RAM)
+    /// RAM by its name or its address (the Cortex-M SRAM area `0x2000_0000..0x4000_0000`, the RP2040 striped RAM)
     pub fn is_ram(&self) -> bool {
         let n = self.name.to_ascii_uppercase();
         !self.is_flash()

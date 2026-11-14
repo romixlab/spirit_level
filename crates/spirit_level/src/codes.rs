@@ -1,6 +1,8 @@
-//! The registry of lint codes, `codes.toml`: every code ever given, with the lint id it belongs to, its group and
-//! whether the lint is active or retired. A code is never reused or changed; a retired lint keeps its row, so its
-//! code stays reserved. [`check`] holds the registry to the lints and to an earlier copy of itself.
+//! The registry of lint codes, `codes.toml`.
+//!
+//! Every code ever given, with the lint id it belongs to, its group and whether the lint is active or retired. A code
+//! is never reused or changed; a retired lint keeps its row, so its code stays reserved. [`check`] holds the registry
+//! to the lints and to an earlier copy of itself.
 
 use sl_core::LintMeta;
 use std::collections::BTreeMap;
@@ -21,8 +23,8 @@ impl Status {
     /// `active`, `retired`
     pub fn name(self) -> &'static str {
         match self {
-            Status::Active => "active",
-            Status::Retired => "retired",
+            Self::Active => "active",
+            Self::Retired => "retired",
         }
     }
 }
@@ -49,7 +51,7 @@ pub fn parse(text: &str) -> (Vec<Row>, Vec<String>) {
         Err(e) => return (rows, vec![format!("codes.toml does not parse: {e}")]),
     };
     for (code, item) in doc.iter() {
-        let field = |k: &str| item.get(k).and_then(|v| v.as_str()).map(str::to_string);
+        let field = |k: &str| item.get(k).and_then(|v| v.as_str()).map(str::to_owned);
         let status = match field("status").as_deref() {
             Some("active") => Status::Active,
             Some("retired") => Status::Retired,
@@ -62,7 +64,7 @@ pub fn parse(text: &str) -> (Vec<Row>, Vec<String>) {
         };
         match (field("id"), field("group")) {
             (Some(id), Some(group)) => rows.push(Row {
-                code: code.to_string(),
+                code: code.to_owned(),
                 id,
                 group,
                 status,
@@ -78,10 +80,11 @@ pub fn rows() -> Vec<Row> {
     parse(REGISTRY).0
 }
 
-/// The problems of `registry` against the lints, and against `base` (the registry of an earlier commit) when
-/// given: a lint without a code or with another code than its row, a code or an id twice, a code that does not fit
-/// its group, a retired row whose lint still exists, an active row without a lint, and a row of `base` that changed
-/// or went (only `active` to `retired` may change).
+/// The problems of `registry` against the lints, and against `base` when given.
+///
+/// `base` is the registry of an earlier commit. The problems: a lint without a code or with another code than its
+/// row, a code or an id twice, a code that does not fit its group, a retired row whose lint still exists, an active
+/// row without a lint, and a row of `base` that changed or went (only `active` to `retired` may change).
 pub fn check(lints: &[&LintMeta], registry: &str, base: Option<&str>) -> Vec<String> {
     let (rows, mut problems) = parse(registry);
     let mut by_code: BTreeMap<&str, &Row> = BTreeMap::new();
@@ -234,7 +237,7 @@ mod tests {
                 .any(|s| s.contains("M0002 changed from gone to new-lint")),
             "{p:?}"
         );
-        let removed: String = OK.lines().take(2).map(|l| format!("{l}\n")).collect();
+        let removed: String = OK.lines().take(2).flat_map(|l| [l, "\n"]).collect();
         let p = check(&[&A, &B], &removed, Some(OK));
         assert!(
             p.iter().any(|s| s.contains("M0002 (gone) was removed")),

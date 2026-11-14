@@ -22,8 +22,8 @@ pub enum LoadError {
 impl fmt::Display for LoadError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            LoadError::Metadata(e) => write!(f, "cargo metadata failed: {e}"),
-            LoadError::Manifest(e) => write!(f, "manifest: {e}"),
+            Self::Metadata(e) => write!(f, "cargo metadata failed: {e}"),
+            Self::Manifest(e) => write!(f, "manifest: {e}"),
         }
     }
 }
@@ -45,9 +45,9 @@ impl DepKind {
     /// The manifest table it is declared in
     pub fn table(self) -> &'static str {
         match self {
-            DepKind::Normal => "dependencies",
-            DepKind::Dev => "dev-dependencies",
-            DepKind::Build => "build-dependencies",
+            Self::Normal => "dependencies",
+            Self::Dev => "dev-dependencies",
+            Self::Build => "build-dependencies",
         }
     }
 }
@@ -105,7 +105,7 @@ impl Dep {
         };
         q.split('&')
             .filter_map(|kv| kv.split_once('='))
-            .map(|(k, v)| (k.to_string(), v.to_string()))
+            .map(|(k, v)| (k.to_owned(), v.to_owned()))
             .collect()
     }
 
@@ -137,7 +137,7 @@ pub struct Package {
     pub name: String,
     /// Its version
     pub version: String,
-    /// Its directory relative to the project root (`crates/foo`, or `` for a root package)
+    /// Its directory relative to the project root (`crates/foo`, or empty for a root package)
     pub dir: String,
     /// The manifest
     pub manifest: TomlFile,
@@ -186,7 +186,7 @@ impl Package {
     /// A path in its directory, relative to the project root
     pub fn path(&self, rel: &str) -> String {
         if self.dir.is_empty() {
-            rel.to_string()
+            rel.to_owned()
         } else {
             format!("{}/{rel}", self.dir)
         }
@@ -263,22 +263,22 @@ pub struct Project {
 
 impl Project {
     /// Reads the project whose manifest is in `dir` or above (cargo's own search)
-    pub fn load(dir: &Path) -> Result<Project, LoadError> {
+    pub fn load(dir: &Path) -> Result<Self, LoadError> {
         let out = cargo(dir)
             .args(["metadata", "--format-version", "1", "--no-deps"])
             .output()
             .map_err(|e| LoadError::Metadata(format!("cannot run cargo: {e}")))?;
         if !out.status.success() {
             return Err(LoadError::Metadata(
-                String::from_utf8_lossy(&out.stderr).trim().to_string(),
+                String::from_utf8_lossy(&out.stderr).trim().to_owned(),
             ));
         }
         let meta = cargo_metadata::MetadataCommand::parse(String::from_utf8_lossy(&out.stdout))
             .map_err(|e| LoadError::Metadata(e.to_string()))?;
-        Project::from_metadata(meta)
+        Self::from_metadata(&meta)
     }
 
-    fn from_metadata(meta: Metadata) -> Result<Project, LoadError> {
+    fn from_metadata(meta: &Metadata) -> Result<Self, LoadError> {
         let root: PathBuf = meta.workspace_root.clone().into();
         let read = |abs: &Path| -> Result<TomlFile, LoadError> {
             let rel = rel_path(&root, abs);
@@ -372,7 +372,7 @@ impl Project {
             .or_else(|| root_manifest.get(&["package", "version"]))
             .and_then(|v| v.as_str())
             .and_then(Version::parse);
-        Ok(Project {
+        Ok(Self {
             root,
             root_manifest,
             packages,
@@ -454,7 +454,7 @@ impl Project {
         }
         let out = cmd.output().map_err(|e| format!("cannot run cargo: {e}"))?;
         if !out.status.success() {
-            return Err(String::from_utf8_lossy(&out.stderr).trim().to_string());
+            return Err(String::from_utf8_lossy(&out.stderr).trim().to_owned());
         }
         let meta = cargo_metadata::MetadataCommand::parse(String::from_utf8_lossy(&out.stdout))
             .map_err(|e| e.to_string())?;
@@ -515,7 +515,7 @@ impl Project {
 }
 
 /// `cargo` with the environment of an outer cargo removed, so a run under `cargo test` or a build script sees
-/// the project as a person would (CARGO_HOME and registry settings stay)
+/// the project as a person would (`CARGO_HOME` and registry settings stay)
 fn cargo(dir: &Path) -> Command {
     command(
         std::env::var_os("SPIRIT_LEVEL_CARGO").unwrap_or_else(|| "cargo".into()),
@@ -523,10 +523,11 @@ fn cargo(dir: &Path) -> Command {
     )
 }
 
-/// A program started in `dir` with the environment of an outer cargo removed (`CARGO_*` but CARGO_HOME and the
-/// registry and network settings, `RUSTC*`, `RUSTFLAGS`, and the `RUSTUP_TOOLCHAIN` rustup sets for the outer
-/// cargo): every tool spirit_level runs sees the project, and the toolchain it pins, as a person would, also
-/// under `cargo test` or `cargo run`
+/// A program started in `dir` with the environment of an outer cargo removed.
+///
+/// Removed are `CARGO_*` but `CARGO_HOME` and the registry and network settings, `RUSTC*`, `RUSTFLAGS`, and the
+/// `RUSTUP_TOOLCHAIN` rustup sets for the outer cargo. Every tool `spirit_level` runs sees the project, and the
+/// toolchain it pins, as a person would, also under `cargo test` or `cargo run`.
 pub fn command(program: impl AsRef<std::ffi::OsStr>, dir: &Path) -> Command {
     let mut cmd = Command::new(program);
     cmd.current_dir(dir);
@@ -549,22 +550,21 @@ pub fn command(program: impl AsRef<std::ffi::OsStr>, dir: &Path) -> Command {
 }
 
 fn rel_path(root: &Path, p: &Path) -> String {
-    match p.strip_prefix(root) {
-        Ok(r) => r.to_string_lossy().replace('\\', "/"),
-        Err(_) => {
-            // outside the root: express it with `..` where the two share a prefix
-            let (mut a, mut b) = (root.components().peekable(), p.components().peekable());
-            while let (Some(x), Some(y)) = (a.peek(), b.peek()) {
-                if x != y {
-                    break;
-                }
-                a.next();
-                b.next();
+    if let Ok(r) = p.strip_prefix(root) {
+        r.to_string_lossy().replace('\\', "/")
+    } else {
+        // outside the root: express it with `..` where the two share a prefix
+        let (mut a, mut b) = (root.components().peekable(), p.components().peekable());
+        while let (Some(x), Some(y)) = (a.peek(), b.peek()) {
+            if x != y {
+                break;
             }
-            let mut parts: Vec<String> = a.map(|_| "..".to_string()).collect();
-            parts.extend(b.map(|c| c.as_os_str().to_string_lossy().into_owned()));
-            parts.join("/")
+            a.next();
+            b.next();
         }
+        let mut parts: Vec<String> = a.map(|_| "..".to_owned()).collect();
+        parts.extend(b.map(|c| c.as_os_str().to_string_lossy().into_owned()));
+        parts.join("/")
     }
 }
 
@@ -614,6 +614,6 @@ mod tests {
             member: false,
         };
         assert_eq!(d.git_url(), Some("https://github.com/a/b"));
-        assert_eq!(d.git_pins(), vec![("tag".to_string(), "v1".to_string())]);
+        assert_eq!(d.git_pins(), vec![("tag".to_owned(), "v1".to_owned())]);
     }
 }

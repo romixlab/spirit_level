@@ -1,4 +1,4 @@
-//! `cfg-4` A crate in the tree twice (git and path copies of WireWeaver, embassy): patch it to one source
+//! `cfg-4` A crate in the tree twice (git and path copies of `WireWeaver`, embassy): patch it to one source
 
 use crate::FwNeed;
 use sl_analysis::lint;

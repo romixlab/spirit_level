@@ -35,7 +35,7 @@ fn ram_fns(ast: &syn::File) -> Vec<RamFn> {
             if let Some(rest) = tokens.split("link_section").nth(1)
                 && let Some(value) = rest.split('"').nth(1)
             {
-                section = Some(value.to_string());
+                section = Some(value.to_owned());
             }
             if a.path().is_ident("inline") && tokens.contains("never") {
                 inline_never = true;

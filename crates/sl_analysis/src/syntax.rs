@@ -14,10 +14,18 @@ pub fn is_test(attrs: &[Attribute]) -> bool {
         }
         if p.is_ident("cfg") {
             let mut found = false;
+            #[expect(
+                clippy::let_underscore_must_use,
+                reason = "a malformed attribute is rustc's error; this reads what parses"
+            )]
             let _ = a.parse_nested_meta(|m| {
                 if m.path.is_ident("test") {
                     found = true;
                 } else if m.path.is_ident("any") || m.path.is_ident("all") {
+                    #[expect(
+                        clippy::let_underscore_must_use,
+                        reason = "a malformed attribute is rustc's error; this reads what parses"
+                    )]
                     let _ = m.parse_nested_meta(|n| {
                         if n.path.is_ident("test") {
                             found = true;
@@ -134,7 +142,7 @@ pub fn functions<'a>(file: &'a syn::File, module: &str) -> Vec<FnInfo<'a>> {
 
 fn join(a: &str, b: &str) -> String {
     if a.is_empty() {
-        b.to_string()
+        b.to_owned()
     } else {
         format!("{a}::{b}")
     }
@@ -216,7 +224,7 @@ pub fn type_idents(ty: &syn::Type) -> Vec<String> {
     v.0
 }
 
-/// McCabe cyclomatic complexity of a block: 1 plus each branch point (`if`, each `match` arm after the first,
+/// `McCabe` cyclomatic complexity of a block: 1 plus each branch point (`if`, each `match` arm after the first,
 /// loops, `&&`, `||`, `?`)
 pub fn complexity(block: &Block) -> u32 {
     struct C(u32);

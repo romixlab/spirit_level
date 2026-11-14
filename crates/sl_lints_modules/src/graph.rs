@@ -52,14 +52,14 @@ struct Builder<'t, 'a> {
 
 impl<'t, 'a> Builder<'t, 'a> {
     /// Maps every module to its node and sums the nodes' code lines
-    fn new(tree: &'t CrateTree<'a>, depth: usize) -> Builder<'t, 'a> {
+    fn new(tree: &'t CrateTree<'a>, depth: usize) -> Self {
         let mut ids: HashMap<String, usize> = HashMap::new();
         let mut nodes: Vec<Node> = Vec::new();
         let mut node_of = Vec::with_capacity(tree.modules.len());
         for m in &tree.modules {
             let segs = m.segments();
             let name = if segs.is_empty() {
-                "(root)".to_string()
+                "(root)".to_owned()
             } else {
                 segs[..segs.len().min(depth.max(1))].join("::")
             };
@@ -85,7 +85,7 @@ impl<'t, 'a> Builder<'t, 'a> {
         if a != b {
             let e = self.g.edges.entry((a, b)).or_insert_with(|| Edge {
                 refs: 0,
-                first: (file.to_string(), line),
+                first: (file.to_owned(), line),
             });
             e.refs += 1;
         }
@@ -152,7 +152,7 @@ impl<'t, 'a> Builder<'t, 'a> {
                 i += 1;
                 continue;
             };
-            let counted = !(i > 0 && toks[i - 1].0 == Tok::PathSep)
+            let counted = (i == 0 || toks[i - 1].0 != Tok::PathSep)
                 && !skip.iter().any(|(a, b)| a <= at && at <= b);
             let Some(m) = module_at(*at).filter(|_| counted) else {
                 i += 1;

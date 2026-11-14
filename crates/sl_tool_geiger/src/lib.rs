@@ -109,7 +109,7 @@ fn scan(dir: &std::path::Path) -> (u64, usize) {
                 ) {
                     stack.push(path);
                 }
-            } else if name.ends_with(".rs")
+            } else if path.extension().is_some_and(|e| e == "rs")
                 && let Ok(m) = geiger::find_unsafe_in_file(&path, geiger::IncludeTests::No)
             {
                 let c = &m.counters;

@@ -19,9 +19,9 @@ pub(crate) const NEEDS: &[FwNeed] = &[FwNeed::Sources];
 /// never handles the erratum's case (no TXBCF / TXBRP access). ES0491 Rev 9
 /// 2.22.3 "DAR mode transmission failure due to lost arbitration": "In DAR mode, the transmission may fail due to
 /// lost arbitration at the first two identifier bits"; workaround "clear the corresponding Tx buffer
-/// transmission request bit TRPx of the FDCAN_TXBRP register and set the corresponding cancellation finished bit
-/// CFx of the FDCAN_TXBCF register, then restart the transmission" (quoted in
-/// firmware_template_skill/references/errata.md). A literal is certain; a setter given a run-time value (a
+/// transmission request bit `TRPx` of the `FDCAN_TXBRP` register and set the corresponding cancellation finished bit
+/// `CFx` of the `FDCAN_TXBCF` register, then restart the transmission" (quoted in
+/// `firmware_template_skill/references/errata.md`). A literal is certain; a setter given a run-time value (a
 /// host option) is a candidate.
 pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
     if !scan::family_in(fw, &["stm32h7"]) {

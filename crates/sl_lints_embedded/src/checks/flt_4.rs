@@ -1,4 +1,4 @@
-//! `flt-4` No UsageFault, MemManage and BusFault handlers, or not enabled in SHCSR
+//! `flt-4` No `UsageFault`, `MemManage` and `BusFault` handlers, or not enabled in SHCSR
 
 use crate::FwNeed;
 use sl_analysis::lint;
@@ -17,7 +17,7 @@ pub(crate) const NEEDS: &[FwNeed] = &[FwNeed::Sources];
 
 /// On a core with configurable faults (Armv7-M, Armv8-M Mainline: by target or chip family): the handlers
 /// `UsageFault`, `MemoryManagement` and `BusFault` that are missing, and, with handlers, no sign that they are
-/// enabled (an `enable(Exception::..)` call or SHCSR named in the code). Off, they escalate to HardFault, which
+/// enabled (an `enable(Exception::..)` call or SHCSR named in the code). Off, they escalate to `HardFault`, which
 /// loses which fault it was.
 pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
     if flt::has_configurable_faults(fw) != Some(true) {

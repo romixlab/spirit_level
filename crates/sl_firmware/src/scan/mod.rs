@@ -1,7 +1,8 @@
-//! Walking function bodies, for the checks that look at more than the [`Facts`](super::Facts): every function of the
-//! source with its body ([`functions`]), a walk over a body that also enters macro calls ([`walk`]: `unwrap!(..)`,
-//! `info!(..)`, `cnt!(..)`, `join!(..)` are parsed as Rust), the names an expression mentions, and what the firmware
-//! runs on (core, chip family) when `bedrock_fw.json` does not say.
+//! Walking function bodies, for the checks that look at more than the [`Facts`](super::Facts).
+//!
+//! Every function of the source with its body ([`functions`]), a walk over a body that also enters macro calls
+//! ([`walk`]: `unwrap!(..)`, `info!(..)`, `cnt!(..)`, `join!(..)` are parsed as Rust), the names an expression
+//! mentions, and what the firmware runs on (core, chip family) when `bedrock_fw.json` does not say.
 //!
 //! Code under `#[cfg(test)]` and `#[test]` functions is left out: it never runs on the target.
 
@@ -35,7 +36,7 @@ pub struct FnItem<'a> {
     module: std::rc::Rc<[String]>,
 }
 
-impl<'a> FnItem<'a> {
+impl FnItem<'_> {
     /// The function's own name
     pub fn name(&self) -> String {
         self.sig.ident.to_string()
@@ -105,7 +106,7 @@ pub fn functions<'a>(fw: &'a Firmware<'_>) -> Vec<FnItem<'a>> {
             .module
             .split("::")
             .filter(|s| !s.is_empty())
-            .map(str::to_string)
+            .map(str::to_owned)
             .collect();
         items(f, &f.ast.items, module, &mut out);
     }
@@ -367,10 +368,10 @@ pub enum Node<'n> {
 
 impl<F: FnMut(Node<'_>)> Inspect for Each<F> {
     fn enter(&mut self, e: &Expr) {
-        (self.0)(Node::Expr(e))
+        (self.0)(Node::Expr(e));
     }
     fn mac(&mut self, name: &str, m: &syn::Macro) {
-        (self.0)(Node::Macro(name, m))
+        (self.0)(Node::Macro(name, m));
     }
 }
 
@@ -420,7 +421,7 @@ pub fn counts(e: &Expr) -> bool {
     each_in(e, |n| match n {
         Node::Macro(name, _) if COUNT_MACROS.contains(&name) => found = true,
         Node::Expr(Expr::MethodCall(m)) if m.method == "count" && !m.args.is_empty() => {
-            found = true
+            found = true;
         }
         _ => {}
     });
@@ -482,15 +483,16 @@ pub fn core(fw: &Firmware<'_>) -> Option<&'static str> {
     })
 }
 
-/// The chip family (`stm32g0`, `stm32h7`, `rp2040`, `rp235x`, `nrf52`): `bedrock_fw.json`'s chip, else the chip
-/// feature of the HAL dependency (`embassy-stm32` `stm32g0b1re`, `embassy-rp` `rp235xa`); `rp2040` for `embassy-rp`
-/// without a chip feature
+/// The chip family (`stm32g0`, `stm32h7`, `rp2040`, `rp235x`, `nrf52`).
+///
+/// `bedrock_fw.json`'s chip, else the chip feature of the HAL dependency (`embassy-stm32` `stm32g0b1re`, `embassy-rp`
+/// `rp235xa`); `rp2040` for `embassy-rp` without a chip feature.
 pub fn family(fw: &Firmware<'_>) -> Option<String> {
     if let Some(c) = fw.chip() {
         return Some(c.family.clone());
     }
     for d in fw.dependencies() {
-        let pkg = d.package().to_string();
+        let pkg = d.package().to_owned();
         let feats: Vec<String> = d.features().into_iter().map(|(f, _, _)| f).collect();
         match pkg.as_str() {
             "embassy-stm32" | "stm32-metapac" => {
@@ -508,7 +510,7 @@ pub fn family(fw: &Firmware<'_>) -> Option<String> {
             "rp2040-hal" => return Some("rp2040".into()),
             "rp235x-hal" => return Some("rp235x".into()),
             p if p.starts_with("stm32") && p.ends_with("xx-hal") => {
-                return Some(p.trim_end_matches("xx-hal").to_string());
+                return Some(p.trim_end_matches("xx-hal").to_owned());
             }
             p if p.starts_with("embassy-nrf") || p.starts_with("nrf52") => {
                 return Some("nrf52".into());
@@ -553,16 +555,13 @@ fn t2() {}
         let mut macros = Vec::new();
         let mut methods = Vec::new();
         each(out[0].block, |n| match n {
-            Node::Macro(name, _) => macros.push(name.to_string()),
+            Node::Macro(name, _) => macros.push(name.to_owned()),
             Node::Expr(Expr::MethodCall(m)) => methods.push(m.method.to_string()),
-            _ => {}
+            Node::Expr(_) => {}
         });
         assert_eq!(macros, ["info", "unwrap", "cnt"]);
         assert_eq!(methods, ["checked_add"]);
-        assert_eq!(
-            out[0].params(),
-            [(vec!["x".to_string()], "u32".to_string())]
-        );
+        assert_eq!(out[0].params(), [(vec!["x".to_owned()], "u32".to_owned())]);
         let body = Expr::Block(syn::ExprBlock {
             attrs: Vec::new(),
             label: None,

@@ -14,7 +14,7 @@ lint!(META, "F0054", "flt-8", "flt", "a boot-loop rescue falls back to the ROM b
 pub(crate) const NEEDS: &[FwNeed] = &[FwNeed::Sources];
 
 
-/// A boot-loop rescue: bedrock_rom_boot's (`early()`, `Start::Rescue`), a count of its own, or embassy-boot's
+/// A boot-loop rescue: `bedrock_rom_boot`'s (`early()`, `Start::Rescue`), a count of its own, or embassy-boot's
 /// rollback of an image that was never marked booted
 const RESCUES: &[&str] = &[
     "bedrock_rom_boot",

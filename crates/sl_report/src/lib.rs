@@ -1,4 +1,8 @@
 //! Text and JSON output of a report: [`text`] groups the findings for people, [`json`] is complete and ungrouped.
+#![expect(
+    clippy::let_underscore_must_use,
+    reason = "fmt::Write into a String cannot fail"
+)]
 
 mod excerpt;
 mod text;

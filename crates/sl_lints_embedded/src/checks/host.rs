@@ -1,4 +1,4 @@
-//! What host-1, host-3 and host-5 share: the WireWeaver handlers of the firmware and the values that come from the
+//! What host-1, host-3 and host-5 share: the `WireWeaver` handlers of the firmware and the values that come from the
 //! host, followed by name through each handler and the crate-local functions it hands them to.
 //!
 //! - A **handler** is a function with a parameter typed `Context<.., impl EventOut>` (the server methods
@@ -95,14 +95,15 @@ impl Event {
         }
     }
 
-    /// `from host argument `len` of `fw::ww::ServerState::read`, through `fw::helpers::decode``
+    /// Where the value comes from: host argument `len` of handler `fw::ww::ServerState::read`, through
+    /// `fw::helpers::decode`
     pub fn source(&self) -> String {
         let mut s = format!(
             "host argument `{}` of handler `{}`",
             self.origin.param, self.handler
         );
         if !self.via.is_empty() {
-            s.push_str(&format!(", through `{}`", self.via.join("` → `")));
+            s = format!("{s}, through `{}`", self.via.join("` → `"));
         }
         s
     }
@@ -241,7 +242,7 @@ fn server_types(fw: &Firmware<'_>) -> BTreeSet<String> {
                 {
                     let path = rest.split(',').next().unwrap_or("").replace(' ', "");
                     if let Some(last) = path.rsplit("::").next() {
-                        self.0.insert(last.to_string());
+                        self.0.insert(last.to_owned());
                     }
                 }
             }
@@ -283,7 +284,7 @@ fn overflow_checks(fw: &Firmware<'_>) -> bool {
 /// Names a function compares, bounds or checks for zero somewhere (`if i < buf.len()`, `n.min(MAX)`, `len != 0`):
 /// a panic on them is guarded or may be, so it is a candidate
 fn guarded_names(f: &FnItem<'_>) -> BTreeSet<String> {
-    use syn::BinOp::*;
+    use syn::BinOp::{Eq, Ge, Gt, Le, Lt, Ne};
     let mut out = BTreeSet::new();
     // `let n = v.min(7);`, `let i = v % N;`: n and i are bounded
     struct Bounded<'o>(&'o mut BTreeSet<String>);
@@ -332,7 +333,7 @@ fn guarded_names(f: &FnItem<'_>) -> BTreeSet<String> {
         // `check_reg_read(addr, words)?`: a validation function sees them
         Node::Expr(Expr::Call(c))
             if scan::call_name(&Expr::Call(c.clone())).is_some_and(|n| {
-                let n = n.rsplit("::").next().unwrap_or("").to_string();
+                let n = n.rsplit("::").next().unwrap_or("").to_owned();
                 ["check", "validate", "verify", "is_valid"]
                     .iter()
                     .any(|w| n.starts_with(w))
@@ -581,7 +582,7 @@ impl Walk<'_> {
             Expr::Path(_) => true,
             Expr::MethodCall(m) => DECIDING.contains(&m.method.to_string().as_str()),
             Expr::Call(_) => scan::call_name(recv)
-                .and_then(|n| n.rsplit("::").next().map(str::to_string))
+                .and_then(|n| n.rsplit("::").next().map(str::to_owned))
                 .is_some_and(|n| DECIDING.contains(&n.as_str())),
             _ => false,
         };
@@ -683,10 +684,9 @@ fn projection(e: &Expr) -> bool {
 /// A literal or a constant (`0`, `Mode::Off`, `MAX`), or an arm that leaves (`return ..`)
 fn constant(e: &Expr) -> bool {
     match e {
-        Expr::Return(_) | Expr::Continue(_) | Expr::Break(_) => true,
+        Expr::Return(_) | Expr::Continue(_) | Expr::Break(_) | Expr::Lit(_) => true,
         Expr::Macro(m) => ["panic", "unreachable", "todo", "unimplemented"]
             .contains(&scan::macro_name(&m.mac).as_str()),
-        Expr::Lit(_) => true,
         Expr::Path(p) => p.path.segments.last().is_some_and(|s| {
             s.ident
                 .to_string()
@@ -757,7 +757,7 @@ impl Walk<'_> {
     }
 
     fn on_if(&mut self, i: &syn::ExprIf) {
-        use syn::BinOp::*;
+        use syn::BinOp::{Ge, Gt, Le, Lt};
         let is_cmp = |e: &Expr| {
             let mut c = false;
             scan::each_in(e, |n| {
@@ -869,7 +869,10 @@ impl Walk<'_> {
     }
 
     fn on_binary(&mut self, b: &syn::ExprBinary, e: &Expr) {
-        use syn::BinOp::*;
+        use syn::BinOp::{
+            Add, AddAssign, Div, DivAssign, Mul, MulAssign, Rem, RemAssign, Shl, ShlAssign, Shr,
+            ShrAssign, Sub, SubAssign,
+        };
         match b.op {
             Div(_) | Rem(_) | DivAssign(_) | RemAssign(_) => {
                 if let Some(o) = self.origin(&b.right) {

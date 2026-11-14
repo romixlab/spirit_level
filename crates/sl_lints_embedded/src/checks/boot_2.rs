@@ -15,8 +15,8 @@ lint!(META, "F0003", "boot-2", "boot", "the H7 supply configuration is read back
 pub(crate) const NEEDS: &[FwNeed] = &[FwNeed::Sources];
 
 
-/// On an H7, a constant `supply_config = SupplyConfig::..` (or a write of PWR_CR3) in a firmware that never reads
-/// PWR_CR3 back: ROM bootloaders before V9.3 lock the register until a power cycle (AN2606, bedrock_rom_boot
+/// On an H7, a constant `supply_config = SupplyConfig::..` (or a write of `PWR_CR3`) in a firmware that never reads
+/// `PWR_CR3` back: ROM bootloaders before V9.3 lock the register until a power cycle (AN2606, `bedrock_rom_boot`
 /// `h7`), the write is ignored and embassy waits for a supply state that never comes. A value from a function
 /// (vb135's `supply_config()`, which reads the register first) is fine.
 pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {

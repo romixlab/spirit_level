@@ -14,7 +14,7 @@ lint!(META, "F0056", "host-1", "host", "nothing reachable from host input can pa
 pub(crate) const NEEDS: &[FwNeed] = &[FwNeed::Sources];
 
 
-/// Each panic a host value reaches in a WireWeaver handler or a function it hands the value to (see
+/// Each panic a host value reaches in a `WireWeaver` handler or a function it hands the value to (see
 /// [`host`]): `unwrap` / `expect` on a result the value decides, indexing with it or into it, division by it,
 /// `assert!` on it, `todo!` / `unimplemented!` in a handler, `panic!` / `unreachable!` in a `match` on it. Overflow
 /// of `+ - * << >>` on it is an estimate with `overflow-checks` on in release, else a candidate (it panics in dev

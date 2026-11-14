@@ -1,6 +1,7 @@
-//! Names inside one crate: what a `use` brings into a module, how a path resolves to a module of the crate, and
-//! the public items a library offers (reachable from its root through `pub mod` and `pub use`). Read from the
-//! syntax alone: no macro expansion, no type information.
+//! Names inside one crate, read from the syntax alone.
+//!
+//! What a `use` brings into a module, how a path resolves to a module of the crate, and the public items a library
+//! offers (reachable from its root through `pub mod` and `pub use`). No macro expansion, no type information.
 
 use crate::crate_tree::CrateTree;
 use crate::syntax::{is_test, item_attrs, line};
@@ -89,7 +90,7 @@ impl Target {
     /// The module it is in (or is)
     pub fn module(&self) -> usize {
         match self {
-            Target::Module(m) | Target::Item(m, _) => *m,
+            Self::Module(m) | Self::Item(m, _) => *m,
         }
     }
 }
@@ -102,7 +103,7 @@ pub struct Names<'t, 'a> {
 
 impl<'t, 'a> Names<'t, 'a> {
     /// Reads every module's `use` items (test items skipped)
-    pub fn new(tree: &'t CrateTree<'a>) -> Names<'t, 'a> {
+    pub fn new(tree: &'t CrateTree<'a>) -> Self {
         let imports = tree
             .modules
             .iter()
@@ -242,8 +243,10 @@ fn is_pub(item: &Item) -> bool {
     matches!(vis, Visibility::Public(_))
 }
 
-/// The public items of a crate: `pub` items of modules reachable from the root through `pub mod`, `pub use` of a
-/// module and `pub use m::*`, plus `pub` items re-exported by name (`pub use inner::Thing`) and exported macros
+/// The public items of a crate.
+///
+/// `pub` items of modules reachable from the root through `pub mod`, `pub use` of a module and `pub use m::*`, plus
+/// `pub` items re-exported by name (`pub use inner::Thing`) and exported macros.
 pub fn public_items<'a>(names: &Names<'_, 'a>) -> Vec<PubItem<'a>> {
     let tree = names.tree();
     let mods = &tree.modules;

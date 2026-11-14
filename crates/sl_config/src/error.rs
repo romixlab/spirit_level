@@ -15,9 +15,9 @@ pub struct ConfigError {
 
 impl ConfigError {
     /// An error at a line of a file
-    pub fn new(file: &str, line: u32, message: impl Into<String>) -> ConfigError {
-        ConfigError {
-            file: file.to_string(),
+    pub fn new(file: &str, line: u32, message: impl Into<String>) -> Self {
+        Self {
+            file: file.to_owned(),
             line,
             message: message.into(),
         }

@@ -16,13 +16,13 @@ pub struct Date {
 
 impl Date {
     /// Parses `YYYY-MM-DD`, checking the day exists
-    pub fn parse(s: &str) -> Option<Date> {
+    pub fn parse(s: &str) -> Option<Self> {
         let mut it = s.split('-');
         let (y, m, d) = (it.next()?, it.next()?, it.next()?);
         if it.next().is_some() || y.len() != 4 || m.len() != 2 || d.len() != 2 {
             return None;
         }
-        let date = Date {
+        let date = Self {
             year: y.parse().ok()?,
             month: m.parse().ok()?,
             day: d.parse().ok()?,
@@ -34,7 +34,7 @@ impl Date {
     }
 
     /// The date of a count of days since 1970-01-01 (Howard Hinnant's civil-from-days)
-    pub fn from_days(days: i64) -> Date {
+    pub fn from_days(days: i64) -> Self {
         let z = days + 719_468;
         let era = z.div_euclid(146_097);
         let doe = z - era * 146_097;
@@ -44,16 +44,16 @@ impl Date {
         let day = (doy - (153 * mp + 2) / 5 + 1) as u8;
         let month = if mp < 10 { mp + 3 } else { mp - 9 } as u8;
         let year = (yoe + era * 400 + i64::from(month <= 2)) as i32;
-        Date { year, month, day }
+        Self { year, month, day }
     }
 
     /// Today in UTC from the system clock. Callers that must be deterministic (tests, the engine) take the date
     /// as a parameter instead and call this only at the edge (the CLI)
-    pub fn today_utc() -> Date {
+    pub fn today_utc() -> Self {
         let secs = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
-            .map_or(0, |d| d.as_secs() as i64);
-        Date::from_days(secs.div_euclid(86_400))
+            .map_or(0, |d| i64::try_from(d.as_secs()).unwrap_or(i64::MAX));
+        Self::from_days(secs.div_euclid(86_400))
     }
 }
 
@@ -78,10 +78,10 @@ pub struct Version(pub u64, pub u64, pub u64);
 
 impl Version {
     /// Parses `1.2.3` or `v1.2.3`
-    pub fn parse(s: &str) -> Option<Version> {
+    pub fn parse(s: &str) -> Option<Self> {
         let s = s.strip_prefix('v').unwrap_or(s);
         let mut it = s.split('.').map(|p| p.parse::<u64>().ok());
-        let v = Version(it.next()??, it.next()??, it.next()??);
+        let v = Self(it.next()??, it.next()??, it.next()??);
         it.next().is_none().then_some(v)
     }
 }
@@ -104,7 +104,7 @@ pub enum Expiry {
 
 impl Expiry {
     /// Parses `2027-01-31`, `v0.5.0` or `0.5.0`
-    pub fn parse(s: &str) -> Option<Expiry> {
+    pub fn parse(s: &str) -> Option<Self> {
         Date::parse(s)
             .map(Expiry::Date)
             .or_else(|| Version::parse(s).map(Expiry::Version))
@@ -114,8 +114,8 @@ impl Expiry {
     /// version never expires, and the configuration check says so)
     pub fn expired(&self, today: Date, version: Option<Version>) -> bool {
         match self {
-            Expiry::Date(d) => today >= *d,
-            Expiry::Version(v) => version.is_some_and(|p| p >= *v),
+            Self::Date(d) => today >= *d,
+            Self::Version(v) => version.is_some_and(|p| p >= *v),
         }
     }
 }
@@ -123,8 +123,8 @@ impl Expiry {
 impl fmt::Display for Expiry {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Expiry::Date(d) => d.fmt(f),
-            Expiry::Version(v) => write!(f, "v{v}"),
+            Self::Date(d) => d.fmt(f),
+            Self::Version(v) => write!(f, "v{v}"),
         }
     }
 }

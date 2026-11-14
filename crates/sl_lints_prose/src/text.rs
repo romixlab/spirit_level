@@ -184,7 +184,7 @@ mod tests {
     #[test]
     fn phrases() {
         assert_eq!(find_phrase("Let me see; outlet media", "let me"), vec![0]);
-        assert!(find_phrase("hackathon", "hack").is_empty());
+        assert_eq!(find_phrase("hackathon", "hack"), [] as [usize; 0]);
         assert_eq!(find_phrase("wait, what", "wait,"), vec![0]);
         assert_eq!(find_phrase("ÄÖ note that", "note that"), vec![5]);
     }
@@ -203,7 +203,7 @@ mod tests {
 
     #[test]
     fn emojis() {
-        let allow = vec!["✅".to_string()];
+        let allow = vec!["✅".to_owned()];
         let e: Vec<&str> = emoji("ok ✅ 🚀 → ✨", &allow)
             .into_iter()
             .map(|e| e.1)

@@ -1,6 +1,7 @@
-//! Synthetic ELFs for the fixtures of the lints that read the linked ELF: a fixture's `elf.toml` describes
-//! sections, segments, symbols and Thumb functions (frame and calls), and [`write`] turns it into a little 32-bit
-//! ELF, so no binary is committed.
+//! Synthetic ELFs for the fixtures of the lints that read the linked ELF.
+//!
+//! A fixture's `elf.toml` describes sections, segments, symbols and Thumb functions (frame and calls), and [`write`]
+//! turns it into a little 32-bit ELF, so no binary is committed.
 //!
 //! ```toml
 //! machine = "arm"                  # or "riscv"
@@ -90,7 +91,7 @@ impl Keys<'_> {
             None => Ok(None),
             Some(v) => v
                 .as_str()
-                .map(|s| Some(s.to_string()))
+                .map(|s| Some(s.to_owned()))
                 .ok_or_else(|| format!("{}: {k} is not a string", self.what)),
         }
     }
@@ -125,7 +126,7 @@ impl Keys<'_> {
             None => Ok(Vec::new()),
             Some(v) => v
                 .as_array()
-                .and_then(|a| a.iter().map(|s| s.as_str().map(str::to_string)).collect())
+                .and_then(|a| a.iter().map(|s| s.as_str().map(str::to_owned)).collect())
                 .ok_or_else(|| format!("{}: {k} is not a list of strings", self.what)),
         }
     }
@@ -148,16 +149,16 @@ fn tables<'a>(doc: &'a DocumentMut, key: &str) -> Result<Vec<Keys<'a>>, String> 
 
 impl Spec {
     /// Reads an `elf.toml`
-    pub fn parse(text: &str) -> Result<Spec, String> {
+    pub fn parse(text: &str) -> Result<Self, String> {
         let doc: DocumentMut = text.parse().map_err(|e| format!("elf.toml: {e}"))?;
         let top = Keys {
             what: "elf.toml".into(),
             t: doc.as_table(),
         };
         top.check(&["machine", "section", "function", "symbol", "segment"])?;
-        let mut spec = Spec {
+        let mut spec = Self {
             machine: top.str("machine")?,
-            ..Spec::default()
+            ..Self::default()
         };
         spec.section = tables(&doc, "section")?
             .iter()
@@ -180,9 +181,9 @@ impl Spec {
 }
 
 impl SectionSpec {
-    fn read(k: &Keys<'_>) -> Result<SectionSpec, String> {
+    fn read(k: &Keys<'_>) -> Result<Self, String> {
         k.check(&["name", "addr", "size", "flags", "nobits", "load"])?;
-        Ok(SectionSpec {
+        Ok(Self {
             name: k.req_str("name")?,
             addr: k.req_int("addr")?,
             size: k.int("size")?,
@@ -194,9 +195,9 @@ impl SectionSpec {
 }
 
 impl FunctionSpec {
-    fn read(k: &Keys<'_>) -> Result<FunctionSpec, String> {
+    fn read(k: &Keys<'_>) -> Result<Self, String> {
         k.check(&["name", "addr", "frame", "calls", "section"])?;
-        Ok(FunctionSpec {
+        Ok(Self {
             name: k.req_str("name")?,
             addr: k.req_int("addr")?,
             frame: k.int("frame")?.unwrap_or(0) as u32,
@@ -207,9 +208,9 @@ impl FunctionSpec {
 }
 
 impl SymbolSpec {
-    fn read(k: &Keys<'_>) -> Result<SymbolSpec, String> {
+    fn read(k: &Keys<'_>) -> Result<Self, String> {
         k.check(&["name", "addr", "size", "kind", "section"])?;
-        Ok(SymbolSpec {
+        Ok(Self {
             name: k.req_str("name")?,
             addr: k.req_int("addr")?,
             size: k.int("size")?.unwrap_or(0),
@@ -220,9 +221,9 @@ impl SymbolSpec {
 }
 
 impl SegmentSpec {
-    fn read(k: &Keys<'_>) -> Result<SegmentSpec, String> {
+    fn read(k: &Keys<'_>) -> Result<Self, String> {
         k.check(&["vaddr", "paddr", "memsz", "filesz", "flags"])?;
-        Ok(SegmentSpec {
+        Ok(Self {
             vaddr: k.req_int("vaddr")?,
             paddr: k.int("paddr")?,
             memsz: k.req_int("memsz")?,
@@ -485,8 +486,7 @@ fn program_headers(spec: &Spec, secs: &[Sec]) -> Vec<[u64; 6]> {
             if s.flags & 2 == 0 || s.size == 0 {
                 continue;
             }
-            let flags =
-                4 | if s.flags & 1 != 0 { 2 } else { 0 } | if s.flags & 4 != 0 { 1 } else { 0 };
+            let flags = 4 | if s.flags & 1 != 0 { 2 } else { 0 } | u64::from(s.flags & 4 != 0);
             let filesz = if s.nobits { 0 } else { s.size };
             phdrs.push([s.addr, s.load, filesz, s.size, flags, i as u64]);
         }

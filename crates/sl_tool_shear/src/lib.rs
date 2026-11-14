@@ -63,7 +63,7 @@ impl Analysis for Shear {
             )
             .span(Span::new(&f.file, line))
             .help(if f.help.is_empty() {
-                "see cargo shear's help".to_string()
+                "see cargo shear's help".to_owned()
             } else {
                 f.help.clone()
             });
@@ -109,7 +109,7 @@ pub fn parse(stdout: &str) -> Option<Vec<Finding>> {
         f.get(k)
             .and_then(Value::as_str)
             .unwrap_or_default()
-            .to_string()
+            .to_owned()
     };
     Some(
         v.get("findings")?

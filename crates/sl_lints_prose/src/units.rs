@@ -129,7 +129,7 @@ pub fn comment_lines(cx: &Context<'_>) -> Vec<Line> {
                         from: From::Comment(c.kind),
                         krate: Some(pkg.name.clone()),
                         base: raw.find(l).unwrap_or(0),
-                        raw: raw.to_string(),
+                        raw: raw.to_owned(),
                     });
                 }
                 if !c.kind.is_doc() {

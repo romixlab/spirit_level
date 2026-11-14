@@ -46,7 +46,7 @@ pub fn render(root: &Path, span: &Span, label: &str, deny: bool, paint: Paint) -
         _ => (start, end),
     };
     let label = if one_line {
-        label.to_string()
+        label.to_owned()
     } else {
         format!("{label} (to line {})", span.end_line)
     };
@@ -86,6 +86,10 @@ fn indent(line: &str) -> usize {
 }
 
 #[cfg(test)]
+#[expect(
+    clippy::let_underscore_must_use,
+    reason = "a test removes its scratch directory as far as it can"
+)]
 mod tests {
     use super::*;
 

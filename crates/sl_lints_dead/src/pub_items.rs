@@ -136,7 +136,7 @@ fn used(
     let mut todo: Vec<usize> = used.iter().copied().collect();
     while let Some(i) = todo.pop() {
         let it = &items[i];
-        let mut v = Idents(HashSet::new());
+        let mut v = Idents(BTreeSet::new());
         face(it.item, &mut v);
         for im in impls.get(&it.name).into_iter().flatten() {
             v.visit_generics(&im.generics);
@@ -152,7 +152,7 @@ fn used(
                     }
                     ImplItem::Type(t) => v.visit_type(&t.ty),
                     ImplItem::Const(c) if matches!(c.vis, syn::Visibility::Public(_)) => {
-                        v.visit_type(&c.ty)
+                        v.visit_type(&c.ty);
                     }
                     _ => {}
                 }
@@ -224,7 +224,7 @@ fn face(item: &Item, v: &mut Idents) {
     }
 }
 
-struct Idents(HashSet<String>);
+struct Idents(BTreeSet<String>);
 
 impl<'ast> Visit<'ast> for Idents {
     fn visit_ident(&mut self, i: &'ast proc_macro2::Ident) {

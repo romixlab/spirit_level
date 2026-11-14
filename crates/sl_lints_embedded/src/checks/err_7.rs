@@ -1,4 +1,4 @@
-//! `err-7` RP2350 ROM reboot with delay 0 or FRCE_OFF bits beyond PROC1 (RP2350-E30, E19)
+//! `err-7` RP2350 ROM reboot with delay 0 or `FRCE_OFF` bits beyond PROC1 (RP2350-E30, E19)
 
 use crate::FwNeed;
 use sl_analysis::lint;
@@ -17,11 +17,11 @@ pub(crate) const NEEDS: &[FwNeed] = &[FwNeed::Sources];
 
 /// On RP2350:
 /// - the bootrom's `reboot(flags, delay_ms, p0, p1)` (`rom_data::reboot`) with a literal delay of 0. RP2350
-///   datasheet D.2.13, RP2350-E30 "reboot() API fails to reboot for delay_ms == 0", affects A2, A3, A4,
-///   workaround "Pass delay_ms = 1 instead."
+///   datasheet D.2.13, RP2350-E30 "`reboot()` API fails to reboot for `delay_ms` == 0", affects A2, A3, A4,
+///   workaround "Pass `delay_ms` = 1 instead."
 /// - a write of `FRCE_OFF` that sets a bit other than PROC1. D.2.6, RP2350-E19 "RP2350 reboot hangs if certain
-///   bits are set in FRCE_OFF when rebooting", affects A2 (fixed by the A3 bootrom), workaround "Don't perform a
-///   WATCHDOG or POWMAN boot, or a core0 reset with bits other than FRCE_OFF.PROC1 set."
+///   bits are set in `FRCE_OFF` when rebooting", affects A2 (fixed by the A3 bootrom), workaround "Don't perform a
+///   WATCHDOG or POWMAN boot, or a core0 reset with bits other than `FRCE_OFF.PROC1` set."
 pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
     if !scan::family_in(fw, &["rp235x"]) {
         return Vec::new();

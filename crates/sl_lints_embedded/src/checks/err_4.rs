@@ -23,9 +23,9 @@ const EDGE: &[&str] = &["set_efbi", "set_edge_filtering", "edge_filtering"];
 /// mode (`set_tfqm(true)`). ES0548 Rev 4 2.15.1 / ES0491 Rev 9 2.22.1 "Desynchronization under specific
 /// condition with edge filtering enabled", workaround "Disable edge filtering or wait for frame retransmission";
 /// ES0548 2.15.2 / ES0491 2.22.2 "Tx FIFO messages inverted under specific buffer usage and priority setting",
-/// when "FDCAN uses both a dedicated Tx buffer and a Tx FIFO (the TFQM bit of the FDCAN_TXBC register is
+/// when "FDCAN uses both a dedicated Tx buffer and a Tx FIFO (the TFQM bit of the `FDCAN_TXBC` register is
 /// cleared)", workaround "Use only a Tx FIFO" (status A on every revision the sheets list; quoted in
-/// firmware_template_skill/references/errata.md). A value decided at run time (the host's) isn't judged.
+/// `firmware_template_skill/references/errata.md`). A value decided at run time (the host's) isn't judged.
 pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
     if !scan::family_in(fw, &["stm32g0", "stm32h7"]) {
         return Vec::new();

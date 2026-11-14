@@ -1,4 +1,4 @@
-//! The types every spirit_level crate shares.
+//! The types every `spirit_level` crate shares.
 //!
 //! - [`LintMeta`]: what a lint is (code, id, category, summary, documentation, parameters, needs, fix kind, source);
 //!   every lint declares one as a `static`, and the book, `explain` and the configuration checks read it.

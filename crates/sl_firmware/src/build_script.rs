@@ -55,7 +55,7 @@ pub const KNOWN_KEYS: &[&str] = &[
 
 impl BuildScript {
     /// Parses the script; a syntax error becomes a note
-    pub fn parse(file: TextFile, notes: &mut Vec<Note>) -> BuildScript {
+    pub fn parse(file: TextFile, notes: &mut Vec<Note>) -> Self {
         let mut directives = Vec::new();
         match syn::parse_file(&file.text) {
             Ok(ast) => {
@@ -73,7 +73,7 @@ impl BuildScript {
                 ),
             }),
         }
-        BuildScript { file, directives }
+        Self { file, directives }
     }
 
     /// The directives with this key
@@ -123,8 +123,8 @@ fn directive(line: &str, l: u32, c: u32) -> Option<Directive> {
     };
     let (key, value) = rest.split_once('=').unwrap_or((rest, ""));
     Some(Directive {
-        key: key.to_string(),
-        value: value.to_string(),
+        key: key.to_owned(),
+        value: value.to_owned(),
         double_colon,
         line: l,
         column: c,
@@ -157,7 +157,7 @@ fn main() {
             },
             &mut notes,
         );
-        assert!(notes.is_empty());
+        assert_eq!(notes, [] as [Note; 0]);
         let keys: Vec<_> = b
             .directives
             .iter()

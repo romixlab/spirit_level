@@ -71,7 +71,7 @@ fn counting_fns(fns: &[FnItem<'_>]) -> BTreeSet<String> {
         scan::each(f.block, |n| match n {
             Node::Macro(name, _) if scan::COUNT_MACROS.contains(&name) => c = true,
             Node::Expr(Expr::MethodCall(m)) if m.method == "count" && !m.args.is_empty() => {
-                c = true
+                c = true;
             }
             _ => {}
         });
@@ -132,7 +132,7 @@ impl Walk<'_> {
             Node::Expr(Expr::Path(p))
                 if p.path.segments.last().is_some_and(|s| s.ident == "Err") =>
             {
-                fine = true
+                fine = true;
             }
             Node::Expr(e @ (Expr::Call(_) | Expr::MethodCall(_))) => {
                 if let Some(name) = scan::call_name(e) {
@@ -147,7 +147,7 @@ impl Walk<'_> {
                 }
             }
             Node::Macro("panic" | "unreachable" | "todo" | "unimplemented" | "assert", _) => {
-                fine = true
+                fine = true;
             }
             _ => {}
         });

@@ -1,4 +1,4 @@
-//! Checks driven by cargo itself: the MSRV build, the no_std and wasm builds of the crates the map marks, and
+//! Checks driven by cargo itself: the MSRV build, the `no_std` and wasm builds of the crates the map marks, and
 //! `cargo doc` without warnings.
 //!
 //! Each runs cargo with `--message-format json` and reports the compiler's messages ([`sl_tools::cargo_json`]).
@@ -228,7 +228,7 @@ impl Runner<'_, '_> {
     }
 
     /// Why the toolchain `version` cannot be selected: not installed, or no rustup (a distribution's cargo
-    /// ignores RUSTUP_TOOLCHAIN and would build with itself, so the check would pass on the wrong compiler)
+    /// ignores `RUSTUP_TOOLCHAIN` and would build with itself, so the check would pass on the wrong compiler)
     fn wrong_toolchain(&self, version: &str) -> Option<(String, String)> {
         let env = [("RUSTUP_TOOLCHAIN", version), ("RUSTUP_AUTO_INSTALL", "0")];
         let out = sl_tools::run(
@@ -287,10 +287,10 @@ impl Runner<'_, '_> {
             &[],
         )
         .ok()?;
-        (out.code == Some(0)).then(|| out.stdout.lines().map(|l| l.trim().to_string()).collect())
+        (out.code == Some(0)).then(|| out.stdout.lines().map(|l| l.trim().to_owned()).collect())
     }
 
-    fn cross(&self, lint: &str, crates: Vec<&Package>, targets: &[String], extra: &[String]) {
+    fn cross(&self, lint: &str, crates: &[&Package], targets: &[String], extra: &[String]) {
         if crates.is_empty() {
             return;
         }
@@ -307,7 +307,7 @@ impl Runner<'_, '_> {
                 );
                 return;
             }
-            for k in &crates {
+            for k in crates {
                 let mut args: Vec<String> = vec![
                     "check".into(),
                     "--message-format".into(),
@@ -338,7 +338,7 @@ impl Runner<'_, '_> {
         let crates = self.marked(|c| c.no_std);
         self.cross(
             "cargo-no-std",
-            crates,
+            &crates,
             params.list("targets"),
             params.list("args"),
         );
@@ -347,8 +347,8 @@ impl Runner<'_, '_> {
     fn wasm(&self) {
         let params = self.cx.params("cargo-wasm");
         let crates = self.marked(|c| c.wasm);
-        let target = vec![params.str("target").to_string()];
-        self.cross("cargo-wasm", crates, &target, params.list("args"));
+        let target = vec![params.str("target").to_owned()];
+        self.cross("cargo-wasm", &crates, &target, params.list("args"));
     }
 
     fn doc(&self) {
@@ -384,7 +384,7 @@ fn cargo_errors(stderr: &str) -> Option<String> {
     let mut take = false;
     for l in stderr.lines() {
         if let Some(e) = l.strip_prefix("error: ") {
-            out.push(e.trim().to_string());
+            out.push(e.trim().to_owned());
             take = true;
         } else if take && l.starts_with("  ") && !l.trim().is_empty() {
             if let Some(last) = out.last_mut() {

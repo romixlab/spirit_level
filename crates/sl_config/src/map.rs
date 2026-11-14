@@ -1,5 +1,7 @@
-//! The crate map of a workspace: layers and what each may see, the layer and properties of every crate, closures
-//! that must never be reached, external git dependencies and where heavy third-party crates may be used.
+//! The crate map of a workspace.
+//!
+//! Layers and what each may see, the layer and properties of every crate, closures that must never be reached,
+//! external git dependencies and where heavy third-party crates may be used.
 //!
 //! ```toml
 //! [map.layers.core]
@@ -107,11 +109,11 @@ impl Map {
     }
 
     /// Reads a map table
-    pub(crate) fn read(mut r: Reader<'_>, errs: &mut Vec<ConfigError>) -> Map {
-        let mut map = Map {
+    pub(crate) fn read(mut r: Reader<'_>, errs: &mut Vec<ConfigError>) -> Self {
+        let mut map = Self {
             file: r.file.rel.clone(),
             line: r.line("").max(1),
-            ..Map::default()
+            ..Self::default()
         };
         if let Some(mut layers) = r.table("layers", errs) {
             for name in layers.keys() {

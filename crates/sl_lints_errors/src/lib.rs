@@ -122,6 +122,10 @@ fn derives_error(attrs: &[syn::Attribute]) -> bool {
         .filter(|a| a.path().is_ident("derive"))
         .any(|a| {
             let mut found = false;
+            #[expect(
+                clippy::let_underscore_must_use,
+                reason = "a malformed attribute is rustc's error; this reads what parses"
+            )]
             let _ = a.parse_nested_meta(|m| {
                 if m.path.segments.last().is_some_and(|s| s.ident == "Error") {
                     found = true;

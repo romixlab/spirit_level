@@ -31,6 +31,10 @@ fn is_wide(h: u16) -> bool {
 }
 
 /// The `bl` / `b.w` (T4) target of a 32-bit instruction at `pc`, and whether it links
+#[expect(
+    clippy::cast_possible_wrap,
+    reason = "Thumb branch offsets are two's complement: the casts sign-extend on purpose"
+)]
 fn branch_target(pc: u64, h1: u16, h2: u16) -> Option<(u64, bool)> {
     if h1 & 0xF800 != 0xF000 {
         return None;
@@ -53,7 +57,7 @@ fn branch_target(pc: u64, h1: u16, h2: u16) -> Option<(u64, bool)> {
     Some(((pc as i64 + 4 + off as i64) as u64, link))
 }
 
-/// ThumbExpandImm of `i:imm3:imm8` (the rotated forms included)
+/// `ThumbExpandImm` of `i:imm3:imm8` (the rotated forms included)
 fn expand_imm(i: u32, imm3: u32, imm8: u32) -> u32 {
     let imm12 = (i << 11) | (imm3 << 8) | imm8;
     if imm12 >> 10 == 0 {
@@ -71,6 +75,10 @@ fn expand_imm(i: u32, imm3: u32, imm8: u32) -> u32 {
 
 /// Reads the function whose code is `code`, starting at `addr`. `literal` reads a word of the image (for the
 /// literal pool a large frame is loaded from).
+#[expect(
+    clippy::cast_possible_wrap,
+    reason = "Thumb branch offsets are two's complement: the casts sign-extend on purpose"
+)]
 pub fn read(addr: u64, code: &[u8], literal: impl Fn(u64) -> Option<u32>) -> Code {
     let mut out = Code {
         frame: prologue(addr, code, &literal),
@@ -133,6 +141,10 @@ struct Prologue {
 
 impl Prologue {
     /// A 32-bit instruction
+    #[expect(
+        clippy::cast_possible_wrap,
+        reason = "Thumb branch offsets are two's complement: the casts sign-extend on purpose"
+    )]
     fn wide(&mut self, pc: u64, h1: u16, h2: u16, literal: &impl Fn(u64) -> Option<u32>) -> Step {
         // push.w {reglist} (stmdb sp!, {..})
         if h1 == 0xE92D {
@@ -217,7 +229,7 @@ impl Prologue {
             }
             // movs rD, #imm8
             h if h & 0xF800 == 0x2000 => {
-                self.consts[((h >> 8) & 7) as usize] = Some((h & 0xFF) as u32)
+                self.consts[((h >> 8) & 7) as usize] = Some((h & 0xFF) as u32);
             }
             // add sp, rM: the constant is negative (the frame)
             h if h & 0xFF87 == 0x4485 => {
@@ -267,6 +279,10 @@ fn prologue(addr: u64, code: &[u8], literal: &impl Fn(u64) -> Option<u32>) -> Op
 pub mod encode {
     /// `push {r7, lr}`, `sub sp, ...`, one `bl` per call, `add sp, ...`, `pop {r7, pc}`; the frame is rounded down
     /// to a multiple of 4 and counts the 8 bytes of the push
+    #[expect(
+        clippy::cast_possible_wrap,
+        reason = "Thumb branch offsets are two's complement: the casts sign-extend on purpose"
+    )]
     pub fn function(addr: u64, frame: u32, calls: &[u64]) -> Vec<u8> {
         let mut out: Vec<u16> = vec![0xB580];
         let sub = frame.saturating_sub(8) & !3;

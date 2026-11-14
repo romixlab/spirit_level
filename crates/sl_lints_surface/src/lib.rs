@@ -104,7 +104,7 @@ fn surface(tree: &CrateTree<'_>) -> BTreeMap<String, u32> {
     let key = |m: usize| {
         let p = &tree.modules[m].path;
         if p.is_empty() {
-            "(root)".to_string()
+            "(root)".to_owned()
         } else {
             p.clone()
         }

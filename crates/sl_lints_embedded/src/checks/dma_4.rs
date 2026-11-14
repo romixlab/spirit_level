@@ -45,7 +45,7 @@ fn is_counted(block: &syn::Block) -> bool {
 }
 
 /// A function that uses a DMA ring consumer with no `cnt!` / `bkp_cnt!` call anywhere in it: an overrun on the
-/// ring (typec_dongle FW-26: `adc_overruns`, `uart_rx_errors`, both counted) goes unnoticed. Same-function is
+/// ring (`typec_dongle` FW-26: `adc_overruns`, `uart_rx_errors`, both counted) goes unnoticed. Same-function is
 /// the main case this looks at, like irq-6's disable/enable pair.
 pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
     let mut out = Vec::new();

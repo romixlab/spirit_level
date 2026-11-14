@@ -140,16 +140,16 @@ pub struct Elf {
 
 impl Elf {
     /// Reads the ELF at `path`; `dir` is the crate directory, for [`Elf::rel`]
-    pub fn load(path: &Path, dir: &Path) -> Result<Elf, String> {
+    pub fn load(path: &Path, dir: &Path) -> Result<Self, String> {
         let data = std::fs::read(path).map_err(|e| format!("can't read: {e}"))?;
         let rel = path
             .strip_prefix(dir)
             .map_or_else(|_| path.display().to_string(), |p| p.display().to_string());
-        Elf::parse(&data, rel, path.to_path_buf())
+        Self::parse(&data, rel, path.to_path_buf())
     }
 
     /// Parses ELF bytes already read
-    pub fn parse(data: &[u8], rel: String, path: PathBuf) -> Result<Elf, String> {
+    pub fn parse(data: &[u8], rel: String, path: PathBuf) -> Result<Self, String> {
         let header = elf::FileHeader32::<object::Endianness>::parse(data)
             .map_err(|e| format!("not a 32-bit ELF: {e}"))?;
         let endian = header.endian().map_err(|e| e.to_string())?;
@@ -217,7 +217,7 @@ impl Elf {
 
         let symbols = read_symbols(data, &table, endian, machine, &by_index, &sections);
 
-        let mut out = Elf {
+        let mut out = Self {
             rel,
             path,
             machine,
@@ -324,8 +324,10 @@ impl Elf {
     }
 }
 
-/// The deepest stack from each function down its direct calls (Thumb code), with the path. A call back into a
-/// function on the path (recursion) ends the path there and is recorded; calls through pointers are not followed.
+/// The deepest stack from each function down its direct calls (Thumb code), with the path.
+///
+/// A call back into a function on the path (recursion) ends the path there and is recorded; calls through pointers
+/// are not followed.
 pub struct CallDepths<'e> {
     elf: &'e Elf,
     /// symbol index → index into `elf.code`
@@ -337,7 +339,7 @@ pub struct CallDepths<'e> {
 
 impl<'e> CallDepths<'e> {
     /// Prepares the call graph of the ELF's decoded functions
-    pub fn new(elf: &'e Elf) -> CallDepths<'e> {
+    pub fn new(elf: &'e Elf) -> Self {
         CallDepths {
             elf,
             code: elf

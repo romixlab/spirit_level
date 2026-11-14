@@ -1,4 +1,4 @@
-//! `flt-1` HardFault handler that spins in a shipped build
+//! `flt-1` `HardFault` handler that spins in a shipped build
 
 use crate::FwNeed;
 use sl_analysis::lint;
@@ -64,7 +64,7 @@ pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
             }
         }
         Node::Macro("cfg", m) if m.tokens.to_string().contains("debug_assertions") => {
-            debug_only = true
+            debug_only = true;
         }
         _ => {}
     });

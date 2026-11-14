@@ -28,13 +28,13 @@ fn rustflags_name_it(v: Option<&Item>) -> bool {
             .as_str()
             .unwrap_or_default()
             .split_whitespace()
-            .map(str::to_string)
+            .map(str::to_owned)
             .collect(),
         Some(v) if v.as_array().is_some() => v
             .as_array()
             .into_iter()
             .flatten()
-            .filter_map(|f| f.as_str().map(str::to_string))
+            .filter_map(|f| f.as_str().map(str::to_owned))
             .collect(),
         _ => return false,
     };

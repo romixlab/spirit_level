@@ -1,4 +1,8 @@
 //! The generated pages of the book.
+#![expect(
+    clippy::let_underscore_must_use,
+    reason = "fmt::Write into a String cannot fail; a test removes its scratch directory as far as it can"
+)]
 
 use sl_config::{Config, Env};
 use sl_core::{Date, FixKind, Level, LintMeta, Need, Source, ToolUse};
@@ -119,7 +123,7 @@ pub fn lint_page(m: &LintMeta, tiers: &[(&str, Config)]) -> String {
     for (name, c) in tiers {
         let l = c.lint(m.id);
         let lvl = if l.level == Level::Allow {
-            "off".to_string()
+            "off".to_owned()
         } else {
             format!("`{}`", l.level)
         };
@@ -250,7 +254,7 @@ fn tier_page(name: &str, text: &str, c: &Config, lints: &[&LintMeta]) -> String 
             continue;
         }
         let at = l.origin.as_ref().map_or(String::new(), |o| {
-            o.file.trim_start_matches("tier:").to_string()
+            o.file.trim_start_matches("tier:").to_owned()
         });
         let _ = writeln!(
             s,
@@ -273,7 +277,7 @@ fn clippy_set(s: &mut String, c: &Config) {
     if set.is_empty() {
         return;
     }
-    let set_in = |o: &sl_config::Origin| o.file.trim_start_matches("tier:").to_string();
+    let set_in = |o: &sl_config::Origin| o.file.trim_start_matches("tier:").to_owned();
     let _ = writeln!(
         s,
         "\n## Clippy set (with what it extends)\n\nThe project turns these on in its own `[workspace.lints.clippy]` (`allow` rows are accepted opt-outs, pasted with their reason); [tier-clippy-set](../lints/M0025.md) checks it.\n\n| Clippy lint | Level | Reason | Set in |\n|---|---|---|---|"
@@ -335,7 +339,7 @@ pub fn nav() -> String {
         "    ] }},\n    {{ \"Lints\" = [\n        \"lints/index.md\","
     );
     let mut codes: Vec<&str> = spirit_level::lints().iter().map(|m| m.code).collect();
-    codes.sort();
+    codes.sort_unstable();
     for code in codes {
         let _ = writeln!(s, "        \"lints/{code}.md\",");
     }
@@ -343,8 +347,10 @@ pub fn nav() -> String {
     s
 }
 
-/// Writes (or with `check`, compares) the generated pages under `docs` and the nav in `zensical`; returns the
-/// files that differ (written, or stale when checking). Pages of lints that no longer exist are reported too
+/// Writes (or with `check`, compares) the generated pages under `docs` and the nav in `zensical`.
+///
+/// Returns the files that differ (written, or stale when checking). Pages of lints that no longer exist are reported
+/// too.
 pub fn write(docs: &Path, zensical: &Path, check: bool) -> std::io::Result<Vec<String>> {
     let mut changed = Vec::new();
     let pages = pages().map_err(std::io::Error::other)?;
@@ -364,7 +370,7 @@ pub fn write(docs: &Path, zensical: &Path, check: bool) -> std::io::Result<Vec<S
         if let Ok(rd) = std::fs::read_dir(docs.join(dir)) {
             for e in rd.flatten() {
                 let rel = format!("{dir}/{}", e.file_name().to_string_lossy());
-                if rel.ends_with(".md") && !pages.contains_key(&rel) {
+                if e.path().extension().is_some_and(|x| x == "md") && !pages.contains_key(&rel) {
                     changed.push(format!(
                         "{} (no such lint or tier any more)",
                         e.path().display()
@@ -417,10 +423,9 @@ mod tests {
             ),
         )
         .unwrap();
-        assert!(
-            !super::write(&dir.join("docs"), &z, false)
-                .unwrap()
-                .is_empty()
+        assert_ne!(
+            super::write(&dir.join("docs"), &z, false).unwrap(),
+            [] as [String; 0]
         );
         assert_eq!(
             super::write(&dir.join("docs"), &z, true).unwrap(),

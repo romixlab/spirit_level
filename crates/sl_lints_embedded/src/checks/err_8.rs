@@ -19,7 +19,7 @@ const KERNEL_STEPS: &[&str] = &["set_adcal", "set_aden", "set_calfact"];
 
 /// On G0, a disable of the ADC (`set_addis(true)`) followed in the same function by a kernel-side step
 /// (`set_adcal(true)`, `set_aden(true)`, a CALFACT write) with no delay call between them (a function or macro
-/// named delay / block_for / Timer / nop / cycles): efton.sk STM32 gotcha 221 "ADC may freeze around
+/// named delay / `block_for` / Timer / nop / cycles): efton.sk STM32 gotcha 221 "ADC may freeze around
 /// calibration or enable/disable": "In 'G0 (and related 'C0 and 'WL families), there should be a 2 ADC kernel
 /// clock delay observed after disabling the ADC, and performing any other ADC-kernel-related operation (such as
 /// re-enabling ADC, or performing calibration, or writing the calibration factor)." A disable at the end of a

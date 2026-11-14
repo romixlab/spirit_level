@@ -17,9 +17,10 @@ pub enum Confidence {
     Candidate,
 }
 
-/// A place in the project, relative to the project root (`crates/foo/src/lib.rs`): a whole file, a line, or a
-/// range from a line and column to an end line and column. Lines and columns are 1-based; a column counts
-/// characters.
+/// A place in the project, relative to the project root (`crates/foo/src/lib.rs`).
+///
+/// A whole file, a line, or a range from a line and column to an end line and column. Lines and columns are 1-based;
+/// a column counts characters.
 #[derive(Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize)]
 pub struct Span {
     /// Path relative to the project root, with `/`
@@ -46,8 +47,8 @@ fn is_zero(n: &u32) -> bool {
 
 impl Span {
     /// A line of a file (0: the whole file)
-    pub fn new(file: impl Into<String>, line: u32) -> Span {
-        Span {
+    pub fn new(file: impl Into<String>, line: u32) -> Self {
+        Self {
             file: file.into(),
             line,
             column: 0,
@@ -58,31 +59,31 @@ impl Span {
     }
 
     /// A line and column
-    pub fn at(file: impl Into<String>, line: u32, column: u32) -> Span {
-        Span {
+    pub fn at(file: impl Into<String>, line: u32, column: u32) -> Self {
+        Self {
             column,
-            ..Span::new(file, line)
+            ..Self::new(file, line)
         }
     }
 
     /// The same span with a label
-    pub fn label(mut self, label: impl Into<String>) -> Span {
+    pub fn label(mut self, label: impl Into<String>) -> Self {
         self.label = label.into();
         self
     }
 
     /// The same span reaching to `end_line`
-    pub fn to(mut self, end_line: u32) -> Span {
+    pub fn to(mut self, end_line: u32) -> Self {
         self.end_line = end_line;
         self
     }
 
     /// From `start` to `end`, each a line and column, the end column after the last character
-    pub fn range(file: impl Into<String>, start: (u32, u32), end: (u32, u32)) -> Span {
-        Span {
+    pub fn range(file: impl Into<String>, start: (u32, u32), end: (u32, u32)) -> Self {
+        Self {
             end_line: end.0,
             end_column: end.1,
-            ..Span::at(file, start.0, start.1)
+            ..Self::at(file, start.0, start.1)
         }
     }
 
@@ -177,9 +178,9 @@ pub struct Diagnostic {
 
 impl Diagnostic {
     /// A finding of `lint` about `item`; the engine sets the level from the configuration
-    pub fn new(lint: &str, item: impl Into<String>, message: impl Into<String>) -> Diagnostic {
-        Diagnostic {
-            lint: lint.to_string(),
+    pub fn new(lint: &str, item: impl Into<String>, message: impl Into<String>) -> Self {
+        Self {
+            lint: lint.to_owned(),
             code: String::new(),
             rule: None,
             level: Level::Warn,
@@ -196,19 +197,19 @@ impl Diagnostic {
     }
 
     /// Adds a place
-    pub fn span(mut self, span: Span) -> Diagnostic {
+    pub fn span(mut self, span: Span) -> Self {
         self.spans.push(span);
         self
     }
 
     /// Says how to fix it
-    pub fn help(mut self, help: impl Into<String>) -> Diagnostic {
+    pub fn help(mut self, help: impl Into<String>) -> Self {
         self.help = Some(help.into());
         self
     }
 
     /// Names the external tool's own rule (`clippy:needless_return`)
-    pub fn rule(mut self, rule: impl Into<String>) -> Diagnostic {
+    pub fn rule(mut self, rule: impl Into<String>) -> Self {
         self.rule = Some(rule.into());
         self
     }
@@ -222,19 +223,19 @@ impl Diagnostic {
     }
 
     /// Names the crate it concerns
-    pub fn krate(mut self, krate: impl Into<String>) -> Diagnostic {
+    pub fn krate(mut self, krate: impl Into<String>) -> Self {
         self.krate = Some(krate.into());
         self
     }
 
     /// Sets the confidence
-    pub fn confidence(mut self, c: Confidence) -> Diagnostic {
+    pub fn confidence(mut self, c: Confidence) -> Self {
         self.confidence = c;
         self
     }
 
     /// Attaches a measurement
-    pub fn metric(mut self, name: impl Into<String>, value: f64, limit: Option<f64>) -> Diagnostic {
+    pub fn metric(mut self, name: impl Into<String>, value: f64, limit: Option<f64>) -> Self {
         self.metric = Some(Metric {
             name: name.into(),
             value,
@@ -244,7 +245,7 @@ impl Diagnostic {
     }
 
     /// Attaches an exact fix
-    pub fn fix(mut self, fix: Fix) -> Diagnostic {
+    pub fn fix(mut self, fix: Fix) -> Self {
         self.fix = Some(fix);
         self
     }

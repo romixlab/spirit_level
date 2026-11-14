@@ -55,7 +55,7 @@ pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
                         c.name.trim_start_matches('.')
                     ),
                 )
-                .span(c.loc.span().label(c.name.trim_start_matches('.').to_string()))
+                .span(c.loc.span().label(c.name.trim_start_matches('.').to_owned()))
                 .help("poll it from a task (await it, or `select` with the work it races), or make sure nothing it polls touches embassy_time and waive this with that reason")
                 .confidence(if time {
                     Confidence::Estimate

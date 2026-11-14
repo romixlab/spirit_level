@@ -15,7 +15,7 @@ pub struct Reader<'a> {
 
 impl<'a> Reader<'a> {
     /// Reads `table`, found at the key path `path` of `file`
-    pub fn new(file: &'a TomlFile, path: Vec<String>, table: &'a dyn TableLike) -> Reader<'a> {
+    pub fn new(file: &'a TomlFile, path: Vec<String>, table: &'a dyn TableLike) -> Self {
         Reader {
             file,
             path,
@@ -44,19 +44,19 @@ impl<'a> Reader<'a> {
     pub fn name(&self, key: &str) -> String {
         let mut p = self.path.clone();
         if !key.is_empty() {
-            p.push(key.to_string());
+            p.push(key.to_owned());
         }
         p.join(".")
     }
 
     /// The keys of the table
     pub fn keys(&self) -> Vec<String> {
-        self.table.iter().map(|(k, _)| k.to_string()).collect()
+        self.table.iter().map(|(k, _)| k.to_owned()).collect()
     }
 
     /// Marks a key as known without reading it
     pub fn touch(&mut self, key: &str) {
-        self.used.push(key.to_string());
+        self.used.push(key.to_owned());
     }
 
     /// The raw item of a key, marked as read
@@ -72,12 +72,11 @@ impl<'a> Reader<'a> {
     /// An optional string
     pub fn opt_str(&mut self, key: &str, errs: &mut Vec<ConfigError>) -> Option<String> {
         let item = self.item(key)?;
-        match item.as_str() {
-            Some(s) => Some(s.to_string()),
-            None => {
-                errs.push(self.err(key, format!("{} must be a string", self.name(key))));
-                None
-            }
+        if let Some(s) = item.as_str() {
+            Some(s.to_owned())
+        } else {
+            errs.push(self.err(key, format!("{} must be a string", self.name(key))));
+            None
         }
     }
 
@@ -93,12 +92,11 @@ impl<'a> Reader<'a> {
     /// An optional boolean
     pub fn opt_bool(&mut self, key: &str, errs: &mut Vec<ConfigError>) -> Option<bool> {
         let v = self.value(key)?;
-        match v.as_bool() {
-            Some(b) => Some(b),
-            None => {
-                errs.push(self.err(key, format!("{} must be true or false", self.name(key))));
-                None
-            }
+        if let Some(b) = v.as_bool() {
+            Some(b)
+        } else {
+            errs.push(self.err(key, format!("{} must be true or false", self.name(key))));
+            None
         }
     }
 
@@ -111,47 +109,37 @@ impl<'a> Reader<'a> {
     ) -> Option<Vec<String>> {
         let v = self.value(key)?;
         if one_ok && let Some(s) = v.as_str() {
-            return Some(vec![s.to_string()]);
+            return Some(vec![s.to_owned()]);
         }
-        match v.as_array() {
-            Some(a) => {
-                let mut out = Vec::new();
-                for x in a.iter() {
-                    match x.as_str() {
-                        Some(s) => out.push(s.to_string()),
-                        None => {
-                            errs.push(
-                                self.err(
-                                    key,
-                                    format!("{} must be a list of strings", self.name(key)),
-                                ),
-                            );
-                            return None;
-                        }
-                    }
+        if let Some(a) = v.as_array() {
+            let mut out = Vec::new();
+            for x in a {
+                if let Some(s) = x.as_str() {
+                    out.push(s.to_owned());
+                } else {
+                    errs.push(
+                        self.err(key, format!("{} must be a list of strings", self.name(key))),
+                    );
+                    return None;
                 }
-                Some(out)
             }
-            None => {
-                errs.push(self.err(key, format!("{} must be a list of strings", self.name(key))));
-                None
-            }
+            Some(out)
+        } else {
+            errs.push(self.err(key, format!("{} must be a list of strings", self.name(key))));
+            None
         }
     }
 
     /// A sub-table (standard or inline) as a reader
-    pub fn table(&mut self, key: &str, errs: &mut Vec<ConfigError>) -> Option<Reader<'a>> {
+    pub fn table(&mut self, key: &str, errs: &mut Vec<ConfigError>) -> Option<Self> {
         let item = self.item(key)?;
-        match item.as_table_like() {
-            Some(t) => {
-                let mut path = self.path.clone();
-                path.push(key.to_string());
-                Some(Reader::new(self.file, path, t))
-            }
-            None => {
-                errs.push(self.err(key, format!("{} must be a table", self.name(key))));
-                None
-            }
+        if let Some(t) = item.as_table_like() {
+            let mut path = self.path.clone();
+            path.push(key.to_owned());
+            Some(Reader::new(self.file, path, t))
+        } else {
+            errs.push(self.err(key, format!("{} must be a table", self.name(key))));
+            None
         }
     }
 

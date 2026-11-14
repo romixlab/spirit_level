@@ -18,7 +18,7 @@ pub(crate) const NEEDS: &[FwNeed] = &[FwNeed::Sources];
 
 /// The compiler stops a pin moved twice, so a second owner comes in through `steal()` (`PA5::steal()`,
 /// `Peripherals::steal().PA5`) or `clone_unchecked()`. A pin taken that way that the code also names elsewhere is
-/// an estimate: a diagnostic API and a driver task may both drive it (usb_io_fw IF-16). Proving the two never run
+/// an estimate: a diagnostic API and a driver task may both drive it (`usb_io_fw` IF-16). Proving the two never run
 /// at once needs a person.
 pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
     let idents = scan::code_idents(fw);
@@ -49,7 +49,7 @@ pub(crate) fn run(fw: &Firmware<'_>, _params: &Params) -> Vec<Diagnostic> {
         let s = &idents[stolen[0]];
         let mut f = Diagnostic::new(
             "pin-6",
-            name.to_string(),
+            name.to_owned(),
             format!("{name} is taken with `steal()` and also named elsewhere: two owners can drive it at once"),
         )
         .span(s.loc.span().label("stolen here"))
