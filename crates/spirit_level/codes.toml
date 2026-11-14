@@ -31,7 +31,7 @@ M0023 = { id = "workspace-inheritance", group = "manifest", status = "active" }
 M0024 = { id = "workspace-lints", group = "manifest", status = "active" }
 M0025 = { id = "tier-clippy-set", group = "manifest", status = "active" }
 M0026 = { id = "profile-no-lto", group = "manifest", status = "active" }
-M0027 = { id = "committed-patch", group = "manifest", status = "active" }
+M0027 = { id = "patch-outside-workspace", group = "manifest", status = "active" }
 M0028 = { id = "test-binaries", group = "manifest", status = "active" }
 M0029 = { id = "macro-compile-fail", group = "manifest", status = "active" }
 S0001 = { id = "crate-lines", group = "size", status = "active" }
@@ -68,6 +68,8 @@ C0010 = { id = "error-enum-growth", group = "code", status = "active" }
 C0011 = { id = "module-graph-scc", group = "code", status = "active" }
 C0012 = { id = "waiver-invalid", group = "code", status = "active" }
 C0013 = { id = "waiver-unused", group = "code", status = "active" }
+C0014 = { id = "build-info-env", group = "code", status = "active" }
+C0015 = { id = "test-support-gated", group = "code", status = "active" }
 P0001 = { id = "agent-file-lines", group = "prose", status = "active" }
 P0002 = { id = "agent-file-links", group = "prose", status = "active" }
 P0003 = { id = "agent-rules-match-lints", group = "prose", status = "active" }

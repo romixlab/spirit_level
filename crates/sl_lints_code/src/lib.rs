@@ -1,5 +1,8 @@
 //! Source lints, one analysis: [`CODE`].
 
+mod build_info;
+mod fakes;
+
 use sl_analysis::syntax::{Range, range, without_tests};
 use sl_analysis::{Analysis, Context, lint};
 use sl_core::{Confidence, Diagnostic, LintMeta, Span};
@@ -32,6 +35,18 @@ lint!(RANDOM_STATE_HASH, "C0007", "random-state-hash", "code", "deterministic cr
     needs: [], fix: None);
 lint!(CLI_SUBPROCESS, "C0003", "cli-subprocess", "code", "workspace crates call each other as libraries, never by running the workspace's own binaries",
     params: [], needs: [], fix: None);
+lint!(BUILD_INFO_ENV, "C0014", "build-info-env", "code", "library code reads build info at run time, not through env!",
+    params: [("names", StrList, "[\"GIT_*\", \"VERGEN_*\", \"BUILD_*\", \"*_GIT_*\", \"*_SHA\", \"*_COMMIT\", \"*_COMMIT_*\", \"*_BUILD_*\", \"SOURCE_DATE_EPOCH\"]", "variable names that hold build info, besides those the crate's build script sets")],
+    needs: [], fix: None);
+lint!(TEST_SUPPORT_GATED, "C0015", "test-support-gated", "code", "test fakes and testing modules compile only for tests or behind the test-support feature",
+    params: [
+        ("feature", Str, "\"test-support\"", "the feature that turns test helpers on"),
+        ("modules", StrList, "[\"testing\", \"test_utils\", \"test_support\", \"fakes\", \"mocks\"]", "module names that hold test helpers"),
+        ("prefixes", StrList, "[\"Fake\", \"Mock\"]", "type name prefixes of test fakes"),
+        ("test-crates", StrList, "[\"*_testkit\", \"*_test_support\", \"*_testing\"]", "crates that exist for tests and are exempt"),
+        ("test-dirs", StrList, "[\"**/tests/**\"]", "directories whose crates exist for tests and are exempt"),
+    ],
+    needs: [], fix: None);
 
 /// The source analysis
 pub struct Code;
@@ -47,6 +62,8 @@ static LINTS: &[&LintMeta] = &[
     &FLOAT_DETERMINISM,
     &RANDOM_STATE_HASH,
     &CLI_SUBPROCESS,
+    &BUILD_INFO_ENV,
+    &TEST_SUPPORT_GATED,
 ];
 
 impl Analysis for Code {
@@ -70,7 +87,10 @@ impl Analysis for Code {
                     .map(|(_, n)| n.clone())
             })
             .collect();
+        fakes::features(cx);
         for pkg in &p.packages {
+            build_info::run(cx, pkg);
+            fakes::run(cx, pkg);
             let det = cx
                 .map()
                 .and_then(|m| m.crates.get(&pkg.name))
@@ -153,7 +173,7 @@ impl Analysis for Code {
 }
 
 /// Library code: under src/ of a crate with a library target, not a binary root or src/bin/
-fn is_library_file(pkg: &Package, f: &SourceFile) -> bool {
+pub(crate) fn is_library_file(pkg: &Package, f: &SourceFile) -> bool {
     pkg.has_lib()
         && f.kind == FileKind::Src
         && f.in_package != "src/main.rs"

@@ -1,0 +1,11 @@
+[package]
+name = "app"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+fs.workspace = true
+
+[dev-dependencies]
+fs = { workspace = true, features = ["test-support"] }
+fx_testkit = { path = "../fx_testkit" }

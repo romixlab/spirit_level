@@ -96,6 +96,8 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [C0006](C0006.md) | [print-in-library](C0006.md) | library code does not print | warn | warn | warn | warn | off | off |
 | [C0007](C0007.md) | [random-state-hash](C0007.md) | deterministic crates use no randomly seeded hash maps | off | off | off | deny | off | off |
 | [C0008](C0008.md) | [todo-macros](C0008.md) | no todo!() or unimplemented!() outside tests | warn | warn | warn | deny | deny | off |
+| [C0014](C0014.md) | [build-info-env](C0014.md) | library code reads build info at run time, not through env! | off | off | warn | warn | off | off |
+| [C0015](C0015.md) | [test-support-gated](C0015.md) | test fakes and testing modules compile only for tests or behind the test-support feature | off | off | warn | warn | off | off |
 
 ## commits
 
@@ -129,7 +131,7 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [M0003](M0003.md) | [git-dependency-pins](M0003.md) | git dependencies are pinned the way the project's policy says: a branch by default | warn | warn | deny | deny | off | off |
 | [M0004](M0004.md) | [no-sys-crates](M0004.md) | the dependency graph has no -sys crates and no C build steps | deny | deny | deny | deny | off | off |
 | [M0005](M0005.md) | [path-outside-workspace](M0005.md) | path dependencies stay inside the workspace | deny | deny | deny | deny | off | off |
-| [M0027](M0027.md) | [committed-patch](M0027.md) | no [patch] or [replace] override is committed, in Cargo.toml or .cargo/config.toml | deny | deny | deny | deny | off | off |
+| [M0027](M0027.md) | [patch-outside-workspace](M0027.md) | no committed [patch] or [replace] override takes a path outside the workspace | deny | deny | deny | deny | off | off |
 
 ## dma
 

@@ -19,6 +19,8 @@ Use it with `extends = "medium"` in `spirit_level.toml`.
 | [C0011](../lints/C0011.md) | module-graph-scc | `warn` | a module cycle holding most of a crate can't be split into crates; cut it while it is small | medium |
 | [C0012](../lints/C0012.md) | waiver-invalid | `deny` | a waiver without a reason, for an unknown lint, or expired hides a finding without saying why | small |
 | [C0013](../lints/C0013.md) | waiver-unused | `warn` | a waiver that allows nothing is left over from changed code | small |
+| [C0014](../lints/C0014.md) | build-info-env | `warn` | build info compiled into libraries recompiles them on every commit; the binary sets it once | medium |
+| [C0015](../lints/C0015.md) | test-support-gated | `warn` | fakes and test helpers never ship: cfg(test), a test-support feature from dev-dependencies, or a test crate | medium |
 | [G0001](../lints/G0001.md) | core-crate-deps | `warn` | a _core crate holds shared types and drags nothing in | medium |
 | [G0003](../lints/G0003.md) | crate-cycles | `deny` | crates in a cycle cannot be built or tested apart | medium |
 | [M0001](../lints/M0001.md) | default-features-off | `warn` | dependencies are added with default-features = false and only the features in use | small |
@@ -45,7 +47,7 @@ Use it with `extends = "medium"` in `spirit_level.toml`.
 | [M0024](../lints/M0024.md) | workspace-lints | `deny` | every crate inherits [workspace.lints], so one table is the policy | small-workspace |
 | [M0025](../lints/M0025.md) | tier-clippy-set | `deny` | the Clippy set is the lint policy of every crate; a gap in it is a gap in the policy | medium |
 | [M0026](../lints/M0026.md) | profile-no-lto | `warn` | LTO in the loop's profiles turns a link of a second into minutes; it belongs in a release profile | small |
-| [M0027](../lints/M0027.md) | committed-patch | `deny` | a committed [patch] builds differently on every other machine; it lives in an ignored .cargo/config.toml | small |
+| [M0027](../lints/M0027.md) | patch-outside-workspace | `deny` | a committed patch into a sibling checkout builds differently on every machine; it lives in an ignored .cargo/config.toml | small |
 | [M0028](../lints/M0028.md) | test-binaries | `warn` | each integration-test binary links the library again; one tests/it binary links it once | medium |
 | [M0029](../lints/M0029.md) | macro-compile-fail | `warn` | a proc macro must refuse bad input with a clear error, and only compile-fail cases show that | medium |
 | [P0001](../lints/P0001.md) | agent-file-lines | `warn` | agents read AGENTS.md whole every session; a long one is skimmed, not followed | small |
@@ -229,6 +231,14 @@ reason = "the Clippy set is the lint policy of every crate; a gap in it is a gap
 [lints.test-binaries]
 level = "warn"
 reason = "each integration-test binary links the library again; one tests/it binary links it once"
+
+[lints.build-info-env]
+level = "warn"
+reason = "build info compiled into libraries recompiles them on every commit; the binary sets it once"
+
+[lints.test-support-gated]
+level = "warn"
+reason = "fakes and test helpers never ship: cfg(test), a test-support feature from dev-dependencies, or a test crate"
 
 [lints.macro-compile-fail]
 level = "warn"

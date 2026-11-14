@@ -11,6 +11,7 @@ publish = false
 fx_util = { path = "util" }
 
 [patch.crates-io]
-serde = { path = "util" }
+rand = { path = "util" }
+libc = { git = "https://example.org/libc" }
 
 [workspace]

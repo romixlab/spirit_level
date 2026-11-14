@@ -77,7 +77,7 @@ lint!(TIER_CLIPPY_SET, "M0025", "tier-clippy-set", "manifest", "the project's [l
 lint!(PROFILE_NO_LTO, "M0026", "profile-no-lto", "repo", "the profiles of the edit-build-test loop and the deploy profile build without LTO",
     params: [("profiles", StrList, "[\"dev\", \"test\", \"deploy\"]", "profiles that build without LTO, inherited settings included")],
     needs: [], fix: None);
-lint!(COMMITTED_PATCH, "M0027", "committed-patch", "dependencies", "no [patch] or [replace] override is committed, in Cargo.toml or .cargo/config.toml",
+lint!(PATCH_OUTSIDE_WORKSPACE, "M0027", "patch-outside-workspace", "dependencies", "no committed [patch] or [replace] override takes a path outside the workspace",
     params: [], needs: [], fix: None);
 lint!(TEST_BINARIES, "M0028", "test-binaries", "repo", "a crate builds its integration tests as one binary",
     params: [("max-binaries", Int, "1", "integration-test binaries a crate may have")], needs: [], fix: None);
@@ -117,7 +117,7 @@ static LINTS: &[&LintMeta] = &[
     &MACRO_CRATE_SUFFIX,
     &TIER_CLIPPY_SET,
     &PROFILE_NO_LTO,
-    &COMMITTED_PATCH,
+    &PATCH_OUTSIDE_WORKSPACE,
     &TEST_BINARIES,
     &MACRO_COMPILE_FAIL,
 ];

@@ -1,0 +1,8 @@
+[[finding]]
+at = "src/lib.rs:4"
+contains = "reads FX_REV at compile time, which its build script sets"
+
+[[finding]]
+at = "src/lib.rs:8"
+contains = "reads VERGEN_GIT_SHA at compile time, a name build info goes by"
+confidence = "estimate"

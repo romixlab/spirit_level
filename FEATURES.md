@@ -40,7 +40,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 
 - ✅ `MAN-1` 25 lints: metadata, inheritance, workspace lints and deps, default features, -sys, duplicates, pins, paths, profiles, toolchain, repo files, changelog, justfile, feature docs, naming.
 - ✅ `MAN-2` Pin policy per project: `git-dependency-pins` checks branch, default-branch, dev-branch, tag, release or any, separately for own repos.
-- ✅ `MAN-3` Survey gaps: `profile-no-lto`, `committed-patch`, `test-binaries`, `macro-compile-fail`; medium's Clippy set caps bool parameters at one.
+- ✅ `MAN-3` Survey gaps: `profile-no-lto`, `patch-outside-workspace`, `test-binaries`, `macro-compile-fail`; medium's Clippy set caps bool parameters at one.
 
 ## GRAPH - crate graph and map
 
@@ -56,6 +56,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `CODE-1` todo!/unimplemented!, panics and prints in libraries, allows without reason, float and hash determinism, CLI subprocesses (`sl_lints_code`); the unsafe allow-list is GRAPH-1's.
 - ✅ `CODE-3` `allow-without-reason` looks inside `cfg_attr(predicate, allow(...))`.
 - ✅ `CODE-2` Module-graph SCC share, dead pub items, error enum growth, pub surface (`sl_lints_modules`, `sl_lints_dead`, `sl_lints_errors`, `sl_lints_surface`).
+- ✅ `CODE-4` `build-info-env` and `test-support-gated`: build info and test fakes stay out of library builds.
 
 ## STATE - shared state (fewer-locks)
 

@@ -89,6 +89,14 @@ reason = "the Clippy set is the lint policy of every crate; a gap in it is a gap
 level = "warn"
 reason = "each integration-test binary links the library again; one tests/it binary links it once"
 
+[lints.build-info-env]
+level = "warn"
+reason = "build info compiled into libraries recompiles them on every commit; the binary sets it once"
+
+[lints.test-support-gated]
+level = "warn"
+reason = "fakes and test helpers never ship: cfg(test), a test-support feature from dev-dependencies, or a test crate"
+
 [lints.macro-compile-fail]
 level = "warn"
 reason = "a proc macro must refuse bad input with a clear error, and only compile-fail cases show that"

@@ -1,10 +1,10 @@
-//! committed-patch: `[patch]` and `[replace]` overrides stay out of git.
+//! patch-outside-workspace: no committed `[patch]` or `[replace]` override points at a path outside the workspace.
 
 use sl_analysis::Context;
 use sl_core::{Confidence, Diagnostic, Span};
-use sl_model::TomlFile;
+use sl_model::{TomlFile, toml_edit};
 
-const ID: &str = "committed-patch";
+const ID: &str = "patch-outside-workspace";
 const CONFIG: &str = ".cargo/config.toml";
 
 pub(crate) fn run(cx: &Context<'_>) {
@@ -47,7 +47,12 @@ fn source(k: &str) -> String {
     }
 }
 
-/// Every `[patch.<source>]` entry and every `[replace]` entry of a committed file
+/// A path that leaves the workspace: `../x`, or absolute
+fn outside(path: &str) -> bool {
+    path.starts_with("..") || std::path::Path::new(path).is_absolute()
+}
+
+/// Every `[patch.<source>]` and `[replace]` entry of a committed file that takes a path outside the workspace
 fn overrides(cx: &Context<'_>, f: &TomlFile) {
     let tables = [("patch", true), ("replace", false)];
     for (key, nested) in tables {
@@ -55,18 +60,32 @@ fn overrides(cx: &Context<'_>, f: &TomlFile) {
             continue;
         };
         for (k, v) in t.iter() {
-            let entries: Vec<(Vec<&str>, String)> = match (nested, v.as_table_like()) {
-                (true, Some(src)) => src
-                    .iter()
-                    .map(|(name, _)| (vec![key, k, name], format!("[patch.{}] {name}", source(k))))
-                    .collect(),
-                _ => vec![(vec![key, k], format!("[{key}] {k}"))],
-            };
-            for (path, what) in entries {
+            let entries: Vec<(Vec<&str>, String, &toml_edit::Item)> =
+                match (nested, v.as_table_like()) {
+                    (true, Some(src)) => src
+                        .iter()
+                        .map(|(name, e)| {
+                            (
+                                vec![key, k, name],
+                                format!("[patch.{}] {name}", source(k)),
+                                e,
+                            )
+                        })
+                        .collect(),
+                    _ => vec![(vec![key, k], format!("[{key}] {k}"), v)],
+                };
+            for (path, what, entry) in entries {
+                let Some(dir) = entry
+                    .get("path")
+                    .and_then(toml_edit::Item::as_str)
+                    .filter(|d| outside(d))
+                else {
+                    continue;
+                };
                 cx.emit(
-                    Diagnostic::new(ID, format!("{}:{}", f.rel, path.join(".")), format!("{} commits the override {what}", f.rel))
+                    Diagnostic::new(ID, format!("{}:{}", f.rel, path.join(".")), format!("{} commits the override {what}, which takes {dir} outside the workspace", f.rel))
                         .span(f.span(&path))
-                        .help("take the dependency the way it is published (git or registry); to develop it alongside, put the [patch] in a .cargo/config.toml that git ignores"),
+                        .help("to develop it alongside, put the override in a .cargo/config.toml that git ignores; the committed form takes it by git or from the registry"),
                 );
             }
         }

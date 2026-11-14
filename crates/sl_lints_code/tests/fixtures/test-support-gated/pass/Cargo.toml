@@ -1,0 +1,6 @@
+[workspace]
+members = ["crates/*", "tests/common", "tests/integ"]
+resolver = "3"
+
+[workspace.dependencies]
+fs = { path = "crates/fs" }

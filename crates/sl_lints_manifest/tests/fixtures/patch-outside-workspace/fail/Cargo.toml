@@ -10,4 +10,9 @@ publish = false
 [dependencies]
 fx_util = { path = "util" }
 
+[patch.crates-io]
+serde = { path = "../serde" }
+rand = { path = "util" }
+libc = { git = "https://example.org/libc" }
+
 [workspace]

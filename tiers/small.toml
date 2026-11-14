@@ -54,9 +54,9 @@ reason = "split debug info and an incremental deploy profile: measured large bui
 level = "warn"
 reason = "LTO in the loop's profiles turns a link of a second into minutes; it belongs in a release profile"
 
-[lints.committed-patch]
+[lints.patch-outside-workspace]
 level = "deny"
-reason = "a committed [patch] builds differently on every other machine; it lives in an ignored .cargo/config.toml"
+reason = "a committed patch into a sibling checkout builds differently on every machine; it lives in an ignored .cargo/config.toml"
 
 [lints.repo-files]
 level = "warn"

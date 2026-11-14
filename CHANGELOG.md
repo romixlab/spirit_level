@@ -6,9 +6,11 @@
 
 - Choice parameters: a value outside the listed strings is a configuration error (MAN-2).
 - profile-no-lto (M0026): dev, test and deploy profiles build without LTO, inherited settings included (MAN-3).
-- committed-patch (M0027): no `[patch]` or `[replace]` committed in Cargo.toml or .cargo/config.toml (MAN-3).
+- patch-outside-workspace (M0027): no committed `[patch]` or `[replace]` takes a path outside the workspace (MAN-3).
 - test-binaries (M0028): one integration-test binary per crate, `tests/it/main.rs` (MAN-3).
 - macro-compile-fail (M0029): every proc-macro crate has a trybuild or ui_test crate (MAN-3).
+- build-info-env (C0014): library code reads git SHA and build time at run time, not through `env!` (CODE-4).
+- test-support-gated (C0015): fakes and testing modules compile only for tests or behind `test-support` (CODE-4).
 
 ### Changed
 

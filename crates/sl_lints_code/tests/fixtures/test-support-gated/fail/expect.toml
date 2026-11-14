@@ -1,0 +1,17 @@
+[[finding]]
+at = "crates/app/Cargo.toml:7"
+contains = "app turns on fs's test-support feature in a dependencies dependency"
+
+[[finding]]
+at = "crates/fs/Cargo.toml:10"
+contains = "default features turn on test-support"
+
+[[finding]]
+at = "crates/fs/src/lib.rs:4"
+contains = "`FakeFs` compiles into the library"
+confidence = "estimate"
+
+[[finding]]
+at = "crates/fs/src/lib.rs:6"
+contains = "module `testing` compiles into the library"
+confidence = "estimate"
