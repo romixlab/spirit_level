@@ -326,7 +326,19 @@ fn run_project(analysis: &dyn Analysis, c: &Case<'_>) -> Result<Option<String>, 
             landing: expect.get("landing").and_then(toml_edit::Item::as_bool) == Some(true),
         },
     );
-    if let Some(n) = report.not_run.iter().find(|n| n.lint == id) {
+    let not_run = report.not_run.iter().find(|n| n.lint == id);
+    // `not-run = "..."`: the case expects the lint not to run, with a reason that contains the text
+    if let Some(want) = expect.get("not-run").and_then(toml_edit::Item::as_str) {
+        return match not_run {
+            Some(n) if n.reason.contains(want) => Ok(None),
+            Some(n) => Err(format!(
+                "did not run, but for another reason: {} ({})",
+                n.need, n.reason
+            )),
+            None => Err(format!("ran, but should not have: {want}")),
+        };
+    }
+    if let Some(n) = not_run {
         if c.tools && SKIPPABLE.iter().any(|s| n.need.starts_with(s)) {
             return Ok(Some(n.reason.clone()));
         }

@@ -37,6 +37,8 @@ Lints that read a linked ELF get it through `check_with(&ANALYSIS, dir, &Hooks {
 
 A case with `landing = true` in its `expect.toml` runs as a landing (`spl check --landing`).
 
+A case with `not-run = "..."` expects the lint to report that it could not run, with a reason that contains the text (a lint that finds out while running that its input is missing).
+
 `BLESS=1` writes the findings it got into `expect.toml` (keeping `params`), for a new case.
 
 ## Cases of external tools
