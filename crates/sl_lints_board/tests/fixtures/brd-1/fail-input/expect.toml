@@ -1,0 +1,8 @@
+[[finding]]
+at = "boards/t8/board.toml:4:8"
+contains = "chip JSON without a core"
+
+[[finding]]
+at = "boards/t8/board.toml:6:7"
+contains = "not boardmap geometry JSON"
+

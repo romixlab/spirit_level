@@ -1,0 +1,14 @@
+project = "../../../projects/pins"
+
+[[finding]]
+at = "boards/t5/board.toml:9:15"
+contains = "PA0 is used by gpio.reset and by periph.can RX"
+
+[[finding]]
+at = "boards/t5/board.toml:26:1"
+contains = "PA1 is listed free, but periph.can TX uses it"
+
+[[finding]]
+at = "boards/t5/board.toml:29:9"
+contains = "PB0 is in short.j1_3 and short.j1_5"
+

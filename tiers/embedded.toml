@@ -399,6 +399,37 @@ reason = "bedrock warning: RAM function (`#[link_section = \".data.*\"]`) withou
 # The Clippy set of a firmware, on top of the size tier it is combined with: unsafe is documented and denied
 # where unsound, stack and flash are watched, the main loop is the only endless one.
 
+# The board description (board.toml): checked on every revision and rework, against itself, the chip's data and the
+# PCB's nets (the board lints, docs/boards.md).
+
+[lints.brd-1]
+level = "deny"
+reason = "a description that does not read, or names chip data or a PCB that does not read, hides every board finding"
+
+[lints.brd-2]
+level = "deny"
+reason = "a pin with two jobs in one configuration is two drivers on one line"
+
+[lints.brd-3]
+level = "deny"
+reason = "two used pins joined on the board drive against each other"
+
+[lints.brd-4]
+level = "deny"
+reason = "a pin, package, peripheral or signal the chip does not have is a typo the generated code would carry"
+
+[lints.brd-5]
+level = "deny"
+reason = "a signal on a pin that cannot carry it never reaches the peripheral"
+
+[lints.brd-6]
+level = "deny"
+reason = "a pin the PCB does not connect as described is firmware driving the wrong line (B135B's LED on B135A's pins)"
+
+[lints.brd-7]
+level = "warn"
+reason = "a connected pin the description leaves out is a fact missing, not a fault: the description grows to cover it"
+
 [clippy.lints]
 undocumented_unsafe_blocks = { level = "deny", reason = "firmware is full of unsafe; every block says in a SAFETY: comment why it is sound" }
 unnecessary_safety_doc = { level = "deny", reason = "a # Safety section on a safe function sends readers looking for a contract that is not there" }

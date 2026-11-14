@@ -97,8 +97,10 @@ sl_dependents = { layer = "model" }
 sl_docs = { layer = "model" }
 sl_tools = { layer = "model" }
 sl_firmware = { layer = "model" }
+sl_board = { layer = "model" }
 sl_analysis = { layer = "analysis" }
 sl_lints_ai = { layer = "lints" }
+sl_lints_board = { layer = "lints" }
 sl_lints_cli = { layer = "lints" }
 sl_lints_code = { layer = "lints" }
 sl_lints_embedded = { layer = "lints" }
@@ -138,6 +140,8 @@ sl_testkit = { layer = "tests" }
 vc_ui = { git = "https://github.com/vhrdtech/vhrd_cli", branch = "main", role = "core" }
 vc_build = { git = "https://github.com/vhrdtech/vhrd_cli", branch = "main", role = "app" }
 vc_complete = { git = "https://github.com/vhrdtech/vhrd_cli", branch = "main", role = "app" }
+# the board description's schema and loader, owned by embedded_bedrock (the board lints read board.toml through it)
+bedrock_board_model = { git = "https://github.com/romixlab/embedded_bedrock", branch = "main", role = "model" }
 
 [map.forbid]
 # the library a project links to check itself never pulls the CLI's dependencies

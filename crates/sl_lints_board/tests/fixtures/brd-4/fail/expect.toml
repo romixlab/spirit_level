@@ -1,0 +1,14 @@
+project = "../../../projects/chip"
+
+[[finding]]
+at = "boards/t6/board.toml:9:27"
+
+[[finding]]
+at = "boards/t6/board.toml:13:15"
+
+[[finding]]
+at = "boards/t6/board.toml:16:12"
+
+[[finding]]
+at = "boards/t6/board.toml:20:7"
+

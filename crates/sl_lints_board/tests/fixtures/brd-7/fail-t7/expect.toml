@@ -1,0 +1,10 @@
+project = "../../../projects/pcb"
+
+[[finding]]
+at = "boards/t7/board.toml:6:7"
+contains = "PC5 is on net J1_2"
+
+[[finding]]
+at = "boards/t7/board.toml:6:7"
+contains = "PC6 is on net J1_2"
+

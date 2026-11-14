@@ -2,12 +2,14 @@
 
 [files]
 # fixtures and captured tool output carry misspellings on purpose; vendor/ holds published crates as they are; the
-# logo's SVG exports are generated (`just logo`), their glyph ids are random letters
+# logo's SVG exports are generated (`just logo`), their glyph ids are random letters; chip data and PCB geometry in
+# test projects are copied as stm32-data and boardmap wrote them (signal names like DATIN, NCE)
 extend-exclude = [
   "crates/*/tests/fixtures/",
   "crates/*/tests/samples/",
   "crates/sl_testkit/vendor/",
   "assets/logo/*.svg",
+  "crates/*/tests/projects/**/*.json",
 ]
 
 [default]

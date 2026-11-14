@@ -1,0 +1,21 @@
+## Why
+
+The description is what the firmware drives; the PCB is what is there. A used pin the PCB leaves unconnected, a pin on another net than the description says, a `[short]` whose pins are on different nets, or two MCU pins on one net without a `[short]` is firmware driving the wrong line. On its first run this check found that vb135_fdcan_iso_usb_fw drives B135A's LED pins on B135B, where the LED is in fact broken.
+
+## Example
+
+```toml
+[led.sd]
+rgb = ["PD14", "PD13", { pin = "PD12", net = "LED_SD_B" }]
+# brd-6: PD14 (led.sd red) is not connected on the PCB
+# brd-6: PD12 (led.sd blue) is on net /MCU_H7/PA7_PD12, not LED_SD_B
+active = "low"
+```
+
+## How to fix
+
+Use the pin the PCB connects, correct `net`, or describe the configuration (a revision, a rework) whose PCB this is. Pins the PCB joins get a `[short]` group.
+
+## How it is checked
+
+Each configuration against its PCB: `pcb = "..."` in `[board]`, a revision or a rework, relative to the description, in boardmap's geometry JSON (`boardmap extract` writes it from a `.kicad_pcb`), with the MCU's footprint named by `[board] mcu`. A pad's pin name gives the GPIO (`PC14-OSC32_IN` is PC14); `net = "LED_R"` matches `/MCU_H7/LED_R`. Without the PCB file the lint does not run and says why. A finding about the PCB as a whole points at its `pcb` key. Checks: `pcb-pad`, `pcb-unconnected`, `pcb-net`, `pcb-short`, `pcb-shared`.

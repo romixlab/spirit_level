@@ -1,0 +1,11 @@
+# Chip data and the PCB are not there: the lints that need them do not run.
+[board]
+name = "T9"
+chip = "STM32TEST"
+mcu = "U1"
+pcb = "t9.json"
+
+[gpio.reset]
+pin = "PA0"
+mode = "output"
+init = "low"

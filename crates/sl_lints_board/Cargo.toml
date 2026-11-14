@@ -1,0 +1,23 @@
+[package]
+name = "sl_lints_board"
+description = "spirit_level board lints: the board description board.toml against itself, the chip's data and the PCB's nets, for every revision and rework"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+sl_analysis.workspace = true
+sl_board.workspace = true
+sl_core.workspace = true
+
+[dev-dependencies]
+sl_config.workspace = true
+sl_engine.workspace = true
+sl_model.workspace = true
+sl_testkit.workspace = true
+
+[lints]
+workspace = true

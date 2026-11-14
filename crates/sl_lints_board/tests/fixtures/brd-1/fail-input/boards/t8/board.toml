@@ -1,0 +1,11 @@
+# Chip data without a core, and a PCB file that is no geometry JSON.
+[board]
+name = "T8"
+chip = "STM32TEST"
+mcu = "U1"
+pcb = "t8.json"
+
+[gpio.reset]
+pin = "PA0"
+mode = "output"
+init = "low"

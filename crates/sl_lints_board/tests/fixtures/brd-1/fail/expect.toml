@@ -1,0 +1,27 @@
+[[finding]]
+at = "boards/t3/board.toml:5:19"
+
+[[finding]]
+at = "boards/t3/board.toml:6:7"
+
+[[finding]]
+at = "boards/t3/board.toml:10:8"
+
+[[finding]]
+at = "boards/t3/board.toml:15:8"
+
+[[finding]]
+at = "boards/t3/board.toml:19:7"
+
+[[finding]]
+at = "boards/t3/board.toml:23:8"
+
+[[finding]]
+at = "boards/t3/board.toml:25:6"
+
+[[finding]]
+at = "boards/t3/board.toml:29:14"
+
+[[finding]]
+at = "boards/t3/board.toml:30:7"
+

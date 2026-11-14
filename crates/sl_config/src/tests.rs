@@ -327,3 +327,29 @@ fn docs_table() {
         "{m:?}"
     );
 }
+
+#[test]
+fn board_table() {
+    let b = load("extends = \"small\"\n").unwrap().board;
+    assert_eq!(b, Board::default());
+    assert_eq!(b.descriptions, ["boards/*/board.toml", "board.toml"]);
+    assert_eq!(b.chip_data, "boards/chips");
+    let b = load(
+        "extends = \"small\"\n[board]\ndescriptions = \"hw/*.toml\"\nchip-data = \"vendor/chips\"\n",
+    )
+    .unwrap()
+    .board;
+    assert_eq!(b.descriptions, ["hw/*.toml"]);
+    assert_eq!(b.chip_data, "vendor/chips");
+    let m = messages(load(
+        "extends = \"small\"\n[board]\ndescriptions = []\npcb = 1\n",
+    ));
+    assert!(
+        m.iter().any(|s| s.contains("board.descriptions is empty")),
+        "{m:?}"
+    );
+    assert!(
+        m.iter().any(|s| s.contains(":4: unknown key board.pcb")),
+        "{m:?}"
+    );
+}

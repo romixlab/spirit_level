@@ -213,6 +213,13 @@ F0095 = { id = "stk-5", group = "firmware", status = "active" }
 F0096 = { id = "stk-6", group = "firmware", status = "active" }
 F0097 = { id = "usb-1", group = "firmware", status = "active" }
 F0098 = { id = "usb-3", group = "firmware", status = "active" }
+F0099 = { id = "brd-1", group = "firmware", status = "active" }
+F0100 = { id = "brd-2", group = "firmware", status = "active" }
+F0101 = { id = "brd-3", group = "firmware", status = "active" }
+F0102 = { id = "brd-4", group = "firmware", status = "active" }
+F0103 = { id = "brd-5", group = "firmware", status = "active" }
+F0104 = { id = "brd-6", group = "firmware", status = "active" }
+F0105 = { id = "brd-7", group = "firmware", status = "active" }
 U0001 = { id = "ui-raw-spawn", group = "ui", status = "active" }
 U0002 = { id = "ui-blocking-call", group = "ui", status = "active" }
 U0003 = { id = "ui-colour-literal", group = "ui", status = "active" }

@@ -1,0 +1,30 @@
+project = "../../../projects/b135_fw_today"
+
+[[finding]]
+at = "boards/b135/board.toml:9:7"
+contains = "PA7 and PD12 are on one net, /MCU_H7/PA7_PD12, but no [short] says so"
+
+[[finding]]
+at = "boards/b135/board.toml:9:7"
+contains = "PB3 and PG9 are on one net, /MCU_H7/PB3_PG9, but no [short] says so"
+
+[[finding]]
+at = "boards/b135/board.toml:9:7"
+contains = "PB4 and PB7 are on one net, /MCU_H7/PB4_PB7, but no [short] says so"
+
+[[finding]]
+at = "boards/b135/board.toml:16:8"
+contains = "PD14 (led.sd red) is not connected on the PCB"
+
+[[finding]]
+at = "boards/b135/board.toml:16:16"
+contains = "PD13 (led.sd green) is not connected on the PCB"
+
+[[finding]]
+at = "boards/b135/board.toml:16:46"
+contains = "PD12 (led.sd blue) is on net /MCU_H7/PA7_PD12, not LED_SD_B"
+
+[[finding]]
+at = "boards/b135/board.toml:20:22"
+contains = "PA10 (led.can blue) is not connected on the PCB"
+

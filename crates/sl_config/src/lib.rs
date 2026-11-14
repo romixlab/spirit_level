@@ -28,8 +28,12 @@
 //!
 //! [cli]                               # how the CLI lints build and run the tools (see [`cli`])
 //! timeout-secs = 20
+//!
+//! [board]                             # board descriptions and their chip data (see [`board`])
+//! chip-data = "boards/chips"
 //! ```
 
+pub mod board;
 pub mod cli;
 pub mod clippy;
 pub mod dependents;
@@ -38,6 +42,7 @@ mod error;
 pub mod map;
 mod reader;
 
+pub use board::Board;
 pub use cli::CliProbe;
 pub use clippy::{ClippyConfig, ClippyLint, ClippySet};
 pub use dependents::Dependents;
@@ -136,6 +141,8 @@ pub struct Config {
     pub docs: Docs,
     /// How the CLI lints build and run the tools
     pub cli: CliProbe,
+    /// The board descriptions and their chip data: the `[board]` table, or its defaults
+    pub board: Board,
 }
 
 /// What a resolution needs to know besides the files
@@ -247,6 +254,7 @@ struct Resolver<'a> {
     dependents: Option<Dependents>,
     docs: Docs,
     cli: CliProbe,
+    board: Board,
     extends: Vec<String>,
     stack: Vec<String>,
     /// The depth at which an extended name is a top-level one (1 under a project file, 0 for bare tiers)
@@ -282,6 +290,7 @@ impl<'a> Resolver<'a> {
             dependents: None,
             docs: Docs::default(),
             cli: CliProbe::default(),
+            board: Board::default(),
             extends: Vec::new(),
             stack: Vec::new(),
             record_at: 1,
@@ -303,6 +312,7 @@ impl<'a> Resolver<'a> {
             dependents: self.dependents,
             docs: self.docs,
             cli: self.cli,
+            board: self.board,
         })
     }
 
@@ -428,6 +438,9 @@ impl<'a> Resolver<'a> {
             }
             if let Some(c) = r.table("cli", &mut errs) {
                 self.cli = CliProbe::read(c, &mut errs);
+            }
+            if let Some(b) = r.table("board", &mut errs) {
+                self.board = Board::read(b, &mut errs);
             }
             if let Some(mf) = r.opt_str("map-file", &mut errs) {
                 if self.map.is_some() {

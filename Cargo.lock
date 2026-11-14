@@ -100,6 +100,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "bedrock_board_model"
+version = "0.1.0"
+source = "git+https://github.com/romixlab/embedded_bedrock#0c78c0d11ff807f2cd200596fd0db630ba596d3b"
+dependencies = [
+ "serde",
+ "serde_json",
+ "toml",
+]
+
+[[package]]
 name = "bitflags"
 version = "2.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1003,6 +1013,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "sl_board"
+version = "0.2.7"
+dependencies = [
+ "bedrock_board_model",
+ "serde",
+ "serde_json",
+ "sl_docs",
+]
+
+[[package]]
 name = "sl_book"
 version = "0.2.7"
 dependencies = [
@@ -1087,6 +1107,19 @@ dependencies = [
  "sl_model",
  "sl_testkit",
  "syn 3.0.10",
+]
+
+[[package]]
+name = "sl_lints_board"
+version = "0.2.7"
+dependencies = [
+ "sl_analysis",
+ "sl_board",
+ "sl_config",
+ "sl_core",
+ "sl_engine",
+ "sl_model",
+ "sl_testkit",
 ]
 
 [[package]]
@@ -1453,6 +1486,7 @@ dependencies = [
  "sl_core",
  "sl_engine",
  "sl_lints_ai",
+ "sl_lints_board",
  "sl_lints_cli",
  "sl_lints_code",
  "sl_lints_dead",

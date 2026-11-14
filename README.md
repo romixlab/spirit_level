@@ -17,6 +17,7 @@ Working name. Private for now.
 | Crate | Layer | Description |
 |---|---|---|
 | [`sl_core`](crates/sl_core) | core | spirit_level's shared types: lint metadata, levels, parameters, diagnostics, spans, fixes, dates and globs |
+| [`sl_board`](crates/sl_board) | model | spirit_level's model of board descriptions: board.toml through bedrock_board_model, stm32-data chip JSON, the MCU's nets from the PCB geometry |
 | [`sl_config`](crates/sl_config) | model | spirit_level's configuration format: tiers, extends, lint levels, parameters, reasons, expiries, scoped exceptions and the crate map |
 | [`sl_dependents`](crates/sl_dependents) | model | The repos that build on a library and the crates in them to retest when it changes (`spl dependents`) |
 | [`sl_docs`](crates/sl_docs) | model | Markdown pages as a reader meets them: their shape, reading metrics, and the Zensical book they belong to |
@@ -25,6 +26,7 @@ Working name. Private for now.
 | [`sl_tools`](crates/sl_tools) | model | External tools for spirit_level's adapters: the pinned versions, the build cache, finding and running a tool, cargo's JSON messages |
 | [`sl_analysis`](crates/sl_analysis) | analysis | The one trait every spirit_level analysis implements, its run context, and syntax helpers shared by the source analyses |
 | [`sl_lints_ai`](crates/sl_lints_ai) | lints | spirit_level lints for code written with agents: stop-gap comments, commented-out code, near-duplicate functions, dead features, committed agent secrets and transcripts |
+| [`sl_lints_board`](crates/sl_lints_board) | lints | spirit_level board lints: the board description board.toml against itself, the chip's data and the PCB's nets, for every revision and rework |
 | [`sl_lints_cli`](crates/sl_lints_cli) | lints | spirit_level CLI lints: builds each command-line tool and checks its help, examples, completion, colour, version line and exit codes |
 | [`sl_lints_code`](crates/sl_lints_code) | lints | spirit_level source lints: todo!() and unimplemented!(), panics and prints in library code, allow without reason, float and hashing determinism, calls of the workspace's own CLIs |
 | [`sl_lints_dead`](crates/sl_lints_dead) | lints | spirit_level lint on dead code rustc cannot see: public items of workspace libraries no other crate names |

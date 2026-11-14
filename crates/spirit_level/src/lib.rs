@@ -81,6 +81,7 @@ pub fn analyses() -> Vec<&'static dyn Analysis> {
         &sl_tool_semver::SEMVER,
         &sl_lints_embedded::EMBEDDED,
         &sl_lints_ui::UI,
+        &sl_lints_board::BOARD,
     ]
 }
 

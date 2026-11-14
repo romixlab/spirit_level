@@ -1,0 +1,35 @@
+# A pin used twice, a free pin in use, a pin in two shorts, both pins of a short used (from bedrock_board_model's pins.toml).
+[board]
+name = "T5"
+chip = "STM32TEST"
+revisions = ["A", "B"]
+
+[periph.can]
+instance = "FDCAN1"
+pins = { RX = "PA0", TX = "PA1" }
+
+[gpio.reset]
+pin = "PA0"
+mode = "output"
+init = "low"
+
+[button.user]
+pin = "PB0"
+active = "low"
+pull = "up"
+
+[short.j1_3]
+pins = ["PB0", "PB1"]
+
+[free]
+PB1 = "J1-3"
+PA1 = "J1-4"
+
+[short.j1_5]
+pins = ["PB0", "PC5"]
+
+# Rev B moves the button off the short: short-both holds in rev A only
+[rev.B.button.user]
+pin = "PC0"
+active = "low"
+pull = "up"

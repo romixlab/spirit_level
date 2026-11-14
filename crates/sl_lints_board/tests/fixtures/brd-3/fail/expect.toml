@@ -1,0 +1,6 @@
+project = "../../../projects/pins"
+
+[[finding]]
+at = "boards/t5/board.toml:22:16"
+contains = "(in rev A)"
+

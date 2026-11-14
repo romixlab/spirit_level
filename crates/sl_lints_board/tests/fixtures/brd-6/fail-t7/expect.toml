@@ -1,0 +1,18 @@
+project = "../../../projects/pcb"
+
+[[finding]]
+at = "boards/t7/board.toml:6:7"
+contains = "PC5 and PC6 are on one net, J1_2"
+
+[[finding]]
+at = "boards/t7/board.toml:10:74"
+contains = "is on net /MCU/CAN_TX, not CAN_RX"
+
+[[finding]]
+at = "boards/t7/board.toml:13:7"
+contains = "PB0 (led.status) is not connected"
+
+[[finding]]
+at = "boards/t7/board.toml:17:9"
+contains = "short.pair: PB1 is on net J1_3, PC0 on net J1_4"
+

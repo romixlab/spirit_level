@@ -1,0 +1,24 @@
+{
+  "source": "T7 test board, MCU only",
+  "bbox": [0.0, 0.0, 10.0, 10.0],
+  "outline": [],
+  "footprints": {
+    "U1": {
+      "value": "STM32TEST",
+      "side": "F",
+      "at": [5.0, 5.0],
+      "rot": 0.0,
+      "pads": [
+        { "number": "1", "at": [1.0, 1.0], "size": [0.5, 0.5], "shape": "rect", "through": false, "net": "/MCU/CAN_RX", "pin": "PA0" },
+        { "number": "2", "at": [1.0, 2.0], "size": [0.5, 0.5], "shape": "rect", "through": false, "net": "/MCU/CAN_TX", "pin": "PA1" },
+        { "number": "3", "at": [1.0, 3.0], "size": [0.5, 0.5], "shape": "rect", "through": false, "net": "unconnected-(U1-PB0-Pad3)", "pin": "PB0" },
+        { "number": "4", "at": [1.0, 4.0], "size": [0.5, 0.5], "shape": "rect", "through": false, "net": "J1_3", "pin": "PB1" },
+        { "number": "5", "at": [2.0, 1.0], "size": [0.5, 0.5], "shape": "rect", "through": false, "net": "J1_4", "pin": "PC0" },
+        { "number": "6", "at": [2.0, 2.0], "size": [0.5, 0.5], "shape": "rect", "through": false, "net": "J1_1", "pin": "PA0_C" },
+        { "number": "7", "at": [2.0, 3.0], "size": [0.5, 0.5], "shape": "rect", "through": false, "net": "J1_2", "pin": "PC5" },
+        { "number": "8", "at": [2.0, 4.0], "size": [0.5, 0.5], "shape": "rect", "through": false, "net": "J1_2", "pin": "PC6" },
+        { "number": "9", "at": [3.0, 1.0], "size": [0.5, 0.5], "shape": "rect", "through": false, "net": "GND", "pin": "VSS" }
+      ]
+    }
+  }
+}

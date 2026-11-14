@@ -1,0 +1,6 @@
+project = "../../../projects/chip"
+
+[[finding]]
+at = "boards/t6/board.toml:13:27"
+contains = "FDCAN2 TX is not on PA1 (periph.can2 TX)"
+
