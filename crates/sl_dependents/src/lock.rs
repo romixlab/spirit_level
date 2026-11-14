@@ -59,10 +59,16 @@ impl Lock {
 
     /// The packages reachable from `start` (itself included)
     pub fn reach(&self, start: usize) -> BTreeSet<usize> {
+        self.reach_until(start, &|_| false)
+    }
+
+    /// The packages reachable from `start` (itself included) without going past a package `stop` accepts
+    pub fn reach_until(&self, start: usize, stop: &dyn Fn(usize) -> bool) -> BTreeSet<usize> {
         let mut seen = BTreeSet::new();
         let mut stack = vec![start];
         while let Some(i) = stack.pop() {
             if seen.insert(i)
+                && (i == start || !stop(i))
                 && let Some(p) = self.packages.get(i)
             {
                 stack.extend(&p.deps);
@@ -123,5 +129,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
         assert_eq!(l.packages[1].deps, vec![2]);
         assert_eq!(l.reach(0), BTreeSet::from([0, 1, 2, 3]));
         assert_eq!(l.reach(1), BTreeSet::from([1, 2]));
+        assert_eq!(l.reach_until(0, &|i| i == 1), BTreeSet::from([0, 1, 3]));
     }
 }

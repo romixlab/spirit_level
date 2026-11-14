@@ -33,7 +33,7 @@ pub const SCHEMA: &str = "spirit_level.dependents/1";
 /// How a run measures change
 #[derive(Clone, Debug, Default)]
 pub struct Options {
-    /// The base revision instead of the table's
+    /// The base revision instead of the table's (whose default is the library's default branch)
     pub base: Option<String>,
     /// Count every crate of the library as changed (no git needed)
     pub all: bool,
@@ -139,8 +139,10 @@ pub enum SourceKind {
     },
     /// A path dependency: it builds against a checkout as it is
     Path {
-        /// The path, relative to the dependent's root
+        /// The path of one of the crates its members name, relative to the dependent's root
         path: Option<String>,
+        /// Whether that path is inside the library's checkout this run measured
+        this_checkout: bool,
     },
     /// A registry release
     Registry {
@@ -184,7 +186,11 @@ enum Outcome {
 
 /// The dependents of `project` the table names, and the crates in each to retest
 pub fn find(project: &Project, table: &Dependents, opts: &Options) -> Result<Report, GitError> {
-    let base = opts.base.clone().unwrap_or_else(|| table.base.clone());
+    let base = opts
+        .base
+        .clone()
+        .or_else(|| table.base.clone())
+        .unwrap_or_else(|| git::default_branch(&project.root));
     let changed = if opts.all {
         changed::all(project)
     } else {
@@ -234,7 +240,7 @@ fn checkouts(
     errors: &mut Vec<RepoError>,
 ) -> Vec<(PathBuf, bool)> {
     let own = std::fs::canonicalize(library).unwrap_or_else(|_| library.to_path_buf());
-    let mut out: Vec<(PathBuf, bool)> = Vec::new();
+    let mut out = Vec::new();
     for s in &table.scan {
         let dir = table.resolve(s, home);
         let entries = match std::fs::read_dir(&dir) {
@@ -258,11 +264,10 @@ fn checkouts(
     }
     out.extend(table.repos.iter().map(|r| (table.resolve(r, home), true)));
     let mut seen = BTreeSet::new();
-    out.retain(|(p, _)| {
-        let c = std::fs::canonicalize(p).unwrap_or_else(|_| p.clone());
-        c != own && seen.insert(c)
-    });
-    out
+    out.into_iter()
+        .map(|(p, named)| (std::fs::canonicalize(&p).unwrap_or(p), named))
+        .filter(|(p, _)| *p != own && seen.insert(p.clone()))
+        .collect()
 }
 
 fn folder_name(p: &Path) -> String {
@@ -319,7 +324,7 @@ impl Library<'_> {
             return Outcome::NotUser;
         }
         let hit = |i: usize| is_lib(i) && self.affected.contains(&lock.packages[i].name);
-        let crates = retest_crates(&lock, &project, &hit);
+        let crates = retest_crates(&lock, &project, &is_lib, &hit);
         let name = folder_name(root);
         if crates.is_empty() {
             let uses = lib
@@ -356,14 +361,7 @@ impl Library<'_> {
                 continue;
             }
             let kind = match &p.source {
-                None => SourceKind::Path {
-                    path: project
-                        .packages
-                        .iter()
-                        .flat_map(|m| &m.deps)
-                        .find(|d| d.name == p.name)
-                        .and_then(|d| d.path.clone()),
-                },
+                None => self.path_source(lock, lib, project),
                 Some(s) => match parse_git(s) {
                     Some((url, branch, commit)) => {
                         let state = self.commit_state(&commit, branch.as_deref());
@@ -391,20 +389,54 @@ impl Library<'_> {
         out.into_iter().map(|(_, s)| s).collect()
     }
 
-    /// A locked commit against the tip of the branch it follows (the base when the library has no such branch)
+    /// A path source: the first path a member of the dependent gives for a crate of the library
+    fn path_source(&self, lock: &Lock, lib: &[usize], project: &Project) -> SourceKind {
+        let names: BTreeSet<&str> = lib
+            .iter()
+            .filter(|&&i| lock.packages[i].source.is_none())
+            .map(|&i| lock.packages[i].name.as_str())
+            .collect();
+        let path = project
+            .packages
+            .iter()
+            .flat_map(|m| &m.deps)
+            .find(|d| d.path.is_some() && names.contains(d.name.as_str()))
+            .and_then(|d| d.path.clone());
+        let own = std::fs::canonicalize(self.root).ok();
+        let this_checkout = path.as_ref().is_some_and(|p| {
+            std::fs::canonicalize(project.root.join(p))
+                .ok()
+                .zip(own.as_ref())
+                .is_some_and(|(abs, own)| abs.starts_with(own))
+        });
+        SourceKind::Path {
+            path,
+            this_checkout,
+        }
+    }
+
+    /// A locked commit against the tip of the branch it follows: the library's local branch, else its
+    /// `origin/` one; the base when the source names no branch
     fn commit_state(&self, commit: &str, branch: Option<&str>) -> CommitState {
-        let tip = branch
-            .filter(|b| git::commit(self.root, &format!("refs/heads/{b}")).is_ok())
-            .unwrap_or(self.base);
-        let tip_commit = match git::commit(self.root, tip) {
-            Ok(c) => c,
-            Err(e) => {
-                return CommitState::Unknown {
-                    reason: format!("no {tip} in the library's checkout ({e})"),
-                };
-            }
+        let tip = match branch {
+            None => self.base.to_owned(),
+            Some(b) => match [b.to_owned(), format!("origin/{b}")]
+                .into_iter()
+                .find(|r| git::commit(self.root, r).is_ok())
+            {
+                Some(r) => r,
+                None => {
+                    return CommitState::Unknown {
+                        reason: format!("no branch {b} in the library's checkout"),
+                    };
+                }
+            },
         };
-        let tip = tip.to_owned();
+        let Ok(tip_commit) = git::commit(self.root, &tip) else {
+            return CommitState::Unknown {
+                reason: format!("no {tip} in the library's checkout"),
+            };
+        };
         if tip_commit.starts_with(commit) || commit.starts_with(&tip_commit) {
             CommitState::Current { tip }
         } else if git::is_ancestor(self.root, commit, &tip_commit) {
@@ -424,15 +456,15 @@ impl Library<'_> {
     }
 }
 
-/// The dependent's own crates whose lock graph reaches a package `hit` accepts
-fn retest_crates(lock: &Lock, project: &Project, hit: &dyn Fn(usize) -> bool) -> Vec<RetestCrate> {
-    let hits = |start: usize| -> BTreeSet<String> {
-        lock.reach(start)
-            .into_iter()
-            .filter(|&i| hit(i))
-            .map(|i| lock.packages[i].name.clone())
-            .collect()
-    };
+/// The dependent's own crates whose lock graph reaches a package `hit` accepts; `is_lib` tells the library's
+/// crates, where each crate's list of crates it uses stops
+fn retest_crates(
+    lock: &Lock,
+    project: &Project,
+    is_lib: &dyn Fn(usize) -> bool,
+    hit: &dyn Fn(usize) -> bool,
+) -> Vec<RetestCrate> {
+    let leads = |i: usize| lock.reach(i).into_iter().any(hit);
     let mut out = Vec::new();
     for pkg in &project.packages {
         let Some(m) = lock
@@ -442,28 +474,29 @@ fn retest_crates(lock: &Lock, project: &Project, hit: &dyn Fn(usize) -> bool) ->
         else {
             continue;
         };
-        let uses = hits(m);
+        let uses: BTreeSet<String> = lock
+            .reach_until(m, is_lib)
+            .into_iter()
+            .filter(|&e| is_lib(e) && leads(e))
+            .map(|e| lock.packages[e].name.clone())
+            .collect();
         if uses.is_empty() {
             continue;
         }
-        let direct = lock.packages[m].deps.iter().any(|&d| hit(d));
-        let through = if direct {
-            Vec::new()
+        let deps = &lock.packages[m].deps;
+        let direct = deps.iter().any(|&d| is_lib(d) && leads(d));
+        let through: BTreeSet<String> = if direct {
+            BTreeSet::new()
         } else {
-            let mut t: Vec<String> = lock.packages[m]
-                .deps
-                .iter()
-                .filter(|&&d| !hits(d).is_empty())
+            deps.iter()
+                .filter(|&&d| leads(d))
                 .map(|&d| lock.packages[d].name.clone())
-                .collect();
-            t.sort();
-            t.dedup();
-            t
+                .collect()
         };
         out.push(RetestCrate {
             name: pkg.name.clone(),
             uses: uses.into_iter().collect(),
-            through,
+            through: through.into_iter().collect(),
         });
     }
     out

@@ -12,6 +12,7 @@ use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 use vc_ui::{Exit, Paint};
 
+mod dependents;
 mod tools;
 
 /// The tool's name, in front of its error lines
@@ -24,7 +25,7 @@ const NOT_RUN: Exit = Exit::category(3, "not_run");
 #[derive(Parser)]
 #[command(name = "spl", version = vc_build::version!(), about = "A linter for Rust projects of every size: tiers of lints in TOML, from one crate to a workspace of hundreds")]
 #[command(
-    after_help = "Examples:\n  spl check\n  spl check --all --group-by crate\n  spl check --format json --only S0001\n  spl explain workspace-lints\n  spl init --tier small-workspace"
+    after_help = "Examples:\n  spl check\n  spl check --all --group-by crate\n  spl check --format json --only S0001\n  spl explain workspace-lints\n  spl init --tier small-workspace\n  spl dependents --base main"
 )]
 struct Cli {
     #[command(flatten)]
@@ -96,6 +97,10 @@ enum Cmd {
         #[arg(long, default_value = "small", add = ArgValueCandidates::new(tier_candidates))]
         tier: Vec<String>,
     },
+    /// The repos that build on this library and the crates in them to retest: what changed against a base, the
+    /// crates of the dependents' locks that reach it, the command to run in each
+    #[command(after_help = dependents::AFTER_HELP)]
+    Dependents(dependents::DependentsArgs),
     /// The external tools of the adapters: where each is found, and installing the pinned versions
     #[command(subcommand)]
     Tools(tools::ToolsCmd),
@@ -217,6 +222,7 @@ fn run(cli: Cli) -> Result<Exit, String> {
         Cmd::Tiers => Ok(tiers()),
         Cmd::Config(a) => show_config(a),
         Cmd::Init { path, tier } => init(&path, &tier),
+        Cmd::Dependents(a) => dependents::run(a),
         Cmd::Tools(cmd) => tools::run(cmd),
         Cmd::Book {
             docs,

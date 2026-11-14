@@ -291,7 +291,7 @@ fn dependents_table() {
     let d = c.dependents.unwrap();
     assert_eq!(d.scan, vec!["~/git"]);
     assert_eq!(d.repos, vec!["../app"]);
-    assert_eq!(d.base, "main");
+    assert_eq!(d.base, None);
     assert_eq!(d.test, "cargo nextest run");
     assert_eq!(d.origin.line, 2);
     assert!(load("extends = \"small\"\n").unwrap().dependents.is_none());

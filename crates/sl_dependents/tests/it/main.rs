@@ -56,7 +56,7 @@ impl Scratch {
         let table = Dependents {
             scan: vec!["..".to_owned()],
             repos: vec![],
-            base: "main".to_owned(),
+            base: None,
             test: "cargo nextest run".to_owned(),
             dir: self.lib(),
             origin: Origin {
@@ -216,7 +216,13 @@ fn all_needs_no_git_and_a_path_dependency_says_so() {
     let b = &r.retest[1];
     assert_eq!(b.command, "cargo nextest run -p b");
     match &b.sources[0].kind {
-        SourceKind::Path { path } => assert_eq!(path.as_deref(), Some("../lib/crates/lib_core")),
+        SourceKind::Path {
+            path,
+            this_checkout,
+        } => {
+            assert_eq!(path.as_deref(), Some("../lib/crates/lib_core"));
+            assert!(this_checkout);
+        }
         k => panic!("{k:?}"),
     }
     match &r.retest[0].sources[0].kind {
@@ -224,7 +230,7 @@ fn all_needs_no_git_and_a_path_dependency_says_so() {
             state: CommitState::Unknown { reason },
             ..
         } => {
-            assert!(reason.contains("no main"), "{reason}");
+            assert!(reason.contains("no branch main"), "{reason}");
         }
         k => panic!("{k:?}"),
     }
@@ -237,7 +243,7 @@ fn a_library_outside_git_fails_without_all() {
     let table = Dependents {
         scan: vec![],
         repos: vec!["../app_b".to_owned()],
-        base: "main".to_owned(),
+        base: None,
         test: "cargo test".to_owned(),
         dir: s.lib(),
         origin: Origin {

@@ -224,3 +224,77 @@ fn explain_lints_tiers_init() {
     let o = run(&p.0, &["init", "--tier", "small"]);
     assert_eq!(o.status.code(), Some(2));
 }
+
+/// The fixture library and its dependents of `sl_dependents`, copied into a scratch folder
+fn dependents_fixtures(name: &str) -> Scratch {
+    fn copy(from: &Path, to: &Path) {
+        std::fs::create_dir_all(to).expect("create a scratch folder");
+        for e in std::fs::read_dir(from)
+            .expect("read a fixture folder")
+            .flatten()
+        {
+            let (src, dst) = (e.path(), to.join(e.file_name()));
+            if src.is_dir() {
+                copy(&src, &dst);
+            } else {
+                std::fs::copy(&src, &dst).expect("copy a fixture file");
+            }
+        }
+    }
+    let s = Scratch::new(name, &[]);
+    copy(
+        &Path::new(env!("CARGO_MANIFEST_DIR")).join("../sl_dependents/tests/fixtures"),
+        &s.0,
+    );
+    s
+}
+
+#[test]
+fn dependents_lists_crates_to_retest() {
+    let s = dependents_fixtures("dependents");
+    let lib = s.0.join("lib");
+    let o = run(&lib, &["dependents", "--all"]);
+    let t = text(&o);
+    assert_eq!(o.status.code(), Some(0), "{t}");
+    assert!(
+        t.starts_with("lib: every crate counts as changed (--all)"),
+        "{t}"
+    );
+    assert!(t.contains("  a_app   lib_io through a_core\n"), "{t}");
+    assert!(
+        t.contains("next: cd ")
+            && t.contains("app_a && cargo nextest run -p a_app -p a_core -p a_tool"),
+        "{t}"
+    );
+    assert!(
+        t.contains("path: ../lib/crates/lib_core, builds against this checkout"),
+        "{t}"
+    );
+    assert!(t.contains("4 crates to retest in 2 repos"), "{t}");
+
+    let o = run(&lib, &["dependents", "--all", "--format", "json"]);
+    let v: serde_json::Value = serde_json::from_slice(&o.stdout).expect("JSON");
+    assert_eq!(v["schema"], "spirit_level.dependents/1");
+    assert_eq!(v["retest"][1]["command"], "cargo nextest run -p b");
+    assert_eq!(v["retest"][0]["sources"][0]["kind"], "git");
+
+    // without git, measuring change needs --all
+    let o = run(&lib, &["dependents"]);
+    assert_eq!(o.status.code(), Some(2), "{}", text(&o));
+    assert!(
+        text(&o).contains("--all counts every crate"),
+        "{}",
+        text(&o)
+    );
+}
+
+#[test]
+fn dependents_are_off_without_the_table() {
+    let p = workspace("extends = \"small\"\n");
+    let o = run(&p.0, &["dependents"]);
+    assert_eq!(o.status.code(), Some(0));
+    assert!(text(&o).starts_with("dependents are off"), "{}", text(&o));
+    let o = run(&p.0, &["dependents", "--format", "json"]);
+    let v: serde_json::Value = serde_json::from_slice(&o.stdout).expect("JSON");
+    assert_eq!(v["enabled"], false);
+}

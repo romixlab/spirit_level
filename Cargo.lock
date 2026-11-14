@@ -1208,6 +1208,7 @@ dependencies = [
  "serde_json",
  "sl_config",
  "sl_core",
+ "sl_dependents",
  "sl_engine",
  "vc_ui",
 ]
@@ -1431,6 +1432,7 @@ dependencies = [
  "sl_book",
  "sl_config",
  "sl_core",
+ "sl_dependents",
  "sl_engine",
  "sl_firmware",
  "sl_model",

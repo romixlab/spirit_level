@@ -13,6 +13,7 @@ annotate-snippets.workspace = true
 serde_json.workspace = true
 sl_config.workspace = true
 sl_core.workspace = true
+sl_dependents.workspace = true
 sl_engine.workspace = true
 vc_ui.workspace = true
 

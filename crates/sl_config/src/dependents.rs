@@ -4,7 +4,7 @@
 //! [dependents]
 //! scan = ["~/git"]                 # folders whose subfolders are checkouts
 //! repos = ["../io_weaver"]         # single checkouts
-//! base = "main"                    # what "changed" is measured against (default main)
+//! base = "main"                    # what "changed" is measured against (default: the default branch)
 //! test = "cargo nextest run"       # the retest command, `-p CRATE` appended per crate (the default)
 //! ```
 
@@ -13,8 +13,6 @@ use crate::error::ConfigError;
 use crate::reader::Reader;
 use std::path::{Path, PathBuf};
 
-/// The base revision when the table names none
-pub const DEFAULT_BASE: &str = "main";
 /// The retest command when the table names none
 pub const DEFAULT_TEST: &str = "cargo nextest run";
 
@@ -25,8 +23,8 @@ pub struct Dependents {
     pub scan: Vec<String>,
     /// Single checkouts, as written
     pub repos: Vec<String>,
-    /// The revision changes are measured against
-    pub base: String,
+    /// The revision changes are measured against; None: the library's default branch
+    pub base: Option<String>,
     /// The retest command a dependent runs; `-p CRATE` is appended for each crate
     pub test: String,
     /// The directory relative paths start from: the directory of the file the table is in
@@ -43,9 +41,7 @@ impl Dependents {
         };
         let scan = r.opt_list("scan", true, errs).unwrap_or_default();
         let repos = r.opt_list("repos", true, errs).unwrap_or_default();
-        let base = r
-            .opt_str("base", errs)
-            .unwrap_or_else(|| DEFAULT_BASE.to_owned());
+        let base = r.opt_str("base", errs);
         let test = r
             .opt_str("test", errs)
             .unwrap_or_else(|| DEFAULT_TEST.to_owned());
@@ -87,7 +83,7 @@ mod tests {
         Dependents {
             scan: vec![],
             repos: vec![],
-            base: DEFAULT_BASE.to_owned(),
+            base: None,
             test: DEFAULT_TEST.to_owned(),
             dir: PathBuf::from("/w/lib"),
             origin: Origin {

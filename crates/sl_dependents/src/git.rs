@@ -96,3 +96,18 @@ pub(crate) fn paths(dir: &Path, args: &[&str]) -> Result<Vec<String>, GitError> 
         .map(str::to_owned)
         .collect())
 }
+
+/// The library's default branch: the local branch `origin/HEAD` names, else `origin/HEAD`'s target, else `main`
+pub(crate) fn default_branch(dir: &Path) -> String {
+    let Ok(remote) = run(
+        dir,
+        &["symbolic-ref", "--short", "refs/remotes/origin/HEAD"],
+    ) else {
+        return "main".to_owned();
+    };
+    let remote = remote.trim();
+    match remote.strip_prefix("origin/") {
+        Some(local) if commit(dir, &format!("refs/heads/{local}")).is_ok() => local.to_owned(),
+        _ => remote.to_owned(),
+    }
+}
