@@ -4,8 +4,7 @@
 use crate::text::{markdown_lines, mask};
 use sl_analysis::Context;
 use sl_analysis::comments::{CommentKind, comments};
-use sl_core::{Params, glob};
-use std::path::Path;
+use sl_core::Params;
 
 /// Where a line of prose comes from
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -41,44 +40,11 @@ impl Line {
     }
 }
 
-/// Every file of the project matching one of `files` and none of `skip`: walks from the root, skipping `target/`,
-/// hidden directories and nested cargo projects that are not workspace members (test fixtures)
+/// Every file of the project matching one of `files` and none of `skip` ([`sl_docs::walk::files`])
 pub fn files(cx: &Context<'_>, include: &[String], skip: &[String]) -> Vec<String> {
     let p = cx.project;
     let members: Vec<&str> = p.packages.iter().map(|k| k.dir.as_str()).collect();
-    let mut out = Vec::new();
-    walk(&p.root, "", &members, &mut out);
-    out.retain(|f| {
-        include.iter().any(|g| glob::matches(g, f)) && !skip.iter().any(|g| glob::matches(g, f))
-    });
-    out.sort();
-    out
-}
-
-fn walk(root: &Path, rel: &str, members: &[&str], out: &mut Vec<String>) {
-    let Ok(rd) = std::fs::read_dir(root.join(rel)) else {
-        return;
-    };
-    for e in rd.flatten() {
-        let name = e.file_name().to_string_lossy().to_string();
-        let path = if rel.is_empty() {
-            name.clone()
-        } else {
-            format!("{rel}/{name}")
-        };
-        let Ok(ft) = e.file_type() else { continue };
-        if ft.is_dir() {
-            if name.starts_with('.') || name == "target" {
-                continue;
-            }
-            if e.path().join("Cargo.toml").exists() && !members.contains(&path.as_str()) {
-                continue;
-            }
-            walk(root, &path, members, out);
-        } else if ft.is_file() {
-            out.push(path);
-        }
-    }
+    sl_docs::walk::files(&p.root, &members, include, skip)
 }
 
 /// The masked lines of the Markdown files a lint's `files` and `skip` parameters select

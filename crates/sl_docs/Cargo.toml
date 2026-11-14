@@ -9,6 +9,7 @@ repository.workspace = true
 publish = false
 
 [dependencies]
+sl_core.workspace = true
 
 [lints]
 workspace = true
