@@ -1,0 +1,5 @@
+params = { max-lines = 20, target-lines = 10 }
+
+[[finding]]
+at = "src/lib.rs:3"
+contains = "above the target 10 (limit 20)"

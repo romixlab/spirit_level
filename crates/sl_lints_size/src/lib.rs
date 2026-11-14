@@ -2,7 +2,7 @@
 
 use sl_analysis::syntax::{complexity, functions, without_tests};
 use sl_analysis::{Analysis, Context, lint};
-use sl_core::{Diagnostic, LintMeta, Span};
+use sl_core::{Diagnostic, Level, LintMeta, Span};
 use sl_model::{FileKind, LineCount, count_lines};
 
 lint!(CRATE_LINES, "S0001", "crate-lines", "size", "a crate's src/ stays under its line limit",
@@ -15,7 +15,8 @@ lint!(MODULE_LINES, "S0004", "module-lines", "size", "a source file stays under 
     params: [("max-lines", Int, "1000", "code lines of one file above which it is reported")],
     needs: [], fix: None);
 lint!(FUNCTION_LINES, "S0003", "function-lines", "size", "a function stays under its line limit",
-    params: [("max-lines", Int, "150", "code lines of one function above which it is reported")],
+    params: [("max-lines", Int, "150", "code lines of one function above which it is reported"),
+             ("target-lines", Int, "0", "a lower limit to tighten toward: a function above it but within max-lines is reported as a warning at most; 0: none")],
     needs: [], fix: None);
 lint!(FUNCTION_COMPLEXITY, "S0002", "function-complexity", "size", "a function's cyclomatic complexity stays under its limit",
     params: [("max", Int, "15", "the highest complexity allowed")],
@@ -88,6 +89,7 @@ impl Analysis for Size {
             }
             let module_max = cx.params_for("module-lines", pkg).int("max-lines");
             let fn_max = cx.params_for("function-lines", pkg).int("max-lines");
+            let fn_target = cx.params_for("function-lines", pkg).int("target-lines");
             let cx_max = cx.params_for("function-complexity", pkg).int("max");
             for f in files
                 .iter()
@@ -123,6 +125,15 @@ impl Analysis for Size {
                                 .krate(&pkg.name)
                                 .metric("code-lines", f64::from(code), Some(fn_max as f64))
                                 .help("split it into steps with names; a long match often wants a function per arm"),
+                        );
+                    } else if fn_target > 0 && i64::from(code) > fn_target {
+                        cx.emit(
+                            Diagnostic::new("function-lines", &item, format!("{} has {code} code lines, above the target {fn_target} (limit {fn_max})", func.path))
+                                .span(Span::new(f.rel.clone(), a).to(b))
+                                .krate(&pkg.name)
+                                .metric("code-lines", f64::from(code), Some(fn_target as f64))
+                                .at_most(Level::Warn)
+                                .help("the limit is moving down to the target: split it into steps with names while it is in hand"),
                         );
                     }
                     let c = complexity(func.block);

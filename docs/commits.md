@@ -8,7 +8,7 @@ A commit lint checks the commits in `base..HEAD`, merges left out: the work of t
 
 ```toml
 [lints.fixes-tag]
-params = { base = "origin/main" }
+base = "origin/main"
 ```
 
 On the base branch itself the range is empty and the commit lints find nothing. When `base` is not a commit in the repository, the lint reports one candidate finding that names the base and fails nothing.

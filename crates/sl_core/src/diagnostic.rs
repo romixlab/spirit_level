@@ -174,6 +174,10 @@ pub struct Diagnostic {
     /// The reason of the waiver or exception that allows it; an allowed finding never fails the run
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub allowed: Option<String>,
+    /// The highest level it may be reported at, whatever the lint's level (a finding past a target but under the
+    /// limit is a warning)
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub at_most: Option<Level>,
 }
 
 impl Diagnostic {
@@ -193,7 +197,14 @@ impl Diagnostic {
             metric: None,
             fix: None,
             allowed: None,
+            at_most: None,
         }
+    }
+
+    /// Caps the level it is reported at
+    pub fn at_most(mut self, level: Level) -> Self {
+        self.at_most = Some(level);
+        self
     }
 
     /// Adds a place

@@ -181,7 +181,7 @@ fn apply_levels(diagnostics: &mut [Diagnostic], config: &Config) {
     for d in diagnostics {
         let path = d.primary().map(|s| s.file.clone());
         let (level, exc) = config.level(&d.lint, d.krate.as_deref(), path.as_deref());
-        d.level = level;
+        d.level = d.at_most.map_or(level, |cap| level.min(cap));
         if level == Level::Allow {
             d.allowed = Some(exc.map_or_else(|| "allowed".to_owned(), |e| e.reason.clone()));
             d.level = config.lint(&d.lint).level;

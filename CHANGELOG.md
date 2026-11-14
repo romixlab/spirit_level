@@ -11,6 +11,7 @@
 
 ### Changed
 
+- function-lines (S0003) takes `target-lines`: functions between target and limit are warnings, so the limit can tighten (SIZE-2).
 - stop-gap-comments (A0010) no longer reports FIXME; fixme-before-land does (AI-2).
 
 ## [0.2.3] - 2026-11-14
