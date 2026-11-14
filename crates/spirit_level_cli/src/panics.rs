@@ -99,10 +99,7 @@ fn text(found: &[FirmwarePanics]) -> String {
             let _ = writeln!(out, "{} ({}): not read, because {why}", f.krate, f.elf);
             continue;
         };
-        let (own, deps): (Vec<&Site>, Vec<&Site>) = inv
-            .sites
-            .iter()
-            .partition(|s| s.rel.is_some() || s.place.is_none());
+        let (own, deps): (Vec<&Site>, Vec<&Site>) = inv.sites.iter().partition(|s| s.in_project);
         let _ = writeln!(
             out,
             "{} ({}): {} panic sites, {} in the project, {} in dependencies; {} calls inside the standard library not listed",

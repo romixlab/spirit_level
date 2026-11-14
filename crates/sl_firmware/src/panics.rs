@@ -114,6 +114,8 @@ pub struct Site {
     pub symbol: String,
     /// The call instructions: more than one where inlining or monomorphization copied the site
     pub addrs: Vec<u64>,
+    /// The function is in a crate of the project, folded or not ([`locate`])
+    pub in_project: bool,
     /// The file relative to the project root, when it is a file of the project ([`locate`])
     #[serde(skip_serializing_if = "Option::is_none")]
     pub rel: Option<String>,
@@ -221,6 +223,7 @@ pub fn inventory(elf: &Elf, panic_fns: &[String]) -> Result<Inventory, NotRun> {
                     via: names[callee].clone(),
                     symbol: holder.clone(),
                     addrs: vec![pc],
+                    in_project: false,
                     rel: None,
                     class: None,
                     macro_name: None,
@@ -341,7 +344,6 @@ fn number(found: &mut [Site]) {
 pub fn locate(inv: &mut Inventory, fw: &crate::Firmware<'_>) {
     let mut texts: BTreeMap<String, Option<String>> = BTreeMap::new();
     for s in &mut inv.sites {
-        let Some(place) = &s.place else { continue };
         let krate = s.function.trim_start_matches('<');
         let krate = krate.split("::").next().unwrap_or_default();
         let Some(pkg) = fw
@@ -352,10 +354,12 @@ pub fn locate(inv: &mut Inventory, fw: &crate::Firmware<'_>) {
         else {
             continue;
         };
+        s.in_project = true;
+        let Some(place) = &s.place else { continue };
         let parts: Vec<&str> = place
             .file
             .split(['/', '\\'])
-            .filter(|p| !p.is_empty())
+            .filter(|p| !p.is_empty() && *p != ".")
             .collect();
         let Some(in_pkg) = (0..parts.len())
             .map(|k| parts[k..].join("/"))
