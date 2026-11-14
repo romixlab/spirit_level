@@ -41,6 +41,8 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `TIER-2` embedded: every bedrock_lint check (port of embedded_bedrock's bedrock_lint): `sl_firmware`, `sl_lints_embedded`, `--elf`, migration page.
 - ✅ `TIER-3` ai: agent files, terse output, AI-isms, stop-gap smells, agent-config hygiene; stands beside the size tiers.
 - ✅ `TIER-4` Clippy set per tier (`[clippy]` in tier files, modelled on rerun's), checked by `tier-clippy-set` (M0025) in the project's `[lints.clippy]` and `clippy.toml`.
+- ✅ `TIER-6` `elf-panic-inventory`: `spl panics --elf` lists every panic site of a release ELF (DWARF); `pan-1` holds each to `panics.toml` with a reason ([pan-1](docs/lints/F0110.md)).
+- 📋 `TIER-7` `board-safe-state`: `board.toml` `safe` entries per output and `safe_state = "none"`; `flt-11` reads them instead of the function name alone.
 - ✅ `TIER-5` `board-lints`: board descriptions (`board.toml`) in the embedded tier: `brd-1`..`brd-7` against the schema, chip data and PCB nets; `[board]` table; the schema and loader `sl_board_model`, moved from embedded_bedrock, published ([Board descriptions](docs/boards.md)).
 
 ## MAN - manifest and repo lints
@@ -73,7 +75,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `CODE-4` `build-info-env` and `test-support-gated`: build info and test fakes stay out of library builds.
 - ✅ `CODE-7` `orphan-source-file`: files under `src/` that no `mod` reaches, test modules and `#[path]` included.
 - ✅ `CODE-8` Limits and units: `sized-ints-in-contracts` (map key `contract`), `unit-suffix`, `unbounded-read`.
-- 📋 `CODE-10` Assertion policy, decision open: `compound-assert` (`assert!(a && b)` in libraries) and `assert-message` (`assert!` without a message) wait for it; existing panic lints stay as they are.
+- ✅ `CODE-10` Assertion policy: `panic-in-library` counts bare `unwrap` and message-less panics; `compound-assert`, `assert-message`, `float-partial-cmp-unwrap`; Clippy `missing_panics_doc`, `debug_assert_with_mut_call`; task classes `[embedded.classes]` with `cls-1`, `cls-2`, `flt-11`, `flt-12`.
 - 📋 `CODE-5` `build-script-clock`: build.rs reads no clock and finds git through the real git dir, so worktree builds stay clean.
 - 📋 `CODE-6` `command-registry`: a CLI past a size parameter registers commands per module, not in one central Subcommand enum (estimate).
 - ✅ `CODE-9` CLI lints (`sl_lints_cli`): spl builds each CLI and checks its help, examples, completion, colour, version line and exit codes; the map key `cli` and the `[cli]` table.
