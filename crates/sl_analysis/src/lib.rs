@@ -62,6 +62,7 @@ pub struct Context<'a> {
     pub today: Date,
     runnable: Vec<&'static str>,
     elf: &'a [PathBuf],
+    landing: bool,
     out: RefCell<Vec<Diagnostic>>,
     skipped: RefCell<Vec<Skipped>>,
 }
@@ -101,6 +102,7 @@ impl<'a> Context<'a> {
             today,
             runnable,
             elf: &[],
+            landing: false,
             out: RefCell::new(Vec::new()),
             skipped: RefCell::new(Vec::new()),
         }
@@ -110,6 +112,18 @@ impl<'a> Context<'a> {
     pub fn with_elf(mut self, elf: &'a [PathBuf]) -> Self {
         self.elf = elf;
         self
+    }
+
+    /// The same context in a run that lands a branch (`--landing`), or not
+    pub fn with_landing(mut self, landing: bool) -> Self {
+        self.landing = landing;
+        self
+    }
+
+    /// Whether this run lands a branch: a lint that allows something while the branch is in work reports it as a
+    /// candidate in other runs, and at its level here
+    pub fn landing(&self) -> bool {
+        self.landing
     }
 
     /// The linked ELFs given for the run; lints that read them declare [`sl_core::Need::Elf`]

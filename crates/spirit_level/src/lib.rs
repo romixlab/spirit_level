@@ -103,6 +103,8 @@ pub struct Options {
     pub only: Vec<String>,
     /// Linked ELFs of the project's firmware, for the embedded lints that read them
     pub elf: Vec<PathBuf>,
+    /// Whether this run lands a branch
+    pub landing: bool,
 }
 
 impl Options {
@@ -114,6 +116,7 @@ impl Options {
             tiers: Vec::new(),
             only: Vec::new(),
             elf: Vec::new(),
+            landing: false,
         }
     }
 }
@@ -239,6 +242,7 @@ pub fn check(dir: &Path, opts: &Options) -> Result<(Project, Report), CheckError
             today: opts.today,
             path: None,
             elf: opts.elf.clone(),
+            landing: opts.landing,
         },
     );
     Ok((project, report))

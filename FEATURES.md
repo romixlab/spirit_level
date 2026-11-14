@@ -21,6 +21,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `ENG-7` Grouped text output: by lint (an adapter rule is its own group), crate or file; deny first, by count; 5 places, `--all` for every one; JSON stays complete and ungrouped (`sl_report::text`).
 - ✅ `ENG-8` Exact spans (`end_column`) and a source excerpt per group drawn with annotate-snippets, `--excerpts N` (`sl_report::excerpt`).
 - ✅ `ENG-9` Stable lint codes (group letter and four digits) in `LintMeta`, the registry `crates/spirit_level/codes.toml`, `spl codes --check`; codes work wherever ids do; adapter findings carry the tool's rule (`X-clippy:needless_return`).
+- ✅ `ENG-10` Commit checks: the branch's commits read once per base (`sl_model::git`), `Spirit-Level: allow(...)` trailers as commit waivers, `--landing` runs ([commits](docs/commits.md)).
 
 ## CLI - the command
 

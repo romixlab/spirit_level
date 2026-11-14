@@ -323,6 +323,7 @@ fn run_project(analysis: &dyn Analysis, c: &Case<'_>) -> Result<Option<String>, 
             today,
             path: None,
             elf: c.elf.clone(),
+            landing: expect.get("landing").and_then(toml_edit::Item::as_bool) == Some(true),
         },
     );
     if let Some(n) = report.not_run.iter().find(|n| n.lint == id) {
@@ -416,12 +417,15 @@ fn wanted(expect: &toml_edit::DocumentMut) -> Result<Vec<Want>, String> {
     Ok(want)
 }
 
-/// Writes expect.toml from what the run found, keeping `network`, `project`, `params` and the `contains` still true
+/// Writes expect.toml from what the run found, keeping `network`, `landing`, `project`, `params` and the `contains` still true
 fn bless(c: &Case<'_>, want: &[Want], got: &[Got]) -> Result<(), String> {
     let expect = &c.expect;
     let mut out = String::new();
     if c.network {
         out.push_str("network = true\n");
+    }
+    if c.expect.get("landing").and_then(toml_edit::Item::as_bool) == Some(true) {
+        out.push_str("landing = true\n");
     }
     for key in ["project", "params"] {
         if let Some(p) = expect.get(key) {
@@ -500,7 +504,8 @@ struct GitCase {
 
 impl GitCase {
     /// Copies `project` into a fresh directory, commits every file but the `untracked` ones on `main`, then
-    /// adds each `[[commit]]` on a branch `work` (empty commits with the given message, or writing `files`)
+    /// adds each `[[commit]]` on a branch `work`: its `message`, where `{sha:N}` is the 12-hex hash of commit N (0 is
+    /// the initial one), writing its `files` table of path and text (none: an empty commit)
     fn make(case_dir: &Path, project: &Path, id: &str) -> Result<Self, String> {
         let spec: toml_edit::DocumentMut = std::fs::read_to_string(case_dir.join("git.toml"))
             .map_err(|e| format!("git.toml: {e}"))?
@@ -534,20 +539,38 @@ impl GitCase {
         }
         repo.git(&["commit", "-q", "--allow-empty", "-m", "initial"])?;
         repo.git(&["switch", "-q", "-c", "work"])?;
+        let mut hashes = vec![repo.git(&["rev-parse", "HEAD"])?];
         if let Some(commits) = spec.get("commit").and_then(|c| c.as_array_of_tables()) {
             for c in commits {
-                let msg = c
+                let mut msg = c
                     .get("message")
                     .and_then(|m| m.as_str())
-                    .unwrap_or("change");
-                repo.git(&["commit", "-q", "--allow-empty", "-m", msg])?;
+                    .unwrap_or("change")
+                    .to_owned();
+                for (n, h) in hashes.iter().enumerate() {
+                    msg = msg.replace(&format!("{{sha:{n}}}"), &h[..12]);
+                }
+                if let Some(files) = c.get("files").and_then(|f| f.as_table_like()) {
+                    for (path, text) in files.iter() {
+                        let p = repo.dir.join(path);
+                        if let Some(parent) = p.parent() {
+                            std::fs::create_dir_all(parent).map_err(|e| format!("{path}: {e}"))?;
+                        }
+                        std::fs::write(&p, text.as_str().unwrap_or_default())
+                            .map_err(|e| format!("{path}: {e}"))?;
+                    }
+                }
+                repo.git(&["add", "-A"])?;
+                repo.git(&["commit", "-q", "--allow-empty", "-m", &msg])?;
+                hashes.push(repo.git(&["rev-parse", "HEAD"])?);
             }
         }
         Ok(repo)
     }
 
-    /// Runs git in the repository with no user or system configuration and fixed identities and dates
-    fn git(&self, args: &[&str]) -> Result<(), String> {
+    /// Runs git in the repository with no user or system configuration and fixed identities and dates; its
+    /// output, trimmed
+    fn git(&self, args: &[&str]) -> Result<String, String> {
         let out = std::process::Command::new("git")
             .args(args)
             .current_dir(&self.dir)
@@ -562,7 +585,7 @@ impl GitCase {
             .output()
             .map_err(|e| format!("git: {e}"))?;
         if out.status.success() {
-            Ok(())
+            Ok(String::from_utf8_lossy(&out.stdout).trim().to_owned())
         } else {
             Err(format!(
                 "git {}: {}",

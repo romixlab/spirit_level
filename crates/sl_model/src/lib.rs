@@ -7,6 +7,7 @@
 //! }
 //! ```
 
+pub mod git;
 pub mod lines;
 pub mod project;
 pub mod source;

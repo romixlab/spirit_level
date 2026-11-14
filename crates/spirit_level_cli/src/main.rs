@@ -159,6 +159,9 @@ struct CheckArgs {
     /// Today's date for expiries (YYYY-MM-DD); default: the system clock
     #[arg(long, env = "SPIRIT_LEVEL_TODAY")]
     today: Option<String>,
+    /// This run lands the branch: what is allowed while it is in work (a FIXME) fails here
+    #[arg(long, env = "SPIRIT_LEVEL_LANDING")]
+    landing: bool,
 }
 
 #[derive(clap::Args)]
@@ -247,8 +250,10 @@ fn check(a: CheckArgs) -> Result<Exit, String> {
         excerpts,
         timings,
         today: t,
+        landing,
     } = a;
     let mut opts = spirit_level::Options::new(today(t)?);
+    opts.landing = landing;
     opts.config = config;
     opts.tiers = tier;
     opts.only = only;

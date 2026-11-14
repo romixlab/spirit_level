@@ -52,6 +52,8 @@ pub struct RunOptions {
     pub path: Option<std::ffi::OsString>,
     /// Linked ELFs of the project's firmware (`--elf`), for the lints that need [`Need::Elf`]
     pub elf: Vec<std::path::PathBuf>,
+    /// Whether this run lands a branch (`--landing`): lints that allow something during the work refuse it
+    pub landing: bool,
 }
 
 /// A lint that did not run, and why
@@ -232,7 +234,9 @@ pub fn run(
             continue;
         }
         let start = Instant::now();
-        let cx = Context::new(project, config, opts.today, runnable.clone()).with_elf(&opts.elf);
+        let cx = Context::new(project, config, opts.today, runnable.clone())
+            .with_elf(&opts.elf)
+            .with_landing(opts.landing);
         a.run(&cx);
         let out = cx.take();
         ran.extend(
@@ -257,13 +261,13 @@ pub fn run(
 
     apply_levels(&mut diagnostics, config);
 
-    // source waivers
-    let (waivers, problems) = waiver::collect(
-        project,
-        &|name| lints.iter().find(|m| m.is(name)).map(|m| m.id),
-        opts.today,
-        project.version,
-    );
+    // waivers in sources, manifests and the messages of the commits read
+    let resolve = |name: &str| lints.iter().find(|m| m.is(name)).map(|m| m.id);
+    let (mut waivers, mut problems) =
+        waiver::collect(project, &resolve, opts.today, project.version);
+    let (cw, cp) = waiver::collect_commits(project, &resolve, opts.today, project.version);
+    waivers.extend(cw);
+    problems.extend(cp);
     let mut used = vec![false; waivers.len()];
     for d in diagnostics.iter_mut().filter(|d| d.allowed.is_none()) {
         let Some(p) = d.primary() else { continue };

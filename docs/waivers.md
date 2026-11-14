@@ -19,4 +19,6 @@ reqwest = "0.12"
 - **Expiry:** right after the list, `allow(crate-lines) expires=2027-03-31 split tracked as SPLIT-2`, or a release, `expires=v0.5.0`.
 - **Checked.** A waiver without a reason, naming an unknown lint, or expired is reported by [waiver-invalid](lints/C0012.md); one that allows nothing by [waiver-unused](lints/C0013.md). Doc comments (`///`, `//!`) never hold waivers, so documentation can show them.
 
+A commit is waived by a trailer in its message, `Spirit-Level: allow(lint) reason`: see [Commits and landing](commits.md).
+
 For a whole crate or a set of paths, use an [exception](configuration.md) in `spirit_level.toml` instead.

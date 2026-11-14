@@ -2,6 +2,7 @@
 //!
 //! - Rust: `// spirit-level: allow(lint-a, lint-b) the reason`
 //! - TOML: `# spirit-level: allow(lint) the reason`
+//! - a commit message: a `Spirit-Level: allow(lint) the reason` trailer, covering that commit
 //! - optionally an expiry right after the list: `allow(lint) expires=2027-01-31 the reason` (or `expires=v0.5.0`)
 //!
 //! At the end of a line a waiver covers that line. On a line of its own it covers the next item: the first line
@@ -119,69 +120,15 @@ fn parse(
         let line = i as u32 + 1;
         let own_line = before[..cpos].trim().is_empty();
         let rest = l[at + MARK.len()..].trim();
-        let problem = |m: String| Problem {
-            file: rel.to_owned(),
-            line,
-            message: m,
-        };
-        let Some(inner) = rest.strip_prefix("allow(") else {
-            ps.push(problem(format!(
-                "a waiver reads `{MARK} allow(lint) reason`, found `{rest}`"
-            )));
+        let Some((lints, expires, reason)) = allow(rest, resolve, today, version, &mut |m| {
+            ps.push(Problem {
+                file: rel.to_owned(),
+                line,
+                message: m,
+            });
+        }) else {
             continue;
         };
-        let Some(close) = inner.find(')') else {
-            ps.push(problem(
-                "the waiver's lint list is not closed with `)`".into(),
-            ));
-            continue;
-        };
-        let named: Vec<&str> = inner[..close]
-            .split(',')
-            .map(str::trim)
-            .filter(|s| !s.is_empty())
-            .collect();
-        let mut tail = inner[close + 1..].trim();
-        let mut expires = None;
-        if let Some(e) = tail.strip_prefix("expires=") {
-            let (val, r) = e.split_once(char::is_whitespace).unwrap_or((e, ""));
-            match Expiry::parse(val) {
-                Some(x) => expires = Some(x),
-                None => ps.push(problem(format!(
-                    "expires={val} is neither a date (2027-01-31) nor a release (v0.5.0)"
-                ))),
-            }
-            tail = r.trim();
-        }
-        if named.is_empty() {
-            ps.push(problem("the waiver names no lint".into()));
-            continue;
-        }
-        let mut lints = Vec::new();
-        for name in named {
-            match resolve(name) {
-                Some(id) => lints.push(id.to_owned()),
-                None => ps.push(problem(format!(
-                    "the waiver names {name}, which is not a lint"
-                ))),
-            }
-        }
-        if tail.is_empty() {
-            ps.push(problem(format!(
-                "the waiver of {} gives no reason",
-                lints.join(", ")
-            )));
-            continue;
-        }
-        if let Some(e) = expires
-            && e.expired(today, version)
-        {
-            ps.push(problem(format!(
-                "the waiver of {} expired ({e}): fix the finding and remove it, or renew it with a new reason",
-                lints.join(", ")
-            )));
-            continue;
-        }
         let covers = if own_line {
             coverage(&lines, i, line, rust, comment, extents)
         } else {
@@ -191,12 +138,119 @@ fn parse(
             file: rel.to_owned(),
             line,
             lints,
-            reason: tail.to_owned(),
+            reason,
             expires,
             covers,
         });
     }
 }
+
+/// The lints, expiry and reason of a waiver's text after the marker (`allow(a, b) expires=... reason`); None when
+/// it does not hold, its problems passed to `problem`
+fn allow(
+    rest: &str,
+    resolve: &dyn Fn(&str) -> Option<&'static str>,
+    today: Date,
+    version: Option<Version>,
+    problem: &mut dyn FnMut(String),
+) -> Option<(Vec<String>, Option<Expiry>, String)> {
+    let Some(inner) = rest.strip_prefix("allow(") else {
+        problem(format!(
+            "a waiver reads `{MARK} allow(lint) reason`, found `{rest}`"
+        ));
+        return None;
+    };
+    let Some(close) = inner.find(')') else {
+        problem("the waiver's lint list is not closed with `)`".into());
+        return None;
+    };
+    let named: Vec<&str> = inner[..close]
+        .split(',')
+        .map(str::trim)
+        .filter(|s| !s.is_empty())
+        .collect();
+    let mut tail = inner[close + 1..].trim();
+    let mut expires = None;
+    if let Some(e) = tail.strip_prefix("expires=") {
+        let (val, r) = e.split_once(char::is_whitespace).unwrap_or((e, ""));
+        match Expiry::parse(val) {
+            Some(x) => expires = Some(x),
+            None => problem(format!(
+                "expires={val} is neither a date (2027-01-31) nor a release (v0.5.0)"
+            )),
+        }
+        tail = r.trim();
+    }
+    if named.is_empty() {
+        problem("the waiver names no lint".into());
+        return None;
+    }
+    let mut lints = Vec::new();
+    for name in named {
+        match resolve(name) {
+            Some(id) => lints.push(id.to_owned()),
+            None => problem(format!("the waiver names {name}, which is not a lint")),
+        }
+    }
+    if tail.is_empty() {
+        problem(format!(
+            "the waiver of {} gives no reason",
+            lints.join(", ")
+        ));
+        return None;
+    }
+    if let Some(e) = expires
+        && e.expired(today, version)
+    {
+        problem(format!(
+            "the waiver of {} expired ({e}): fix the finding and remove it, or renew it with a new reason",
+            lints.join(", ")
+        ));
+        return None;
+    }
+    Some((lints, expires, tail.to_owned()))
+}
+
+/// The waivers in the messages of the commits the run read: a `Spirit-Level: allow(lint) reason` trailer covers
+/// its whole commit (`commit:<12 hex>`)
+pub fn collect_commits(
+    project: &Project,
+    resolve: &dyn Fn(&str) -> Option<&'static str>,
+    today: Date,
+    version: Option<Version>,
+) -> (Vec<Waiver>, Vec<Problem>) {
+    let mut ws = Vec::new();
+    let mut ps = Vec::new();
+    let mut seen = std::collections::BTreeSet::new();
+    for list in project.commits_read() {
+        for c in list.iter().filter(|c| seen.insert(c.hash.clone())) {
+            for t in c.trailers(COMMIT_TRAILER) {
+                let file = c.file();
+                let parsed = allow(&t.value, resolve, today, version, &mut |m| {
+                    ps.push(Problem {
+                        file: file.clone(),
+                        line: t.line,
+                        message: m,
+                    });
+                });
+                if let Some((lints, expires, reason)) = parsed {
+                    ws.push(Waiver {
+                        file,
+                        line: t.line,
+                        lints,
+                        reason,
+                        expires,
+                        covers: (0, u32::MAX),
+                    });
+                }
+            }
+        }
+    }
+    (ws, ps)
+}
+
+/// The trailer key of a commit waiver
+pub const COMMIT_TRAILER: &str = "Spirit-Level";
 
 /// The lines an own-line waiver at index `i` (line `line`) covers: the next item
 fn coverage(

@@ -285,6 +285,7 @@ pub struct Project {
     pub version: Option<Version>,
     resolve: OnceLock<Result<Resolve, String>>,
     tracked: OnceLock<Result<Vec<String>, String>>,
+    commits: crate::git::Cache,
 }
 
 impl Project {
@@ -407,6 +408,7 @@ impl Project {
             version,
             resolve: OnceLock::new(),
             tracked: OnceLock::new(),
+            commits: crate::git::Cache::default(),
         })
     }
 
@@ -562,6 +564,17 @@ impl Project {
             })
             .as_deref()
             .map_err(String::as_str)
+    }
+
+    /// The commits in `base..HEAD` (merges left out, oldest first), read once per base; an error when `base` is
+    /// not a commit or git cannot run
+    pub fn commits(&self, base: &str) -> Result<std::sync::Arc<[crate::git::Commit]>, String> {
+        self.commits.get(&self.root, base)
+    }
+
+    /// Every commit list this run has read so far, for the waivers in their messages
+    pub fn commits_read(&self) -> Vec<std::sync::Arc<[crate::git::Commit]>> {
+        self.commits.read_so_far()
     }
 }
 

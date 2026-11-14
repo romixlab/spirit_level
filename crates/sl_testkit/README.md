@@ -16,7 +16,7 @@ confidence = "estimate"      # optional: estimate or candidate; absent means cer
 
 `pass/` expects no finding. A case may bring its own `spirit_level.toml` (for a crate map); then that file is the configuration and `params` is not used. `check(&ANALYSIS, "tests/fixtures")` runs every case with only that lint enabled at `deny` and today fixed at 2026-11-13, and fails with a list of every difference. It also fails when a lint of the analysis has no `pass` and `fail` case.
 
-A case with a `git.toml` runs on a temporary copy made into a git repository: every file but those in `untracked` is committed on `main`, then each `[[commit]]` is an empty commit with its `message` on a branch `work`. Lints that read the history or the tracked files test this way.
+A case with a `git.toml` runs on a temporary copy made into a git repository: every file but those in `untracked` is committed on `main`, then each `[[commit]]` is a commit on a branch `work` with its `message` (`{sha:N}` is the 12-hex hash of commit N, 0 the initial one) and the files of its `files` table (path and text; none: an empty commit). Lints that read the history or the tracked files test this way.
 
 ```toml
 untracked = ["scratch.txt"]
@@ -28,6 +28,8 @@ message = "Add the parser"
 Several cases may run one project: `project = "../../../projects/clean"` in `expect.toml` (relative to the case) names it, so a firmware shared by many lints is kept once under `tests/projects/`.
 
 Lints that read a linked ELF get it through `check_with(&ANALYSIS, dir, &Hooks { elf: Some(&make) })`: `make` gets the case's project directory and returns the ELF's bytes (or None), the harness writes them to a temporary file and passes it as `--elf` would. A span in that ELF is written `<elf>` in `expect.toml`.
+
+A case with `landing = true` in its `expect.toml` runs as a landing (`spl check --landing`).
 
 `BLESS=1` writes the findings it got into `expect.toml` (keeping `params`), for a new case.
 
