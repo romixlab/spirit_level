@@ -85,6 +85,14 @@ reason = "the docs of internal crates are the map of the code; they build withou
 level = "deny"
 reason = "the Clippy set is the lint policy of every crate; a gap in it is a gap in the policy"
 
+[lints.test-binaries]
+level = "warn"
+reason = "each integration-test binary links the library again; one tests/it binary links it once"
+
+[lints.macro-compile-fail]
+level = "warn"
+reason = "a proc macro must refuse bad input with a clear error, and only compile-fail cases show that"
+
 # On top of small's Clippy set: pedantic and cargo, with the opt-outs rerun found to be noise (each with its reason),
 # and the restriction and nursery lints a workspace of this size wants.
 
@@ -133,3 +141,4 @@ multiple_crate_versions = { level = "allow", reason = "spl's duplicate-versions 
 [clippy.config]
 cognitive-complexity-threshold = { value = 25, reason = "Clippy's default; spl's function-complexity (cyclomatic, 15) is the tighter limit" }
 allow-print-in-tests = { value = true, reason = "a test may print what it saw" }
+max-fn-params-bools = { value = 1, reason = "two bool parameters are a call site nobody can read; an enum or a struct says what each means" }

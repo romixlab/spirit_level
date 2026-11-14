@@ -1,0 +1,2 @@
+[patch."https://example.org/x"]
+x = { path = "util" }

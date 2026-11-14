@@ -40,6 +40,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 
 - ✅ `MAN-1` 25 lints: metadata, inheritance, workspace lints and deps, default features, -sys, duplicates, pins, paths, profiles, toolchain, repo files, changelog, justfile, feature docs, naming.
 - ✅ `MAN-2` Pin policy per project: `git-dependency-pins` checks branch, default-branch, dev-branch, tag, release or any, separately for own repos.
+- ✅ `MAN-3` Survey gaps: `profile-no-lto`, `committed-patch`, `test-binaries`, `macro-compile-fail`; medium's Clippy set caps bool parameters at one.
 
 ## GRAPH - crate graph and map
 

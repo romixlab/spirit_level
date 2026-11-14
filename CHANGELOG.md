@@ -5,11 +5,17 @@
 ### Added
 
 - Choice parameters: a value outside the listed strings is a configuration error (MAN-2).
+- profile-no-lto (M0026): dev, test and deploy profiles build without LTO, inherited settings included (MAN-3).
+- committed-patch (M0027): no `[patch]` or `[replace]` committed in Cargo.toml or .cargo/config.toml (MAN-3).
+- test-binaries (M0028): one integration-test binary per crate, `tests/it/main.rs` (MAN-3).
+- macro-compile-fail (M0029): every proc-macro crate has a trybuild or ui_test crate (MAN-3).
 
 ### Changed
 
 - git-dependency-pins (M0003) checks a per-project pin policy, separately for own repos (MAN-2).
 - external-form (G0005) leaves rev and tag to git-dependency-pins (MAN-2).
+- The medium tier's Clippy set sets `max-fn-params-bools = 1` (MAN-3).
+- spirit_level_cli's integration tests run as one binary, `tests/it` (MAN-3).
 - workspace-lints (M0024) accepts a copied lint table in crates the map marks unsafe (GRAPH-2).
 
 ### Fixed

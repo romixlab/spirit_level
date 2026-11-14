@@ -1,0 +1,7 @@
+[[finding]]
+at = "Cargo.toml:11"
+contains = "[profile.deploy] builds with lto = \"fat\", inherited from [profile.release]"
+
+[[finding]]
+at = "Cargo.toml:18"
+contains = "[profile.test] builds with lto = \"thin\""

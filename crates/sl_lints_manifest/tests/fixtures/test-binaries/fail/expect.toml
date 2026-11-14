@@ -1,0 +1,3 @@
+[[finding]]
+at = "tests"
+contains = "fx has 2 integration-test binaries"

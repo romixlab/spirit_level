@@ -3,7 +3,6 @@
 
 use sl_analysis::Context;
 use sl_core::{Confidence, Diagnostic, Span, glob};
-use std::process::Command;
 
 const LINTS: &[&str] = &[
     "leftover-files",
@@ -12,28 +11,11 @@ const LINTS: &[&str] = &[
     "agent-session-files",
 ];
 
-/// The tracked files under the project root, relative to it
-fn tracked(cx: &Context<'_>) -> Result<Vec<String>, String> {
-    let out = Command::new("git")
-        .args(["ls-files", "-z"])
-        .current_dir(&cx.project.root)
-        .output()
-        .map_err(|e| format!("cannot run git: {e}"))?;
-    if !out.status.success() {
-        return Err(String::from_utf8_lossy(&out.stderr).trim().to_owned());
-    }
-    Ok(String::from_utf8_lossy(&out.stdout)
-        .split('\0')
-        .filter(|s| !s.is_empty())
-        .map(str::to_owned)
-        .collect())
-}
-
 pub(crate) fn run(cx: &Context<'_>) {
     if !LINTS.iter().any(|l| cx.enabled(l)) {
         return;
     }
-    let files = match tracked(cx) {
+    let files = match cx.project.tracked() {
         Ok(f) => f,
         Err(e) => {
             for id in LINTS {
@@ -47,17 +29,17 @@ pub(crate) fn run(cx: &Context<'_>) {
             return;
         }
     };
-    matching(cx, &files, "leftover-files", |f| {
+    matching(cx, files, "leftover-files", |f| {
         (
             format!("{f} is a leftover (merge, patch, editor or scratch file)"),
             "delete it and add the pattern to .gitignore".to_owned(),
         )
     });
-    matching(cx, &files, "agent-session-files", |f| {
+    matching(cx, files, "agent-session-files", |f| {
         (format!("{f} is an agent session file (transcript, history or per-person settings)"), "remove it from git (`git rm --cached`) and ignore it; transcripts hold private context and secrets".to_owned())
     });
-    secrets(cx, &files);
-    permissions(cx, &files);
+    secrets(cx, files);
+    permissions(cx, files);
 }
 
 fn matching(cx: &Context<'_>, files: &[String], id: &str, say: impl Fn(&str) -> (String, String)) {

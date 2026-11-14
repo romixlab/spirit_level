@@ -129,6 +129,7 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [M0003](M0003.md) | [git-dependency-pins](M0003.md) | git dependencies are pinned the way the project's policy says: a branch by default | warn | warn | deny | deny | off | off |
 | [M0004](M0004.md) | [no-sys-crates](M0004.md) | the dependency graph has no -sys crates and no C build steps | deny | deny | deny | deny | off | off |
 | [M0005](M0005.md) | [path-outside-workspace](M0005.md) | path dependencies stay inside the workspace | deny | deny | deny | deny | off | off |
+| [M0027](M0027.md) | [committed-patch](M0027.md) | no [patch] or [replace] override is committed, in Cargo.toml or .cargo/config.toml | deny | deny | deny | deny | off | off |
 
 ## dma
 
@@ -357,6 +358,8 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [M0017](M0017.md) | [profile-defaults](M0017.md) | the dev profile splits debug info and a deploy profile builds incrementally | warn | warn | warn | warn | off | off |
 | [M0018](M0018.md) | [repo-files](M0018.md) | the repo carries its rule files | warn | warn | warn | warn | deny | off |
 | [M0019](M0019.md) | [toolchain-pinned](M0019.md) | the repo pins its toolchain in rust-toolchain.toml | off | off | warn | deny | off | off |
+| [M0026](M0026.md) | [profile-no-lto](M0026.md) | the profiles of the edit-build-test loop and the deploy profile build without LTO | warn | warn | warn | warn | off | off |
+| [M0028](M0028.md) | [test-binaries](M0028.md) | a crate builds its integration tests as one binary | off | off | warn | warn | off | off |
 
 ## rustfmt
 
@@ -477,3 +480,4 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [M0022](M0022.md) | [workspace-dependencies](M0022.md) | members take every dependency from [workspace.dependencies] | off | warn | deny | deny | off | off |
 | [M0023](M0023.md) | [workspace-inheritance](M0023.md) | members inherit the shared package keys from [workspace.package] | off | deny | deny | deny | off | off |
 | [M0024](M0024.md) | [workspace-lints](M0024.md) | the root declares [workspace.lints] and every member inherits them | off | deny | deny | deny | off | off |
+| [M0029](M0029.md) | [macro-compile-fail](M0029.md) | every proc-macro crate has compile-fail tests | off | off | warn | warn | off | off |

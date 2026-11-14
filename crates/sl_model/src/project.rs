@@ -149,7 +149,9 @@ pub enum TargetKind {
     ProcMacro,
     /// A binary
     Bin,
-    /// An integration test, bench, example or build script
+    /// An integration test: one test binary
+    Test,
+    /// A bench, example or build script
     Other,
 }
 
@@ -282,6 +284,7 @@ pub struct Project {
     /// The project's version: `[workspace.package] version`, else the root package's
     pub version: Option<Version>,
     resolve: OnceLock<Result<Resolve, String>>,
+    tracked: OnceLock<Result<Vec<String>, String>>,
 }
 
 impl Project {
@@ -365,6 +368,8 @@ impl Project {
                         TargetKind::Lib
                     } else if t.kind.contains(&CmTargetKind::Bin) {
                         TargetKind::Bin
+                    } else if t.kind.contains(&CmTargetKind::Test) {
+                        TargetKind::Test
                     } else {
                         TargetKind::Other
                     };
@@ -401,6 +406,7 @@ impl Project {
             packages,
             version,
             resolve: OnceLock::new(),
+            tracked: OnceLock::new(),
         })
     }
 
@@ -534,6 +540,28 @@ impl Project {
     /// Whether a file exists relative to the root
     pub fn exists(&self, rel: &str) -> bool {
         self.root.join(rel).exists()
+    }
+
+    /// The files git tracks under the root, relative to it (`git ls-files`), read once; an error when the
+    /// project is not in a git checkout or git cannot run
+    pub fn tracked(&self) -> Result<&[String], &str> {
+        self.tracked
+            .get_or_init(|| {
+                let out = command("git", &self.root)
+                    .args(["ls-files", "-z"])
+                    .output()
+                    .map_err(|e| format!("cannot run git: {e}"))?;
+                if !out.status.success() {
+                    return Err(String::from_utf8_lossy(&out.stderr).trim().to_owned());
+                }
+                Ok(String::from_utf8_lossy(&out.stdout)
+                    .split('\0')
+                    .filter(|s| !s.is_empty())
+                    .map(str::to_owned)
+                    .collect())
+            })
+            .as_deref()
+            .map_err(String::as_str)
     }
 }
 

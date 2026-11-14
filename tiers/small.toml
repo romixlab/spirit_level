@@ -50,6 +50,14 @@ reason = "a path into a sibling checkout builds differently on every PC"
 level = "warn"
 reason = "split debug info and an incremental deploy profile: measured large build-time wins"
 
+[lints.profile-no-lto]
+level = "warn"
+reason = "LTO in the loop's profiles turns a link of a second into minutes; it belongs in a release profile"
+
+[lints.committed-patch]
+level = "deny"
+reason = "a committed [patch] builds differently on every other machine; it lives in an ignored .cargo/config.toml"
+
 [lints.repo-files]
 level = "warn"
 reason = "every work repo carries README, AGENTS, CLAUDE, FEATURES and CHANGELOG"

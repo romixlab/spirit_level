@@ -27,6 +27,8 @@ Use it with `extends = "small"` in `spirit_level.toml`.
 | [M0017](../lints/M0017.md) | profile-defaults | `warn` | split debug info and an incremental deploy profile: measured large build-time wins | small |
 | [M0018](../lints/M0018.md) | repo-files | `warn` | every work repo carries README, AGENTS, CLAUDE, FEATURES and CHANGELOG | small |
 | [M0025](../lints/M0025.md) | tier-clippy-set | `warn` | Clippy runs in the editor and CI from the project's own lint table; the tier says what belongs in it | small |
+| [M0026](../lints/M0026.md) | profile-no-lto | `warn` | LTO in the loop's profiles turns a link of a second into minutes; it belongs in a release profile | small |
+| [M0027](../lints/M0027.md) | committed-patch | `deny` | a committed [patch] builds differently on every other machine; it lives in an ignored .cargo/config.toml | small |
 | [P0001](../lints/P0001.md) | agent-file-lines | `warn` | agents read AGENTS.md whole every session; a long one is skimmed, not followed | small |
 | [P0009](../lints/P0009.md) | changelog-entry-length | `warn` | a CHANGELOG is a list: one short line per change | small |
 | [S0002](../lints/S0002.md) | function-complexity | `warn` | more paths than can be tested or held in one's head | small |
@@ -119,6 +121,14 @@ reason = "a path into a sibling checkout builds differently on every PC"
 [lints.profile-defaults]
 level = "warn"
 reason = "split debug info and an incremental deploy profile: measured large build-time wins"
+
+[lints.profile-no-lto]
+level = "warn"
+reason = "LTO in the loop's profiles turns a link of a second into minutes; it belongs in a release profile"
+
+[lints.committed-patch]
+level = "deny"
+reason = "a committed [patch] builds differently on every other machine; it lives in an ignored .cargo/config.toml"
 
 [lints.repo-files]
 level = "warn"

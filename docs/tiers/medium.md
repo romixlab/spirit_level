@@ -44,6 +44,10 @@ Use it with `extends = "medium"` in `spirit_level.toml`.
 | [M0023](../lints/M0023.md) | workspace-inheritance | `deny` | edition, rust-version, licence and repository are declared once in [workspace.package] | small-workspace |
 | [M0024](../lints/M0024.md) | workspace-lints | `deny` | every crate inherits [workspace.lints], so one table is the policy | small-workspace |
 | [M0025](../lints/M0025.md) | tier-clippy-set | `deny` | the Clippy set is the lint policy of every crate; a gap in it is a gap in the policy | medium |
+| [M0026](../lints/M0026.md) | profile-no-lto | `warn` | LTO in the loop's profiles turns a link of a second into minutes; it belongs in a release profile | small |
+| [M0027](../lints/M0027.md) | committed-patch | `deny` | a committed [patch] builds differently on every other machine; it lives in an ignored .cargo/config.toml | small |
+| [M0028](../lints/M0028.md) | test-binaries | `warn` | each integration-test binary links the library again; one tests/it binary links it once | medium |
+| [M0029](../lints/M0029.md) | macro-compile-fail | `warn` | a proc macro must refuse bad input with a clear error, and only compile-fail cases show that | medium |
 | [P0001](../lints/P0001.md) | agent-file-lines | `warn` | agents read AGENTS.md whole every session; a long one is skimmed, not followed | small |
 | [P0007](../lints/P0007.md) | commit-subject-length | `warn` | the subject is what one-line logs and reviews show | medium |
 | [P0009](../lints/P0009.md) | changelog-entry-length | `warn` | a CHANGELOG is a list: one short line per change | small |
@@ -130,6 +134,7 @@ The project turns these on in its own `[workspace.lints.clippy]` (`allow` rows a
 | `allow-print-in-tests` | `true` | a test may print what it saw | medium |
 | `allow-unwrap-in-tests` | `true` | a test that unwraps fails at the unwrap, which is what a test should do | small |
 | `cognitive-complexity-threshold` | `25` | Clippy's default; spl's function-complexity (cyclomatic, 15) is the tighter limit | medium |
+| `max-fn-params-bools` | `1` | two bool parameters are a call site nobody can read; an enum or a struct says what each means | medium |
 
 ## The file
 
@@ -221,6 +226,14 @@ reason = "the docs of internal crates are the map of the code; they build withou
 level = "deny"
 reason = "the Clippy set is the lint policy of every crate; a gap in it is a gap in the policy"
 
+[lints.test-binaries]
+level = "warn"
+reason = "each integration-test binary links the library again; one tests/it binary links it once"
+
+[lints.macro-compile-fail]
+level = "warn"
+reason = "a proc macro must refuse bad input with a clear error, and only compile-fail cases show that"
+
 # On top of small's Clippy set: pedantic and cargo, with the opt-outs rerun found to be noise (each with its reason),
 # and the restriction and nursery lints a workspace of this size wants.
 
@@ -269,4 +282,5 @@ multiple_crate_versions = { level = "allow", reason = "spl's duplicate-versions 
 [clippy.config]
 cognitive-complexity-threshold = { value = 25, reason = "Clippy's default; spl's function-complexity (cyclomatic, 15) is the tighter limit" }
 allow-print-in-tests = { value = true, reason = "a test may print what it saw" }
+max-fn-params-bools = { value = 1, reason = "two bool parameters are a call site nobody can read; an enum or a struct says what each means" }
 ```

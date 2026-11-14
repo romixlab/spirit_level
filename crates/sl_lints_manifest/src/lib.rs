@@ -3,8 +3,11 @@
 
 mod clippy;
 mod deps;
+mod macros;
 mod package;
+mod patch;
 mod repo;
+mod speed;
 mod workspace;
 
 use sl_analysis::{Analysis, Context, lint};
@@ -71,6 +74,15 @@ lint!(MACRO_CRATE_SUFFIX, "M0021", "macro-crate-suffix", "workspace", "proc-macr
     params: [], needs: [], fix: None);
 lint!(TIER_CLIPPY_SET, "M0025", "tier-clippy-set", "manifest", "the project's [lints.clippy] and clippy.toml turn on the Clippy set its tiers expect, every opt-out with a reason",
     params: [], needs: [], fix: None);
+lint!(PROFILE_NO_LTO, "M0026", "profile-no-lto", "repo", "the profiles of the edit-build-test loop and the deploy profile build without LTO",
+    params: [("profiles", StrList, "[\"dev\", \"test\", \"deploy\"]", "profiles that build without LTO, inherited settings included")],
+    needs: [], fix: None);
+lint!(COMMITTED_PATCH, "M0027", "committed-patch", "dependencies", "no [patch] or [replace] override is committed, in Cargo.toml or .cargo/config.toml",
+    params: [], needs: [], fix: None);
+lint!(TEST_BINARIES, "M0028", "test-binaries", "repo", "a crate builds its integration tests as one binary",
+    params: [("max-binaries", Int, "1", "integration-test binaries a crate may have")], needs: [], fix: None);
+lint!(MACRO_COMPILE_FAIL, "M0029", "macro-compile-fail", "workspace", "every proc-macro crate has compile-fail tests",
+    params: [("harnesses", StrList, "[\"trybuild\", \"ui_test\"]", "crates that run compile-fail cases")], needs: [], fix: None);
 
 /// The manifest analysis
 pub struct Manifest;
@@ -104,6 +116,10 @@ static LINTS: &[&LintMeta] = &[
     &CRATE_DIR_NAME,
     &MACRO_CRATE_SUFFIX,
     &TIER_CLIPPY_SET,
+    &PROFILE_NO_LTO,
+    &COMMITTED_PATCH,
+    &TEST_BINARIES,
+    &MACRO_COMPILE_FAIL,
 ];
 
 impl Analysis for Manifest {
@@ -121,6 +137,9 @@ impl Analysis for Manifest {
         deps::run(cx);
         repo::run(cx);
         clippy::run(cx);
+        speed::run(cx);
+        patch::run(cx);
+        macros::run(cx);
     }
 }
 

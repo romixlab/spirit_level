@@ -1,0 +1,3 @@
+[[finding]]
+at = "crates/w_macros/Cargo.toml:2"
+contains = "proc-macro crate w_macros has no compile-fail tests"

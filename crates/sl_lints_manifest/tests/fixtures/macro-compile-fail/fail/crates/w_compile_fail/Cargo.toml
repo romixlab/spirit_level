@@ -1,0 +1,10 @@
+[package]
+name = "w_compile_fail"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+w = { path = "../w" }
+
+[dev-dependencies]
+rstest = "1"
