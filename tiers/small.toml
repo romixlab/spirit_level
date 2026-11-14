@@ -11,8 +11,8 @@ level = "warn"
 reason = "a waiver that allows nothing is left over from changed code"
 
 [lints.tool-version]
-level = "warn"
-reason = "an external tool outside its tested range may print a shape the adapter misreads, so its results are untested"
+level = "deny"
+reason = "an external tool outside its tested range may print a shape the adapter misreads: its results cannot be trusted"
 
 [lints.package-description]
 level = "warn"

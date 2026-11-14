@@ -63,7 +63,7 @@ Use it with `extends = "small"` in `spirit_level.toml`.
 | [X0019](../lints/X0019.md) | deny-advisories | `warn` | a dependency with a known vulnerability is a risk taken unseen; needs no deny.toml | small |
 | [X0026](../lints/X0026.md) | machete-unused-deps | `warn` | an unused dependency costs build time, audit and lockfile churn for nothing | small |
 | [X0032](../lints/X0032.md) | typos-misspelling | `warn` | a misspelled identifier is copied to every call site; typos has almost no false positives | small |
-| [X0034](../lints/X0034.md) | tool-version | `warn` | an external tool outside its tested range may print a shape the adapter misreads, so its results are untested | small |
+| [X0034](../lints/X0034.md) | tool-version | `deny` | an external tool outside its tested range may print a shape the adapter misreads: its results cannot be trusted | small |
 
 ## Clippy set (with what it extends)
 
@@ -109,8 +109,8 @@ level = "warn"
 reason = "a waiver that allows nothing is left over from changed code"
 
 [lints.tool-version]
-level = "warn"
-reason = "an external tool outside its tested range may print a shape the adapter misreads, so its results are untested"
+level = "deny"
+reason = "an external tool outside its tested range may print a shape the adapter misreads: its results cannot be trusted"
 
 [lints.package-description]
 level = "warn"

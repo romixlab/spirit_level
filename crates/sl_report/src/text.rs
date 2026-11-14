@@ -8,7 +8,7 @@
 
 use crate::excerpt;
 use sl_core::{Confidence, Diagnostic, Level, LintMeta};
-use sl_engine::Report;
+use sl_engine::{NotRun, Report};
 use std::collections::BTreeMap;
 use std::fmt::Write;
 use std::path::Path;
@@ -43,6 +43,8 @@ pub struct TextOptions {
     pub group_by: GroupBy,
     /// Colour on or off: [`Paint::stdout`] for a report printed on stdout
     pub paint: Paint,
+    /// Warn-level lints that could not run do not fail the run (`--allow-warn-not-run`)
+    pub allow_warn_not_run: bool,
 }
 
 impl Default for TextOptions {
@@ -55,6 +57,7 @@ impl Default for TextOptions {
             excerpts: 1,
             group_by: GroupBy::Lint,
             paint: Paint::OFF,
+            allow_warn_not_run: false,
         }
     }
 }
@@ -101,7 +104,7 @@ pub fn text(r: &Report, lints: &[&LintMeta], o: TextOptions) -> String {
     for g in groups(&shown, o.group_by) {
         group(&mut s, &g, lints, Path::new(&r.root), o);
     }
-    not_run(&mut s, r, o.paint);
+    not_run(&mut s, r, o);
     if o.timings {
         for t in &r.timings {
             let line = format!("  {:>6} ms  {}", t.ms, t.analysis);
@@ -272,13 +275,19 @@ fn place(s: &mut String, d: &Diagnostic, by_lint: bool, p: Paint) {
     }
 }
 
-fn not_run(s: &mut String, r: &Report, p: Paint) {
+/// Whether a lint that could not run fails the run
+fn not_run_fails(n: &NotRun, o: TextOptions) -> bool {
+    n.level == Level::Deny || !o.allow_warn_not_run
+}
+
+fn not_run(s: &mut String, r: &Report, o: TextOptions) {
+    let p = o.paint;
     if r.not_run.is_empty() {
         return;
     }
     let _ = writeln!(s, "{}", p.paint(HEADING, "not run"));
     for n in &r.not_run {
-        let st = if n.level == Level::Deny { ERR } else { WARN };
+        let st = if not_run_fails(n, o) { ERR } else { WARN };
         let _ = writeln!(
             s,
             "  {} {} {} needs {}: {}",
@@ -287,6 +296,13 @@ fn not_run(s: &mut String, r: &Report, p: Paint) {
             n.lint,
             n.need,
             n.reason
+        );
+    }
+    if r.not_run.iter().any(|n| n.need.starts_with("tool:")) {
+        let _ = writeln!(
+            s,
+            "  {}",
+            p.next_hint("next: spl tools needed --spec --missing | xargs -r cargo binstall -y")
         );
     }
     s.push('\n');
@@ -313,10 +329,23 @@ fn summary(s: &mut String, r: &Report, o: TextOptions) {
             }
         ));
     }
-    if !r.not_run.is_empty() {
-        parts.push(format!("{} not run", r.not_run.len()));
+    let (failing, allowed): (Vec<&NotRun>, Vec<&NotRun>) =
+        r.not_run.iter().partition(|n| not_run_fails(n, o));
+    if !failing.is_empty() {
+        parts.push(p.paint(ERR, &format!("{} not run", failing.len())));
     }
-    let head = if r.failing() == 0 && !r.incomplete() {
+    if !allowed.is_empty() {
+        let ids: Vec<&str> = allowed.iter().map(|n| n.lint.as_str()).collect();
+        parts.push(p.paint(
+            WARN,
+            &format!(
+                "{} warn-level not run, let through by --allow-warn-not-run ({})",
+                allowed.len(),
+                ids.join(", ")
+            ),
+        ));
+    }
+    let head = if r.failing() == 0 && !r.incomplete(o.allow_warn_not_run) {
         p.paint(OK, "ok")
     } else {
         p.paint(ERR, "failed")

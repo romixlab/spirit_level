@@ -7,8 +7,8 @@ spirit_level reuses established Rust lint tools instead of reimplementing them. 
 - **Library or executable.** A tool with a library on stable Rust that does the whole job is linked. The others run as executables, and the adapter reads their machine-readable output (JSON where the tool has it, its stable text where not).
 - **Optional.** A linked tool is a cargo feature of `spirit_level` and `spirit_level_cli` (`hakari`, `geiger`), off by default. An executable adapter costs nothing to build, so it is always compiled in; it runs only when one of its lints is on.
 - **Found on PATH.** spl installs nothing. Each tool is found on PATH and its version read, so it comes from whatever installs tools here: `cargo binstall`, `cargo install`, a distribution's package, mise.
-- **Missing tools.** A lint whose executable is not installed, or whose feature was not built, is reported as not run with the reason and the `crate@version` that installs it. At `deny` the run then exits with code 3: it never passes green.
-- **Tested versions.** `crates/sl_tools/tools.toml` gives each tool the range of versions its parser is tested against. A tool outside that range still runs; `tool-version` reports its results as untested.
+- **Missing tools.** A lint whose executable is not installed, or whose feature was not built, is reported as not run with the reason and the `crate@version` that installs it. The run then exits with code 3, at `warn` as at `deny` ([exit codes](output.md#exit-codes)).
+- **Tested versions.** `crates/sl_tools/tools.toml` gives each tool the range of versions its parser is tested against. A tool outside that range still runs; `tool-version` (deny from the small tier) reports its results as untested and fails the run.
 - **What a project needs.** `spl tools needed` lists what the project's enabled lints need: their tools, the toolchain of each `rust-version` for `cargo-msrv`, and the targets of `cargo-no-std` and `cargo-wasm` when the map marks crates. Install them before `check` in CI, so no lint is left not run.
 
 ## Library or executable

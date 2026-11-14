@@ -75,4 +75,6 @@ JSON is complete and ungrouped: every finding, whatever `--all` and `--group-by`
 | 0 | no denied finding (warnings allowed) |
 | 1 | at least one denied finding |
 | 2 | a configuration or usage error, or a project cargo cannot read |
-| 3 | no denied finding, but a lint at `deny` could not run (a tool, the crate map or the resolved graph is missing) |
+| 3 | no denied finding, but an enabled lint could not run (a tool, toolchain, target, the crate map or the resolved graph is missing) |
+
+A lint that cannot run fails the run at `warn` as well as at `deny`: a check that silently skips part of its work never passes green. `spl check --allow-warn-not-run` lets warn-level lints that cannot run through: they are listed under "not run" and in the summary, and the exit code follows the findings. A deny-level lint that cannot run still exits with 3. There is no configuration key for this; a project that never wants a tool turns its lints off.

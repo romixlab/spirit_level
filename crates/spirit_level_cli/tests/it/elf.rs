@@ -45,10 +45,14 @@ fn elf_lints_run_with_the_elf() {
 
 #[test]
 fn elf_lints_are_not_run_without_it() {
+    // stk-6 is warn-level: not running fails the run, unless --allow-warn-not-run lets it through
     let (code, report) = check(&[]);
-    assert_eq!(code, 0, "{report}");
+    assert_eq!(code, 3, "{report}");
     assert_eq!(report["not_run"][0]["lint"], "stk-6", "{report}");
     assert_eq!(report["not_run"][0]["need"], "elf", "{report}");
+    let (code, report) = check(&["--allow-warn-not-run"]);
+    assert_eq!(code, 0, "{report}");
+    assert_eq!(report["not_run"][0]["lint"], "stk-6", "{report}");
 }
 
 #[test]

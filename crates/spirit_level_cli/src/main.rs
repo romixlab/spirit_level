@@ -21,7 +21,7 @@ mod tools;
 const TOOL: &str = "spl";
 /// A denied finding
 const DENIED: Exit = Exit::FAILURE;
-/// A denied lint could not run
+/// An enabled lint could not run
 const NOT_RUN: Exit = Exit::category(3, "not_run");
 
 #[derive(Parser)]
@@ -56,7 +56,7 @@ enum GroupByArg {
 enum Cmd {
     /// Check the project: run every lint its configuration enables
     #[command(
-        after_help = "Examples:\n  spl check\n  spl check --all --group-by crate\n  spl check --tier small --only cli ../other_repo\n  spl check --format json --fix\n\nExit codes: 0 clean, 1 a denied finding, 2 a configuration or usage error, 3 a denied lint could not run"
+        after_help = "Examples:\n  spl check\n  spl check --all --group-by crate\n  spl check --tier small --only cli ../other_repo\n  spl check --format json --fix\n  spl check --allow-warn-not-run\n\nExit codes: 0 clean, 1 a denied finding, 2 a configuration or usage error, 3 an enabled lint could not run (a warn-level one not with --allow-warn-not-run)"
     )]
     Check(CheckArgs),
     /// Show a lint's page: its rule, why, parameters and level in every tier
@@ -178,6 +178,10 @@ struct CheckArgs {
     /// This run lands the branch: what is allowed while it is in work (a `FIXME`) fails here
     #[arg(long, env = "SPIRIT_LEVEL_LANDING")]
     landing: bool,
+    /// Warn-level lints that cannot run (a tool, toolchain or target missing) are listed but do not fail the run;
+    /// a deny-level lint that cannot run still fails it (exit 3)
+    #[arg(long)]
+    allow_warn_not_run: bool,
 }
 
 #[derive(clap::Args)]
@@ -269,6 +273,7 @@ fn check(a: CheckArgs) -> Result<Exit, String> {
         timings,
         today: t,
         landing,
+        allow_warn_not_run,
     } = a;
     let mut opts = spirit_level::Options::new(today(t)?);
     opts.landing = landing;
@@ -325,6 +330,7 @@ fn check(a: CheckArgs) -> Result<Exit, String> {
                         GroupByArg::File => sl_report::GroupBy::File,
                     },
                     paint: Paint::stdout(),
+                    allow_warn_not_run,
                     ..sl_report::TextOptions::default()
                 }
             )
@@ -333,7 +339,7 @@ fn check(a: CheckArgs) -> Result<Exit, String> {
     }
     Ok(if report.failing() > 0 {
         DENIED
-    } else if report.incomplete() {
+    } else if report.incomplete(allow_warn_not_run) {
         NOT_RUN
     } else {
         Exit::SUCCESS

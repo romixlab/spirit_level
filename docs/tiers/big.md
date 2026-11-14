@@ -125,7 +125,7 @@ Use it with `extends = "big"` in `spirit_level.toml`.
 | [X0028](../lints/X0028.md) | semver-checks-breaking | `deny` | a crate the map marks stable changes its API only with the version bump it needs | big |
 | [X0031](../lints/X0031.md) | taplo-fmt | `deny` | manifests are edited by people and by tools; one TOML formatting keeps their diffs about the change | big |
 | [X0032](../lints/X0032.md) | typos-misspelling | `deny` | names are searched across hundreds of crates; a misspelling hides from every search | big |
-| [X0034](../lints/X0034.md) | tool-version | `warn` | an external tool outside its tested range may print a shape the adapter misreads, so its results are untested | small |
+| [X0034](../lints/X0034.md) | tool-version | `deny` | an external tool outside its tested range may print a shape the adapter misreads: its results cannot be trusted | small |
 
 ## Clippy set (with what it extends)
 

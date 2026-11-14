@@ -535,7 +535,7 @@ Every lint, grouped by category, with its stable code and its level in each ship
 
 | Code | Lint | Rule | small | small-workspace | medium | big | ai | embedded | ui | egui | units-strict | units-paranoid |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| [X0034](X0034.md) | [tool-version](X0034.md) | every external tool an enabled lint runs is a version its output is tested against | warn | warn | warn | warn | off | off | off | off | off | off |
+| [X0034](X0034.md) | [tool-version](X0034.md) | every external tool an enabled lint runs is a version its output is tested against | deny | deny | deny | deny | off | off | off | off | off | off |
 
 ## typos
 

@@ -17,16 +17,27 @@ const ROOT: &str = "[workspace]\nmembers = [\"crates/*\"]\nresolver = \"3\"\n";
 const A: &str = "[package]\nname = \"a\"\nversion = \"0.1.0\"\nedition = \"2024\"\n";
 const CONFIG: &str = "[lints.typos-misspelling]\nlevel = \"warn\"\nreason = \"r\"\n\n[lints.machete-unused-deps]\nlevel = \"warn\"\nreason = \"r\"\n\n[lints.deny-bans]\nlevel = \"warn\"\nreason = \"r\"\n\n[lints.tool-version]\nlevel = \"warn\"\nreason = \"r\"\n";
 
+/// typos-misspelling with machete-unused-deps and tool-version at the levels given
+fn config(machete: &str, tool_version: &str) -> String {
+    format!(
+        "[lints.typos-misspelling]\nlevel = \"warn\"\nreason = \"r\"\n\n[lints.machete-unused-deps]\nlevel = \"{machete}\"\nreason = \"r\"\n\n[lints.tool-version]\nlevel = \"{tool_version}\"\nreason = \"r\"\n"
+    )
+}
+
 impl Setup {
     /// `tools`: executable name and the shell lines of its script
     fn new(name: &str, tools: &[(&str, &str)]) -> Self {
+        Self::with_config(name, CONFIG, tools)
+    }
+
+    fn with_config(name: &str, config: &str, tools: &[(&str, &str)]) -> Self {
         let dir = std::env::temp_dir().join(format!("sl_cli_tools_{}_{name}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         for (p, t) in [
             ("p/Cargo.toml", ROOT),
             ("p/crates/a/Cargo.toml", A),
             ("p/crates/a/src/lib.rs", "//! a\n"),
-            ("p/spirit_level.toml", CONFIG),
+            ("p/spirit_level.toml", config),
         ] {
             let f = dir.join(p);
             std::fs::create_dir_all(f.parent().expect("a file path has a parent"))
@@ -286,4 +297,74 @@ fn tool_paths_are_the_fake_ones() {
         assert_eq!(t["state"], "missing", "{t}");
     }
     assert!(Path::new(&s.bin("cargo")).exists());
+}
+
+/// typos in range or not; cargo-machete missing
+fn not_run_setup(name: &str, machete: &str, tool_version: &str, typos: &str) -> Setup {
+    Setup::with_config(
+        name,
+        &config(machete, tool_version),
+        &[(
+            "typos",
+            &format!("[ \"$1\" = --version ] && echo 'typos-cli {typos}'; exit 0"),
+        )],
+    )
+}
+
+#[test]
+fn a_warn_level_lint_that_cannot_run_fails_the_run() {
+    let s = not_run_setup("warn_not_run", "warn", "deny", "1.52.2");
+    let o = s.spl(&["check"]);
+    let t = all(&o);
+    assert_eq!(o.status.code(), Some(3), "{t}");
+    assert!(
+        t.contains("warn X0026 machete-unused-deps needs tool:cargo-machete: cargo-machete is not installed: install cargo-machete@0.9.2"),
+        "{t}"
+    );
+    assert!(
+        t.contains("next: spl tools needed --spec --missing | xargs -r cargo binstall -y"),
+        "{t}"
+    );
+    assert!(t.contains("failed: ") && t.contains(": 1 not run"), "{t}");
+}
+
+#[test]
+fn allow_warn_not_run_lets_a_warn_level_lint_through() {
+    let s = not_run_setup("warn_allowed", "warn", "deny", "1.52.2");
+    let o = s.spl(&["check", "--allow-warn-not-run"]);
+    let t = all(&o);
+    assert_eq!(o.status.code(), Some(0), "{t}");
+    assert!(
+        t.contains("cargo-machete is not installed: install cargo-machete@0.9.2"),
+        "{t}"
+    );
+    assert!(
+        t.contains("ok: ")
+            && t.contains(
+                "1 warn-level not run, let through by --allow-warn-not-run (machete-unused-deps)"
+            ),
+        "{t}"
+    );
+    let o = s.spl(&["check", "--allow-warn-not-run", "--format", "json"]);
+    assert_eq!(o.status.code(), Some(0), "{}", all(&o));
+}
+
+#[test]
+fn allow_warn_not_run_never_lets_a_deny_level_lint_through() {
+    let s = not_run_setup("deny_not_run", "deny", "deny", "1.52.2");
+    for args in [&["check"][..], &["check", "--allow-warn-not-run"]] {
+        let o = s.spl(args);
+        let t = all(&o);
+        assert_eq!(o.status.code(), Some(3), "{args:?}: {t}");
+        assert!(t.contains("failed: ") && t.contains("1 not run"), "{t}");
+    }
+}
+
+#[test]
+fn an_out_of_range_tool_fails_also_with_allow_warn_not_run() {
+    let s = not_run_setup("tool_version_deny", "warn", "deny", "1.50.3");
+    let o = s.spl(&["check", "--allow-warn-not-run"]);
+    let t = all(&o);
+    assert_eq!(o.status.code(), Some(1), "{t}");
+    assert!(t.contains("deny X0034 tool-version"), "{t}");
 }

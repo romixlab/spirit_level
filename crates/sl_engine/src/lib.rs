@@ -118,9 +118,12 @@ impl Report {
         self.diagnostics.iter().filter(|d| d.fails()).count()
     }
 
-    /// Whether a denied lint could not run (the run is incomplete)
-    pub fn incomplete(&self) -> bool {
-        self.not_run.iter().any(|n| n.level == Level::Deny)
+    /// Whether an enabled lint that could not run fails the run: every one does, except a warn-level one when
+    /// `allow_warn_not_run` is set (`spl check --allow-warn-not-run`)
+    pub fn incomplete(&self, allow_warn_not_run: bool) -> bool {
+        self.not_run
+            .iter()
+            .any(|n| n.level == Level::Deny || !allow_warn_not_run)
     }
 
     /// Findings counted by level, allowed ones apart: (deny, warn, allowed)
