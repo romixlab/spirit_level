@@ -117,6 +117,7 @@ The project turns these on in its own `[workspace.lints.clippy]` (`allow` rows a
 | `fallible_impl_from` | `warn` | a From that can panic is a TryFrom | small |
 | `float_cmp_const` | `warn` | comparing a float to a constant exactly is almost always a bug | big |
 | `get_unwrap` | `warn` | `.get(i).unwrap()` is indexing with a worse message: index, or handle the None | small |
+| `ignore_without_reason` | `warn` | an ignored test says why, or nobody knows when it may run again | small |
 | `imprecise_flops` | `warn` | hypot, ln_1p and friends are more precise than the formula written out | big |
 | `iter_over_hash_type` | `warn` | iteration over a hash map changes order from run to run; random-state-hash reports the type | big |
 | `let_underscore_must_use` | `warn` | `let _ =` on a must_use value drops an error unseen | small |

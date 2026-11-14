@@ -89,6 +89,7 @@ The project turns these on in its own `[workspace.lints.clippy]` (`allow` rows a
 | `exit` | `warn` | process::exit skips every destructor; main returns instead | small |
 | `fallible_impl_from` | `warn` | a From that can panic is a TryFrom | small |
 | `get_unwrap` | `warn` | `.get(i).unwrap()` is indexing with a worse message: index, or handle the None | small |
+| `ignore_without_reason` | `warn` | an ignored test says why, or nobody knows when it may run again | small |
 | `let_underscore_must_use` | `warn` | `let _ =` on a must_use value drops an error unseen | small |
 | `map_err_ignore` | `warn` | `map_err(\|_\| ...)` throws the cause away; wrap it as the source | small |
 | `mem_forget` | `warn` | forget leaks the value and skips Drop; ManuallyDrop says it on purpose | small |

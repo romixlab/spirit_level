@@ -108,6 +108,7 @@ cargo = { level = "warn", priority = -1 }    # manifest hygiene: feature names, 
 pedantic = { level = "warn", priority = -1 } # the stricter idioms; the opt-outs below are the ones that are noise for most code
 allow_attributes = "warn"                    # #[expect] fails once the lint stops firing, so an exception cannot outlive its cause
 as_ptr_cast_mut = "warn"                     # `as_ptr() as *mut` writes through a shared borrow: undefined behaviour
+ignore_without_reason = "warn"               # an ignored test says why, or nobody knows when it may run again
 cognitive_complexity = "warn"                # a function too tangled to follow in one read; complements spl's cyclomatic function-complexity
 exit = "warn"                                # process::exit skips every destructor; main returns instead
 fallible_impl_from = "warn"                  # a From that can panic is a TryFrom
