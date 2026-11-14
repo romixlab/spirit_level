@@ -33,7 +33,11 @@ pub(crate) fn run(cx: &Context<'_>) {
             reached.extend(tree.modules.iter().map(|m| m.file.in_package.as_str()));
         }
         let skip = cx.params_for(ID, pkg);
-        for f in sources.iter().filter(|f| f.kind == FileKind::Src) {
+        // only src/: other directories of a package hold templates and scripts that are no part of a target
+        for f in sources
+            .iter()
+            .filter(|f| f.kind == FileKind::Src && f.in_package.starts_with("src/"))
+        {
             if reached.contains(f.in_package.as_str())
                 || f.ast().is_err()
                 || skip
