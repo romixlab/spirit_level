@@ -19,13 +19,14 @@ name = "embassy_stm32"
 reason = "the HAL's own invariants; its configuration errors fire at init, before any output"
 ```
 
-A site is named by the path of the function it is written in, without generic arguments, its kind (`unwrap`, `expect`, `panic`, `assert`, `bounds`, `slice`, `overflow`, `division`, `refcell`, `alloc`) and its index among the sites of that kind in that function, in source order. The key survives edits in other functions and new lines above it; a new site of the same kind earlier in the same function shifts the indices after it, and the review sees that.
+A site is named by the path of the function it is written in, without generic arguments, its kind (`unwrap`, `expect`, `panic`, `assert`, `bounds`, `slice`, `overflow`, `division`, `refcell`, `alloc`, `resumed`) and its index among the sites of that kind in that function, in source order. The key survives edits in other functions and new lines above it; a new site of the same kind earlier in the same function shifts the indices after it, and the review sees that.
 
 - **Inlining**: a site inlined into several callers is one site, placed where it is written, with several call addresses.
 - **Generics**: each monomorphization is a copy of the same site: one key.
 - **Folded sites**: where the optimizer merged several sites into one call, the DWARF has no line (line 0). The site is listed under the function that holds the call and is acknowledged like any other.
+- **Resumed**: each `async fn` holds a compiler-made `resumed` site, reached only when an executor polls a finished future. Its entry gives that reason once per function.
 - **Dependencies**: a `[[crate]]` entry acknowledges every site of a crate outside the project at once. The project's own crates are acknowledged site by site.
-- **Service modules**: a site in a module of a class in `zero-in` (`service`) is reported whatever the file says: such a module never reaches the panic handler in release.
+- **Service modules**: a site in a module of a class in `zero-in` (`service`) is reported whatever the file says: such a module never reaches the panic handler in release. A `resumed` site is acknowledged there like anywhere else.
 
 An entry that matches no site any more is reported as stale.
 

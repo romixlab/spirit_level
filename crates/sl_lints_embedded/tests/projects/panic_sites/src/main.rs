@@ -22,7 +22,19 @@ pub extern "C" fn _start() -> ! {
         acc = acc.wrapping_add(power::scaled::<u16>(input(1) as u16));
         power::arm(input(1) == 1);
         acc = acc.wrapping_add(power::window(&[1, 2, 3, 4], input(1)));
+        acc = acc.wrapping_add(u32::from(poll_once(led::settle(input(2) as u8))));
         core::hint::black_box(acc);
+    }
+}
+
+/// One poll of a future whose state the optimizer cannot see: its `resumed` check stays in the ELF
+fn poll_once<F: Future<Output = u8>>(f: F) -> u8 {
+    let mut f = core::pin::pin!(f);
+    let f = core::hint::black_box(f.as_mut());
+    let mut cx = core::task::Context::from_waker(core::task::Waker::noop());
+    match f.poll(&mut cx) {
+        core::task::Poll::Ready(v) => v,
+        core::task::Poll::Pending => 0,
     }
 }
 

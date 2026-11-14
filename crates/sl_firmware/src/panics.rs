@@ -47,6 +47,9 @@ pub enum Kind {
     Refcell,
     /// An allocation that failed or overflowed
     Alloc,
+    /// An `async fn` or coroutine polled after it completed or panicked: the compiler adds one to each state
+    /// machine; an executor that drops finished futures never reaches it
+    Resumed,
 }
 
 impl Kind {
@@ -63,6 +66,7 @@ impl Kind {
             Self::Division => "division",
             Self::Refcell => "refcell",
             Self::Alloc => "alloc",
+            Self::Resumed => "resumed",
         }
     }
 
@@ -72,7 +76,7 @@ impl Kind {
     }
 
     /// Every kind
-    pub const ALL: [Self; 10] = [
+    pub const ALL: [Self; 11] = [
         Self::Unwrap,
         Self::Expect,
         Self::Panic,
@@ -83,6 +87,7 @@ impl Kind {
         Self::Division,
         Self::Refcell,
         Self::Alloc,
+        Self::Resumed,
     ];
 }
 
@@ -450,6 +455,7 @@ const KINDS: &[(&[&str], Kind)] = &[
         Kind::Slice,
     ),
     (&["assert_failed"], Kind::Assert),
+    (&["_resumed"], Kind::Resumed),
     (&["panic", "unreachable"], Kind::Panic),
 ];
 
@@ -594,6 +600,10 @@ mod tests {
         assert_eq!(
             classify("core::panicking::assert_failed"),
             Some(Kind::Assert)
+        );
+        assert_eq!(
+            classify("core::panicking::panic_const::panic_const_async_fn_resumed"),
+            Some(Kind::Resumed)
         );
         assert_eq!(classify("core::panicking::panic_fmt"), Some(Kind::Panic));
         assert_eq!(classify("core::fmt::write"), None);

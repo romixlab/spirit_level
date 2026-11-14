@@ -9,19 +9,19 @@ at = "<elf>"
 contains = "in _start is not acknowledged"
 
 [[finding]]
-at = "panics.toml:21"
+at = "panics.toml:27"
 contains = "which the ELF no longer has"
 
 [[finding]]
-at = "panics.toml:27"
+at = "panics.toml:33"
 contains = "gives no reason"
 
 [[finding]]
-at = "panics.toml:33"
+at = "panics.toml:39"
 contains = "site by site"
 
 [[finding]]
-at = "panics.toml:37"
+at = "panics.toml:43"
 contains = "has no panic site in the ELF"
 
 [[finding]]

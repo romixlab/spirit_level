@@ -5,7 +5,7 @@
 //! # panics.toml, beside the firmware's Cargo.toml
 //! [[site]]
 //! function = "app::power::duty"   # the function path without generic arguments
-//! kind = "panic"                  # unwrap, expect, panic, assert, bounds, slice, overflow, division, refcell, alloc
+//! kind = "panic"                  # unwrap, expect, panic, assert, bounds, slice, overflow, division, refcell, alloc, resumed
 //! index = 0                       # among the sites of this kind in this function, in source order
 //! reason = "a zero period is a broken config table; the stage is off until the reset"
 //!
@@ -119,7 +119,10 @@ pub(crate) fn run(cx: &Context<'_>, fw: &Firmware<'_>) {
         if let Some(i) = hit {
             used[i] = true;
         }
-        if let Some(c) = s.class.filter(|c| zero_in.iter().any(|z| z == c.name())) {
+        let zero = s.kind != Kind::Resumed
+            && s.class
+                .is_some_and(|c| zero_in.iter().any(|z| z == c.name()));
+        if let Some(c) = s.class.filter(|_| zero) {
             out.push(
                 Diagnostic::new(PAN_1.id, key(s), format!("{what} is in a {} module: it resets the whole MCU in release, and an entry does not acknowledge it", c.name()))
                     .span(span)

@@ -28,6 +28,13 @@ kind = "bounds"
 index = 0
 reason = "fixture: acknowledged"
 
+# src/led.rs:13
+[[site]]
+function = "panic_sites::led::settle::{closure#0}"
+kind = "resumed"
+index = 0
+reason = "fixture: acknowledged"
+
 # src/power.rs:40
 [[site]]
 function = "panic_sites::power::arm"

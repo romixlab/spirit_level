@@ -19,6 +19,12 @@ index = 0
 reason = "an entry cannot acknowledge a site in a service module"
 
 [[site]]
+function = "panic_sites::led::settle::{closure#0}"
+kind = "resumed"
+index = 0
+reason = "acknowledged in a service module too: the compiler's site, not the code's"
+
+[[site]]
 function = "panic_sites::power::duty"
 kind = "panic"
 index = 2

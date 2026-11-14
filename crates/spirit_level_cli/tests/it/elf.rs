@@ -88,7 +88,9 @@ fn panics_lists_every_site_of_the_elf() {
     let (code, text) = panics("panic_sites_service", &[]);
     assert_eq!(code, 0, "{text}");
     assert!(
-        text.contains("panic_sites (firmware.elf): 16 panic sites"),
+        text.contains(
+            "panic_sites (firmware.elf): 17 panic sites, 15 in the project, 2 in dependencies"
+        ),
         "{text}"
     );
     assert!(text.contains("src/power.rs:17:5"), "{text}");
@@ -104,7 +106,7 @@ fn panics_lists_every_site_of_the_elf() {
         text.contains("(folded: no line)            bounds 0   _start"),
         "{text}"
     );
-    assert!(text.contains("by kind: bounds 2, division 1, expect 1, overflow 5, panic 4, refcell 1, slice 1, unwrap 1"), "{text}");
+    assert!(text.contains("by kind: bounds 2, division 1, expect 1, overflow 5, panic 4, refcell 1, resumed 1, slice 1, unwrap 1"), "{text}");
 }
 
 #[test]
@@ -114,14 +116,19 @@ fn panics_as_json_and_as_acknowledgement_entries() {
     let v: serde_json::Value = serde_json::from_str(&text).unwrap();
     assert_eq!(v["schema"], "spirit_level.panics/1");
     let sites = v["firmware"][0]["sites"].as_array().unwrap();
-    assert_eq!(sites.len(), 16, "{v}");
+    assert_eq!(sites.len(), 17, "{v}");
     let expect = sites.iter().find(|s| s["kind"] == "expect").unwrap();
     assert_eq!(expect["function"], "panic_sites::power::duty");
     assert_eq!(expect["rel"], "src/power.rs");
     assert_eq!(expect["place"]["line"], 21);
+    let resumed = sites.iter().find(|s| s["kind"] == "resumed").unwrap();
+    assert_eq!(resumed["function"], "panic_sites::led::settle::{closure#0}");
+    assert_eq!(resumed["in_project"], true);
+    let start = sites.iter().find(|s| s["function"] == "_start").unwrap();
+    assert_eq!(start["in_project"], false, "no crate in its name");
 
     let (code, toml) = panics("panic_sites", &["--tier", "embedded", "--ack"]);
     assert_eq!(code, 0, "{toml}");
-    assert_eq!(toml.matches("[[site]]").count(), 16, "{toml}");
+    assert_eq!(toml.matches("[[site]]").count(), 17, "{toml}");
     assert!(toml.contains("# src/power.rs:21\n[[site]]\nfunction = \"panic_sites::power::duty\"\nkind = \"expect\"\nindex = 0\nreason = \"\"\n"), "{toml}");
 }
