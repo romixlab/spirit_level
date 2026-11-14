@@ -60,4 +60,19 @@ wgpu = ["foo_gpu"]                  # only these crates may depend on wgpu direc
 | `external.<crate>` | a crate of another project taken by git: its URL, its branch (optional) and the layer that may use it; how it is pinned is `git-dependency-pins`' policy |
 | `third-party.<crate>` | workspace crates that alone may depend on a heavy third-party crate |
 
-Unknown keys are errors, like everywhere in the configuration. Dev-dependencies are exempt from the layer rule but not from `forbid`. To fix an edge that points the wrong way, move a crate; do not reorder the layers.
+Unknown keys are errors, like everywhere in the configuration; the next section is the one way around that. Dev-dependencies are exempt from the layer rule but not from `forbid`. To fix an edge that points the wrong way, move a crate; do not reorder the layers.
+
+## A map another tool owns
+
+A workspace whose own generator or linter reads the map keeps keys spl does not know beside spl's: a coverage cell, a release, a licence, whole tables of its own. Name those keys in `foreign`, and spl leaves them to their owner:
+
+```toml
+[map-file]
+path = "crates.toml"
+foreign = ["meta", "domains", "deferred", "layers.*.licence", "crates.*.cell", "crates.*.area", "crates.*.when"]
+```
+
+- Each entry is a dotted key path; `*` stands for any one key, a crate's or a layer's name. A path that ends at a table hands the whole table over.
+- spl reads its own keys as everywhere else. A key that is neither spl's nor listed is an error, so a typo in an spl key (`depz` for `deps`) still stops the run, with the nearest key spl knows.
+- An entry that names a key spl reads (`crates.*.deps`) is an error: a key has one owner.
+- The owner checks its keys; spl never looks at them. `map-file = "crates.toml"` is the same table with no `foreign` entries.

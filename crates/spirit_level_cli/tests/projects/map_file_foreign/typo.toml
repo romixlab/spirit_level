@@ -1,0 +1,13 @@
+# A crate map that another tool owns in part: spl reads its own keys and leaves those listed in foreign.
+
+[map-file]
+path = "crates_typo.toml"
+foreign = ["meta", "domains", "layers.*.licence", "crates.*.cell", "crates.*.area", "crates.*.when"]
+
+[lints.map-complete]
+level = "deny"
+reason = "fixture"
+
+[lints.layer-edges]
+level = "deny"
+reason = "fixture"

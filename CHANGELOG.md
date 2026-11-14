@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `[map-file] foreign`: map keys another tool owns are left to it; unknown keys suggest the nearest spl key (CFG-6).
+
 ## [0.4.1] - 2026-11-15
 
 ### Fixed

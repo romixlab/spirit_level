@@ -3,7 +3,55 @@
 
 use crate::error::ConfigError;
 use sl_model::TomlFile;
+use std::cell::RefCell;
+use std::collections::BTreeSet;
 use toml_edit::{Item, TableLike, Value};
+
+/// The key paths of a map file that the map's owner checks: spl leaves them unread instead of reporting them
+pub struct Foreign {
+    patterns: Vec<Vec<String>>,
+    /// The patterns that name a key spl reads
+    clash: RefCell<BTreeSet<usize>>,
+}
+
+impl Foreign {
+    /// Dotted key paths (`meta`, `crates.*.cell`); `*` stands for any one key
+    pub fn new(patterns: &[String]) -> Result<Self, String> {
+        let mut out = Vec::new();
+        for p in patterns {
+            let segs: Vec<String> = p.split('.').map(str::to_owned).collect();
+            if segs.iter().any(String::is_empty) {
+                return Err(format!(
+                    "map-file.foreign: {p:?} is not a dotted key path such as \"meta\" or \"crates.*.cell\""
+                ));
+            }
+            out.push(segs);
+        }
+        Ok(Self {
+            patterns: out,
+            clash: RefCell::new(BTreeSet::new()),
+        })
+    }
+
+    /// The pattern that names `key` of the table at `path`
+    fn find(&self, path: &[String], key: &str) -> Option<usize> {
+        self.patterns.iter().position(|p| {
+            p.len() == path.len() + 1
+                && p.iter()
+                    .zip(path.iter().map(String::as_str).chain([key]))
+                    .all(|(want, got)| want == "*" || want == got)
+        })
+    }
+
+    /// The patterns that name a key spl reads, so they are not the owner's
+    pub fn clashes(&self) -> Vec<String> {
+        self.clash
+            .borrow()
+            .iter()
+            .filter_map(|i| self.patterns.get(*i).map(|p| p.join(".")))
+            .collect()
+    }
+}
 
 /// A table being read
 pub struct Reader<'a> {
@@ -11,6 +59,7 @@ pub struct Reader<'a> {
     pub(crate) path: Vec<String>,
     pub(crate) table: &'a dyn TableLike,
     used: Vec<String>,
+    foreign: Option<&'a Foreign>,
 }
 
 impl<'a> Reader<'a> {
@@ -21,7 +70,14 @@ impl<'a> Reader<'a> {
             path,
             table,
             used: Vec::new(),
+            foreign: None,
         }
+    }
+
+    /// The same reader over a map file whose owner checks the keys `foreign` names
+    pub fn with_foreign(mut self, foreign: &'a Foreign) -> Self {
+        self.foreign = Some(foreign);
+        self
     }
 
     /// The line of a key of this table (the table's own line when `key` is empty)
@@ -151,19 +207,55 @@ impl<'a> Reader<'a> {
         if let Some(t) = item.as_table_like() {
             let mut path = self.path.clone();
             path.push(key.to_owned());
-            Some(Reader::new(self.file, path, t))
+            let mut r = Reader::new(self.file, path, t);
+            r.foreign = self.foreign;
+            Some(r)
         } else {
             errs.push(self.err(key, format!("{} must be a table", self.name(key))));
             None
         }
     }
 
-    /// Reports every key not read as unknown
+    /// Reports every key not read as unknown, unless the map's owner checks it
     pub fn finish(self, errs: &mut Vec<ConfigError>) {
-        for (k, _) in self.table.iter() {
-            if !self.used.iter().any(|u| u == k) {
-                errs.push(self.err(k, format!("unknown key {}", self.name(k))));
+        if let Some(f) = self.foreign {
+            for u in &self.used {
+                if let Some(i) = f.find(&self.path, u) {
+                    f.clash.borrow_mut().insert(i);
+                }
             }
+        }
+        for (k, _) in self.table.iter() {
+            if self.used.iter().any(|u| u == k)
+                || self
+                    .foreign
+                    .is_some_and(|f| f.find(&self.path, k).is_some())
+            {
+                continue;
+            }
+            let near = self
+                .used
+                .iter()
+                .filter(|u| self.table.get(u.as_str()).is_none())
+                .map(|u| (crate::distance(u, k), u))
+                .filter(|(d, _)| *d <= 2)
+                .min_by_key(|(d, _)| *d);
+            let hint = if let Some((_, near)) = near {
+                format!("; did you mean {near}?")
+            } else if self.foreign.is_some() {
+                let mut p: Vec<&str> = self.path.iter().map(String::as_str).collect();
+                if let Some(entry) = p.get_mut(1) {
+                    *entry = "*";
+                }
+                p.push(k);
+                format!(
+                    " (a key the map's owner checks goes in map-file.foreign: \"{}\")",
+                    p.join(".")
+                )
+            } else {
+                String::new()
+            };
+            errs.push(self.err(k, format!("unknown key {}{hint}", self.name(k))));
         }
     }
 }

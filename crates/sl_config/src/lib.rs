@@ -2,7 +2,8 @@
 //!
 //! ```toml
 //! extends = "big"                     # a shipped tier, a list of them, or a path to a shared file
-//! map-file = "crates.toml"            # or an inline [map] table
+//! map-file = "crates.toml"            # or an inline [map] table; a table when another tool owns part of it:
+//!                                     # [map-file] path = "crates.toml", foreign = ["meta", "crates.*.area"]
 //!
 //! [lints.crate-lines]                 # an override: level and/or parameters, always with a reason
 //! level = "deny"
@@ -459,33 +460,70 @@ impl<'a> Resolver<'a> {
             if let Some(e) = r.table("embedded", &mut errs) {
                 self.embedded = Embedded::read(e, &mut errs);
             }
-            if let Some(mf) = r.opt_str("map-file", &mut errs) {
-                if self.map.is_some() {
-                    errs.push(r.err(
-                        "map-file",
-                        "give the map either inline ([map]) or as map-file, not both",
-                    ));
-                } else {
-                    let path = dir.join(&mf);
-                    let mrel = path
-                        .strip_prefix(&self.root)
-                        .map_or_else(|_| path.display().to_string(), |p| p.display().to_string());
-                    match std::fs::read_to_string(&path)
-                        .map_err(|e| e.to_string())
-                        .and_then(|t| TomlFile::parse(mrel, t))
-                    {
-                        Ok(mfile) => {
-                            let mr = Reader::new(&mfile, Vec::new(), mfile.root());
-                            self.map = Some(Map::read(mr, &mut errs));
-                        }
-                        Err(e) => errs.push(r.err("map-file", format!("map-file {mf}: {e}"))),
-                    }
-                }
+            if r.table.get("map-file").is_some() {
+                self.map_file(&mut r, &dir, &mut errs);
             }
         }
         r.finish(&mut errs);
         self.errs.extend(errs);
         self.stack.pop();
+    }
+
+    /// `map-file = "crates.toml"`, or a table with the path and the keys the map's owner checks
+    fn map_file(&mut self, r: &mut Reader<'_>, dir: &Path, errs: &mut Vec<ConfigError>) {
+        let (mf, foreign, at) = if r.table.get("map-file").is_some_and(|i| i.is_str()) {
+            (
+                r.opt_str("map-file", errs),
+                Vec::new(),
+                r.err("map-file", ""),
+            )
+        } else if let Some(mut t) = r.table("map-file", errs) {
+            let mf = t.str("path", errs);
+            let foreign = t.opt_list("foreign", false, errs).unwrap_or_default();
+            let at = t.err("foreign", "");
+            t.finish(errs);
+            (mf, foreign, at)
+        } else {
+            return;
+        };
+        let Some(mf) = mf else { return };
+        if self.map.is_some() {
+            errs.push(r.err(
+                "map-file",
+                "give the map either inline ([map]) or as map-file, not both",
+            ));
+            return;
+        }
+        let foreign = match reader::Foreign::new(&foreign) {
+            Ok(f) => f,
+            Err(e) => {
+                errs.push(ConfigError::new(&at.file, at.line, e));
+                return;
+            }
+        };
+        let path = dir.join(&mf);
+        let mrel = path
+            .strip_prefix(&self.root)
+            .map_or_else(|_| path.display().to_string(), |p| p.display().to_string());
+        match std::fs::read_to_string(&path)
+            .map_err(|e| e.to_string())
+            .and_then(|t| TomlFile::parse(mrel, t))
+        {
+            Ok(mfile) => {
+                let mr = Reader::new(&mfile, Vec::new(), mfile.root()).with_foreign(&foreign);
+                self.map = Some(Map::read(mr, errs));
+            }
+            Err(e) => errs.push(r.err("map-file", format!("map-file {mf}: {e}"))),
+        }
+        for p in foreign.clashes() {
+            errs.push(ConfigError::new(
+                &at.file,
+                at.line,
+                format!(
+                    "map-file.foreign lists {p}, which spl reads itself: remove it from the list"
+                ),
+            ));
+        }
     }
 
     fn lints_table(&mut self, mut lints: Reader<'_>, expiring: bool, errs: &mut Vec<ConfigError>) {
@@ -746,7 +784,7 @@ fn unknown_lint(id: &str, lints: &[&'static LintMeta]) -> String {
     }
 }
 
-fn distance(a: &str, b: &str) -> usize {
+pub(crate) fn distance(a: &str, b: &str) -> usize {
     let b: Vec<char> = b.chars().collect();
     let mut prev: Vec<usize> = (0..=b.len()).collect();
     for (i, ca) in a.chars().enumerate() {

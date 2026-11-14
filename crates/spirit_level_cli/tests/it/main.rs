@@ -2,4 +2,5 @@
 
 mod cli;
 mod elf;
+mod projects;
 mod tools;

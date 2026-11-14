@@ -4,7 +4,7 @@ A project's configuration is `spirit_level.toml` at the workspace root. It exten
 
 ```toml
 extends = "big"                      # a shipped tier, a list, or a path to a shared .toml file
-map-file = "crates.toml"             # the crate map, or inline as [map]
+map-file = "crates.toml"             # the crate map, or inline as [map]; a table when another tool owns part of it
 
 [lints.crate-lines]                  # an override
 level = "deny"                       # allow, warn or deny
@@ -43,7 +43,7 @@ timeout-secs = 20
 - **Parameters** are the lint's own keys, listed on its page with their type and default. An unknown parameter or a value of the wrong type is an error.
 - **Expiries:** a date (expired from that day on) or a release (expired once the project's version, from `[workspace.package]` or `[package]`, reaches it). An expired override or exception is an error: fix what it allowed and remove it, or renew it with a new reason and expiry.
 - **Exceptions** apply to findings about the listed crates or whose file matches a path pattern (`*` within a segment, `**` across segments). They change the level, parameters, or both. Their parameters apply to the crates they name.
-- **Unknown keys fail.** A typo in a key, a lint id or a tier name stops the run with the file and line, before any lint runs.
+- **Unknown keys fail.** A typo in a key, a lint id or a tier name stops the run with the file and line, before any lint runs. In a map file, keys another tool owns are named in `[map-file] foreign` ([The crate map](map.md#a-map-another-tool-owns)).
 - **Codes or ids.** A lint is named by its id or its code: `[lints.S0001]` is `[lints.crate-lines]`, in exceptions (`lint = "S0001"`), waivers and `--only` too.
 
 ## Tables beside the lints

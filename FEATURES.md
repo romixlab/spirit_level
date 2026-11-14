@@ -9,6 +9,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `CFG-3` Unknown keys, lint ids, parameters and wrong types fail loudly with file and line.
 - ✅ `CFG-4` Scoped exceptions by crate or path glob: level and/or parameters, reason, expiry.
 - ✅ `CFG-5` The crate map: layers with allow lists, crates with layer and flags, forbid, external, third-party.
+- ✅ `CFG-6` `foreign-map-keys`: `[map-file] foreign` names the key paths the map's owner checks; spl leaves them unread, and a typo in an spl key stays an error.
 
 ## ENG - engine and output
 

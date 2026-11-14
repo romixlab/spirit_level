@@ -71,12 +71,20 @@ fn env() -> Env<'static> {
 }
 
 fn load(text: &str) -> Result<Config, Vec<ConfigError>> {
+    load_with(text, &[])
+}
+
+/// Loads `text` as the project file beside `files`
+fn load_with(text: &str, files: &[(&str, &str)]) -> Result<Config, Vec<ConfigError>> {
     // one directory per call: tests run in parallel threads, and two of them may load the same text
     static NEXT: std::sync::atomic::AtomicUsize = std::sync::atomic::AtomicUsize::new(0);
     let n = NEXT.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
     let dir = std::env::temp_dir().join(format!("sl_config_test_{}_{n}", std::process::id()));
     std::fs::create_dir_all(&dir).unwrap();
     std::fs::write(dir.join(FILE), text).unwrap();
+    for (p, t) in files {
+        std::fs::write(dir.join(p), t).unwrap();
+    }
     let e = env();
     let c = Config::load(&dir, None, &e);
     let _ = std::fs::remove_dir_all(&dir);
@@ -237,6 +245,72 @@ fn map_is_read_and_checked() {
     assert!(
         e.iter().any(|s| s.contains("crate a is in layer x")),
         "{e:?}"
+    );
+}
+
+const OWNED_MAP: &str = "[meta]\nversion = 1\n[layers.core]\nallow = [\"core\"]\nlicence = \"MIT\"\n[crates]\na = { layer = \"core\", area = \"MODEL\", contract = true }\n";
+
+#[test]
+fn map_file_leaves_foreign_keys_to_the_owner() {
+    let c = load_with(
+        "extends = \"small\"\n[map-file]\npath = \"crates.toml\"\nforeign = [\"meta\", \"layers.*.licence\", \"crates.*.area\"]\n",
+        &[("crates.toml", OWNED_MAP)],
+    )
+    .unwrap();
+    let m = c.map.unwrap();
+    assert!(m.crates["a"].contract);
+    assert_eq!(m.layers[0].allow, ["core"]);
+}
+
+#[test]
+fn map_file_without_foreign_rejects_the_owners_keys() {
+    let e = messages(load_with(
+        "extends = \"small\"\nmap-file = \"crates.toml\"\n",
+        &[("crates.toml", OWNED_MAP)],
+    ));
+    assert!(
+        e.iter().any(|s| s.contains("unknown key crates.a.area")
+            && s.contains("map-file.foreign: \"crates.*.area\"")),
+        "{e:?}"
+    );
+    assert!(e.iter().any(|s| s.contains("unknown key meta")), "{e:?}");
+}
+
+#[test]
+fn map_file_typo_in_an_spl_key_is_still_an_error() {
+    let e = messages(load_with(
+        "extends = \"small\"\n[map-file]\npath = \"crates.toml\"\nforeign = [\"meta\", \"layers.*.licence\", \"crates.*.area\"]\n",
+        &[(
+            "crates.toml",
+            &OWNED_MAP.replace("contract = true", "contarct = true"),
+        )],
+    ));
+    assert_eq!(e.len(), 1, "{e:?}");
+    assert!(
+        e[0].starts_with("crates.toml:7: unknown key crates.a.contarct; did you mean contract?"),
+        "{e:?}"
+    );
+}
+
+#[test]
+fn map_file_foreign_may_not_take_an_spl_key() {
+    let e = messages(load_with(
+        "extends = \"small\"\n[map-file]\npath = \"crates.toml\"\nforeign = [\"meta\", \"layers.*.licence\", \"crates.*.area\", \"crates.*.contract\", \"bad..path\"]\n",
+        &[("crates.toml", OWNED_MAP)],
+    ));
+    assert!(
+        e[0].contains("\"bad..path\" is not a dotted key path"),
+        "{e:?}"
+    );
+    let e = messages(load_with(
+        "extends = \"small\"\n[map-file]\npath = \"crates.toml\"\nforeign = [\"meta\", \"layers.*.licence\", \"crates.*.area\", \"crates.*.contract\"]\n",
+        &[("crates.toml", OWNED_MAP)],
+    ));
+    assert_eq!(
+        e,
+        [
+            "spirit_level.toml:4: map-file.foreign lists crates.*.contract, which spl reads itself: remove it from the list"
+        ]
     );
 }
 

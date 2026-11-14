@@ -1,0 +1,17 @@
+[meta]
+version = 1
+
+[domains]
+core = "Platform"
+
+[layers.utils]
+allow = ["utils"]
+licence = "MIT OR Apache-2.0"
+
+[layers.model]
+allow = ["utils", "model"]
+licence = "MIT OR Apache-2.0"
+
+[crates]
+a = { layer = "utils", cell = "core.X", area = "MODEL", when = "v0.1" }
+b = { layer = "model", cell = "core.X", area = "MODEL", when = "v0.1", depz = ["a"] }
