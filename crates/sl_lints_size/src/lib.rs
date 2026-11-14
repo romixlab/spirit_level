@@ -18,7 +18,7 @@ lint!(FUNCTION_LINES, "S0003", "function-lines", "size", "a function stays under
     params: [("max-lines", Int, "150", "code lines of one function above which it is reported")],
     needs: [], fix: None);
 lint!(FUNCTION_COMPLEXITY, "S0002", "function-complexity", "size", "a function's cyclomatic complexity stays under its limit",
-    params: [("max", Int, "25", "the highest complexity allowed")],
+    params: [("max", Int, "15", "the highest complexity allowed")],
     needs: [], fix: None);
 
 /// The size analysis

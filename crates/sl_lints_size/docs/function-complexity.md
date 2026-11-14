@@ -1,6 +1,6 @@
 ## Why
 
-Cyclomatic complexity counts the independent paths through a function: 1, plus one for each `if`, loop, `?`, `&&`, `||` and each `match` arm after the first. Above about 25 a function cannot be tested path by path or held in one's head.
+Cyclomatic complexity counts the independent paths through a function: 1, plus one for each `if`, loop, `?`, `&&`, `||` and each `match` arm after the first. Above about 15 a function cannot be tested path by path or held in one's head.
 
 ## How to fix
 

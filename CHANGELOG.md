@@ -4,6 +4,7 @@
 
 ### Changed
 
+- function-complexity (S0002) limit 25 -> 15.
 - Theme overrides folder renamed `docs-overrides/`.
 - Tier TOMLs moved to `tiers/` at the repo root.
 
