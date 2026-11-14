@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.2.5] - 2026-11-14
+
 ### Added
 
 - Reading lints D0001-D0007: prose runs, reading time, heading length, sections, code walls, image text, code languages (DOCS-1).
