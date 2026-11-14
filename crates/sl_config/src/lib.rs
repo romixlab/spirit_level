@@ -568,37 +568,42 @@ impl<'a> Resolver<'a> {
             self.clippy.read(c, &mut errs);
         }
         if !tier {
-            for t in tables(&mut r, "exceptions", &mut errs) {
-                self.exception(t, &mut errs);
-            }
-            for t in tables(&mut r, "crate-tiers", &mut errs) {
-                self.tier_entry(t, &dir, &mut errs);
-            }
-            if let Some(m) = r.table("map", &mut errs) {
-                self.map = Some(Map::read(m, &mut errs));
-            }
-            if let Some(d) = r.table("dependents", &mut errs) {
-                self.dependents = Some(Dependents::read(d, &dir, &mut errs));
-            }
-            if let Some(d) = r.table("docs", &mut errs) {
-                self.docs = Docs::read(d, &mut errs);
-            }
-            if let Some(c) = r.table("cli", &mut errs) {
-                self.cli = CliProbe::read(c, &mut errs);
-            }
-            if let Some(b) = r.table("board", &mut errs) {
-                self.board = Board::read(b, &mut errs);
-            }
-            if let Some(e) = r.table("embedded", &mut errs) {
-                self.embedded = Embedded::read(e, &mut errs);
-            }
-            if r.table.get("map-file").is_some() {
-                self.map_file(&mut r, &dir, &mut errs);
-            }
+            self.project_tables(&mut r, &dir, &mut errs);
         }
         r.finish(&mut errs);
         self.errs.extend(errs);
         self.stack.pop();
+    }
+
+    /// The tables only a project file or a shared file sets, never a tier
+    fn project_tables(&mut self, r: &mut Reader<'_>, dir: &Path, errs: &mut Vec<ConfigError>) {
+        for t in tables(r, "exceptions", errs) {
+            self.exception(t, errs);
+        }
+        for t in tables(r, "crate-tiers", errs) {
+            self.tier_entry(t, dir, errs);
+        }
+        if let Some(m) = r.table("map", errs) {
+            self.map = Some(Map::read(m, errs));
+        }
+        if let Some(d) = r.table("dependents", errs) {
+            self.dependents = Some(Dependents::read(d, dir, errs));
+        }
+        if let Some(d) = r.table("docs", errs) {
+            self.docs = Docs::read(d, errs);
+        }
+        if let Some(c) = r.table("cli", errs) {
+            self.cli = CliProbe::read(c, errs);
+        }
+        if let Some(b) = r.table("board", errs) {
+            self.board = Board::read(b, errs);
+        }
+        if let Some(e) = r.table("embedded", errs) {
+            self.embedded = Embedded::read(e, errs);
+        }
+        if r.table.get("map-file").is_some() {
+            self.map_file(r, dir, errs);
+        }
     }
 
     /// `map-file = "crates.toml"`, or a table with the path and the keys the map's owner checks
