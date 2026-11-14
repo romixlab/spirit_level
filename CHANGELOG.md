@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.2.6] - 2026-11-14
+
 ### Added
 
 - CLI lints C0020-C0029: spl builds each CLI and checks help, examples, completion, colour, version and exit codes (CODE-9).
