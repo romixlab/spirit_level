@@ -1,6 +1,7 @@
 //! Fixture.
 
 mod a;
+mod b;
 #[path = "elsewhere.rs"]
 mod other;
 

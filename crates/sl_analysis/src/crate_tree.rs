@@ -212,6 +212,16 @@ fn walk<'a>(
 ) {
     let m = &tree.modules[idx];
     let (file, items, prefix) = (m.file, m.items, m.path.clone());
+    // rustc reads `#[path]` on a `mod x;` of a file's top level relative to the file's own directory; inside an
+    // inline module, relative to that module's directory
+    let file_level = m.lines == (1, file.lines.total);
+    let path_base = if file_level {
+        file.in_package
+            .rsplit_once('/')
+            .map_or_else(String::new, |(d, _)| d.to_owned())
+    } else {
+        dir.to_owned()
+    };
     for item in items {
         let Item::Mod(im) = item else { continue };
         if !tests && is_test(&im.attrs) {
@@ -238,7 +248,7 @@ fn walk<'a>(
             c
         } else {
             let candidates = match &attr_path {
-                Some(p) => vec![normalize(&join_dir(dir, p))],
+                Some(p) => vec![normalize(&join_dir(&path_base, p))],
                 None => vec![
                     normalize(&join_dir(dir, &format!("{name}.rs"))),
                     normalize(&join_dir(dir, &format!("{name}/mod.rs"))),
