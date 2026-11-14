@@ -12,7 +12,7 @@ lint!(TEST_LINES, "S0005", "test-lines", "size", "a crate's test code stays unde
     params: [("max-lines", Int, "20000", "code lines in tests/, benches/ and examples/ above which a crate is reported")],
     needs: [], fix: None);
 lint!(MODULE_LINES, "S0004", "module-lines", "size", "a source file stays under its line limit",
-    params: [("max-lines", Int, "2000", "code lines of one file above which it is reported")],
+    params: [("max-lines", Int, "1000", "code lines of one file above which it is reported")],
     needs: [], fix: None);
 lint!(FUNCTION_LINES, "S0003", "function-lines", "size", "a function stays under its line limit",
     params: [("max-lines", Int, "150", "code lines of one function above which it is reported")],

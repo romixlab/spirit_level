@@ -57,7 +57,7 @@ The project turns these on in its own `[workspace.lints.clippy]` (`allow` rows a
 
 | Setting | Value | Reason | Set in |
 |---|---|---|---|
-| `cognitive-complexity-threshold` | `25` | Clippy's default; spl's function-complexity (cyclomatic, 15) is the tighter limit | ai |
+| `cognitive-complexity-threshold` | `20` | set on samples: 17 read fine, 21 and 25 were too long; spl's function-complexity (cyclomatic, 15) counts paths | ai |
 
 ## The file
 
@@ -206,5 +206,5 @@ too_long_first_doc_paragraph = { level = "warn", reason = "agents write long doc
 cognitive_complexity = { level = "warn", reason = "agents grow functions branch by branch; a tangled one is split" }
 
 [clippy.config]
-cognitive-complexity-threshold = { value = 25, reason = "Clippy's default; spl's function-complexity (cyclomatic, 15) is the tighter limit" }
+cognitive-complexity-threshold = { value = 20, reason = "set on samples: 17 read fine, 21 and 25 were too long; spl's function-complexity (cyclomatic, 15) counts paths" }
 ```

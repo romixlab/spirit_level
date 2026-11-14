@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- cognitive-complexity-threshold 25 -> 20; module-lines (S0004) 2000 -> 1000.
+
 ## [0.2.2] - 2026-11-14
 
 ### Added

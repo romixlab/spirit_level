@@ -135,7 +135,7 @@ The project turns these on in its own `[workspace.lints.clippy]` (`allow` rows a
 |---|---|---|---|
 | `allow-print-in-tests` | `true` | a test may print what it saw | medium |
 | `allow-unwrap-in-tests` | `true` | a test that unwraps fails at the unwrap, which is what a test should do | small |
-| `cognitive-complexity-threshold` | `25` | Clippy's default; spl's function-complexity (cyclomatic, 15) is the tighter limit | medium |
+| `cognitive-complexity-threshold` | `20` | set on samples: 17 read fine, 21 and 25 were too long; spl's function-complexity (cyclomatic, 15) counts paths | medium |
 | `max-fn-params-bools` | `1` | two bool parameters are a call site nobody can read; an enum or a struct says what each means | medium |
 
 ## The file
@@ -290,7 +290,7 @@ cargo_common_metadata = { level = "allow", reason = "keywords and categories mat
 multiple_crate_versions = { level = "allow", reason = "spl's duplicate-versions checks this, with a reasoned allow list" }
 
 [clippy.config]
-cognitive-complexity-threshold = { value = 25, reason = "Clippy's default; spl's function-complexity (cyclomatic, 15) is the tighter limit" }
+cognitive-complexity-threshold = { value = 20, reason = "set on samples: 17 read fine, 21 and 25 were too long; spl's function-complexity (cyclomatic, 15) counts paths" }
 allow-print-in-tests = { value = true, reason = "a test may print what it saw" }
 max-fn-params-bools = { value = 1, reason = "two bool parameters are a call site nobody can read; an enum or a struct says what each means" }
 ```
