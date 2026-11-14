@@ -23,6 +23,7 @@ pub const HAND_PAGES: &[(&str, &str)] = &[
     ("Configuration", "configuration.md"),
     ("The crate map", "map.md"),
     ("CLI checks", "cli.md"),
+    ("UI practices", "ui.md"),
     ("Waivers", "waivers.md"),
     ("Commits and landing", "commits.md"),
     ("Output and exit codes", "output.md"),
