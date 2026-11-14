@@ -334,3 +334,13 @@ fn pages_table_detail_and_json() {
     let o = run(&p.0, &["pages", "--page", "nope.md"]);
     assert_eq!(o.status.code(), Some(2), "{}", text(&o));
 }
+
+#[test]
+fn long_help_is_the_about_not_a_flattened_struct_s_rustdoc() {
+    let dir = std::env::temp_dir();
+    let o = run(&dir, &["--help"]);
+    assert_eq!(o.status.code(), Some(0), "{}", text(&o));
+    let out = String::from_utf8_lossy(&o.stdout);
+    assert!(out.starts_with("A linter for Rust projects"), "{out}");
+    assert!(!out.contains("```"), "{out}");
+}

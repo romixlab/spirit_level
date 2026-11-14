@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- `spl --help` opens with spl's own description, not vc_ui ColorFlag's rustdoc (CLI-4).
+
 ## [0.2.5] - 2026-11-14
 
 ### Added
