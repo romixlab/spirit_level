@@ -295,7 +295,7 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [G0005](G0005.md) | [external-form](G0005.md) | crates of other projects come by git as the map lists them, used only where their role allows | off | off | off | deny | off | off | off | off | off | off |
 | [G0006](G0006.md) | [forbidden-closure](G0006.md) | a crate never reaches the crates the map forbids it, directly or through others | off | off | off | deny | off | off | off | off | off | off |
 | [G0007](G0007.md) | [layer-edges](G0007.md) | every dependency edge between workspace crates is allowed by the map | off | off | off | deny | off | off | off | off | off | off |
-| [G0008](G0008.md) | [map-complete](G0008.md) | the crate map and the workspace list the same crates | off | off | off | deny | off | off | off | off | off | off |
+| [G0008](G0008.md) | [map-complete](G0008.md) | the crate map and the workspaces list the same crates | off | off | off | deny | off | off | off | off | off | off |
 | [G0009](G0009.md) | [third-party-placement](G0009.md) | heavy third-party crates are used only by the crates the map names | off | off | off | deny | off | off | off | off | off | off |
 | [G0010](G0010.md) | [unsafe-allow-list](G0010.md) | unsafe code is forbidden except in the crates the map marks unsafe | off | off | off | deny | off | off | off | off | off | off |
 | [G0011](G0011.md) | [crate-folder-layer](G0011.md) | a crate's folder is its layer in the map, then its discipline where the map gives one | off | off | off | deny | off | off | off | off | off | off |

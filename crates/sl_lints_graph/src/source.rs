@@ -99,7 +99,7 @@ pub(crate) fn unsafe_allow_list(cx: &Context<'_>, p: &Project, map: &Map) {
     });
     if level.as_deref() != Some("forbid") {
         cx.emit(
-            Diagnostic::new("unsafe-allow-list", "unsafe_code", format!("{} does not set unsafe_code = \"forbid\"", path[..path.len() - 1].join(".")))
+            Diagnostic::new("unsafe-allow-list", if p.workspace.is_empty() { "unsafe_code".to_owned() } else { format!("{}:unsafe_code", p.workspace) }, format!("{} does not set unsafe_code = \"forbid\"", path[..path.len() - 1].join(".")))
                 .span(root.span(&path))
                 .help(format!("set `unsafe_code = \"forbid\"` under [{}]; the crates the map marks `unsafe = true` override it in their own [lints]", path[..path.len() - 1].join("."))),
         );

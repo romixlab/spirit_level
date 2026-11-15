@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Map key `workspace`: `map-complete` and the map lints also check nested workspaces the map names, like `tools/` (GRAPH-6).
+
 ## [0.4.10] - 2026-11-15
 
 ### Changed

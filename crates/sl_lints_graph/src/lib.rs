@@ -13,7 +13,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 pub use scc::strongly_connected;
 
-lint!(MAP_COMPLETE, "G0008", "map-complete", "graph", "the crate map and the workspace list the same crates",
+lint!(MAP_COMPLETE, "G0008", "map-complete", "graph", "the crate map and the workspaces list the same crates",
     params: [], needs: [Need::Map], fix: None);
 lint!(LAYER_EDGES, "G0007", "layer-edges", "graph", "every dependency edge between workspace crates is allowed by the map",
     params: [], needs: [Need::Map], fix: None);
@@ -79,16 +79,27 @@ impl Analysis for Graph {
     fn run(&self, cx: &Context<'_>) {
         let p = cx.project;
         if let Some(map) = cx.map() {
-            map_complete(cx, p, map);
-            layer_edges(cx, p, map);
-            external_form(cx, p, map);
-            third_party(cx, p, map);
-            folders::crate_folder_layer(cx, p, map);
-            if cx.enabled("forbidden-closure") {
-                forbidden(cx, p, map);
+            let mut nested = Vec::new();
+            let mut unread = Vec::new();
+            for dir in map.workspaces() {
+                match p.nested(dir) {
+                    Ok(w) => nested.push(w),
+                    Err(e) => unread.push((dir, e)),
+                }
             }
-            if cx.enabled("unsafe-allow-list") {
-                source::unsafe_allow_list(cx, p, map);
+            let all: Vec<&Project> = std::iter::once(p).chain(&nested).collect();
+            map_complete(cx, &all, &unread, map);
+            folders::crate_folder_layer(cx, p, map);
+            for w in all {
+                layer_edges(cx, w, map);
+                external_form(cx, w, map);
+                third_party(cx, w, map);
+                if cx.enabled("forbidden-closure") {
+                    forbidden(cx, w, map);
+                }
+                if cx.enabled("unsafe-allow-list") {
+                    source::unsafe_allow_list(cx, w, map);
+                }
             }
         }
         core_deps(cx, p);
@@ -116,37 +127,108 @@ fn map_line(map: &Map, krate: &str) -> Span {
     )
 }
 
-fn map_complete(cx: &Context<'_>, p: &Project, map: &Map) {
-    for pkg in &p.packages {
-        if !map.crates.contains_key(&pkg.name) {
-            cx.emit(
-                Diagnostic::new(
-                    "map-complete",
-                    format!("crate:{}", pkg.name),
-                    format!("{} is not in the crate map", pkg.name),
-                )
-                .span(Span::new(pkg.manifest.rel.clone(), 1))
-                .span(Span::new(map.file.clone(), map.line).label("the map"))
-                .krate(&pkg.name)
-                .help(format!(
-                    "add `{} = {{ layer = \"...\" }}` under [map.crates]",
-                    pkg.name
-                )),
-            );
+/// How a finding names a workspace: the checked one, or a nested one by its directory
+fn workspace_name(dir: &str) -> String {
+    if dir.is_empty() {
+        "the workspace".to_owned()
+    } else {
+        format!("the workspace in {dir}/")
+    }
+}
+
+/// The map against the members of the checked workspace and of every nested workspace the map names
+fn map_complete(
+    cx: &Context<'_>,
+    all: &[&Project],
+    unread: &[(&str, sl_model::LoadError)],
+    map: &Map,
+) {
+    for (dir, e) in unread {
+        let line = map
+            .crates
+            .values()
+            .find(|c| c.workspace.as_deref() == Some(*dir))
+            .map_or(map.line, |c| c.line);
+        cx.emit(
+            Diagnostic::new(
+                "map-complete",
+                format!("workspace:{dir}"),
+                format!(
+                    "the map lists crates of {}, which cannot be read: {e}",
+                    workspace_name(dir)
+                ),
+            )
+            .span(Span::new(map.file.clone(), line))
+            .help("create the workspace there, or correct the crates' `workspace` key in the map"),
+        );
+    }
+    for w in all {
+        for pkg in &w.packages {
+            let Some(c) = map.crates.get(&pkg.name) else {
+                let key = if w.workspace.is_empty() {
+                    String::new()
+                } else {
+                    format!(", workspace = \"{}\"", w.workspace)
+                };
+                cx.emit(
+                    Diagnostic::new(
+                        "map-complete",
+                        format!("crate:{}", pkg.name),
+                        format!("{} is not in the crate map", pkg.name),
+                    )
+                    .span(Span::new(pkg.manifest.rel.clone(), 1))
+                    .span(Span::new(map.file.clone(), map.line).label("the map"))
+                    .krate(&pkg.name)
+                    .help(format!(
+                        "add `{} = {{ layer = \"...\"{key} }}` under [map.crates]",
+                        pkg.name
+                    )),
+                );
+                continue;
+            };
+            let want = c.workspace.as_deref().unwrap_or_default();
+            if want != w.workspace {
+                cx.emit(
+                    Diagnostic::new(
+                        "map-complete",
+                        format!("crate:{}", pkg.name),
+                        format!(
+                            "{} is a member of {}, the map puts it in {}",
+                            pkg.name,
+                            workspace_name(&w.workspace),
+                            workspace_name(want)
+                        ),
+                    )
+                    .span(Span::new(pkg.manifest.rel.clone(), 1))
+                    .span(Span::new(map.file.clone(), c.line).label("its map entry"))
+                    .krate(&pkg.name)
+                    .help(if w.workspace.is_empty() {
+                        "remove `workspace` from its map entry".to_owned()
+                    } else {
+                        format!("set `workspace = \"{}\"` in its map entry", w.workspace)
+                    }),
+                );
+            }
         }
     }
     for (name, c) in &map.crates {
-        if p.package(name).is_none() {
-            cx.emit(
-                Diagnostic::new(
-                    "map-complete",
-                    format!("map:{name}"),
-                    format!("the map lists {name}, which is not a workspace member"),
-                )
+        let want = c.workspace.as_deref().unwrap_or_default();
+        if unread.iter().any(|(d, _)| *d == want) || all.iter().any(|w| w.package(name).is_some()) {
+            continue;
+        }
+        let message = if want.is_empty() {
+            format!("the map lists {name}, which is not a workspace member")
+        } else {
+            format!(
+                "the map lists {name}, which is not a member of {}",
+                workspace_name(want)
+            )
+        };
+        cx.emit(
+            Diagnostic::new("map-complete", format!("map:{name}"), message)
                 .span(Span::new(map.file.clone(), c.line))
                 .help("remove it from the map, or create the crate"),
-            );
-        }
+        );
     }
 }
 
@@ -288,7 +370,21 @@ fn third_party(cx: &Context<'_>, p: &Project, map: &Map) {
 }
 
 fn forbidden(cx: &Context<'_>, p: &Project, map: &Map) {
-    let Ok(res) = p.resolve() else { return };
+    if !map.forbid.keys().any(|from| p.package(from).is_some()) {
+        return;
+    }
+    let res = match p.resolve() {
+        Ok(res) => res,
+        Err(e) if !p.workspace.is_empty() => {
+            cx.not_run(
+                "forbidden-closure",
+                "resolve",
+                format!("{}: {e}", workspace_name(&p.workspace)),
+            );
+            return;
+        }
+        Err(_) => return,
+    };
     for (from, banned) in &map.forbid {
         let Some(start) = res
             .packages

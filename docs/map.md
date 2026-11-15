@@ -27,6 +27,7 @@ foo_cli = { layer = "app", cli = true }
 foo_ui = { layer = "app", ui = true }
 foo_theme = { layer = "app", theme = true }
 foo_fw = { layer = "app", tiers = ["embedded"] }
+foo_gen = { layer = "app", workspace = "tools" }   # a member of the workspace in tools/
 
 [map.forbid]
 foo_cli = ["foo_gpu", "wgpu"]       # the CLI never reaches these, directly or through others
@@ -59,11 +60,20 @@ wgpu = ["foo_gpu"]                  # only these crates may depend on wgpu direc
 | `ui` | a user interface crate, held to the [UI practices](ui.md); absent: a crate that depends on a UI toolkit is one, `false` exempts such a crate |
 | `theme` | the theme crate: colours and sizes are written as values here and nowhere else in UI code |
 | `tiers` | tiers that hold this crate beside the project's own, such as `["embedded"]` for a firmware crate ([Tiers for some crates](configuration.md#tiers-for-some-crates)) |
+| `workspace` | the directory of the nested workspace the crate is a member of, relative to the project root; absent: a member of the checked workspace ([Nested workspaces](#nested-workspaces)) |
 | `forbid.<crate>` | crates (workspace or third-party) its closure must never reach |
 | `external.<crate>` | a crate of another project taken by git: its URL, its branch (optional) and the layer that may use it; how it is pinned is `git-dependency-pins`' policy |
 | `third-party.<crate>` | workspace crates that alone may depend on a heavy third-party crate |
 
 Unknown keys are errors, like everywhere in the configuration; the next section is the one way around that. Dev-dependencies are exempt from the layer rule but not from `forbid`. To fix an edge that points the wrong way, move a crate; do not reorder the layers.
+
+## Nested workspaces
+
+A repository may keep a second Cargo workspace beside the main one, such as its own tools in `tools/` with their own `Cargo.lock`. Its crates go in the same map, each with `workspace = "tools"`.
+
+- [map-complete](lints/G0008.md) reads the members of every workspace the map names: a member missing from the map, an entry with no such member, a crate in another workspace than its entry says, and a named workspace that cargo cannot read are findings.
+- [layer-edges](lints/G0007.md), [forbidden-closure](lints/G0006.md), [external-form](lints/G0005.md), [third-party-placement](lints/G0009.md) and [unsafe-allow-list](lints/G0010.md) check each nested workspace as they check the main one.
+- The other lints check the main workspace only. `spl check tools` checks a nested workspace on its own, with a `spirit_level.toml` of its own there.
 
 ## A map another tool owns
 

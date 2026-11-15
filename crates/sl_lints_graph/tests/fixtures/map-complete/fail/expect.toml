@@ -1,4 +1,3 @@
-
 [[finding]]
 at = "crates/b/Cargo.toml:1"
 contains = "b is not in the crate map"
@@ -6,3 +5,19 @@ contains = "b is not in the crate map"
 [[finding]]
 at = "spirit_level.toml:13"
 contains = "lists c"
+
+[[finding]]
+at = "spirit_level.toml:15"
+contains = "the map lists v, which is not a member of the workspace in tools/"
+
+[[finding]]
+at = "spirit_level.toml:17"
+contains = "the map lists crates of the workspace in gone/, which cannot be read: manifest: gone/Cargo.toml: no such file"
+
+[[finding]]
+at = "tools/u/Cargo.toml:1"
+contains = "u is not in the crate map"
+
+[[finding]]
+at = "tools/w/Cargo.toml:1"
+contains = "w is a member of the workspace in tools/, the map puts it in the workspace"

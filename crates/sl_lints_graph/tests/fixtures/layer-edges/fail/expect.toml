@@ -10,3 +10,7 @@ contains = "layer utils may not depend on layer model"
 [[finding]]
 at = "crates/c/Cargo.toml:9"
 contains = "c depends on workspace-hack: layer model may not depend on layer hack"
+
+[[finding]]
+at = "tools/tu/Cargo.toml:8"
+contains = "tu depends on tm: layer utils may not depend on layer model"

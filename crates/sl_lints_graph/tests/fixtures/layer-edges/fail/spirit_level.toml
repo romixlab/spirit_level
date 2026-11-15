@@ -17,3 +17,5 @@ b = { layer = "utils" }
 c = { layer = "model", deps = [] }
 h = { layer = "hack", deps = [] }
 workspace-hack = { layer = "hack" }
+tu = { layer = "utils", workspace = "tools" }
+tm = { layer = "model", workspace = "tools" }

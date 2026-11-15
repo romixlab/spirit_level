@@ -11,3 +11,4 @@ allow = ["utils", "model"]
 [map.crates]
 a = { layer = "model" }
 b = { layer = "utils" }
+t = { layer = "utils", workspace = "tools" }
