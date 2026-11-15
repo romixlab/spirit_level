@@ -126,6 +126,7 @@ A0008 = { id = "near-duplicate-fns", group = "ai", status = "active" }
 A0009 = { id = "near-duplicate-modules", group = "ai", status = "active" }
 A0010 = { id = "stop-gap-comments", group = "ai", status = "active" }
 A0011 = { id = "fixme-before-land", group = "ai", status = "active" }
+A0012 = { id = "large-blobs", group = "ai", status = "active" }
 F0001 = { id = "boot-1", group = "firmware", status = "active" }
 F0002 = { id = "boot-10", group = "firmware", status = "active" }
 F0003 = { id = "boot-2", group = "firmware", status = "active" }

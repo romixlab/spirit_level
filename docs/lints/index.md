@@ -324,11 +324,11 @@ Every lint, grouped by category, with its stable code and its level in each ship
 
 | Code | Lint | Rule | small | small-workspace | medium | big | ai | embedded | ui | egui | units-strict | units-paranoid |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| [A0000](A0000.md) | [large-blobs](A0000.md) | no git-tracked file is over the size limit outside the allow list | off | off | off | off | warn | off | off | off | off | off |
 | [A0001](A0001.md) | [agent-config-permissions](A0001.md) | committed agent settings grant no blanket permissions | off | off | off | off | deny | off | off | off | off | off |
 | [A0002](A0002.md) | [agent-config-secrets](A0002.md) | committed agent configuration holds no secrets | off | off | off | off | deny | off | off | off | off | off |
 | [A0003](A0003.md) | [agent-session-files](A0003.md) | no agent transcripts or per-person agent files are committed | off | off | off | off | deny | off | off | off | off | off |
 | [A0004](A0004.md) | [leftover-files](A0004.md) | no merge, patch, editor or scratch leftovers are committed | off | off | off | off | deny | off | off | off | off | off |
+| [A0012](A0012.md) | [large-blobs](A0012.md) | no git-tracked file is over the size limit outside the allow list | off | off | off | off | warn | off | off | off | off | off |
 
 ## irq
 

@@ -8,7 +8,6 @@ Use it with `extends = "ai"` in `spirit_level.toml`.
 
 | Code | Lint | Level | Reason | Set in |
 |---|---|---|---|---|
-| [A0000](../lints/A0000.md) | large-blobs | `warn` | a large tracked file stays in every clone forever; agents commit dumps and binaries with git add -A | ai |
 | [A0001](../lints/A0001.md) | agent-config-permissions | `deny` | committed settings apply to every agent; a blanket grant lets any of them run anything | ai |
 | [A0002](../lints/A0002.md) | agent-config-secrets | `deny` | a committed key is public to every reader and stays in history | ai |
 | [A0003](../lints/A0003.md) | agent-session-files | `deny` | transcripts and per-person agent files hold private context and secrets | ai |
@@ -20,6 +19,7 @@ Use it with `extends = "ai"` in `spirit_level.toml`.
 | [A0009](../lints/A0009.md) | near-duplicate-modules | `deny` | a rewrite that keeps the old module is not finished | ai |
 | [A0010](../lints/A0010.md) | stop-gap-comments | `deny` | a TODO or a 'for now' marks a path the final design throws away; tracked work names its id | ai |
 | [A0011](../lints/A0011.md) | fixme-before-land | `deny` | an agent may leave itself a FIXME on its branch; the landing refuses it | ai |
+| [A0012](../lints/A0012.md) | large-blobs | `warn` | a large tracked file stays in every clone forever; agents commit dumps and binaries with git add -A | ai |
 | [C0002](../lints/C0002.md) | allow-without-reason | `deny` | an allowed lint says why, so it can be turned back on | ai |
 | [C0008](../lints/C0008.md) | todo-macros | `deny` | todo!() and unimplemented!() are stop-gaps that compile | ai |
 | [C0018](../lints/C0018.md) | unit-suffix | `warn` | agents write units last in names from the start; a warning, since it reads names only and fires widely in older code | ai |

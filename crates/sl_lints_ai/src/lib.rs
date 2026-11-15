@@ -38,7 +38,7 @@ lint!(DEAD_FEATURES, "A0006", "dead-features", "stop-gap", "every cargo feature 
 lint!(LEFTOVER_FILES, "A0004", "leftover-files", "hygiene", "no merge, patch, editor or scratch leftovers are committed",
     params: [("patterns", StrList, "[\"**/*.orig\", \"**/*.rej\", \"**/*.bak\", \"**/*~\", \"**/*.swp\", \"**/*.tmp\", \"**/scratch*\", \"**/HANDOFF.md\"]", "globs of tracked files that are leftovers")],
     needs: [Need::Tool("git")], fix: None);
-lint!(LARGE_BLOBS, "A0000", "large-blobs", "hygiene", "no git-tracked file is over the size limit outside the allow list",
+lint!(LARGE_BLOBS, "A0012", "large-blobs", "hygiene", "no git-tracked file is over the size limit outside the allow list",
     params: [("max-bytes", Int, "1000000", "the size in bytes a tracked file may reach before it is flagged"),
              ("allow", StrList, "[]", "globs of tracked files allowed past the limit")],
     needs: [Need::Tool("git")], fix: None);
