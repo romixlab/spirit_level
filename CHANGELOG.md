@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-15
+
 ### Added
 
 - `spl tools needed`: the tools, toolchains and targets a project needs; table, `--spec`, `--components`, `--json`, `--missing`, `--all` (TOOL-2).
