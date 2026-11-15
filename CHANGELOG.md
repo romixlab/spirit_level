@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.4.18] - 2026-11-15
+
 ### Added
 
 - `zensical-keys` (D0018): zensical.toml names only keys Zensical reads (DOCS-2).
