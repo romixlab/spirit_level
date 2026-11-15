@@ -32,6 +32,10 @@ reason = "a file of thousands of lines holds several subjects and collects every
 level = "warn"
 reason = "split a crate before it passes ~20,000 lines: one crate is one serial compile step"
 
+[lints.crate-folder-size]
+level = "warn"
+reason = "a flat crates/ past a few dozen crates groups by layer; a layer of about 100 crates by discipline"
+
 [lints.lock-unwrap]
 level = "warn"
 reason = "the count of lock().unwrap() per crate shows where shared state concentrates"

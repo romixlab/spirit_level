@@ -4,6 +4,7 @@ use sl_analysis::syntax::{complexity, functions, without_tests};
 use sl_analysis::{Analysis, Context, lint};
 use sl_core::{Diagnostic, Level, LintMeta, Span};
 use sl_model::{FileKind, LineCount, count_lines};
+use std::collections::BTreeMap;
 
 lint!(CRATE_LINES, "S0001", "crate-lines", "size", "a crate's src/ stays under its line limit",
     params: [("max-lines", Int, "20000", "code lines in src/ above which a crate is reported")],
@@ -17,6 +18,10 @@ lint!(MODULE_LINES, "S0004", "module-lines", "size", "a source file stays under 
 lint!(FUNCTION_LINES, "S0003", "function-lines", "size", "a function stays under its line limit",
     params: [("max-lines", Int, "150", "code lines of one function above which it is reported"),
              ("target-lines", Int, "0", "a lower limit to tighten toward: a function above it but within max-lines is reported as a warning at most; 0: none")],
+    needs: [], fix: None);
+lint!(CRATE_FOLDER_SIZE, "S0006", "crate-folder-size", "size", "a folder holds no more crate folders than its limit",
+    params: [("max-flat", Int, "80", "crate folders side by side in a folder that is not a layer folder (a flat crates/) above which it is reported"),
+             ("max-crates", Int, "100", "crate folders in one layer or discipline folder above which it is reported")],
     needs: [], fix: None);
 lint!(FUNCTION_COMPLEXITY, "S0002", "function-complexity", "size", "a function's cyclomatic complexity stays under its limit",
     params: [("max", Int, "15", "the highest complexity allowed")],
@@ -34,6 +39,7 @@ static LINTS: &[&LintMeta] = &[
     &MODULE_LINES,
     &FUNCTION_LINES,
     &FUNCTION_COMPLEXITY,
+    &CRATE_FOLDER_SIZE,
 ];
 
 impl Analysis for Size {
@@ -47,6 +53,7 @@ impl Analysis for Size {
 
     fn run(&self, cx: &Context<'_>) {
         let p = cx.project;
+        folder_size(cx);
         for pkg in &p.packages {
             if cx
                 .map()
@@ -148,6 +155,53 @@ impl Analysis for Size {
                     }
                 }
             }
+        }
+    }
+}
+
+/// `crate-folder-size`: counts the crate folders in each folder that holds some
+fn folder_size(cx: &Context<'_>) {
+    let p = cx.project;
+    let mut folders: BTreeMap<&str, u32> = BTreeMap::new();
+    for pkg in p.packages.iter().filter(|pkg| !pkg.dir.is_empty()) {
+        let parent = pkg.dir.rsplit_once('/').map_or("", |(parent, _)| parent);
+        *folders.entry(parent).or_default() += 1;
+    }
+    let is_layer = |name: &str| cx.map().is_some_and(|m| m.layer(name).is_some());
+    let params = cx.params("crate-folder-size");
+    let root = &p.root_manifest;
+    let span = Span::new(root.rel.clone(), root.line(&["workspace", "members"]));
+    for (folder, count) in folders {
+        let mut names = folder.rsplit('/');
+        let name = names.next().unwrap_or_default();
+        let layered = is_layer(name) || names.next().is_some_and(is_layer);
+        let (max, help) = if layered {
+            (
+                params.int("max-crates"),
+                "split the layer folder by discipline, crates/<layer>/<discipline>/<crate>, with the map key `discipline`",
+            )
+        } else {
+            (
+                params.int("max-flat"),
+                "group the crates by layer, crates/<layer>/<crate>, as the crate map's layers say; a layer of about 100 crates then splits by discipline",
+            )
+        };
+        if i64::from(count) > max {
+            let shown = if folder.is_empty() {
+                "the workspace root"
+            } else {
+                folder
+            };
+            cx.emit(
+                Diagnostic::new(
+                    "crate-folder-size",
+                    format!("folder:{folder}"),
+                    format!("{shown} holds {count} crate folders (limit {max})"),
+                )
+                .span(span.clone())
+                .metric("crate-folders", f64::from(count), Some(max as f64))
+                .help(help),
+            );
         }
     }
 }

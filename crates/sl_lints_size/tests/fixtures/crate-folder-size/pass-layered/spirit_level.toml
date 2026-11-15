@@ -1,0 +1,19 @@
+[lints.crate-folder-size]
+level = "deny"
+max-flat = 2
+max-crates = 3
+reason = "fixture"
+
+[map.layers.utils]
+allow = ["utils"]
+
+[map.layers.engines]
+allow = ["utils", "engines"]
+
+[map.crates]
+a = { layer = "utils" }
+b = { layer = "utils" }
+c = { layer = "utils" }
+d = { layer = "engines", discipline = "rf" }
+e = { layer = "engines", discipline = "rf" }
+f = { layer = "engines", discipline = "rf" }

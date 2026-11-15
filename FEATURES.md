@@ -71,6 +71,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 
 - ✅ `SIZE-1` Crate, test, module and function lines; cyclomatic complexity.
 - ✅ `SIZE-2` `function-lines` ratchet: `target-lines` below the limit reports at most a warning (`Diagnostic::at_most`).
+- ✅ `SIZE-3` `crate-folder-size`: crate folders per folder, `max-flat` for a flat `crates/`, `max-crates` for a layer or discipline folder.
 
 ## CODE - source lints
 

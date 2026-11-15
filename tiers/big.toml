@@ -60,6 +60,10 @@ reason = "the crate map is the source of truth: every crate in it, nothing gone"
 level = "deny"
 reason = "layers are declared and checked edge by edge; move a crate, never reorder layers"
 
+[lints.crate-folder-size]
+level = "deny"
+reason = "a flat crates/ past a few dozen crates groups by layer; a layer of about 100 crates by discipline"
+
 [lints.crate-folder-layer]
 level = "deny"
 reason = "the map decides the path: crates/<layer>/<crate>, a large layer by discipline, never deeper"

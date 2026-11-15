@@ -1,0 +1,5 @@
+params = { max-flat = 3 }
+
+[[finding]]
+at = "Cargo.toml:2"
+contains = "crates holds 4 crate folders (limit 3)"

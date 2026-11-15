@@ -40,6 +40,7 @@ S0002 = { id = "function-complexity", group = "size", status = "active" }
 S0003 = { id = "function-lines", group = "size", status = "active" }
 S0004 = { id = "module-lines", group = "size", status = "active" }
 S0005 = { id = "test-lines", group = "size", status = "active" }
+S0006 = { id = "crate-folder-size", group = "size", status = "active" }
 T0001 = { id = "lock-held-across", group = "state", status = "active" }
 T0002 = { id = "lock-unwrap", group = "state", status = "active" }
 T0003 = { id = "nested-locks", group = "state", status = "active" }
