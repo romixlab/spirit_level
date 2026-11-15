@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.4.7] - 2026-11-15
+
 ### Changed
 
 - `core-crate-deps` lets `vocabulary` name workspace crates too, and exempts the workspace-hack package (GRAPH-1).
