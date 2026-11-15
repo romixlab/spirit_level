@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.4.30] - 2026-11-15
+
 ### Added
 
 - `ui-tooltip-repeats-label`: a tooltip that only repeats its control's label (UI-3).
