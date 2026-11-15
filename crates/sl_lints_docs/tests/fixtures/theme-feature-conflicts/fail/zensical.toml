@@ -1,0 +1,11 @@
+[project]
+site_name = "fx"
+
+[project.theme]
+features = [
+  "navigation.prune",
+  "navigation.expand",
+  "navigation.indexes",
+  "toc.integrate",
+  "navigation.instant",
+]

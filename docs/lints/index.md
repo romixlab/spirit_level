@@ -36,6 +36,7 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [D0011](D0011.md) | [admonition-syntax](D0011.md) | admonitions use a type Zensical styles and a body indented four spaces | deny | deny | deny | deny | off | off | off | off | off | off |
 | [D0017](D0017.md) | [book-build-stamp](D0017.md) | the book's footer shows the crate's version, commit and build age | warn | warn | warn | warn | off | off | off | off | off | off |
 | [D0018](D0018.md) | [readme-index-clash](D0018.md) | no docs folder holds both README.md and index.md | deny | deny | deny | deny | off | off | off | off | off | off |
+| [D0019](D0019.md) | [theme-feature-conflicts](D0019.md) | theme features that exclude each other are not both on | deny | deny | deny | deny | off | off | off | off | off | off |
 
 ## boot
 

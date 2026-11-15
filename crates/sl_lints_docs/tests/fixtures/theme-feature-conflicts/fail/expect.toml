@@ -1,0 +1,11 @@
+[[finding]]
+at = "zensical.toml"
+contains = "`navigation.prune` and `navigation.expand`"
+
+[[finding]]
+at = "zensical.toml"
+contains = "`navigation.indexes` and `toc.integrate`"
+
+[[finding]]
+at = "zensical.toml"
+contains = "`navigation.instant` is on"

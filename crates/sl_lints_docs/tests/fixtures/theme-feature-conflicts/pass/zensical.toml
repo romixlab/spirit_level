@@ -1,0 +1,6 @@
+[project]
+site_name = "fx"
+site_url = "https://example.org"
+
+[project.theme]
+features = ["navigation.instant", "navigation.tabs", "navigation.sections"]

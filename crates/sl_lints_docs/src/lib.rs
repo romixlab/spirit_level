@@ -83,6 +83,10 @@ lint!(BOOK_BUILD_STAMP, "D0017", "book-build-stamp", "book", "the book's footer 
     needs: [], fix: None);
 lint!(README_INDEX_CLASH, "D0018", "readme-index-clash", "book", "no docs folder holds both README.md and index.md",
     params: [], needs: [], fix: None);
+lint!(THEME_FEATURE_CONFLICTS, "D0019", "theme-feature-conflicts", "book", "theme features that exclude each other are not both on",
+    params: [("pairs", StrList, "[\"navigation.prune, navigation.expand\", \"navigation.indexes, toc.integrate\"]", "theme features Zensical does not support together, each entry \"a, b\""),
+             ("needs-site-url", StrList, "[\"navigation.instant\"]", "theme features that need project.site_url set, since they rely on the generated sitemap.xml")],
+    needs: [], fix: None);
 
 /// The docs analysis
 pub struct Docs;
@@ -109,6 +113,7 @@ static DOCS_LINTS: &[&LintMeta] = &[
     &READING_EASE,
     &BOOK_BUILD_STAMP,
     &README_INDEX_CLASH,
+    &THEME_FEATURE_CONFLICTS,
 ];
 
 impl Analysis for Docs {

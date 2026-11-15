@@ -278,6 +278,10 @@ reason = "without a version, commit and age in the footer, a reader cannot tell 
 level = "deny"
 reason = "Zensical does not say which of README.md and index.md it builds when a folder holds both"
 
+[lints.theme-feature-conflicts]
+level = "deny"
+reason = "Zensical does not support the conflicting features together, and builds neither error nor warn about it"
+
 # Units in types (exact_units)
 
 [lints.exact-units-quantity]

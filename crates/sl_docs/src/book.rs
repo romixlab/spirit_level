@@ -45,6 +45,10 @@ pub struct Book {
     pub extra_javascript: Vec<String>,
     /// The built site's folder (`project.site_dir`), relative to the project root
     pub site_dir: String,
+    /// `project.theme.features` turned on, as Zensical spells them (`navigation.instant`)
+    pub features: Vec<String>,
+    /// `project.site_url`; some theme features need it set, since they rely on the generated sitemap
+    pub site_url: Option<String>,
 }
 
 /// Whether a nav string is a page path rather than a link: not a URL, not absolute
@@ -138,6 +142,10 @@ impl Book {
                 .unwrap_or(DEFAULT_SITE_DIR)
                 .trim_matches('/')
                 .to_owned(),
+            features: patterns(file.get(&["project", "theme", "features"])),
+            site_url: project("site_url")
+                .and_then(Item::as_str)
+                .map(str::to_owned),
             file,
         }))
     }
@@ -209,6 +217,8 @@ mod tests {
         assert_eq!(b.overrides_dir, None);
         assert_eq!(b.extra_javascript, Vec::<String>::new());
         assert_eq!(b.site_dir, "site");
+        assert_eq!(b.features, Vec::<String>::new());
+        assert_eq!(b.site_url, None);
         assert!(pattern_matches("/hidden.md", "hidden.md"));
         assert!(!pattern_matches("/hidden.md", "a/hidden.md"));
         assert!(pattern_matches("hidden.md", "a/hidden.md"));
@@ -223,6 +233,16 @@ mod tests {
         assert_eq!(b.overrides_dir.as_deref(), Some("overrides"));
         assert_eq!(b.extra_javascript, ["javascripts/a.js", "javascripts/b.js"]);
         assert_eq!(b.site_dir, "out");
+    }
+
+    #[test]
+    fn theme_features_and_site_url() {
+        let b = book(
+            "features",
+            "[project]\nsite_name = \"x\"\nsite_url = \"https://example.org\"\n[project.theme]\nfeatures = [\"navigation.instant\", \"navigation.tabs\"]\n",
+        );
+        assert_eq!(b.features, ["navigation.instant", "navigation.tabs"]);
+        assert_eq!(b.site_url.as_deref(), Some("https://example.org"));
     }
 
     #[test]

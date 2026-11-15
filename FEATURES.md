@@ -107,6 +107,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `DOCS-3` Readable words: abbreviations spelled out at first use, terms defined before use, one name per concept (a project word list), passive share and Flesch reading ease per page, in `spl pages` and as lints.
 - ✅ `DOCS-4` book-build-stamp: a Zensical book's footer carries a build stamp (version, commit, UTC time) and a script showing its age from the reader's own clock.
 - ✅ `DOCS-5` readme-index-clash: no docs folder holds both `README.md` and `index.md`, since Zensical does not say which one it builds.
+- ✅ `DOCS-7` theme-feature-conflicts: theme features Zensical does not support together, and features that need `project.site_url` set.
 
 ## AI - code written with agents
 

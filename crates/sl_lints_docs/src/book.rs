@@ -17,6 +17,9 @@ pub(crate) fn run(cx: &Context<'_>, book: &Book) {
     if cx.enabled("book-build-stamp") {
         build_stamp(cx, root, book);
     }
+    if cx.enabled("theme-feature-conflicts") {
+        feature_conflicts(cx, book);
+    }
     let all = [format!("{}/**/*.md", book.docs_dir)];
     let pages: Vec<Page> = walk::files(root, &members(cx.project), &all, &[])
         .into_iter()
@@ -123,6 +126,47 @@ fn build_stamp(cx: &Context<'_>, root: &Path, book: &Book) {
                  (seconds, then minutes, hours, days), beside the absolute UTC time",
             ),
         );
+    }
+}
+
+/// Theme features that Zensical does not support together, and features that need `project.site_url` set
+fn feature_conflicts(cx: &Context<'_>, book: &Book) {
+    let id = "theme-feature-conflicts";
+    let p = cx.params(id);
+    let on: BTreeSet<&str> = book.features.iter().map(String::as_str).collect();
+    for pair in p.list("pairs") {
+        let Some((a, b)) = pair.split_once(',') else {
+            continue;
+        };
+        let (a, b) = (a.trim(), b.trim());
+        if on.contains(a) && on.contains(b) {
+            cx.emit(
+                Diagnostic::new(
+                    id,
+                    format!("pair:{a}:{b}"),
+                    format!(
+                        "`{a}` and `{b}` are both in project.theme.features, but Zensical does not support them together"
+                    ),
+                )
+                .span(Span::new(book.file.rel.clone(), 0))
+                .help(format!("drop one of `{a}` or `{b}` from the theme's features")),
+            );
+        }
+    }
+    for feature in p.list("needs-site-url") {
+        if on.contains(feature.as_str()) && book.site_url.is_none() {
+            cx.emit(
+                Diagnostic::new(
+                    id,
+                    format!("site-url:{feature}"),
+                    format!(
+                        "`{feature}` is on, but project.site_url is not set: Zensical's generated sitemap.xml, which it relies on, is empty without it"
+                    ),
+                )
+                .span(Span::new(book.file.rel.clone(), 0))
+                .help("set project.site_url in zensical.toml"),
+            );
+        }
     }
 }
 

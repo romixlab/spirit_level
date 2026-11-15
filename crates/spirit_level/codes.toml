@@ -301,3 +301,4 @@ D0015 = { id = "passive-voice", group = "docs", status = "active" }
 D0016 = { id = "reading-ease", group = "docs", status = "active" }
 D0017 = { id = "book-build-stamp", group = "docs", status = "active" }
 D0018 = { id = "readme-index-clash", group = "docs", status = "active" }
+D0019 = { id = "theme-feature-conflicts", group = "docs", status = "active" }
