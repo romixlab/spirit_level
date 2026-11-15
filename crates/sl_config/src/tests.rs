@@ -251,6 +251,27 @@ fn map_is_read_and_checked() {
     );
 }
 
+#[test]
+fn map_crates_name_their_nested_workspace() {
+    let c = load(
+        "extends = \"small\"\n[map.layers.core]\nallow = [\"core\"]\n[map.crates]\na = { layer = \"core\" }\nb = { layer = \"core\", workspace = \"tools/\" }\nc = { layer = \"core\", workspace = \"tools\" }\nd = { layer = \"core\", workspace = \"xtask/gen\" }\n",
+    )
+    .unwrap();
+    let m = c.map.unwrap();
+    assert_eq!(m.crates["a"].workspace, None);
+    assert_eq!(m.crates["b"].workspace.as_deref(), Some("tools"));
+    assert_eq!(m.workspaces(), ["tools", "xtask/gen"]);
+    for bad in ["../other", "/abs", ".", "a//b", ""] {
+        let e = messages(load(&format!(
+            "extends = \"small\"\n[map.layers.core]\nallow = [\"core\"]\n[map.crates]\na = {{ layer = \"core\", workspace = {bad:?} }}\n"
+        )));
+        assert!(
+            e.iter().any(|s| s.contains("crate a has workspace")),
+            "{bad}: {e:?}"
+        );
+    }
+}
+
 const OWNED_MAP: &str = "[meta]\nversion = 1\n[layers.core]\nallow = [\"core\"]\nlicence = \"MIT\"\n[crates]\na = { layer = \"core\", area = \"MODEL\", contract = true }\n";
 
 #[test]

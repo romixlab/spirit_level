@@ -15,6 +15,7 @@
 //! foo_core = { layer = "core" }
 //! foo_cli = { layer = "app", deps = ["foo_core"], cli = true }
 //! foo_fw = { layer = "app", tiers = ["embedded"] }
+//! foo_gen = { layer = "app", workspace = "tools" }
 //!
 //! [map.forbid]
 //! foo_cli = ["foo_gpu"]
@@ -76,6 +77,9 @@ pub struct MapCrate {
     pub theme: bool,
     /// Tiers that hold this crate beside the project's own (`embedded` for a firmware crate)
     pub tiers: Vec<String>,
+    /// The directory of the nested workspace it is a member of, relative to the project root; None: a member of
+    /// the checked workspace
+    pub workspace: Option<String>,
     /// The line of its entry
     pub line: u32,
 }
@@ -116,6 +120,16 @@ impl Map {
     /// The layer called `name`
     pub fn layer(&self, name: &str) -> Option<&Layer> {
         self.layers.iter().find(|l| l.name == name)
+    }
+
+    /// The nested workspaces its crates name, each once, in order
+    pub fn workspaces(&self) -> Vec<&str> {
+        let set: std::collections::BTreeSet<&str> = self
+            .crates
+            .values()
+            .filter_map(|c| c.workspace.as_deref())
+            .collect();
+        set.into_iter().collect()
     }
 
     /// The layer of a crate
@@ -164,6 +178,9 @@ impl Map {
                     ui: c.opt_bool("ui", errs),
                     theme: c.opt_bool("theme", errs).unwrap_or(false),
                     tiers: c.opt_list("tiers", true, errs).unwrap_or_default(),
+                    workspace: c
+                        .opt_str("workspace", errs)
+                        .map(|w| w.trim_end_matches('/').to_owned()),
                     line,
                 };
                 c.finish(errs);
@@ -243,6 +260,15 @@ impl Map {
                     ),
                 ));
             }
+            if let Some(w) = &c.workspace
+                && !nested_dir(w)
+            {
+                errs.push(ConfigError::new(
+                    &self.file,
+                    c.line,
+                    format!("crate {name} has workspace {w:?}: give the nested workspace's directory relative to the project root, such as \"tools\""),
+                ));
+            }
         }
         for (name, e) in &self.external {
             if let Some(r) = &e.role
@@ -256,4 +282,14 @@ impl Map {
             }
         }
     }
+}
+
+/// Whether `dir` names a directory below the project root: relative, not empty, no `.` or `..` part
+fn nested_dir(dir: &str) -> bool {
+    !dir.is_empty()
+        && !dir.contains('\\')
+        && !std::path::Path::new(dir).is_absolute()
+        && dir
+            .split('/')
+            .all(|p| !p.is_empty() && p != "." && p != "..")
 }
