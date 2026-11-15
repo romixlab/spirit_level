@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Pass fixtures for Bevy's dylib-feature pattern, so unused-deps and feature lints stay silent on it (TOOL-1).
+
 ## [0.4.12] - 2026-11-15
 
 ### Added

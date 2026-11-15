@@ -1,0 +1,12 @@
+[package]
+name = "fx"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+fx_internal = { path = "../fx_internal" }
+fx_dylib = { path = "../fx_dylib", optional = true }
+
+[features]
+# links fx_internal as a dylib for faster incremental dev builds (Bevy's bevy_dylib pattern)
+dynamic_linking = ["dep:fx_dylib"]

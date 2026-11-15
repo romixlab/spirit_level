@@ -1,0 +1,10 @@
+[package]
+name = "fx_dylib"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+crate-type = ["dylib"]
+
+[dependencies]
+fx_internal = { path = "../fx_internal" }
