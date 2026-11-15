@@ -46,6 +46,7 @@ wgpu = ["foo_gpu"]                  # only these crates may depend on wgpu direc
 | `layers.<name>.desc` | what lives in the layer |
 | `crates.<name>.layer` | the crate's layer (required) |
 | `crates.<name>.deps` | the workspace crates it may depend on; absent: any its layer allows |
+| `crates.<name>.discipline` | its discipline inside a large layer: the folder between the layer folder and the crate's own ([crate-folder-layer](lints/G0011.md)) |
 | `crates.<name>.desc` | its description, when the map is where it is written |
 | `unsafe` | may allow `unsafe` code, in a `[lints]` table of its own that copies the workspace lints; every other crate forbids it |
 | `generated` | generated code, checked in: exempt from size limits |

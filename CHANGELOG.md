@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `crate-folder-layer` (G0011): a crate's folder is its map layer, then its new `discipline` key; never deeper (GRAPH-4).
+
 ## [0.4.7] - 2026-11-15
 
 ### Changed

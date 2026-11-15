@@ -1,0 +1,15 @@
+[lints.crate-folder-layer]
+level = "deny"
+reason = "fixture"
+
+[map.layers.utils]
+allow = ["utils"]
+
+[map.layers.engines]
+allow = ["utils", "engines"]
+
+[map.crates]
+a = { layer = "utils" }
+b = { layer = "engines", discipline = "rf" }
+c = { layer = "engines", discipline = "heat" }
+xtask = { layer = "utils" }

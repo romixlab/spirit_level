@@ -64,6 +64,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 
 - ✅ `GRAPH-1` Map completeness, layer edges, forbidden closures, external form, third-party placement, `_core` rules, crate cycles, crate table, unsafe allow-list (`sl_lints_graph`).
 - 📋 `GRAPH-3` `clippy-policy-bans`: clippy.toml bans unbounded channels and wall-clock timers in tests. Raw spawns, blocking calls and colours in UI crates are `UI-1`'s source lints.
+- ✅ `GRAPH-4` `crate-folder-layer`: crates sit in `crates/<layer>/<crate>`, a large layer by discipline (map key `discipline`), at most two folders deep.
 - ✅ `GRAPH-2` linkme elements and unsafe attributes count as unsafe; crates marked unsafe copy the workspace lints.
 
 ## SIZE - size and complexity

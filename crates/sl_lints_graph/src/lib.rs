@@ -1,5 +1,6 @@
 //! Crate-graph lints, one analysis: [`GRAPH`].
 
+mod folders;
 mod scc;
 mod source;
 mod table;
@@ -40,6 +41,9 @@ lint!(CRATE_CYCLES, "G0003", "crate-cycles", "graph", "workspace crates form no 
 lint!(CRATE_TABLE, "G0004", "crate-table", "graph", "the crate table in the README is the one generated from the manifests and the map",
     params: [("file", Str, "\"README.md\"", "the file holding the table between its markers")],
     needs: [], fix: Exact);
+lint!(CRATE_FOLDER_LAYER, "G0011", "crate-folder-layer", "graph", "a crate's folder is its layer in the map, then its discipline where the map gives one",
+    params: [("root", Str, "\"crates\"", "the folder that holds the crates, flat or in layer folders")],
+    needs: [Need::Map], fix: None);
 lint!(UNSAFE_ALLOW_LIST, "G0010", "unsafe-allow-list", "graph", "unsafe code is forbidden except in the crates the map marks unsafe",
     params: [], needs: [Need::Map], fix: None);
 
@@ -60,6 +64,7 @@ static LINTS: &[&LintMeta] = &[
     &CRATE_CYCLES,
     &CRATE_TABLE,
     &UNSAFE_ALLOW_LIST,
+    &CRATE_FOLDER_LAYER,
 ];
 
 impl Analysis for Graph {
@@ -78,6 +83,7 @@ impl Analysis for Graph {
             layer_edges(cx, p, map);
             external_form(cx, p, map);
             third_party(cx, p, map);
+            folders::crate_folder_layer(cx, p, map);
             if cx.enabled("forbidden-closure") {
                 forbidden(cx, p, map);
             }

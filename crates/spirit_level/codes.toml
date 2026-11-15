@@ -56,6 +56,7 @@ G0007 = { id = "layer-edges", group = "graph", status = "active" }
 G0008 = { id = "map-complete", group = "graph", status = "active" }
 G0009 = { id = "third-party-placement", group = "graph", status = "active" }
 G0010 = { id = "unsafe-allow-list", group = "graph", status = "active" }
+G0011 = { id = "crate-folder-layer", group = "graph", status = "active" }
 C0001 = { id = "pub-surface", group = "code", status = "active" }
 C0002 = { id = "allow-without-reason", group = "code", status = "active" }
 C0003 = { id = "cli-subprocess", group = "code", status = "active" }

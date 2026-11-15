@@ -46,6 +46,8 @@ pub struct Layer {
 pub struct MapCrate {
     /// Its layer
     pub layer: String,
+    /// Its discipline inside a large layer: the folder between the layer folder and the crate's own
+    pub discipline: Option<String>,
     /// Its description, when the map is where it is written
     pub desc: Option<String>,
     /// The workspace crates it may depend on; None: any its layer allows
@@ -148,6 +150,7 @@ impl Map {
                 };
                 let entry = MapCrate {
                     layer: c.str("layer", errs).unwrap_or_default(),
+                    discipline: c.opt_str("discipline", errs),
                     desc: c.opt_str("desc", errs),
                     deps: c.opt_list("deps", false, errs),
                     r#unsafe: c.opt_bool("unsafe", errs).unwrap_or(false),

@@ -1,0 +1,15 @@
+[[finding]]
+at = "crates/c/Cargo.toml:1"
+contains = "c lives in crates/c; the map puts it in crates/utils/c (layer utils)"
+
+[[finding]]
+at = "crates/engines/d/Cargo.toml:1"
+contains = "the map puts it in crates/engines/rf/d (layer engines, discipline rf)"
+
+[[finding]]
+at = "crates/engines/rf/e/Cargo.toml:1"
+contains = "puts it in crates/engines/heat/e"
+
+[[finding]]
+at = "crates/utils/b/Cargo.toml:1"
+contains = "puts it in crates/engines/b"
