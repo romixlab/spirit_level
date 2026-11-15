@@ -1,0 +1,8 @@
+[[finding]]
+at = "src/lib.rs:2:23"
+confidence = "candidate"
+
+[[finding]]
+at = "src/lib.rs:3:23"
+confidence = "candidate"
+

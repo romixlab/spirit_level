@@ -192,3 +192,16 @@ calls = [
 ]
 level = "allow"
 reason = "opt-in: a project that has not started translating its UI would see this fire on every label; a project that translates turns it on"
+
+[lints.ui-hover-text]
+button-calls = [
+  "button",
+  "small_button",
+  "selectable_label",
+  "Button::new",
+  "menu_button",
+  "primary_button",
+  "danger_button",
+]
+hover-calls = ["on_hover_text", "on_disabled_hover_text"]
+reason = "an icon-only button with no tooltip has no words at all; a candidate, since a short label may be a real word or get help another way"

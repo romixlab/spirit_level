@@ -128,6 +128,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `UI-7` `egui-checklist-menu`: a `menu_button` closure with several checkboxes closes on each click; the shared checklist widget keeps it open.
 - ✅ `UI-3` `ui-tooltip-repeats-label`: a tooltip whose text exactly repeats the label of the control it is attached to.
 - ✅ `UI-4` `ui-locale-strings`, opt-in: a string literal with a letter, passed to a text call, needs a translation catalogue entry.
+- ✅ `UI-5` `ui-hover-text`, candidate: an icon-only or glyph button with no tooltip; glyph detection reuses `egui-status-glyph`'s `glyphs`.
 
 ## TOOL - external tools
 

@@ -37,6 +37,17 @@ pub(crate) fn needs_locale(value: &str) -> bool {
     letter
 }
 
+/// Whether a label is a status glyph (one of `glyphs`) or an icon: made only of symbols, no letter or digit
+pub(crate) fn is_icon_label(value: &str, glyphs: &[String]) -> bool {
+    let v = value.trim();
+    if v.is_empty() {
+        return false;
+    }
+    glyphs.iter().any(|g| v == g)
+        || v.chars()
+            .all(|c| !c.is_alphanumeric() && !c.is_whitespace())
+}
+
 /// The verb a label starts with, when it is one of `verbs` and the label does not open a dialog (ends in "…")
 pub(crate) fn destructive_verb(value: &str, verbs: &[String]) -> Option<String> {
     let v = value.trim();
@@ -129,6 +140,15 @@ mod tests {
         // a named placeholder's letters are not prose
         assert!(!needs_locale("{count}"));
         assert!(needs_locale("{count} items left"));
+    }
+
+    #[test]
+    fn icon_labels_hold_no_letter_or_digit() {
+        let glyphs = words(&["\u{2705}"]);
+        assert!(is_icon_label("\u{2705}", &glyphs));
+        assert!(is_icon_label("\u{1F5D1}", &glyphs));
+        assert!(!is_icon_label("Delete", &glyphs));
+        assert!(!is_icon_label("", &glyphs));
     }
 
     #[test]

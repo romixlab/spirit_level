@@ -1,0 +1,5 @@
+[lints.ui-hover-text]
+level = "deny"
+reason = "fixture"
+button-calls = ["button", "Button::new"]
+hover-calls = ["on_hover_text"]

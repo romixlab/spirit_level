@@ -52,3 +52,7 @@ reason = "a tooltip that only repeats the label cost the person a hover for noth
 [lints.ui-locale-strings]
 level = "allow"
 reason = "opt-in: a project that has not started translating its UI would see this fire on every label; a project that translates turns it on"
+
+[lints.ui-hover-text]
+level = "warn"
+reason = "an icon-only button with no tooltip has no words at all; a candidate, since a short label may be a real word or get help another way"

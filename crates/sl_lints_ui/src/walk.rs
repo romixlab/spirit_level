@@ -88,6 +88,9 @@ struct P {
     tooltip_label_calls: Vec<String>,
     tooltip_hover_calls: Vec<String>,
     locale_calls: Vec<String>,
+    hover_button_calls: Vec<String>,
+    hover_hover_calls: Vec<String>,
+    hover_glyphs: Vec<String>,
 }
 
 impl P {
@@ -194,6 +197,11 @@ impl P {
         if let Some(q) = get("ui-locale-strings") {
             p.locale_calls = q.list("calls").to_vec();
         }
+        if let Some(q) = get("ui-hover-text") {
+            p.hover_button_calls = q.list("button-calls").to_vec();
+            p.hover_hover_calls = q.list("hover-calls").to_vec();
+            p.hover_glyphs = cx.params("egui-status-glyph").list("glyphs").to_vec();
+        }
         p
     }
 }
@@ -246,6 +254,9 @@ struct Walk<'a> {
     bare: Option<(u32, u32)>,
     /// Inside the arguments of a fold call: its header may count what it holds
     in_fold: u32,
+    /// Inside the receiver or the arguments of a call matching `ui-hover-text`'s `hover-calls`: a button reached
+    /// from here already has a tooltip
+    covered: bool,
 }
 
 /// Walks one file of a UI crate for the lints in `on`
@@ -272,6 +283,7 @@ pub(crate) fn run(
         reasons: Vec::new(),
         bare: None,
         in_fold: 0,
+        covered: false,
     };
     w.visit_file(file);
     w.out
@@ -371,6 +383,7 @@ impl Walk<'_> {
             &self.p.glyph_calls,
             &self.p.destructive_calls,
             &self.p.locale_calls,
+            &self.p.hover_button_calls,
         ]
         .iter()
         .any(|l| name_matches(l));
@@ -387,6 +400,7 @@ impl Walk<'_> {
         let glyph = name_matches(&self.p.glyph_calls);
         let destructive = name_matches(&self.p.destructive_calls);
         let locale = name_matches(&self.p.locale_calls);
+        let hover_missing = name_matches(&self.p.hover_button_calls) && !self.covered;
         for lit in &literals {
             let v = lit.value();
             let r = range(lit);
@@ -437,6 +451,21 @@ impl Walk<'_> {
             }
             if locale && text::needs_locale(&v) {
                 self.push("ui-locale-strings", r, format!("{v:?} is a literal string shown to a person"), "move it to the project's translation catalogue, and pass the catalogue key here instead".into(), Confidence::Certain);
+            }
+            if hover_missing && text::is_icon_label(&v, &self.p.hover_glyphs) {
+                let hover = self
+                    .p
+                    .hover_hover_calls
+                    .first()
+                    .cloned()
+                    .unwrap_or_default();
+                self.push(
+                    "ui-hover-text",
+                    r,
+                    format!("{v:?} is an icon-only label with no tooltip saying what it does"),
+                    format!("attach `{hover}` saying what the control does"),
+                    Confidence::Candidate,
+                );
             }
         }
     }
@@ -914,6 +943,8 @@ impl<'ast> Visit<'ast> for Walk<'_> {
         self.check_tooltip_label(&name, &m.receiver, &args);
         let salted = self.salted;
         self.salted = salted || method_in(&self.p.salt_methods, &name);
+        let covered = self.covered;
+        self.covered = covered || method_in(&self.p.hover_hover_calls, &name);
         self.visit_expr(&m.receiver);
         self.salted = false;
         let kind = if self.is_spawner(&name) {
@@ -930,6 +961,7 @@ impl<'ast> Visit<'ast> for Walk<'_> {
         }
         self.in_fold -= fold;
         self.salted = salted;
+        self.covered = covered;
     }
 
     fn visit_expr_assign(&mut self, a: &'ast syn::ExprAssign) {
