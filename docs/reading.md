@@ -107,7 +107,7 @@ Every practice the docs lints were built from, where it comes from, and how it i
 | Sentences stay short | vhrd_site page stats (sentence length); prose rules | [sentence-words](lints/P0015.md) | certain |
 | Links and their anchors resolve in a book | [Zensical: validation](https://zensical.org/docs/setup/validation/) | `zensical build --strict` (on by default) | certain |
 | Links in agent files resolve | | [agent-file-links](lints/P0002.md) | certain |
-| Pages link to `.md` files by relative path, never to `.html` or the site's absolute paths | [Zensical: linking between pages](https://zensical.org/docs/authoring/markdown/#linking-between-pages) | [page-links](lints/D0019.md) | certain |
+| Pages link to `.md` files by relative path, never to `.html` or the site's absolute paths | [Zensical: linking between pages](https://zensical.org/docs/authoring/markdown/#linking-between-pages) | [page-links](lints/D0020.md) | certain |
 | No folder holds both `README.md` and `index.md` | [Zensical: Markdown](https://zensical.org/docs/authoring/markdown/) | [readme-index-clash](lints/D0018.md) | certain |
 | Theme features that exclude each other are not both on | [Zensical: navigation](https://zensical.org/docs/setup/navigation/) | [theme-feature-conflicts](lints/D0019.md) | certain |
 | A page meant as an entry point has a description | [Zensical: front matter](https://zensical.org/docs/authoring/frontmatter/) | review: which pages are entry points | |
