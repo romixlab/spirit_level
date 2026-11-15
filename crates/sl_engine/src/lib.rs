@@ -257,6 +257,67 @@ fn inapplicable<'f>(
     }
 }
 
+/// What the needs of one lint say about it
+enum Verdict {
+    /// Every need is met
+    Run,
+    /// The project has nothing it applies to
+    Skip(Skipped),
+    /// A need is missing
+    NotRun(NotRun),
+}
+
+/// The needs of a run's lints, checked against the project and the options
+struct Needs<'r> {
+    project: &'r Project,
+    config: &'r Config,
+    opts: &'r RunOptions,
+    tools: &'r Tools,
+    /// The firmware binaries' names, read the first time a lint needs the ELF
+    firmware: std::cell::OnceCell<Vec<String>>,
+}
+
+impl Needs<'_> {
+    fn check(&self, m: &LintMeta) -> Verdict {
+        let firmware = || -> &[String] {
+            self.firmware.get_or_init(|| {
+                sl_firmware::firmware_binaries(self.project)
+                    .into_iter()
+                    .map(|p| p.name.clone())
+                    .collect()
+            })
+        };
+        let level = self.config.highest_level(m.id);
+        if let Some((need, reason)) = m
+            .needs
+            .iter()
+            .find_map(|n| inapplicable(*n, m.id, self.config, firmware).map(|r| (n, r)))
+        {
+            return Verdict::Skip(Skipped {
+                lint: m.id.to_owned(),
+                code: m.code.to_owned(),
+                level,
+                need: need.name(),
+                reason,
+            });
+        }
+        m.needs
+            .iter()
+            .find_map(|n| {
+                missing(*n, self.project, self.config, self.opts, self.tools).map(|r| (n, r))
+            })
+            .map_or(Verdict::Run, |(need, reason)| {
+                Verdict::NotRun(NotRun {
+                    lint: m.id.to_owned(),
+                    code: m.code.to_owned(),
+                    level,
+                    need: need.name(),
+                    reason,
+                })
+            })
+    }
+}
+
 /// Detects every tool of `pins` that a lint of `wanted` needs
 fn detect_tools<'m>(
     wanted: impl Iterator<Item = &'m LintMeta>,
@@ -355,48 +416,23 @@ pub fn run(
         project,
         opts,
     );
-    let firmware = std::cell::OnceCell::<Vec<String>>::new();
+    let needs = Needs {
+        project,
+        config,
+        opts,
+        tools: &tools,
+        firmware: std::cell::OnceCell::new(),
+    };
     for a in analyses {
         let mut runnable = Vec::new();
         for m in a.lints() {
             if !config.enabled(m.id) || !selected(m) {
                 continue;
             }
-            let firmware = || -> &[String] {
-                firmware.get_or_init(|| {
-                    sl_firmware::firmware_binaries(project)
-                        .into_iter()
-                        .map(|p| p.name.clone())
-                        .collect()
-                })
-            };
-            if let Some((need, reason)) = m
-                .needs
-                .iter()
-                .find_map(|n| inapplicable(*n, m.id, config, firmware).map(|r| (n, r)))
-            {
-                skipped.push(Skipped {
-                    lint: m.id.to_owned(),
-                    code: m.code.to_owned(),
-                    level: config.highest_level(m.id),
-                    need: need.name(),
-                    reason,
-                });
-                continue;
-            }
-            match m
-                .needs
-                .iter()
-                .find_map(|n| missing(*n, project, config, opts, &tools).map(|r| (n, r)))
-            {
-                Some((need, reason)) => not_run.push(NotRun {
-                    lint: m.id.to_owned(),
-                    code: m.code.to_owned(),
-                    level: config.highest_level(m.id),
-                    need: need.name(),
-                    reason,
-                }),
-                None => runnable.push(m.id),
+            match needs.check(m) {
+                Verdict::Run => runnable.push(m.id),
+                Verdict::Skip(s) => skipped.push(s),
+                Verdict::NotRun(n) => not_run.push(n),
             }
         }
         if runnable.is_empty() {
