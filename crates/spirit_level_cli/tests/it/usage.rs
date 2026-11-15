@@ -1,6 +1,5 @@
 //! `spl usage` and the records every run leaves (CLI-2): counted per command and flag, from a script, on the
-//! injected day, in a scratch store. Made opt-in, off by default, in `vc_usage` (CLI-5); these tests still opt
-//! in explicitly, so they pass under the locked `vc_usage` either way.
+//! injected day, in a scratch store. Opt-in, off by default (CLI-5).
 #![expect(
     clippy::let_underscore_must_use,
     reason = "a test removes its scratch directory as far as it can"
@@ -109,6 +108,61 @@ fn records_off_writes_nothing_and_usage_says_so() {
         .expect("spl starts");
     assert_eq!(out.status.code(), Some(2));
     assert!(String::from_utf8_lossy(&out.stderr).contains("usage records are off"));
+}
+
+/// A scratch `XDG_STATE_HOME`, removed on drop
+struct Xdg(PathBuf);
+
+impl Xdg {
+    fn new(name: &str) -> Self {
+        let dir = std::env::temp_dir().join(format!("sl_usage_{}_{name}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        Self(dir)
+    }
+}
+
+impl Drop for Xdg {
+    fn drop(&mut self) {
+        let _ = std::fs::remove_dir_all(&self.0);
+    }
+}
+
+#[test]
+fn off_by_default_creates_nothing_under_xdg_state_home() {
+    let xdg = Xdg::new("default_off");
+    let out = crate::spl()
+        .arg("usage")
+        .env_remove("SPL_USAGE_DIR")
+        .env("XDG_STATE_HOME", &xdg.0)
+        .output()
+        .expect("spl starts");
+    assert_eq!(out.status.code(), Some(2));
+    assert!(String::from_utf8_lossy(&out.stderr).contains("usage records are off"));
+    assert!(!xdg.0.join("spl").exists(), "nothing created by default");
+}
+
+#[test]
+fn spl_usage_on_records_at_the_default_path() {
+    let xdg = Xdg::new("usage_on");
+    let run = |args: &[&str]| {
+        crate::spl()
+            .args(args)
+            .env_remove("SPL_USAGE_DIR")
+            .env("SPL_USAGE", "on")
+            .env("XDG_STATE_HOME", &xdg.0)
+            .env_remove("CLAUDECODE")
+            .env_remove("VC_USAGE_SOURCE")
+            .env("SPIRIT_LEVEL_TODAY", "2026-11-13")
+            .env("NO_COLOR", "1")
+            .output()
+            .expect("spl starts")
+    };
+    assert!(run(&["tiers"]).status.success());
+    let out = run(&["usage", "--format", "json"]);
+    assert!(out.status.success());
+    let doc: serde_json::Value = serde_json::from_slice(&out.stdout).expect("JSON");
+    assert_eq!(signal(&doc, "spl tiers")["runs"], 1);
+    assert!(xdg.0.join("spl").join("usage").join("log.tsv").exists());
 }
 
 #[test]

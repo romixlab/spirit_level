@@ -31,7 +31,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `CLI-2` Usage records: every run counts its command and flags in `~/.local/state/spl/usage` (vc_usage); `spl usage` lists them, `--unused` ([usage records](docs/usage.md)).
 - ✅ `CLI-3` The binary is `spl`; crate and repo stay spirit_level.
 - ✅ `CLI-4` The generic CLI parts from vhrd_cli: `--version` (vc_build), `--color`, error line, exit codes (vc_ui), completion (vc_complete).
-- 🚧 `CLI-5` Usage records are opt-in, off by default (`vc_usage` USAGE-2): `SPL_USAGE_DIR=DIR` or `SPL_USAGE=on` enables them; `spl usage` says so when off. spl's message and docs are ready; off by default takes effect once the `vc_usage` lock is bumped past 294227a ([usage records](docs/usage.md)).
+- ✅ `CLI-5` Usage records are opt-in, off by default (`vc_usage` USAGE-2): `SPL_USAGE_DIR=DIR` or `SPL_USAGE=on` enables them; `spl usage` says so when off ([usage records](docs/usage.md)).
 
 ## DEP - dependents (crater-lite)
 
