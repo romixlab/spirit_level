@@ -1065,6 +1065,7 @@ dependencies = [
  "sl_config",
  "sl_core",
  "sl_model",
+ "toml_edit",
 ]
 
 [[package]]
