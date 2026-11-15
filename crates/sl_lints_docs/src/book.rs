@@ -1,11 +1,12 @@
-//! The book lints: the navigation, pages nobody reaches, titles, admonitions, the footer's build stamp.
+//! The book lints: the navigation, pages nobody reaches, titles, admonitions, the footer's build stamp, a folder
+//! that holds both `README.md` and `index.md`.
 
 use crate::members;
 use sl_analysis::Context;
 use sl_core::{Diagnostic, Span};
 use sl_docs::page::Page;
 use sl_docs::{Book, Kind, walk};
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 
 pub(crate) fn run(cx: &Context<'_>, book: &Book) {
@@ -27,6 +28,9 @@ pub(crate) fn run(cx: &Context<'_>, book: &Book) {
         .collect();
     if cx.enabled("orphan-pages") {
         orphans(cx, book, &pages);
+    }
+    if cx.enabled("readme-index-clash") {
+        readme_index_clash(cx, &pages);
     }
     for p in &pages {
         if cx.enabled("page-title") {
@@ -175,6 +179,45 @@ fn orphans(cx: &Context<'_>, book: &Book, pages: &[Page]) {
             )
             .span(Span::new(p.rel.clone(), 1))
             .help("add it to the nav in zensical.toml or link it from a page that is; delete it if nobody needs it"),
+        );
+    }
+}
+
+/// Folders of the docs tree that hold both `README.md` and `index.md`: Zensical does not say which one becomes
+/// the folder's page, so one of them is built and read, and the other sits there unused
+fn readme_index_clash(cx: &Context<'_>, pages: &[Page]) {
+    let id = "readme-index-clash";
+    let mut by_dir: BTreeMap<&str, (Option<&str>, Option<&str>)> = BTreeMap::new();
+    for p in pages {
+        let (dir, name) = p.rel.rsplit_once('/').unwrap_or(("", p.rel.as_str()));
+        let slot = by_dir.entry(dir).or_default();
+        if name == "README.md" {
+            slot.0 = Some(&p.rel);
+        } else if name == "index.md" {
+            slot.1 = Some(&p.rel);
+        }
+    }
+    for (dir, slot) in by_dir {
+        let (Some(readme), Some(index)) = slot else {
+            continue;
+        };
+        let label = if dir.is_empty() {
+            "the docs folder"
+        } else {
+            dir
+        };
+        cx.emit(
+            Diagnostic::new(
+                id,
+                format!("{dir}:readme-index"),
+                format!(
+                    "{label} holds both {readme} and {index}: Zensical does not say which one becomes its page"
+                ),
+            )
+            .span(Span::new(readme.to_owned(), 1))
+            .help(format!(
+                "keep one of them: fold {readme} into {index} and delete it, or the other way round"
+            )),
         );
     }
 }

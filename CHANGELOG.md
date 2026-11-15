@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `readme-index-clash` (D0018): a docs folder holding both `README.md` and `index.md` denies (DOCS-5).
+
 ## [0.4.15] - 2026-11-15
 
 ### Added

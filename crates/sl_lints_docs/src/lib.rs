@@ -81,6 +81,8 @@ lint!(BOOK_BUILD_STAMP, "D0017", "book-build-stamp", "book", "the book's footer 
              ("marker", Str, "\"stamp\"", "text that marks a build stamp in the partial, an extra_javascript file or the built site's index.html"),
              ("age-marker", Str, "\"ago\"", "text that marks the stamp showing the build's age from the reader's own clock, beside the absolute build time")],
     needs: [], fix: None);
+lint!(README_INDEX_CLASH, "D0018", "readme-index-clash", "book", "no docs folder holds both README.md and index.md",
+    params: [], needs: [], fix: None);
 
 /// The docs analysis
 pub struct Docs;
@@ -106,6 +108,7 @@ static DOCS_LINTS: &[&LintMeta] = &[
     &PASSIVE_VOICE,
     &READING_EASE,
     &BOOK_BUILD_STAMP,
+    &README_INDEX_CLASH,
 ];
 
 impl Analysis for Docs {

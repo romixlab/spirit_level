@@ -274,6 +274,10 @@ reason = "long sentences of long words are read slowly and understood less"
 level = "warn"
 reason = "without a version, commit and age in the footer, a reader cannot tell which build they are looking at"
 
+[lints.readme-index-clash]
+level = "deny"
+reason = "Zensical does not say which of README.md and index.md it builds when a folder holds both"
+
 # Units in types (exact_units)
 
 [lints.exact-units-quantity]

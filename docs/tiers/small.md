@@ -42,6 +42,7 @@ Use it with `extends = "small"` in `spirit_level.toml`.
 | [D0015](../lints/D0015.md) | passive-voice | `warn` | a passive sentence hides who acts; a page of them reads as things that happen on their own | small |
 | [D0016](../lints/D0016.md) | reading-ease | `warn` | long sentences of long words are read slowly and understood less | small |
 | [D0017](../lints/D0017.md) | book-build-stamp | `warn` | without a version, commit and age in the footer, a reader cannot tell which build they are looking at | small |
+| [D0018](../lints/D0018.md) | readme-index-clash | `deny` | Zensical does not say which of README.md and index.md it builds when a folder holds both | small |
 | [M0001](../lints/M0001.md) | default-features-off | `warn` | dependencies are added with default-features = false and only the features in use | small |
 | [M0003](../lints/M0003.md) | git-dependency-pins | `warn` | git dependencies follow a branch; Cargo.lock fixes the commit | small |
 | [M0004](../lints/M0004.md) | no-sys-crates | `deny` | pure-Rust crates only: no bundled C, no -sys bindings without a written reason | small |
@@ -377,6 +378,10 @@ reason = "long sentences of long words are read slowly and understood less"
 [lints.book-build-stamp]
 level = "warn"
 reason = "without a version, commit and age in the footer, a reader cannot tell which build they are looking at"
+
+[lints.readme-index-clash]
+level = "deny"
+reason = "Zensical does not say which of README.md and index.md it builds when a folder holds both"
 
 # Units in types (exact_units)
 
