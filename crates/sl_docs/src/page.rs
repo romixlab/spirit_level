@@ -61,6 +61,8 @@ pub enum Item {
         text: String,
         /// 1-based line of its first text
         line: u32,
+        /// Its bold and inline code, in order
+        marks: Vec<Mark>,
     },
     /// A code block
     Code {
@@ -92,6 +94,26 @@ impl Item {
             | Self::Break { line, .. } => *line,
         }
     }
+}
+
+/// What a [`Mark`] marks
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum MarkKind {
+    /// Bold text: `**term**`
+    Strong,
+    /// Inline code: `` `name` ``
+    Code,
+}
+
+/// A marked part of a prose item's text
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Mark {
+    /// Bold or code
+    pub kind: MarkKind,
+    /// Byte offset in the text where it starts
+    pub start: usize,
+    /// Byte offset in the text where it ends
+    pub end: usize,
 }
 
 /// An image
@@ -235,6 +257,9 @@ struct Open {
     line: Option<u32>,
     images: usize,
     words: bool,
+    marks: Vec<Mark>,
+    /// Where the bold text being read starts
+    strong: Option<usize>,
 }
 
 struct Walk {
@@ -263,9 +288,12 @@ impl Walk {
                 self.items.push(Item::Prose {
                     text: std::mem::take(&mut o.text),
                     line,
+                    marks: std::mem::take(&mut o.marks),
                 });
             }
             o.text.clear();
+            o.marks.clear();
+            o.strong = None;
         }
     }
 
@@ -278,7 +306,28 @@ impl Walk {
                 line,
             });
         } else if !words(&o.text).is_empty() {
-            self.items.push(Item::Prose { text: o.text, line });
+            self.items.push(Item::Prose {
+                text: o.text,
+                line,
+                marks: o.marks,
+            });
+        }
+    }
+
+    /// Inline code: its text, marked
+    fn code(&mut self, t: &str, line: u32) {
+        let start = self.open.last().map(|o| o.text.len());
+        self.text(t, line);
+        if self.heading.is_none()
+            && self.alt.is_none()
+            && self.table == 0
+            && let (Some(start), Some(o)) = (start, self.open.last_mut())
+        {
+            o.marks.push(Mark {
+                kind: MarkKind::Code,
+                start,
+                end: o.text.len(),
+            });
         }
     }
 
@@ -357,7 +406,14 @@ impl Walk {
                 line: None,
                 images: 0,
                 words: false,
+                marks: Vec::new(),
+                strong: None,
             }),
+            Tag::Strong => {
+                if let Some(o) = self.open.last_mut() {
+                    o.strong = Some(o.text.len());
+                }
+            }
             Tag::Image { .. } => {
                 self.alt = Some((String::new(), line));
                 if let Some(o) = self.open.last_mut() {
@@ -395,6 +451,18 @@ impl Walk {
                 }
             }
             TagEnd::Table => self.table = self.table.saturating_sub(1),
+            TagEnd::Strong => {
+                if let Some(o) = self.open.last_mut()
+                    && let Some(start) = o.strong.take()
+                    && o.text.len() > start
+                {
+                    o.marks.push(Mark {
+                        kind: MarkKind::Strong,
+                        start,
+                        end: o.text.len(),
+                    });
+                }
+            }
             TagEnd::Paragraph | TagEnd::Item if self.table == 0 => self.close(line),
             TagEnd::Image => {
                 if let Some((alt, line)) = self.alt.take() {
@@ -413,7 +481,8 @@ impl Walk {
         match ev {
             Event::Start(tag) => self.start(tag, line),
             Event::End(tag) => self.end(tag, line),
-            Event::Text(t) | Event::Code(t) => self.text(&t, line),
+            Event::Text(t) => self.text(&t, line),
+            Event::Code(t) => self.code(&t, line),
             Event::SoftBreak | Event::HardBreak => self.text(" ", line),
             Event::Html(h) => self.html(&h, line, true),
             Event::InlineHtml(h) => self.html(&h, line, false),
@@ -519,8 +588,13 @@ impl Page {
 
     /// The text of the prose, item by item, with its line
     pub fn prose(&self) -> impl Iterator<Item = (&str, u32)> {
+        self.marked_prose().map(|(t, l, _)| (t, l))
+    }
+
+    /// The text of the prose, item by item, with its line and its bold and inline code
+    pub fn marked_prose(&self) -> impl Iterator<Item = (&str, u32, &[Mark])> {
         self.items.iter().filter_map(|i| match i {
-            Item::Prose { text, line } => Some((text.as_str(), *line)),
+            Item::Prose { text, line, marks } => Some((text.as_str(), *line, marks.as_slice())),
             _ => None,
         })
     }
@@ -600,6 +674,24 @@ mod tests {
         let p = page("- Before the code:\n\n  ```sh\n  ls\n  ```\n\n  After it.\n");
         let prose: Vec<(&str, u32)> = p.prose().collect();
         assert_eq!(prose, [("Before the code:", 1), ("After it.", 7)]);
+    }
+
+    #[test]
+    fn bold_and_code_are_marked() {
+        let p = page("A **tier** sets `level` and **more**.\n");
+        let (text, _, marks) = p.marked_prose().next().expect("prose");
+        let got: Vec<(MarkKind, &str)> = marks
+            .iter()
+            .map(|m| (m.kind, &text[m.start..m.end]))
+            .collect();
+        assert_eq!(
+            got,
+            [
+                (MarkKind::Strong, "tier"),
+                (MarkKind::Code, "level"),
+                (MarkKind::Strong, "more")
+            ]
+        );
     }
 
     #[test]

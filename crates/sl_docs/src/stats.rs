@@ -128,7 +128,7 @@ pub fn runs(page: &Page) -> Vec<Run> {
     let mut out = Vec::new();
     let mut cur: Option<Run> = None;
     for item in &page.items {
-        if let Item::Prose { text, line } = item {
+        if let Item::Prose { text, line, .. } = item {
             let r = cur.get_or_insert(Run {
                 words: 0,
                 line: *line,
