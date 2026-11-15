@@ -340,10 +340,10 @@ pub fn run(
         ran.extend(
             runnable
                 .iter()
-                .filter(|id| !out.skipped.iter().any(|s| s.lint == **id))
+                .filter(|id| !out.not_run.iter().any(|s| s.lint == **id))
                 .map(|s| s.to_string()),
         );
-        not_run.extend(out.skipped.into_iter().map(|s| NotRun {
+        not_run.extend(out.not_run.into_iter().map(|s| NotRun {
             level: config.highest_level(&s.lint),
             code: code_of(&s.lint),
             lint: s.lint,

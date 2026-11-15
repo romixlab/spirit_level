@@ -220,7 +220,7 @@ fn input<T>(
         Input::Ready(_) => {}
         Input::Missing(why) => {
             for l in lints {
-                cx.not_run(l.id, "board-input", format!("{file}: skipped: {why}"));
+                cx.not_run(l.id, "board-input", format!("{file}: {why}"));
             }
         }
         Input::Invalid { message, at, help } => {

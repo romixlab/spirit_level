@@ -64,13 +64,13 @@ pub struct Context<'a> {
     elf: &'a [PathBuf],
     landing: bool,
     out: RefCell<Vec<Diagnostic>>,
-    skipped: RefCell<Vec<Skipped>>,
+    unrun: RefCell<Vec<Unrun>>,
 }
 
 /// A lint an analysis could not run after all, found out while running (a tool that failed, a toolchain or
 /// target that is not installed); the engine reports it as not run, like a missing need
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct Skipped {
+pub struct Unrun {
     /// The lint
     pub lint: String,
     /// What was missing, in the form of [`sl_core::Need::name`] (`tool:cargo-deny`, `toolchain:1.88`)
@@ -85,7 +85,7 @@ pub struct Outcome {
     /// The findings
     pub diagnostics: Vec<Diagnostic>,
     /// The lints it could not run
-    pub skipped: Vec<Skipped>,
+    pub not_run: Vec<Unrun>,
 }
 
 impl<'a> Context<'a> {
@@ -104,7 +104,7 @@ impl<'a> Context<'a> {
             elf: &[],
             landing: false,
             out: RefCell::new(Vec::new()),
-            skipped: RefCell::new(Vec::new()),
+            unrun: RefCell::new(Vec::new()),
         }
     }
 
@@ -162,8 +162,8 @@ impl<'a> Context<'a> {
     /// Reports that a running lint could not run after all; its findings are dropped, so a half-run lint never
     /// reports a partial result as the whole
     pub fn not_run(&self, lint: &str, need: impl Into<String>, reason: impl Into<String>) {
-        if self.enabled(lint) && !self.skipped.borrow().iter().any(|s| s.lint == lint) {
-            self.skipped.borrow_mut().push(Skipped {
+        if self.enabled(lint) && !self.unrun.borrow().iter().any(|s| s.lint == lint) {
+            self.unrun.borrow_mut().push(Unrun {
                 lint: lint.to_owned(),
                 need: need.into(),
                 reason: reason.into(),
@@ -180,12 +180,12 @@ impl<'a> Context<'a> {
 
     /// The findings and the lints that could not run
     pub fn take(self) -> Outcome {
-        let skipped = self.skipped.into_inner();
+        let not_run = self.unrun.into_inner();
         let mut diagnostics = self.out.into_inner();
-        diagnostics.retain(|d| !skipped.iter().any(|s| s.lint == d.lint));
+        diagnostics.retain(|d| !not_run.iter().any(|s| s.lint == d.lint));
         Outcome {
             diagnostics,
-            skipped,
+            not_run,
         }
     }
 }

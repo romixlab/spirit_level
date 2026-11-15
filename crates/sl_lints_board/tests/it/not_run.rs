@@ -51,8 +51,8 @@ fn missing_chip_data_and_pcb_are_not_run() {
         .iter()
         .map(|n| (n.lint.as_str(), n.reason.as_str()))
         .collect();
-    let chip = "boards/t9/board.toml: skipped: chip data missing: boards/chips/STM32TEST.json is not there (stm32-data's data/chips/STM32TEST.json)";
-    let pcb = "boards/t9/board.toml: skipped: PCB missing: boards/t9/t9.json is not there";
+    let chip = "boards/t9/board.toml: chip data missing: boards/chips/STM32TEST.json is not there (stm32-data's data/chips/STM32TEST.json)";
+    let pcb = "boards/t9/board.toml: PCB missing: boards/t9/t9.json is not there";
     assert_eq!(
         not_run,
         [

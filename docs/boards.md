@@ -39,7 +39,7 @@ Chip data and the PCB are read from the repo, never from the host, so a check gi
 
 ## Missing inputs
 
-A missing input never passes silently. Without the chip data, or for a chip stm32-data does not cover, `brd-4` and `brd-5` do not run, and the report says why: `skipped: chip data missing: boards/chips/STM32H725IG.json is not there`. Without the PCB file, or with a `.kicad_pcb` instead of geometry JSON, `brd-6` and `brd-7` do not run the same way. A lint that does not run reports nothing for any description of the run, so a partial result is never shown as the whole. An input that is there but does not read is a `brd-1` finding at the key that names it.
+A missing input never passes silently. Without the chip data, or for a chip stm32-data does not cover, `brd-4` and `brd-5` do not run, and the report lists them under "not run" with the reason: `chip data missing: boards/chips/STM32H725IG.json is not there`. Without the PCB file, or with a `.kicad_pcb` instead of geometry JSON, `brd-6` and `brd-7` do not run the same way. A lint that does not run reports nothing for any description of the run, so a partial result is never shown as the whole. An input that is there but does not read is a `brd-1` finding at the key that names it.
 
 ## Where the model lives
 
