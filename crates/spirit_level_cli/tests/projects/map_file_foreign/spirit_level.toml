@@ -2,7 +2,7 @@
 
 [map-file]
 path = "crates.toml"
-foreign = ["meta", "domains", "layers.*.licence", "crates.*.cell", "crates.*.area", "crates.*.when"]
+foreign = ["meta", "domains", "crates.*.cell", "crates.*.area", "crates.*.when"]
 
 [lints.map-complete]
 level = "deny"

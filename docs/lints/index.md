@@ -299,6 +299,7 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [G0009](G0009.md) | [third-party-placement](G0009.md) | heavy third-party crates are used only by the crates the map names | off | off | off | deny | off | off | off | off | off | off |
 | [G0010](G0010.md) | [unsafe-allow-list](G0010.md) | unsafe code is forbidden except in the crates the map marks unsafe | off | off | off | deny | off | off | off | off | off | off |
 | [G0011](G0011.md) | [crate-folder-layer](G0011.md) | a crate's folder is its layer in the map, then its discipline where the map gives one | off | off | off | deny | off | off | off | off | off | off |
+| [G0012](G0012.md) | [map-licence](G0012.md) | every crate carries the licence the map sets for its layer or for itself | off | off | off | deny | off | off | off | off | off | off |
 
 ## hakari
 

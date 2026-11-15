@@ -8,12 +8,14 @@ The map lives in `spirit_level.toml` as `[map]`, or in its own file named by `ma
 [map.layers.utils]
 desc = "Tiny helpers with no workspace dependencies outside utils"
 allow = ["utils"]
+licence = "MIT OR Apache-2.0"
 
 [map.layers.model]
 allow = ["utils", "model"]
 
 [map.layers.app]
 allow = ["utils", "model", "app"]
+licence = "AGPL-3.0-only"
 
 [map.crates]
 foo_ids = { layer = "utils" }
@@ -28,6 +30,7 @@ foo_ui = { layer = "app", ui = true }
 foo_theme = { layer = "app", theme = true }
 foo_fw = { layer = "app", tiers = ["embedded"] }
 foo_gen = { layer = "app", workspace = "tools" }   # a member of the workspace in tools/
+foo_fonts = { layer = "app", licence = "MIT OR Apache-2.0" }
 
 [map.forbid]
 foo_cli = ["foo_gpu", "wgpu"]       # the CLI never reaches these, directly or through others
@@ -45,10 +48,12 @@ wgpu = ["foo_gpu"]                  # only these crates may depend on wgpu direc
 |---|---|
 | `layers.<name>.allow` | layers its crates may depend on; list its own name when crates of one layer may see each other |
 | `layers.<name>.desc` | what lives in the layer |
+| `layers.<name>.licence` | the licence of its crates, an SPDX expression as `license` in Cargo.toml takes it ([map-licence](lints/G0012.md)) |
 | `crates.<name>.layer` | the crate's layer (required) |
 | `crates.<name>.deps` | the workspace crates it may depend on; absent: any its layer allows |
 | `crates.<name>.discipline` | its discipline inside a large layer: the folder between the layer folder and the crate's own ([crate-folder-layer](lints/G0011.md)) |
 | `crates.<name>.desc` | its description, when the map is where it is written |
+| `crates.<name>.licence` | its licence, where it differs from its layer's |
 | `unsafe` | may allow `unsafe` code, in a `[lints]` table of its own that copies the workspace lints; every other crate forbids it |
 | `generated` | generated code, checked in: exempt from size limits |
 | `stable` | a published, stable API: semver-checked |
@@ -72,17 +77,17 @@ Unknown keys are errors, like everywhere in the configuration; the next section 
 A repository may keep a second Cargo workspace beside the main one, such as its own tools in `tools/` with their own `Cargo.lock`. Its crates go in the same map, each with `workspace = "tools"`.
 
 - [map-complete](lints/G0008.md) reads the members of every workspace the map names: a member missing from the map, an entry with no such member, a crate in another workspace than its entry says, and a named workspace that cargo cannot read are findings.
-- [layer-edges](lints/G0007.md), [forbidden-closure](lints/G0006.md), [external-form](lints/G0005.md), [third-party-placement](lints/G0009.md) and [unsafe-allow-list](lints/G0010.md) check each nested workspace as they check the main one.
+- [layer-edges](lints/G0007.md), [forbidden-closure](lints/G0006.md), [external-form](lints/G0005.md), [third-party-placement](lints/G0009.md), [unsafe-allow-list](lints/G0010.md) and [map-licence](lints/G0012.md) check each nested workspace as they check the main one.
 - The other lints check the main workspace only. `spl check tools` checks a nested workspace on its own, with a `spirit_level.toml` of its own there.
 
 ## A map another tool owns
 
-A workspace whose own generator or linter reads the map keeps keys spl does not know beside spl's: a coverage cell, a release, a licence, whole tables of its own. Name those keys in `foreign`, and spl leaves them to their owner:
+A workspace whose own generator or linter reads the map keeps keys spl does not know beside spl's: a coverage cell, a release, an owning area, whole tables of its own. Name those keys in `foreign`, and spl leaves them to their owner:
 
 ```toml
 [map-file]
 path = "crates.toml"
-foreign = ["meta", "domains", "deferred", "layers.*.licence", "crates.*.cell", "crates.*.area", "crates.*.when"]
+foreign = ["meta", "domains", "deferred", "crates.*.cell", "crates.*.area", "crates.*.when"]
 ```
 
 - Each entry is a dotted key path; `*` stands for any one key, a crate's or a layer's name. A path that ends at a table hands the whole table over.

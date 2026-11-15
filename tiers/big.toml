@@ -96,6 +96,10 @@ reason = "the crate table is generated from the manifests and the map, never wri
 level = "deny"
 reason = "unsafe is forbidden except in the crates the map lists"
 
+[lints.map-licence]
+level = "deny"
+reason = "the map decides each layer's licence; a manifest that drifts ships under terms nobody chose"
+
 [lints.todo-macros]
 level = "deny"
 reason = "no stop-gaps: a todo!() is a panic waiting in shipped code"

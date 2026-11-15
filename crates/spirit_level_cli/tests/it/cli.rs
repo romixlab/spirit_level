@@ -98,6 +98,65 @@ fn denied_finding_exits_1_and_fix_repairs_it() {
 }
 
 #[test]
+fn fix_writes_the_licence_the_map_sets() {
+    let p = Scratch::new(
+        "map_licence",
+        &[
+            (
+                "Cargo.toml",
+                "[workspace]\nmembers = [\"crates/*\"]\nresolver = \"3\"\n\n[workspace.package]\nlicense = \"AGPL-3.0-only\"\n",
+            ),
+            (
+                "crates/ids/Cargo.toml",
+                "[package]\nname = \"ids\"\nversion = \"0.1.0\"\nlicense.workspace = true\n",
+            ),
+            (
+                "crates/cli/Cargo.toml",
+                "[package]\nname = \"cli\"\nversion = \"0.1.0\"\nlicense = \"MIT\"\n",
+            ),
+            (
+                "crates/fonts/Cargo.toml",
+                "[package]\nname = \"fonts\"\nversion = \"0.1.0\"\n",
+            ),
+            (
+                "crates/math/Cargo.toml",
+                "[package]\nname = \"math\"\nversion = \"0.1.0\"\nlicense = { workspace = true }\n",
+            ),
+            ("crates/math/src/lib.rs", "//! math\n"),
+            ("crates/ids/src/lib.rs", "//! ids\n"),
+            ("crates/cli/src/lib.rs", "//! cli\n"),
+            ("crates/fonts/src/lib.rs", "//! fonts\n"),
+            (
+                "spirit_level.toml",
+                "[lints.map-licence]\nlevel = \"deny\"\nreason = \"r\"\n\n[map.layers.utils]\nallow = [\"utils\"]\nlicence = \"MIT OR Apache-2.0\"\n\n[map.layers.app]\nallow = [\"utils\", \"app\"]\nlicence = \"AGPL-3.0-only\"\n\n[map.crates]\nids = { layer = \"utils\" }\nmath = { layer = \"utils\" }\ncli = { layer = \"app\" }\nfonts = { layer = \"app\", licence = \"MIT OR Apache-2.0\" }\n",
+            ),
+        ],
+    );
+    let o = run(&p.0, &["check"]);
+    assert_eq!(o.status.code(), Some(1), "{}", text(&o));
+    assert!(text(&o).contains("map-licence ×4"), "{}", text(&o));
+
+    let o = run(&p.0, &["check", "--fix"]);
+    assert_eq!(o.status.code(), Some(0), "{}", text(&o));
+    assert!(
+        p.read("crates/ids/Cargo.toml")
+            .ends_with("\nlicense = \"MIT OR Apache-2.0\"\n")
+    );
+    assert!(
+        p.read("crates/math/Cargo.toml")
+            .ends_with("\nlicense = \"MIT OR Apache-2.0\"\n")
+    );
+    assert!(
+        p.read("crates/cli/Cargo.toml")
+            .ends_with("\nlicense.workspace = true\n")
+    );
+    assert_eq!(
+        p.read("crates/fonts/Cargo.toml"),
+        "[package]\nname = \"fonts\"\nlicense = \"MIT OR Apache-2.0\"\nversion = \"0.1.0\"\n"
+    );
+}
+
+#[test]
 fn json_report() {
     let p = workspace("[lints.package-license]\nlevel = \"warn\"\nreason = \"r\"\n");
     let o = run(&p.0, &["check", "--format", "json"]);

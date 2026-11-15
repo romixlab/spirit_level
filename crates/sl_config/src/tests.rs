@@ -272,18 +272,21 @@ fn map_crates_name_their_nested_workspace() {
     }
 }
 
-const OWNED_MAP: &str = "[meta]\nversion = 1\n[layers.core]\nallow = [\"core\"]\nlicence = \"MIT\"\n[crates]\na = { layer = \"core\", area = \"MODEL\", contract = true }\n";
+const OWNED_MAP: &str = "[meta]\nversion = 1\n[layers.core]\nallow = [\"core\"]\nlicence = \"MIT\"\n[crates]\na = { layer = \"core\", area = \"MODEL\", contract = true }\nb = { layer = \"core\", area = \"MODEL\", licence = \"Apache-2.0\" }\n";
 
 #[test]
 fn map_file_leaves_foreign_keys_to_the_owner() {
     let c = load_with(
-        "extends = \"small\"\n[map-file]\npath = \"crates.toml\"\nforeign = [\"meta\", \"layers.*.licence\", \"crates.*.area\"]\n",
+        "extends = \"small\"\n[map-file]\npath = \"crates.toml\"\nforeign = [\"meta\", \"crates.*.area\"]\n",
         &[("crates.toml", OWNED_MAP)],
     )
     .unwrap();
     let m = c.map.unwrap();
     assert!(m.crates["a"].contract);
     assert_eq!(m.layers[0].allow, ["core"]);
+    assert_eq!(m.licence_of("a"), Some("MIT"));
+    assert_eq!(m.licence_of("b"), Some("Apache-2.0"));
+    assert_eq!(m.licence_of("c"), None);
 }
 
 #[test]
@@ -303,7 +306,7 @@ fn map_file_without_foreign_rejects_the_owners_keys() {
 #[test]
 fn map_file_typo_in_an_spl_key_is_still_an_error() {
     let e = messages(load_with(
-        "extends = \"small\"\n[map-file]\npath = \"crates.toml\"\nforeign = [\"meta\", \"layers.*.licence\", \"crates.*.area\"]\n",
+        "extends = \"small\"\n[map-file]\npath = \"crates.toml\"\nforeign = [\"meta\", \"crates.*.area\"]\n",
         &[(
             "crates.toml",
             &OWNED_MAP.replace("contract = true", "contarct = true"),
@@ -319,7 +322,7 @@ fn map_file_typo_in_an_spl_key_is_still_an_error() {
 #[test]
 fn map_file_foreign_may_not_take_an_spl_key() {
     let e = messages(load_with(
-        "extends = \"small\"\n[map-file]\npath = \"crates.toml\"\nforeign = [\"meta\", \"layers.*.licence\", \"crates.*.area\", \"crates.*.contract\", \"bad..path\"]\n",
+        "extends = \"small\"\n[map-file]\npath = \"crates.toml\"\nforeign = [\"meta\", \"crates.*.area\", \"crates.*.contract\", \"bad..path\"]\n",
         &[("crates.toml", OWNED_MAP)],
     ));
     assert!(
@@ -327,7 +330,7 @@ fn map_file_foreign_may_not_take_an_spl_key() {
         "{e:?}"
     );
     let e = messages(load_with(
-        "extends = \"small\"\n[map-file]\npath = \"crates.toml\"\nforeign = [\"meta\", \"layers.*.licence\", \"crates.*.area\", \"crates.*.contract\"]\n",
+        "extends = \"small\"\n[map-file]\npath = \"crates.toml\"\nforeign = [\"meta\", \"crates.*.area\", \"crates.*.contract\"]\n",
         &[("crates.toml", OWNED_MAP)],
     ));
     assert_eq!(

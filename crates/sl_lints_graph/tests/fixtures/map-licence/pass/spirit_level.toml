@@ -1,0 +1,20 @@
+[lints.map-licence]
+level = "deny"
+reason = "fixture"
+
+[map.layers.utils]
+allow = ["utils"]
+licence = "MIT OR Apache-2.0"
+
+[map.layers.app]
+allow = ["utils", "app"]
+licence = "AGPL-3.0-only"
+
+[map.layers.build]
+allow = ["build"]
+
+[map.crates]
+ids = { layer = "utils" }
+cli = { layer = "app" }
+fonts = { layer = "app", licence = "MIT OR Apache-2.0" }
+gen = { layer = "build" }

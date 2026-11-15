@@ -15,8 +15,21 @@ pub(crate) fn run(cx: &Context<'_>) {
 
     // workspace-inheritance
     let keys = cx.params("workspace-inheritance").list("keys");
+    // A licence the map sets apart from the workspace's is map-licence's to check
+    let map_licence = |pkg: &Package| {
+        let shared = root
+            .get(&["workspace", "package", "license"])
+            .and_then(|v| v.as_str());
+        cx.map()
+            .and_then(|m| m.licence_of(&pkg.name))
+            .filter(|l| Some(*l) != shared)
+    };
     for key in keys {
+        let by_map = |pkg: &Package| key == "license" && map_licence(pkg).is_some();
         if root.get(&["workspace", "package", key]).is_none() {
+            if !p.packages.is_empty() && p.packages.iter().all(by_map) {
+                continue;
+            }
             cx.emit(
                 Diagnostic::new("workspace-inheritance", format!("workspace.package.{key}"), format!("[workspace.package] does not declare {key}"))
                     .span(root_span(&["workspace"]))
@@ -25,7 +38,7 @@ pub(crate) fn run(cx: &Context<'_>) {
             continue;
         }
         for pkg in &p.packages {
-            if inherits(&pkg.manifest, &["package", key]) {
+            if inherits(&pkg.manifest, &["package", key]) || by_map(pkg) {
                 continue;
             }
             let fix = inherit_fix(&pkg.manifest, key);

@@ -10,6 +10,7 @@
 //!
 //! [map.layers.app]
 //! allow = ["core", "app"]
+//! licence = "AGPL-3.0-only"
 //!
 //! [map.crates]
 //! foo_core = { layer = "core" }
@@ -40,6 +41,8 @@ pub struct Layer {
     pub desc: Option<String>,
     /// The layers its crates may depend on (its own only when listed)
     pub allow: Vec<String>,
+    /// The licence of its crates, an SPDX expression as `license` in Cargo.toml takes it
+    pub licence: Option<String>,
 }
 
 /// One crate's entry
@@ -51,6 +54,8 @@ pub struct MapCrate {
     pub discipline: Option<String>,
     /// Its description, when the map is where it is written
     pub desc: Option<String>,
+    /// Its licence, where it differs from its layer's
+    pub licence: Option<String>,
     /// The workspace crates it may depend on; None: any its layer allows
     pub deps: Option<Vec<String>>,
     /// May allow `unsafe` code
@@ -137,6 +142,14 @@ impl Map {
         self.crates.get(krate).and_then(|c| self.layer(&c.layer))
     }
 
+    /// The licence the map sets for a crate: its own, else its layer's
+    pub fn licence_of(&self, krate: &str) -> Option<&str> {
+        let c = self.crates.get(krate)?;
+        c.licence
+            .as_deref()
+            .or_else(|| self.layer(&c.layer)?.licence.as_deref())
+    }
+
     /// Reads a map table
     pub(crate) fn read(mut r: Reader<'_>, errs: &mut Vec<ConfigError>) -> Self {
         let mut map = Self {
@@ -151,8 +164,14 @@ impl Map {
                 };
                 let desc = l.opt_str("desc", errs);
                 let allow = l.opt_list("allow", false, errs).unwrap_or_default();
+                let licence = l.opt_str("licence", errs);
                 l.finish(errs);
-                map.layers.push(Layer { name, desc, allow });
+                map.layers.push(Layer {
+                    name,
+                    desc,
+                    allow,
+                    licence,
+                });
             }
             layers.finish(errs);
         }
@@ -166,6 +185,7 @@ impl Map {
                     layer: c.str("layer", errs).unwrap_or_default(),
                     discipline: c.opt_str("discipline", errs),
                     desc: c.opt_str("desc", errs),
+                    licence: c.opt_str("licence", errs),
                     deps: c.opt_list("deps", false, errs),
                     r#unsafe: c.opt_bool("unsafe", errs).unwrap_or(false),
                     generated: c.opt_bool("generated", errs).unwrap_or(false),

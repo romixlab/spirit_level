@@ -1,0 +1,3 @@
+[[finding]]
+at = "crates/fx_cli/Cargo.toml:7:1"
+contains = "fx_cli does not inherit license"

@@ -1,6 +1,7 @@
 //! Crate-graph lints, one analysis: [`GRAPH`].
 
 mod folders;
+mod licence;
 mod scc;
 mod source;
 mod table;
@@ -44,6 +45,8 @@ lint!(CRATE_TABLE, "G0004", "crate-table", "graph", "the crate table in the READ
 lint!(CRATE_FOLDER_LAYER, "G0011", "crate-folder-layer", "graph", "a crate's folder is its layer in the map, then its discipline where the map gives one",
     params: [("root", Str, "\"crates\"", "the folder that holds the crates, flat or in layer folders")],
     needs: [Need::Map], fix: None);
+lint!(MAP_LICENCE, "G0012", "map-licence", "graph", "every crate carries the licence the map sets for its layer or for itself",
+    params: [], needs: [Need::Map], fix: Exact);
 lint!(UNSAFE_ALLOW_LIST, "G0010", "unsafe-allow-list", "graph", "unsafe code is forbidden except in the crates the map marks unsafe",
     params: [], needs: [Need::Map], fix: None);
 
@@ -65,6 +68,7 @@ static LINTS: &[&LintMeta] = &[
     &CRATE_TABLE,
     &UNSAFE_ALLOW_LIST,
     &CRATE_FOLDER_LAYER,
+    &MAP_LICENCE,
 ];
 
 impl Analysis for Graph {
@@ -94,6 +98,7 @@ impl Analysis for Graph {
                 layer_edges(cx, w, map);
                 external_form(cx, w, map);
                 third_party(cx, w, map);
+                licence::check(cx, w, map);
                 if cx.enabled("forbidden-closure") {
                     forbidden(cx, w, map);
                 }

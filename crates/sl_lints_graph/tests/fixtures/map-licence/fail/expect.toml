@@ -1,0 +1,11 @@
+[[finding]]
+at = "crates/cli/Cargo.toml:4:1"
+contains = "cli is under MIT; the map sets AGPL-3.0-only"
+
+[[finding]]
+at = "crates/fonts/Cargo.toml:1:2"
+contains = "fonts states no licence; the map sets MIT OR Apache-2.0"
+
+[[finding]]
+at = "crates/ids/Cargo.toml:4:1"
+contains = "ids is under AGPL-3.0-only; the map sets MIT OR Apache-2.0"

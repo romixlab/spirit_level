@@ -66,6 +66,7 @@ Use it with `extends = "big"` in `spirit_level.toml`.
 | [G0009](../lints/G0009.md) | third-party-placement | `deny` | heavy dependencies sit in one crate each | big |
 | [G0010](../lints/G0010.md) | unsafe-allow-list | `deny` | unsafe is forbidden except in the crates the map lists | big |
 | [G0011](../lints/G0011.md) | crate-folder-layer | `deny` | the map decides the path: crates/<layer>/<crate>, a large layer by discipline, never deeper | big |
+| [G0012](../lints/G0012.md) | map-licence | `deny` | the map decides each layer's licence; a manifest that drifts ships under terms nobody chose | big |
 | [M0001](../lints/M0001.md) | default-features-off | `deny` | feature creep in a big graph costs every build | big |
 | [M0002](../lints/M0002.md) | duplicate-versions | `deny` | two versions of a crate double its build time and split its types | big |
 | [M0003](../lints/M0003.md) | git-dependency-pins | `deny` | git dependencies follow a branch; a pin hides a break until it is old | medium |
@@ -303,6 +304,10 @@ reason = "the crate table is generated from the manifests and the map, never wri
 [lints.unsafe-allow-list]
 level = "deny"
 reason = "unsafe is forbidden except in the crates the map lists"
+
+[lints.map-licence]
+level = "deny"
+reason = "the map decides each layer's licence; a manifest that drifts ships under terms nobody chose"
 
 [lints.todo-macros]
 level = "deny"

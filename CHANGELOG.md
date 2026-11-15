@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Map key `licence` per layer or crate; `map-licence` checks it, `workspace-inheritance` accepts it (GRAPH-5).
+
 ## [0.4.11] - 2026-11-15
 
 ### Added
