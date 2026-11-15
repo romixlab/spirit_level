@@ -37,6 +37,12 @@ const NO_TERM: &[&str] = &[
     "we", "you", "i",
 ];
 
+/// Words that join or point and name nothing: bold on them is stress, not a definition
+const FUNCTION_WORDS: &[&str] = &[
+    "a", "an", "the", "and", "or", "but", "nor", "of", "to", "in", "on", "at", "by", "for", "with",
+    "from", "is", "are", "be", "if", "then", "else", "so", "as", "than", "it", "this", "that",
+];
+
 /// The longest abbreviation, in characters: a longer word in capitals is a name or stress
 const ABBREVIATION_CHARS_MAX: usize = 6;
 
@@ -129,15 +135,18 @@ pub struct Abbreviation {
     pub line: u32,
 }
 
-/// The abbreviation a word is: two to six capitals and digits with at least two capitals, a plural `s` dropped
+/// The abbreviation a word is: two to six capitals and digits with at least two capitals and at most one digit
+/// (`I2C`; `STM32` is a part number), a plural `s` dropped
 fn abbreviation(word: &str) -> Option<&str> {
     let w = word
         .strip_suffix('s')
         .filter(|s| s.len() >= 2)
         .unwrap_or(word);
     let caps = w.chars().filter(char::is_ascii_uppercase).count();
+    let digits = w.chars().filter(char::is_ascii_digit).count();
     let ok = (2..=ABBREVIATION_CHARS_MAX).contains(&w.len())
         && caps >= 2
+        && digits <= 1
         && w.chars()
             .all(|c| c.is_ascii_uppercase() || c.is_ascii_digit());
     (ok && !SHOUTED.contains(&w)).then_some(w)
@@ -243,8 +252,18 @@ fn sentence_term<'a>(sentence: &[(usize, &'a str)]) -> Option<(usize, Vec<&'a st
     })
 }
 
-/// The page's definitions in order, the first of each term: bold text of one to four words (a label such as
-/// "**Note:**" too, unless `ignore` names it), and definition sentences
+/// Whether bold text at `start..end` labels its item: it opens the item and ends in, or is followed by, a colon,
+/// dot or dash
+fn label(text: &str, start: usize, end: usize) -> bool {
+    let marks = [':', '.', '-', '\u{2013}', '\u{2014}'];
+    text[..start].trim().is_empty()
+        && (text[start..end].trim_end().ends_with(marks)
+            || text[end..].trim_start().starts_with(marks))
+}
+
+/// The page's definitions in order, the first of each term: bold text of one to four words that is not a label
+/// ("**Note:** ..."), stress on a function word or a name in capitals (`A2`), and definition sentences; `ignore`
+/// leaves terms out
 fn definitions(prose: &[Prose], ignore: &[String]) -> Vec<Definition> {
     let mut out: Vec<Definition> = Vec::new();
     let mut push = |stems: Vec<String>, term: String, item: usize, at: usize, line: u32| {
@@ -263,6 +282,7 @@ fn definitions(prose: &[Prose], ignore: &[String]) -> Vec<Definition> {
         let mut found: Vec<(usize, Vec<&str>)> = p
             .strong
             .iter()
+            .filter(|(s, e)| !label(&p.text, *s, *e))
             .map(|(s, e)| {
                 let ws: Vec<&str> = tokens(&p.text[*s..*e])
                     .into_iter()
@@ -270,7 +290,13 @@ fn definitions(prose: &[Prose], ignore: &[String]) -> Vec<Definition> {
                     .collect();
                 (*s, ws)
             })
-            .filter(|(_, ws)| (1..=TERM_WORDS_MAX).contains(&ws.len()))
+            .filter(|(_, ws)| {
+                (1..=TERM_WORDS_MAX).contains(&ws.len())
+                    && ws.iter().any(|w| w.chars().any(char::is_lowercase))
+                    && !ws
+                        .iter()
+                        .all(|w| FUNCTION_WORDS.contains(&w.to_lowercase().as_str()))
+            })
             .collect();
         for s in sentences(&p.text) {
             let base = s.as_ptr() as usize - p.text.as_ptr() as usize;
@@ -429,6 +455,14 @@ mod tests {
     }
 
     #[test]
+    fn part_numbers_are_no_abbreviations() {
+        let p = page("The STM32 and RP2350 talk over I2C.\n");
+        let found = abbreviations(&p, &[]);
+        let got: Vec<&str> = found.iter().map(|a| a.abbr.as_str()).collect();
+        assert_eq!(got, ["I2C"]);
+    }
+
+    #[test]
     fn abbreviations_at_first_use() {
         let p = page(
             "The MCU drives PWMs over USB. Pulse-width modulation (PWM) again.\n\nThe DMA (direct memory access) \
@@ -442,8 +476,9 @@ mod tests {
     #[test]
     fn terms_before_definition() {
         let p = page(
-            "Each tier extends another.\n\nA **tier** is a set of lints. **Note:** a **waiver** is local.\n\n\
-             A run means one pass. Every run ends.\n",
+            "Each tier extends another, and a crate.\n\nA **tier** is a set of lints. **Note:** a **waiver** is local.\n\n\
+             A run means one pass. Every run ends. This **and** that, a crate **A2**.\n\n- **Crate**: a package.\n\
+             - **Crate:** again.\n",
         );
         let found = early_terms(&p, &["note".to_owned()]);
         let got: Vec<(&str, u32, u32)> = found

@@ -2,7 +2,7 @@
 
 A reader who meets an abbreviation they do not know stops, searches the page for its meaning and often finds none. Readers arrive on any page from a search or a link, so each page spells out its abbreviations once, at the first use.
 
-The lint reads a word of two to six capitals and digits, with at least two capitals, as an abbreviation: `PWM`, `I2C`, `MCUs`. It counts as spelled out when the words stand next to it in parentheses, either way round, or when "stands for", "short for" or "means" follows it. Abbreviations every reader knows are in the `known` list and never judged. A file name such as `AGENTS.md`, inline code and words written in capitals for stress (`MUST`, `NOT`) are not abbreviations.
+The lint reads a word of two to six capitals and digits, with at least two capitals and at most one digit, as an abbreviation: `PWM`, `I2C`, `MCUs`. A word with more digits is a part number (`STM32`). It counts as spelled out when the words stand next to it in parentheses, either way round, or when "stands for", "short for" or "means" follows it. Abbreviations every reader knows are in the `known` list and never judged. A file name such as `AGENTS.md`, inline code and words written in capitals for stress (`MUST`, `NOT`) are not abbreviations.
 
 The finding is a candidate: some words in capitals are names, not abbreviations.
 
