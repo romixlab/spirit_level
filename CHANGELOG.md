@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.4.14] - 2026-11-15
+
 ### Added
 
 - `abbreviation-first-use` (D0012), `term-before-definition` (D0013), `term-synonyms` (D0014): candidates on the words a page uses (DOCS-3).
