@@ -424,42 +424,58 @@ fn wanted(expect: &toml_edit::DocumentMut) -> Result<Vec<Want>, String> {
     Ok(want)
 }
 
-/// Writes expect.toml from what the run found, keeping `network`, `landing`, `project`, `params` and the `contains` still true
+/// Writes expect.toml from what the run found, keeping `network`, `landing`, `project`, `params` and the `contains`
+/// still true. A case whose findings already match `want` is left untouched, so a tier-wide `BLESS=1` run never
+/// reformats or re-serializes cases it did not need to change.
 fn bless(c: &Case<'_>, want: &[Want], got: &[Got]) -> Result<(), String> {
+    if compare(want, got.to_vec()).is_ok() {
+        return Ok(());
+    }
     let expect = &c.expect;
-    let mut out = String::new();
+    let mut doc = toml_edit::DocumentMut::new();
+    let root = doc.as_table_mut();
     if c.network {
-        out.push_str("network = true\n");
+        root.insert("network", toml_edit::value(true));
     }
-    if c.expect.get("landing").and_then(toml_edit::Item::as_bool) == Some(true) {
-        out.push_str("landing = true\n");
+    if expect.get("landing").and_then(toml_edit::Item::as_bool) == Some(true) {
+        root.insert("landing", toml_edit::value(true));
     }
+    // cloned, not re-serialized from a `to_string()`, so a `[params]` table keeps its own header
     for key in ["project", "params"] {
         if let Some(p) = expect.get(key) {
-            let _ = writeln!(out, "{key} = {}\n", p.to_string().trim());
+            root.insert(key, p.clone());
         }
     }
+    let mut findings = toml_edit::ArrayOfTables::new();
     for (at, m, conf) in got {
         // a place and a `contains` written by hand stay while the finding still matches them
         let kept = want.iter().find(|(a, w, _)| {
             same_place(a, at) && w.as_ref().is_none_or(|w| m.contains(w.as_str()))
         });
-        let _ = writeln!(
-            out,
-            "[[finding]]\nat = {:?}",
-            kept.map_or(at.as_str(), |(a, _, _)| a.as_str())
+        let mut t = toml_edit::Table::new();
+        t.insert(
+            "at",
+            toml_edit::value(kept.map_or(at.as_str(), |(a, _, _)| a.as_str())),
         );
         if let Some(w) = kept.and_then(|(_, w, _)| w.as_ref()) {
-            let _ = writeln!(out, "contains = {w:?}");
+            t.insert("contains", toml_edit::value(w.as_str()));
         }
         match conf {
             Confidence::Certain => {}
-            Confidence::Estimate => out.push_str("confidence = \"estimate\"\n"),
-            Confidence::Candidate => out.push_str("confidence = \"candidate\"\n"),
+            Confidence::Estimate => {
+                t.insert("confidence", toml_edit::value("estimate"));
+            }
+            Confidence::Candidate => {
+                t.insert("confidence", toml_edit::value("candidate"));
+            }
         }
-        out.push('\n');
+        findings.push(t);
     }
-    std::fs::write(&c.expect_path, out).map_err(|e| e.to_string())?;
+    if !findings.is_empty() {
+        doc.as_table_mut()
+            .insert("finding", toml_edit::Item::ArrayOfTables(findings));
+    }
+    std::fs::write(&c.expect_path, doc.to_string()).map_err(|e| e.to_string())?;
     Ok(())
 }
 
@@ -674,5 +690,79 @@ mod tests {
                 && msg.contains("skipped: fake-tool/pass: fake is not installed"),
             "{msg}"
         );
+    }
+
+    /// A case for `bless()` alone, parsed from `text`; `expect_path` is never read by `bless()` itself
+    fn bless_case(text: &str, expect_path: &Path) -> Case<'static> {
+        Case {
+            id: "fake-lint",
+            name: "fail".to_owned(),
+            project: PathBuf::new(),
+            expect: text.parse().expect("valid expect.toml"),
+            expect_path: expect_path.to_path_buf(),
+            elf: Vec::new(),
+            elf_marker: String::new(),
+            tools: false,
+            network: false,
+        }
+    }
+
+    #[test]
+    fn bless_leaves_a_case_with_a_params_table_untouched_when_findings_still_match() {
+        let dir =
+            std::env::temp_dir().join(format!("sl_testkit_bless_same_{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let path = dir.join("expect.toml");
+        let text = "[params]\npolicy = \"tag\"\nown = [\"github.com/acme\"]\n\n[[finding]]\nat = \"src/lib.rs:3\"\n";
+        std::fs::write(&path, text).unwrap();
+        let c = bless_case(text, &path);
+        let want = wanted(&c.expect).unwrap();
+        let got = vec![(
+            "src/lib.rs:3".to_owned(),
+            "a message".to_owned(),
+            Confidence::Certain,
+        )];
+        bless(&c, &want, &got).expect("bless");
+        assert_eq!(
+            std::fs::read_to_string(&path).unwrap(),
+            text,
+            "a case whose findings already match `want` must not be rewritten"
+        );
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    #[test]
+    fn bless_keeps_a_params_table_a_table_when_findings_change() {
+        let dir =
+            std::env::temp_dir().join(format!("sl_testkit_bless_diff_{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let path = dir.join("expect.toml");
+        let text = "[params]\npolicy = \"tag\"\nown = [\"github.com/acme\"]\n\n[[finding]]\nat = \"src/lib.rs:3\"\n";
+        std::fs::write(&path, text).unwrap();
+        let c = bless_case(text, &path);
+        let want = wanted(&c.expect).unwrap();
+        // the run now finds the lint at a different line, so the expectation changed and bless must rewrite
+        let got = vec![(
+            "src/lib.rs:7".to_owned(),
+            "a message".to_owned(),
+            Confidence::Certain,
+        )];
+        bless(&c, &want, &got).expect("bless");
+        let after = std::fs::read_to_string(&path).unwrap();
+        let doc: toml_edit::DocumentMut = after.parse().unwrap_or_else(|e| {
+            panic!("bless wrote invalid toml: {e}\n---\n{after}");
+        });
+        let params = doc
+            .get("params")
+            .and_then(toml_edit::Item::as_table_like)
+            .expect("params stays a table, not a flattened `params = policy = ...` line");
+        assert_eq!(params.get("policy").and_then(|v| v.as_str()), Some("tag"));
+        let findings = doc["finding"].as_array_of_tables().expect("finding array");
+        assert_eq!(findings.len(), 1);
+        assert_eq!(
+            findings.get(0).unwrap().get("at").and_then(|v| v.as_str()),
+            Some("src/lib.rs:7")
+        );
+        let _ = std::fs::remove_dir_all(&dir);
     }
 }

@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- `BLESS=1` rewrote every fixture's expect.toml and could corrupt `[params]` tables (TESTKIT-1).
+
 ## [0.4.31] - 2026-11-15
 
 ### Changed

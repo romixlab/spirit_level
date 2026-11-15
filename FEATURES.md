@@ -144,3 +144,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `BOOK-1` Lint and tier pages generated from metadata; `book --check` fails when stale.
 - ✅ `BOOK-2` Logo and brand assets from a Typst source (`assets/`); book favicon, header logo, README header.
 - ✅ `BOOK-3` `spl book stamp`: a book's footer build stamp (crate version, git commit, build time) and the reader-clock age script, serving `book-build-stamp` (D0017); `sl_book::stamp`.
+
+## TESTKIT - the golden fixture harness
+
+- ✅ `TESTKIT-1` `BLESS=1` rewrites only the fixture cases whose findings changed; an untouched case, including a `[params]` table, round-trips byte for byte (`sl_testkit::bless`).
