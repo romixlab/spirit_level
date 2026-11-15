@@ -585,6 +585,9 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [U0008](U0008.md) | [ui-label-punctuation](U0008.md) | UI text writes the ellipsis as one character and button labels end without a full stop | off | off | off | off | off | off | deny | deny | off | off |
 | [U0009](U0009.md) | [ui-debug-text](U0009.md) | text shown to a person never holds Rust's debug formatting | off | off | off | off | off | off | warn | warn | off | off |
 | [U0014](U0014.md) | [ui-unwrap-external-data](U0014.md) | UI code returns an error for a bad file, parse or connection, never unwraps or expects it | off | off | off | off | off | off | warn | warn | off | off |
+| [U0017](U0017.md) | [ui-tooltip-repeats-label](U0017.md) | a tooltip says more than the label it is attached to | off | off | off | off | off | off | warn | warn | off | off |
+| [U0018](U0018.md) | [ui-locale-strings](U0018.md) | string literals shown to a person come from the translation catalogue, not written in the call | off | off | off | off | off | off | off | off | off | off |
+| [U0019](U0019.md) | [ui-hover-text](U0019.md) | an icon-only or glyph button says what it does in a tooltip | off | off | off | off | off | off | warn | warn | off | off |
 
 ## units
 

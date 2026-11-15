@@ -18,6 +18,8 @@ Use it with `extends = "ui"` in `spirit_level.toml`.
 | [U0008](../lints/U0008.md) | ui-label-punctuation | `deny` | one way to write the ellipsis and button labels; certain, rare, and `spl check --fix` applies it | ui |
 | [U0009](../lints/U0009.md) | ui-debug-text | `warn` | Rust's debug form is for developers; a person reads what happened and what to do | ui |
 | [U0014](../lints/U0014.md) | ui-unwrap-external-data | `warn` | panic-in-library skips binary crates; a UI app's bad file, parse or connection still deserves an error, not a crash; an estimate, since the chain may be known good or already checked | ui |
+| [U0017](../lints/U0017.md) | ui-tooltip-repeats-label | `warn` | a tooltip that only repeats the label cost the person a hover for nothing; certain, since the match is exact | ui |
+| [U0019](../lints/U0019.md) | ui-hover-text | `warn` | an icon-only button with no tooltip has no words at all; a candidate, since a short label may be a real word or get help another way | ui |
 
 ## The file
 
@@ -68,4 +70,16 @@ reason = "Rust's debug form is for developers; a person reads what happened and 
 [lints.ui-unwrap-external-data]
 level = "warn"
 reason = "panic-in-library skips binary crates; a UI app's bad file, parse or connection still deserves an error, not a crash; an estimate, since the chain may be known good or already checked"
+
+[lints.ui-tooltip-repeats-label]
+level = "warn"
+reason = "a tooltip that only repeats the label cost the person a hover for nothing; certain, since the match is exact"
+
+[lints.ui-locale-strings]
+level = "allow"
+reason = "opt-in: a project that has not started translating its UI would see this fire on every label; a project that translates turns it on"
+
+[lints.ui-hover-text]
+level = "warn"
+reason = "an icon-only button with no tooltip has no words at all; a candidate, since a short label may be a real word or get help another way"
 ```

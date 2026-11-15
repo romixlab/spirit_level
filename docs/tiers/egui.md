@@ -26,6 +26,8 @@ Use it with `extends = "egui"` in `spirit_level.toml`.
 | [U0014](../lints/U0014.md) | ui-unwrap-external-data | `warn` | panic-in-library skips binary crates; a UI app's bad file, parse or connection still deserves an error, not a crash; an estimate, since the chain may be known good or already checked | ui |
 | [U0015](../lints/U0015.md) | egui-panel-api | `warn` | panel and App code written for an older egui keeps compiling under a deprecation warning, then breaks on the next bump; an estimate, without type information | egui |
 | [U0016](../lints/U0016.md) | egui-checklist-menu | `warn` | a menu_button closes on the first tick inside it; ve_basics::Checklist keeps it open for several | egui |
+| [U0017](../lints/U0017.md) | ui-tooltip-repeats-label | `warn` | a tooltip that only repeats the label cost the person a hover for nothing; certain, since the match is exact | egui |
+| [U0019](../lints/U0019.md) | ui-hover-text | `warn` | an icon-only button with no tooltip has no words at all; a candidate, since a short label may be a real word or get help another way | egui |
 
 ## The file
 
@@ -188,4 +190,53 @@ reason = "panel and App code written for an older egui keeps compiling under a d
 [lints.egui-checklist-menu]
 level = "warn"
 reason = "a menu_button closes on the first tick inside it; ve_basics::Checklist keeps it open for several"
+
+[lints.ui-tooltip-repeats-label]
+label-calls = [
+  "label",
+  "button",
+  "small_button",
+  "heading",
+  "selectable_label",
+  "checkbox",
+  "radio",
+  "radio_value",
+  "selectable_value",
+  "menu_button",
+  "Label::new",
+  "Button::new",
+  "RichText::new",
+  "primary_button",
+  "danger_button",
+]
+hover-calls = ["on_hover_text", "on_disabled_hover_text"]
+reason = "a tooltip that only repeats the label cost the person a hover for nothing; certain, since the match is exact"
+
+[lints.ui-locale-strings]
+calls = [
+  "label",
+  "button",
+  "small_button",
+  "heading",
+  "selectable_label",
+  "checkbox",
+  "Label::new",
+  "Button::new",
+  "RichText::new",
+]
+level = "allow"
+reason = "opt-in: a project that has not started translating its UI would see this fire on every label; a project that translates turns it on"
+
+[lints.ui-hover-text]
+button-calls = [
+  "button",
+  "small_button",
+  "selectable_label",
+  "Button::new",
+  "menu_button",
+  "primary_button",
+  "danger_button",
+]
+hover-calls = ["on_hover_text", "on_disabled_hover_text"]
+reason = "an icon-only button with no tooltip has no words at all; a candidate, since a short label may be a real word or get help another way"
 ```
