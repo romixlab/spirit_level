@@ -45,6 +45,7 @@ Use it with `extends = "small"` in `spirit_level.toml`.
 | [D0018](../lints/D0018.md) | readme-index-clash | `deny` | Zensical does not say which of README.md and index.md it builds when a folder holds both | small |
 | [D0019](../lints/D0019.md) | theme-feature-conflicts | `deny` | Zensical does not support the conflicting features together, and builds neither error nor warn about it | small |
 | [D0020](../lints/D0020.md) | zensical-keys | `deny` | Zensical ignores a key it does not know, silently; a typo in zensical.toml never fails the build | small |
+| [D0021](../lints/D0021.md) | page-links | `deny` | a link to a page that moved or never existed, or to the built site, leads a reader nowhere | small |
 | [M0001](../lints/M0001.md) | default-features-off | `warn` | dependencies are added with default-features = false and only the features in use | small |
 | [M0003](../lints/M0003.md) | git-dependency-pins | `warn` | git dependencies follow a branch; Cargo.lock fixes the commit | small |
 | [M0004](../lints/M0004.md) | no-sys-crates | `deny` | pure-Rust crates only: no bundled C, no -sys bindings without a written reason | small |
@@ -348,6 +349,10 @@ reason = "a navigation entry that names no page renders as a link that leads now
 [lints.orphan-pages]
 level = "warn"
 reason = "a page nobody reaches is published, unread and left to go stale"
+
+[lints.page-links]
+level = "deny"
+reason = "a link to a page that moved or never existed, or to the built site, leads a reader nowhere"
 
 [lints.page-title]
 level = "warn"
