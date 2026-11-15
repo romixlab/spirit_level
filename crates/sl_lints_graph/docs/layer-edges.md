@@ -4,6 +4,8 @@ Layers keep a workspace from growing back into one tangle: a crate may depend on
 
 When a crate's map entry lists `deps`, every edge must also be one of them: a new edge between two crates is then a visible change of the map.
 
+An edge to the workspace-hack package is exempt: hakari makes every member depend on it, so no layer or `deps` list has to name it. The package is the one `hakari-package` names in `.config/hakari.toml` (or `.guppy/hakari.toml`); a crate merely called `workspace-hack` is checked like any other. The hack's own dependencies are still checked.
+
 ## Example
 
 ```toml

@@ -8,6 +8,10 @@ allow = ["utils"]
 [map.layers.model]
 allow = ["utils", "model"]
 
+[map.layers.hack]
+allow = []
+
 [map.crates]
 a = { layer = "model", deps = ["b"] }
 b = { layer = "utils" }
+h = { layer = "hack", deps = [] }

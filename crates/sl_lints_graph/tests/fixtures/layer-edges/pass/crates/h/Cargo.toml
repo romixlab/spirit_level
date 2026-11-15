@@ -1,0 +1,5 @@
+[package]
+name = "h"
+version = "0.1.0"
+edition = "2024"
+description = "the workspace-hack"

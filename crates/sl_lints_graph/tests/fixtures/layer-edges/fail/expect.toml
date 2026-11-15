@@ -6,3 +6,7 @@ contains = "b is not in a's deps"
 [[finding]]
 at = "crates/b/Cargo.toml:8"
 contains = "layer utils may not depend on layer model"
+
+[[finding]]
+at = "crates/c/Cargo.toml:9"
+contains = "c depends on workspace-hack: layer model may not depend on layer hack"

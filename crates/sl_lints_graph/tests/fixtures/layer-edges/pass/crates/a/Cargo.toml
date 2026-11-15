@@ -6,3 +6,4 @@ description = "the a crate"
 
 [dependencies]
 b = { path = "../b" }
+h = { path = "../h" }

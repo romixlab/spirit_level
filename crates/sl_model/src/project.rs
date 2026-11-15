@@ -274,6 +274,9 @@ impl Resolve {
     }
 }
 
+/// Where cargo-hakari looks for its configuration, in order
+pub const HAKARI_CONFIG_PATHS: &[&str] = &[".config/hakari.toml", ".guppy/hakari.toml"];
+
 /// The project: a workspace (or one crate) as cargo sees it
 #[derive(Debug)]
 pub struct Project {
@@ -551,6 +554,14 @@ impl Project {
     /// Whether a file exists relative to the root
     pub fn exists(&self, rel: &str) -> bool {
         self.root.join(rel).exists()
+    }
+
+    /// The workspace-hack package hakari's configuration names (`hakari-package` in the first of
+    /// [`HAKARI_CONFIG_PATHS`] that exists); None without one, or when it does not parse
+    pub fn workspace_hack(&self) -> Option<String> {
+        let path = HAKARI_CONFIG_PATHS.iter().find(|c| self.exists(c))?;
+        let doc: toml_edit::DocumentMut = self.read(path)?.parse().ok()?;
+        doc.get("hakari-package")?.as_str().map(str::to_owned)
     }
 
     /// The files git tracks under the root, relative to it (`git ls-files`), read once; an error when the

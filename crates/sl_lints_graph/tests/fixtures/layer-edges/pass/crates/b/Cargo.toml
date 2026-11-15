@@ -4,5 +4,8 @@ version = "0.1.0"
 edition = "2024"
 description = "the b crate"
 
+[dependencies]
+h = { path = "../h" }
+
 [dev-dependencies]
 a = { path = "../a" }

@@ -3,3 +3,7 @@ name = "c"
 version = "0.1.0"
 edition = "2024"
 description = "the c crate"
+
+[dependencies]
+h = { path = "../h" }
+workspace-hack = { path = "../workspace-hack" }

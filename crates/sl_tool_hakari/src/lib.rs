@@ -24,9 +24,6 @@ pub static HAKARI: Hakari = Hakari;
 
 static LINTS: &[&LintMeta] = &[&HAKARI_GENERATE, &HAKARI_MANAGE_DEPS];
 
-/// Where cargo-hakari looks for its configuration, in order
-pub const CONFIG_PATHS: &[&str] = &[".config/hakari.toml", ".guppy/hakari.toml"];
-
 impl Analysis for Hakari {
     fn name(&self) -> &'static str {
         "hakari"
@@ -56,7 +53,6 @@ fn run(cx: &Context<'_>) {
 
 #[cfg(feature = "link")]
 mod linked {
-    use super::CONFIG_PATHS;
     use guppy::graph::PackageGraph;
     use hakari::summaries::HakariConfig;
     use sl_analysis::Context;
@@ -64,7 +60,7 @@ mod linked {
 
     pub(super) fn run(cx: &Context<'_>) {
         let p = cx.project;
-        let Some(config_path) = CONFIG_PATHS.iter().find(|c| p.exists(c)) else {
+        let Some(config_path) = sl_model::HAKARI_CONFIG_PATHS.iter().find(|c| p.exists(c)) else {
             for lint in ["hakari-generate", "hakari-manage-deps"] {
                 cx.emit(
                     Diagnostic::new(lint, "workspace", "the workspace has no workspace-hack package (no .config/hakari.toml)")

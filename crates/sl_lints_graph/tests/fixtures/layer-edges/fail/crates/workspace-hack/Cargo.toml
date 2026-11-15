@@ -1,0 +1,5 @@
+[package]
+name = "workspace-hack"
+version = "0.1.0"
+edition = "2024"
+description = "not the workspace-hack hakari names"

@@ -145,6 +145,7 @@ fn map_complete(cx: &Context<'_>, p: &Project, map: &Map) {
 }
 
 fn layer_edges(cx: &Context<'_>, p: &Project, map: &Map) {
+    let hack = p.workspace_hack();
     for pkg in &p.packages {
         let Some(me) = map.crates.get(&pkg.name) else {
             continue;
@@ -155,7 +156,7 @@ fn layer_edges(cx: &Context<'_>, p: &Project, map: &Map) {
         for d in pkg
             .deps
             .iter()
-            .filter(|d| d.member && d.kind != DepKind::Dev)
+            .filter(|d| d.member && d.kind != DepKind::Dev && hack.as_ref() != Some(&d.name))
         {
             let Some(to) = map.crates.get(&d.name) else {
                 continue;

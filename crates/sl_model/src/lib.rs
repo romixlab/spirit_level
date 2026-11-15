@@ -15,8 +15,8 @@ pub mod toml_file;
 
 pub use lines::{LineCount, count_lines};
 pub use project::{
-    Dep, DepKind, LoadError, Package, Project, Resolve, ResolvedPackage, TargetKind, command,
-    git_url_key,
+    Dep, DepKind, HAKARI_CONFIG_PATHS, LoadError, Package, Project, Resolve, ResolvedPackage,
+    TargetKind, command, git_url_key,
 };
 pub use source::{FileKind, SourceFile};
 pub use toml_edit;
