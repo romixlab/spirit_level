@@ -61,9 +61,12 @@ phrases = [
 ]
 reason = "the errata checks quote errata sheets, whose fix field is called workaround"
 
-# The generated lint and tier pages of the book are looked up, not read through.
+# The generated lint and tier pages of the book are looked up, not read through. Each crate's docs/<id>.md is a
+# fragment the lint! macro embeds into its generated page: never a standalone page, and its relative links (to a
+# sibling lint by code, to a hand-written page with "../") resolve only once embedded.
 [docs]
 reference = ["docs/lints/**", "docs/tiers/**"]
+skip = ["CHANGELOG.md", "FEATURES.md", "AGENTS.md", "CLAUDE.md", "**/CHANGELOG.md", "**/tests/**", "crates/*/docs/**"]
 
 [map.layers.core]
 desc = "Types only: lint metadata, levels, parameters, diagnostics"
