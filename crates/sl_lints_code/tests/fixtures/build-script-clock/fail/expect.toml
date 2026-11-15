@@ -1,0 +1,9 @@
+[[finding]]
+at = "build.rs:2"
+contains = "calls Utc::now() at build time"
+confidence = "estimate"
+
+[[finding]]
+at = "build.rs:4"
+contains = "treats `.git/HEAD` as the git directory"
+confidence = "estimate"

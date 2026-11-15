@@ -2,6 +2,7 @@
 
 mod asserts;
 mod build_info;
+mod build_script;
 mod fakes;
 mod practice;
 
@@ -76,6 +77,12 @@ lint!(UNBOUNDED_READ, "C0019", "unbounded-read", "code", "a read to the end of a
         ("bounds", StrList, "[\"take\"]", "methods in the receiver chain that bound the read"),
     ],
     needs: [], fix: None);
+lint!(BUILD_SCRIPT_CLOCK, "C0039", "build-script-clock", "code", "build.rs reads no clock and resolves git through the real git dir",
+    params: [
+        ("clock-functions", StrList, "[\"SystemTime::now\", \"Utc::now\", \"Local::now\"]", "qualified Type::method calls that read the wall clock"),
+        ("git-dir-evidence", StrList, "[\"git-dir\", \"git-common-dir\"]", "substrings anywhere in the build script that show it asked git for the real git dir first"),
+    ],
+    needs: [], fix: None);
 
 /// The source analysis
 pub struct Code;
@@ -99,6 +106,7 @@ static LINTS: &[&LintMeta] = &[
     &COMPOUND_ASSERT,
     &ASSERT_MESSAGE,
     &FLOAT_PARTIAL_CMP_UNWRAP,
+    &BUILD_SCRIPT_CLOCK,
 ];
 
 impl Analysis for Code {
@@ -125,6 +133,7 @@ impl Analysis for Code {
         fakes::features(cx);
         for pkg in &p.packages {
             build_info::run(cx, pkg);
+            build_script::run(cx, pkg);
             fakes::run(cx, pkg);
             practice::run(cx, pkg);
             asserts::run(cx, pkg);

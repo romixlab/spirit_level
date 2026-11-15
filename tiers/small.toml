@@ -193,6 +193,10 @@ reason = "an estimate: past a handful of commands, one central list is the line 
 level = "warn"
 reason = "partial_cmp(..).unwrap() panics on the first NaN; total_cmp orders every float"
 
+[lints.build-script-clock]
+level = "warn"
+reason = "a clock read makes the build unreproducible; a hardcoded .git path breaks in a worktree checkout"
+
 # The Clippy set every tier expects in [workspace.lints.clippy] (or [lints.clippy]); tier-clippy-set checks it.
 
 [clippy.lints]

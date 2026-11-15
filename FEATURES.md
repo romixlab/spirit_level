@@ -89,7 +89,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `CODE-11` exact_units lints (`sl_lints_units`): `exact-units-quantity` and `exact-units-bounds` from small, `exact-units-plain-number` in `units-strict`, `exact-units-in-bodies` in `units-paranoid`; `unit-suffix` only where the quantity lint is off.
 - ✅ `CODE-12` `cli-no-abbreviations`: a CLI's unique-prefix abbreviation of a subcommand (clap's `infer_subcommands`) runs that subcommand.
 - ✅ `CODE-6` `command-registry`: a CLI past a size parameter registers commands per module, not in one central Subcommand enum (estimate).
-- 📋 `CODE-5` `build-script-clock`: build.rs reads no clock and finds git through the real git dir, so worktree builds stay clean.
+- ✅ `CODE-5` `build-script-clock`: build.rs reads no clock and finds git through the real git dir, so worktree builds stay clean.
 - ✅ `CODE-9` CLI lints (`sl_lints_cli`): spl builds each CLI and checks its help, examples, completion, colour, version line and exit codes; the map key `cli` and the `[cli]` table.
 
 ## STATE - shared state (fewer-locks)
