@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.4.3] - 2026-11-15
+
 ### Added
 
 - Usage records: every run counts its command and flags locally; `spl usage` shows them, `--unused` the never-used (CLI-2).
