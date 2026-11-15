@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.4.33] - 2026-11-15
+
 ### Added
 
 - `[docs.site]`: `spl pages` and the reading lints read a built zola or Zensical site's HTML (DOCS-8).
