@@ -978,7 +978,8 @@ fn unknown_lint(id: &str, lints: &[&'static LintMeta]) -> String {
     }
 }
 
-pub(crate) fn distance(a: &str, b: &str) -> usize {
+/// The Levenshtein edit distance between two strings, for a "did you mean" hint on an unknown key or lint id
+pub fn distance(a: &str, b: &str) -> usize {
     let b: Vec<char> = b.chars().collect();
     let mut prev: Vec<usize> = (0..=b.len()).collect();
     for (i, ca) in a.chars().enumerate() {

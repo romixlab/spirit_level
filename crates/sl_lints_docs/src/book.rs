@@ -6,6 +6,7 @@ use sl_analysis::Context;
 use sl_core::{Diagnostic, Span};
 use sl_docs::page::Page;
 use sl_docs::{Book, Kind, walk};
+use sl_model::toml_edit::{Item, Key, TableLike};
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 
@@ -19,6 +20,9 @@ pub(crate) fn run(cx: &Context<'_>, book: &Book) {
     }
     if cx.enabled("theme-feature-conflicts") {
         feature_conflicts(cx, book);
+    }
+    if cx.enabled("zensical-keys") {
+        zensical_keys(cx, book);
     }
     let all = [format!("{}/**/*.md", book.docs_dir)];
     let pages: Vec<Page> = walk::files(root, &members(cx.project), &all, &[])
@@ -166,6 +170,77 @@ fn feature_conflicts(cx: &Context<'_>, book: &Book) {
                 .span(Span::new(book.file.rel.clone(), 0))
                 .help("set project.site_url in zensical.toml"),
             );
+        }
+    }
+}
+
+/// Zensical reads `zensical.toml` key by key and never complains about one it does not know: a typo (`sitename`
+/// for `site_name`, `theme.customdir` for `theme.custom_dir`) silently does nothing. Checks the keys actually
+/// written against the `known` parameter's dotted paths, under `[project]` when the file nests that way.
+fn zensical_keys(cx: &Context<'_>, book: &Book) {
+    let id = "zensical-keys";
+    let known: BTreeSet<&str> = cx
+        .params(id)
+        .list("known")
+        .iter()
+        .map(String::as_str)
+        .collect();
+    let opaque: BTreeSet<&str> = known.iter().filter_map(|k| k.strip_suffix(".*")).collect();
+    let root = book.file.root();
+    let table: &dyn TableLike = root
+        .get("project")
+        .and_then(Item::as_table_like)
+        .unwrap_or(root);
+    zensical_keys_walk(cx, id, book, &known, &opaque, table, "");
+}
+
+fn zensical_keys_walk(
+    cx: &Context<'_>,
+    id: &str,
+    book: &Book,
+    known: &BTreeSet<&str>,
+    opaque: &BTreeSet<&str>,
+    table: &dyn TableLike,
+    prefix: &str,
+) {
+    for (key, item) in table.iter() {
+        let path = if prefix.is_empty() {
+            key.to_owned()
+        } else {
+            format!("{prefix}.{key}")
+        };
+        if !known.contains(path.as_str()) {
+            let near = known
+                .iter()
+                .filter(|k| !k.ends_with(".*"))
+                .map(|k| (sl_config::distance(k, &path), *k))
+                .filter(|(d, _)| *d <= 2)
+                .min_by_key(|(d, _)| *d);
+            let hint = near.map_or_else(String::new, |(_, k)| format!("; did you mean {k}?"));
+            let line = table
+                .key(key)
+                .and_then(Key::span)
+                .map_or(0, |r| book.file.line_of_offset(r.start));
+            cx.emit(
+                Diagnostic::new(
+                    id,
+                    format!("key:{path}"),
+                    format!("{path} is not a key Zensical reads{hint}"),
+                )
+                .span(Span::new(book.file.rel.clone(), line))
+                .help("correct the key, or drop it: Zensical ignores a key it does not know, silently"),
+            );
+            continue;
+        }
+        if opaque.contains(path.as_str()) {
+            continue;
+        }
+        if let Some(t) = item.as_table_like() {
+            zensical_keys_walk(cx, id, book, known, opaque, t, &path);
+        } else if let Some(arr) = item.as_array_of_tables() {
+            for entry in arr {
+                zensical_keys_walk(cx, id, book, known, opaque, entry, &path);
+            }
         }
     }
 }

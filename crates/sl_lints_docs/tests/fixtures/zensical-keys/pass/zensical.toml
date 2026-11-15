@@ -1,0 +1,29 @@
+[project]
+site_name = "fx"
+site_description = "d"
+repo_url = "https://example.org"
+
+[project.theme]
+name = "material"
+custom_dir = "overrides"
+
+[project.theme.font]
+text = "Inter"
+code = "JetBrains Mono"
+
+[project.theme.icon.admonition]
+custom-note = "material/alert"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: light)"
+primary = "custom"
+accent = "custom"
+
+[project.theme.palette.toggle]
+icon = "lucide/sun"
+name = "Switch to dark mode"
+
+[project.extra]
+anything_goes = "yes"
+
+plugins = ["search"]

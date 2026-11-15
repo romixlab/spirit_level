@@ -282,6 +282,10 @@ reason = "Zensical does not say which of README.md and index.md it builds when a
 level = "deny"
 reason = "Zensical does not support the conflicting features together, and builds neither error nor warn about it"
 
+[lints.zensical-keys]
+level = "deny"
+reason = "Zensical ignores a key it does not know, silently; a typo in zensical.toml never fails the build"
+
 # Units in types (exact_units)
 
 [lints.exact-units-quantity]

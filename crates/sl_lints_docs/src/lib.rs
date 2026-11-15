@@ -87,6 +87,9 @@ lint!(THEME_FEATURE_CONFLICTS, "D0019", "theme-feature-conflicts", "book", "them
     params: [("pairs", StrList, "[\"navigation.prune, navigation.expand\", \"navigation.indexes, toc.integrate\"]", "theme features Zensical does not support together, each entry \"a, b\""),
              ("needs-site-url", StrList, "[\"navigation.instant\"]", "theme features that need project.site_url set, since they rely on the generated sitemap.xml")],
     needs: [], fix: None);
+lint!(ZENSICAL_KEYS, "D0020", "zensical-keys", "book", "zensical.toml names only keys Zensical reads",
+    params: [("known", StrList, "[\"site_name\", \"site_dir\", \"docs_dir\", \"site_url\", \"site_description\", \"site_author\", \"use_directory_urls\", \"strict\", \"dev_addr\", \"copyright\", \"watch\", \"exclude_docs\", \"draft_docs\", \"not_in_nav\", \"remote_branch\", \"remote_name\", \"repo_url\", \"repo_name\", \"edit_uri_template\", \"edit_uri\", \"extra_css\", \"extra_templates\", \"extra_javascript\", \"nav\", \"validation\", \"validation.*\", \"extra\", \"extra.*\", \"markdown_extensions\", \"markdown_extensions.*\", \"plugins\", \"plugins.*\", \"theme\", \"theme.name\", \"theme.custom_dir\", \"theme.variant\", \"theme.language\", \"theme.direction\", \"theme.features\", \"theme.favicon\", \"theme.logo\", \"theme.font\", \"theme.font.text\", \"theme.font.code\", \"theme.icon\", \"theme.icon.logo\", \"theme.icon.edit\", \"theme.icon.view\", \"theme.icon.top\", \"theme.icon.share\", \"theme.icon.menu\", \"theme.icon.alternate\", \"theme.icon.search\", \"theme.icon.close\", \"theme.icon.previous\", \"theme.icon.next\", \"theme.icon.repo\", \"theme.icon.annotation\", \"theme.icon.tag\", \"theme.icon.admonition\", \"theme.icon.admonition.*\", \"theme.icon.blog\", \"theme.icon.blog.back\", \"theme.icon.blog.date\", \"theme.icon.blog.date_updated\", \"theme.icon.blog.categories\", \"theme.icon.blog.readtime\", \"theme.palette\", \"theme.palette.media\", \"theme.palette.scheme\", \"theme.palette.primary\", \"theme.palette.accent\", \"theme.palette.toggle\", \"theme.palette.toggle.icon\", \"theme.palette.toggle.name\"]", "dotted key paths zensical.toml may use, read from Zensical's own configuration code; a path ending `.*` accepts any key below it (a plugin's options, a reader-chosen admonition icon map)")],
+    needs: [], fix: None);
 
 /// The docs analysis
 pub struct Docs;
@@ -114,6 +117,7 @@ static DOCS_LINTS: &[&LintMeta] = &[
     &BOOK_BUILD_STAMP,
     &README_INDEX_CLASH,
     &THEME_FEATURE_CONFLICTS,
+    &ZENSICAL_KEYS,
 ];
 
 impl Analysis for Docs {

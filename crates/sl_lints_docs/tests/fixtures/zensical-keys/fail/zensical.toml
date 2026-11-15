@@ -1,0 +1,6 @@
+[project]
+site_name = "fx"
+reop_url = "https://example.org"
+
+[project.theme]
+cutsom_dir = "overrides"
