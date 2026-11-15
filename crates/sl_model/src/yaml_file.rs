@@ -1,8 +1,9 @@
-//! A YAML file (`mkdocs.yml`) read into the generic [`ConfigNode`] tree, so a mapping key or a sequence entry
-//! keeps the line it is written on. Built on yaml-rust2's event parser: there is no ready-made marked tree, so
-//! [`Builder`] assembles one from [`Event`]s, resolving anchors and aliases as it goes. A tag this crate does not
-//! know (`!ENV`, `!!python/name:...`) changes nothing: YAML tags are metadata on top of the plain, quoted or block
-//! scalar actually written, which the parser still reports.
+//! A YAML file (`mkdocs.yml`) read into the generic [`ConfigNode`] tree.
+//!
+//! There is no ready-made marked tree in yaml-rust2, so a private event receiver assembles one from
+//! [`Event`]s, keeping the line each mapping key or sequence entry is written on and resolving anchors and
+//! aliases as it goes. A tag this crate does not know (`!ENV`, `!!python/name:...`) changes nothing: YAML tags
+//! are metadata on top of the plain, quoted or block scalar actually written, which the parser still reports.
 
 use crate::{ConfigNode, ConfigValue};
 use yaml_rust2::Event;
@@ -67,11 +68,12 @@ impl MarkedEventReceiver for Builder {
             | Event::DocumentStart
             | Event::DocumentEnd => {}
             Event::SequenceStart(aid, _) => {
-                self.stack.push((Frame::Sequence(line, Vec::new()), aid))
+                self.stack.push((Frame::Sequence(line, Vec::new()), aid));
             }
-            Event::MappingStart(aid, _) => self
-                .stack
-                .push((Frame::Mapping(line, Vec::new(), None), aid)),
+            Event::MappingStart(aid, _) => {
+                self.stack
+                    .push((Frame::Mapping(line, Vec::new(), None), aid));
+            }
             Event::SequenceEnd => {
                 if let Some((Frame::Sequence(line, items), aid)) = self.stack.pop() {
                     self.close(

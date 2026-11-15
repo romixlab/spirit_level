@@ -1,7 +1,9 @@
-//! A book Zensical builds: `zensical.toml` at the project root, or, failing that, `mkdocs.yml` (Zensical reads a
-//! legacy MkDocs project's `mkdocs.yml` unchanged). Read for its docs folder, its navigation, the pages it leaves
-//! out of the navigation or the build, its theme language, and every key it writes (for `zensical-keys`) — all
-//! through the generic [`sl_model::ConfigNode`] tree, so the two file formats are read the same way.
+//! A book Zensical builds: `zensical.toml` at the project root, or, failing that, `mkdocs.yml`.
+//!
+//! Zensical reads a legacy `MkDocs` project's `mkdocs.yml` unchanged. [`Book`] reads for its docs folder, its
+//! navigation, the pages it leaves out of the navigation or the build, its theme language, and every key it
+//! writes (for `zensical-keys`) — all through the generic [`sl_model::ConfigNode`] tree, so the two file formats
+//! are read the same way.
 
 use sl_model::{ConfigNode, ConfigValue, TomlFile, YamlFile};
 use std::path::Path;

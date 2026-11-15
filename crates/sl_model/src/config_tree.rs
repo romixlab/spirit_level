@@ -1,6 +1,7 @@
-//! A generic configuration tree, parsed from TOML ([`crate::TomlFile::tree`]) or YAML
-//! ([`crate::YamlFile`]), so a reader of a project's configuration (a Zensical book's `zensical.toml` or
-//! `mkdocs.yml`) walks either format the same way.
+//! A generic configuration tree, parsed from TOML or YAML so both formats are walked the same way.
+//!
+//! [`crate::TomlFile::tree`] builds one from a `zensical.toml`; [`crate::YamlFile`] builds one directly while
+//! parsing an `mkdocs.yml`.
 
 /// One node of the tree, with the line it starts on
 #[derive(Debug, Clone, PartialEq)]
@@ -34,7 +35,7 @@ impl ConfigNode {
     }
 
     /// The node as a sequence's entries
-    pub fn as_sequence(&self) -> Option<&[ConfigNode]> {
+    pub fn as_sequence(&self) -> Option<&[Self]> {
         match &self.value {
             ConfigValue::Sequence(v) => Some(v),
             _ => None,
@@ -42,7 +43,7 @@ impl ConfigNode {
     }
 
     /// The node as a mapping's entries
-    pub fn as_mapping(&self) -> Option<&[(String, u32, ConfigNode)]> {
+    pub fn as_mapping(&self) -> Option<&[(String, u32, Self)]> {
         match &self.value {
             ConfigValue::Mapping(v) => Some(v),
             _ => None,
@@ -50,7 +51,7 @@ impl ConfigNode {
     }
 
     /// The value at a dotted path of mapping keys
-    pub fn get(&self, path: &[&str]) -> Option<&ConfigNode> {
+    pub fn get(&self, path: &[&str]) -> Option<&Self> {
         let mut node = self;
         for k in path {
             node = &node.as_mapping()?.iter().find(|(key, _, _)| key == k)?.2;
