@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.4.34] - 2026-11-15
+
 ### Changed
 
 - Book lints (nav-entries, orphan-pages, page-title, admonition-syntax, zensical-keys) also read `mkdocs.yml` (DOCS-2).

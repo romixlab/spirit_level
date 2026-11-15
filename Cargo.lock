@@ -990,7 +990,7 @@ checksum = "f8fadd59c855ef2080decdef8ff161eb6661b86933c9d82e5ba29dc602a55aba"
 
 [[package]]
 name = "sl_analysis"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "proc-macro2",
  "sl_config",
@@ -1001,7 +1001,7 @@ dependencies = [
 
 [[package]]
 name = "sl_board"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "serde",
  "serde_json",
@@ -1011,7 +1011,7 @@ dependencies = [
 
 [[package]]
 name = "sl_board_model"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "serde",
  "toml",
@@ -1019,7 +1019,7 @@ dependencies = [
 
 [[package]]
 name = "sl_book"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "sl_config",
  "sl_core",
@@ -1030,7 +1030,7 @@ dependencies = [
 
 [[package]]
 name = "sl_config"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "serde",
  "sl_core",
@@ -1040,14 +1040,14 @@ dependencies = [
 
 [[package]]
 name = "sl_core"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "serde",
 ]
 
 [[package]]
 name = "sl_dependents"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "serde",
  "sl_config",
@@ -1057,7 +1057,7 @@ dependencies = [
 
 [[package]]
 name = "sl_docs"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "html5gum",
  "pulldown-cmark",
@@ -1070,7 +1070,7 @@ dependencies = [
 
 [[package]]
 name = "sl_engine"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "serde",
  "sl_analysis",
@@ -1084,7 +1084,7 @@ dependencies = [
 
 [[package]]
 name = "sl_firmware"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "addr2line",
  "object",
@@ -1100,7 +1100,7 @@ dependencies = [
 
 [[package]]
 name = "sl_lints_ai"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "proc-macro2",
  "serde_json",
@@ -1113,7 +1113,7 @@ dependencies = [
 
 [[package]]
 name = "sl_lints_board"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "sl_analysis",
  "sl_board",
@@ -1126,7 +1126,7 @@ dependencies = [
 
 [[package]]
 name = "sl_lints_cli"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "sl_analysis",
  "sl_core",
@@ -1138,7 +1138,7 @@ dependencies = [
 
 [[package]]
 name = "sl_lints_code"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "sl_analysis",
  "sl_core",
@@ -1149,7 +1149,7 @@ dependencies = [
 
 [[package]]
 name = "sl_lints_dead"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "proc-macro2",
  "sl_analysis",
@@ -1160,7 +1160,7 @@ dependencies = [
 
 [[package]]
 name = "sl_lints_docs"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "serde",
  "sl_analysis",
@@ -1173,7 +1173,7 @@ dependencies = [
 
 [[package]]
 name = "sl_lints_embedded"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1190,7 +1190,7 @@ dependencies = [
 
 [[package]]
 name = "sl_lints_errors"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "sl_analysis",
  "sl_core",
@@ -1201,7 +1201,7 @@ dependencies = [
 
 [[package]]
 name = "sl_lints_graph"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "sl_analysis",
  "sl_config",
@@ -1213,7 +1213,7 @@ dependencies = [
 
 [[package]]
 name = "sl_lints_manifest"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "sl_analysis",
  "sl_config",
@@ -1225,7 +1225,7 @@ dependencies = [
 
 [[package]]
 name = "sl_lints_modules"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "sl_analysis",
  "sl_core",
@@ -1236,7 +1236,7 @@ dependencies = [
 
 [[package]]
 name = "sl_lints_prose"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "sl_analysis",
  "sl_core",
@@ -1247,7 +1247,7 @@ dependencies = [
 
 [[package]]
 name = "sl_lints_size"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "sl_analysis",
  "sl_core",
@@ -1257,7 +1257,7 @@ dependencies = [
 
 [[package]]
 name = "sl_lints_state"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "sl_analysis",
  "sl_core",
@@ -1268,7 +1268,7 @@ dependencies = [
 
 [[package]]
 name = "sl_lints_surface"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "sl_analysis",
  "sl_core",
@@ -1278,7 +1278,7 @@ dependencies = [
 
 [[package]]
 name = "sl_lints_ui"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "proc-macro2",
  "sl_analysis",
@@ -1290,7 +1290,7 @@ dependencies = [
 
 [[package]]
 name = "sl_lints_units"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "quote",
  "sl_analysis",
@@ -1302,7 +1302,7 @@ dependencies = [
 
 [[package]]
 name = "sl_model"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "cargo_metadata",
  "proc-macro2",
@@ -1314,7 +1314,7 @@ dependencies = [
 
 [[package]]
 name = "sl_report"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "annotate-snippets",
  "serde_json",
@@ -1327,7 +1327,7 @@ dependencies = [
 
 [[package]]
 name = "sl_testkit"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "sl_analysis",
  "sl_config",
@@ -1339,7 +1339,7 @@ dependencies = [
 
 [[package]]
 name = "sl_tool_audit"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "serde_json",
  "sl_analysis",
@@ -1350,7 +1350,7 @@ dependencies = [
 
 [[package]]
 name = "sl_tool_cargo"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "sl_analysis",
  "sl_config",
@@ -1362,7 +1362,7 @@ dependencies = [
 
 [[package]]
 name = "sl_tool_clippy"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "sl_analysis",
  "sl_core",
@@ -1372,7 +1372,7 @@ dependencies = [
 
 [[package]]
 name = "sl_tool_deny"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "serde_json",
  "sl_analysis",
@@ -1383,7 +1383,7 @@ dependencies = [
 
 [[package]]
 name = "sl_tool_geiger"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "geiger",
  "sl_analysis",
@@ -1394,7 +1394,7 @@ dependencies = [
 
 [[package]]
 name = "sl_tool_hakari"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "guppy",
  "hakari",
@@ -1406,7 +1406,7 @@ dependencies = [
 
 [[package]]
 name = "sl_tool_machete"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "sl_analysis",
  "sl_core",
@@ -1416,7 +1416,7 @@ dependencies = [
 
 [[package]]
 name = "sl_tool_rustfmt"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "sl_analysis",
  "sl_core",
@@ -1426,7 +1426,7 @@ dependencies = [
 
 [[package]]
 name = "sl_tool_semver"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "sl_analysis",
  "sl_core",
@@ -1436,7 +1436,7 @@ dependencies = [
 
 [[package]]
 name = "sl_tool_shear"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "serde_json",
  "sl_analysis",
@@ -1447,7 +1447,7 @@ dependencies = [
 
 [[package]]
 name = "sl_tool_taplo"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "sl_analysis",
  "sl_core",
@@ -1457,7 +1457,7 @@ dependencies = [
 
 [[package]]
 name = "sl_tool_typos"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "serde_json",
  "sl_analysis",
@@ -1468,7 +1468,7 @@ dependencies = [
 
 [[package]]
 name = "sl_tool_udeps"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "serde_json",
  "sl_analysis",
@@ -1479,7 +1479,7 @@ dependencies = [
 
 [[package]]
 name = "sl_tools"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "semver",
  "serde_json",
@@ -1496,7 +1496,7 @@ checksum = "149309498a5f7334b12ddae0cad8aba81ce785fe91755068867e017cf98fee46"
 
 [[package]]
 name = "spirit_level"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "sl_analysis",
  "sl_config",
@@ -1539,7 +1539,7 @@ dependencies = [
 
 [[package]]
 name = "spirit_level_cli"
-version = "0.4.33"
+version = "0.4.34"
 dependencies = [
  "clap",
  "clap_complete",
