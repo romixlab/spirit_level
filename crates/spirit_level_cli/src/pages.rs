@@ -15,9 +15,9 @@ use vc_ui::{Exit, Paint};
 const SCHEMA: &str = "spirit_level.pages/1";
 
 /// The tail of `spl pages --help`
-const AFTER_HELP: &str = "Examples:\n  spl pages\n  spl pages --page docs/start.md\n  spl pages --format json > before.json\n\nThe pages are the Markdown files of the [docs] table (default: every .md but CHANGELOG, FEATURES, agent files and tests). Reading speed and image times come from the page-reading-time lint's parameters. Exit codes: 0 listed, 2 a configuration error or an unknown page";
+const AFTER_HELP: &str = "Examples:\n  spl pages\n  spl pages --page docs/start.md\n  spl pages --format json > before.json\n\nThe pages are the Markdown files of the [docs] table (default: every .md but CHANGELOG, FEATURES, agent files and tests); with [docs.site], a built site's pages (zola, Zensical) in place of their Markdown sources: build the site first. Reading speed and image times come from the page-reading-time lint's parameters. Exit codes: 0 listed, 2 a configuration error, a built site that cannot be read or an unknown page";
 
-/// The reading metrics of every Markdown page: words, reading time, longest run of prose, paragraphs,
+/// The reading metrics of every page, Markdown or built: words, reading time, longest run of prose, paragraphs,
 /// sentences, figures, headings, links, code
 #[derive(clap::Parser)]
 #[command(name = "pages", display_order = 8, after_help = AFTER_HELP)]
@@ -66,7 +66,8 @@ fn run(a: Pages) -> Result<Exit, String> {
         }
         Err(e) => return Err(e.to_string()),
     };
-    let mut pages = sl_lints_docs::report(&project, &config);
+    let mut pages =
+        sl_lints_docs::report(&project, &config).map_err(|e| format!("[docs.site]: {e}"))?;
     if let Some(want) = &a.page {
         let want = want.trim_start_matches("./");
         pages.retain(|p| p.page == want);
@@ -110,9 +111,9 @@ fn listed(items: &[String]) -> String {
 fn table(pages: &[PageReport]) -> String {
     let head = [
         "page", "kind", "words", "read", "run", "para", "sent", "flesch", "pass%", "abbr", "terms",
-        "syn", "img", "h", "links", "code",
+        "syn", "img", "h", "links", "cta", "code",
     ];
-    let rows: Vec<[String; 16]> = pages
+    let rows: Vec<[String; 17]> = pages
         .iter()
         .map(|p| {
             let s = &p.stats;
@@ -133,6 +134,7 @@ fn table(pages: &[PageReport]) -> String {
                 s.figures.to_string(),
                 s.headings.len().to_string(),
                 format!("{}/{}", s.links_internal, s.links_external),
+                s.ctas.to_string(),
                 s.code_blocks.to_string(),
             ]
         })
@@ -218,6 +220,11 @@ fn detail(p: &PageReport) -> String {
         out,
         "  links {} internal, {} external; code blocks {} ({} lines); tables {}; admonitions {}",
         s.links_internal, s.links_external, s.code_blocks, s.code_lines, s.tables, s.admonitions
+    );
+    let _ = writeln!(
+        out,
+        "  calls to action {}; terminal captures {}",
+        s.ctas, s.captures
     );
     let _ = writeln!(
         out,

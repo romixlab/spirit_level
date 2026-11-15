@@ -9,10 +9,10 @@ The numbers are useful on their own, before any budget. `spl pages` prints them 
 `spl pages` prints one row per page:
 
 ```text
-page                     kind       words  read  run  para  sent  flesch  pass%  abbr  terms  syn  img   h  links  code
-README.md                guide        412  1.8m  140    48    14      52     12     1      0    0    1   6    9/3     4
-docs/configuration.md    guide       1630  7.1m  210    61    16      48     21     0      2    1    0  14   12/0    11
-docs/lints/D0001.md      reference    310  1.3m   88    40    11      55     18     0      0    0    0   6    8/0     1
+page                     kind       words  read  run  para  sent  flesch  pass%  abbr  terms  syn  img   h  links  cta  code
+README.md                guide        412  1.8m  140    48    14      52     12     1      0    0    1   6    9/3    0     4
+docs/configuration.md    guide       1630  7.1m  210    61    16      48     21     0      2    1    0  14   12/0    0    11
+docs/lints/D0001.md      reference    310  1.3m   88    40    11      55     18     0      0    0    0   6    8/0    0     1
 ```
 
 | Column | Meaning |
@@ -31,6 +31,7 @@ docs/lints/D0001.md      reference    310  1.3m   88    40    11      55     18 
 | `img` | figures: paragraphs that hold only images, and HTML figures |
 | `h` | headings |
 | `links` | internal and external links |
+| `cta` | calls to action: links and buttons styled to be pressed (built pages) |
 | `code` | code blocks |
 
 `spl pages --page PAGE` prints every number of one page, with its runs, its headings and each abbreviation, term and name the last four columns count. `spl pages --format json` prints all of them for every page as one document. Two JSON files from two runs diff line by line, so a change to a page shows what it moved.
@@ -39,7 +40,7 @@ The report uses the parameters of the lints, so the report and the lints count t
 
 ## What is measured where
 
-spirit_level reads the Markdown sources, never the built site. The sources are always in the repository, and a finding points at the line to change. A built site holds what the sources do not: pages from templates, included snippets, the rendered navigation. The table says where each fact comes from.
+spirit_level reads the Markdown sources by default. The sources are always in the repository, and a finding points at the line to change. A built site holds what the sources do not: pages from templates, included snippets, the rendered navigation. A site whose pages live mostly in templates is read from its built HTML instead (see [A built site](#a-built-site)). The table says where each fact comes from for Markdown pages.
 
 | Fact | Read from |
 |---|---|
@@ -72,6 +73,48 @@ language = "en"                                      # default: the book's theme
 ```
 
 The values shown for `files` and `skip` are the defaults. A walk from the root leaves out `target/`, hidden folders and nested cargo projects that are not workspace members, such as test fixtures.
+
+### A built site
+
+A site built from templates and shortcodes, such as a zola site, holds most of a page outside its Markdown. The `[docs.site]` table makes the reading and word lints and `spl pages` read the built HTML in place of the Markdown sources:
+
+```toml
+[docs.site]
+generator = "zola"                 # "zola" or "zensical"; default: found from zensical.toml, zola.toml or config.toml
+dir = "public"                     # the built site; default: zola's public, Zensical's site_dir
+content = "main"                   # the element holding a page's content: tag, .class or tag.class
+sources = ["content/**"]           # the Markdown files whose built pages replace them
+url = "https://example.org"        # the site's own address: a link to it is internal
+files = ["**/*.html"]              # the built pages, relative to dir
+skip = ["404.html"]                # built pages left out, relative to dir
+skip-classes = ["v-label", "specs"]    # elements whose text is not prose
+cta-classes = ["v-btn"]            # links and buttons that are calls to action
+capture-classes = ["term-fig"]     # figures that show a terminal capture
+```
+
+Every key is optional. Without `dir`, `content`, `sources` and `url`, the generator's own settings decide:
+
+| Key | zola | Zensical |
+|---|---|---|
+| `dir` | `public` | `project.site_dir` |
+| `content` | `main` | `article` |
+| `sources` | `content/**` | `project.docs_dir` and below |
+| `url` | `base_url` | `project.site_url` |
+
+The default `skip-classes` are Zensical's heading anchors, admonition titles, tab labels, edit buttons and page dates; the default `cta-classes` is Zensical's `md-button`. A list set in the table replaces its default.
+
+spirit_level does not build the site: build it first (`zola build`, `zensical build`). A missing build folder stops the reading and word lints with a note, and `spl pages` with exit code 2. A built page has these differences from a Markdown page:
+
+- Only the content element counts. The header, navigation and footer outside it never do, nor do scripts, styles, inline SVG drawings and elements marked `aria-hidden`.
+- **Prose** is the text of `<p>`, `<li>` and `<blockquote>`. Text in a figure caption, a `<summary>`, a `<dt>` or an element of a `skip-classes` class is neither prose nor a break.
+- **Visual breaks** are headings, `<pre>` blocks, `<figure>`, `<video>`, `<table>`, `<details>`, admonitions, content tabs and calls to action. A figure of a `capture-classes` class is a break but no image to look at.
+- A code block's language comes from a `language-*` class or a `data-lang` attribute on the `<pre>`, its `<code>` or an element around them.
+- A link to the site's own `url` is internal. `page-links` judges Markdown pages only: the links of a built page are the generator's.
+- Each built page's `<html lang>` decides whether it is English, ahead of the `[docs]` language.
+- A built page with no content element, such as a redirect, is no page.
+- A finding points at the built file's line. The `[docs]` `reference` globs match the built path, such as `public/docs/**`.
+
+The book lints still read the Markdown sources and `zensical.toml`.
 
 ### Kinds of page
 

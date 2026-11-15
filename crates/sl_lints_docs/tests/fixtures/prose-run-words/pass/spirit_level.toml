@@ -1,0 +1,9 @@
+[lints.prose-run-words]
+level = "deny"
+reason = "fixture"
+max-words = 20
+
+[docs.site]
+generator = "zola"
+cta-classes = ["v-btn"]
+skip-classes = ["v-label"]

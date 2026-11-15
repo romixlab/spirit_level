@@ -1,19 +1,24 @@
-//! The Markdown pages of a project as a reader meets them: each page's headings, prose, code and visual breaks in
-//! order ([`page`]), its reading metrics ([`stats`]), the words it names things with ([`terms`]), and the Zensical book it belongs to ([`book`]).
+//! The pages of a project as a reader meets them: each page's headings, prose, code and visual breaks in order
+//! ([`page`]), its reading metrics ([`stats`]), the words it names things with ([`terms`]), and the Zensical book
+//! it belongs to ([`book`]).
 //!
-//! Pages are read from the Markdown sources, never from a built site. Zensical's admonitions and content tabs are
-//! read with their bodies ([`dialect`]).
+//! Pages are read from their Markdown sources, Zensical's admonitions and content tabs with their bodies
+//! ([`dialect`]). A site built from templates holds much of a page outside its Markdown: such a site's built
+//! HTML is read in place of its sources ([`site`], [`html`]), into the same page model.
 
 pub mod book;
 pub mod dialect;
+pub mod html;
 pub mod page;
+pub mod site;
 pub mod stats;
 pub mod terms;
 pub mod text;
 pub mod walk;
 
 pub use book::Book;
-pub use page::{Kind, Page};
+pub use page::{Kind, Page, Source};
+pub use site::{Site, SiteError};
 pub use stats::{ReadingSpeed, Stats};
 
 use std::path::Path;

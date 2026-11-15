@@ -21,7 +21,7 @@ Working name. Private for now.
 | [`sl_board_model`](crates/sl_board_model) | model | The board description board.toml: schema, loading with source spans, revisions and reworks as patches |
 | [`sl_config`](crates/sl_config) | model | spirit_level's configuration format: tiers, extends, lint levels, parameters, reasons, expiries, scoped exceptions and the crate map |
 | [`sl_dependents`](crates/sl_dependents) | model | The repos that build on a library and the crates in them to retest when it changes (`spl dependents`) |
-| [`sl_docs`](crates/sl_docs) | model | Markdown pages as a reader meets them: their shape, reading metrics, and the Zensical book they belong to |
+| [`sl_docs`](crates/sl_docs) | model | Pages as a reader meets them, from Markdown or a built site: their shape, reading metrics, and the Zensical book they belong to |
 | [`sl_firmware`](crates/sl_firmware) | model | spirit_level's model of bare-metal firmware crates: cargo configuration, build script, memory.x, bedrock_fw.json, source facts, the linked ELF with frames and calls |
 | [`sl_model`](crates/sl_model) | model | spirit_level's project model: cargo metadata, manifests with spans, Rust sources parsed with syn, line counts |
 | [`sl_tools`](crates/sl_tools) | model | External tools for spirit_level's adapters: the tested versions, finding a tool on PATH and reading its version, running it, cargo's JSON messages |

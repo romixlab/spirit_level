@@ -429,6 +429,34 @@ fn docs_table() {
 }
 
 #[test]
+fn docs_site_table() {
+    assert_eq!(load("extends = \"small\"\n").unwrap().docs.site, None);
+    let s = load(
+        "extends = \"small\"\n[docs.site]\ngenerator = \"zola\"\ncontent = \"div.page\"\ncta-classes = [\"v-btn\"]\n",
+    )
+    .unwrap()
+    .docs
+    .site
+    .expect("the site");
+    assert_eq!(s.generator, Some(Generator::Zola));
+    assert_eq!(s.content.as_deref(), Some("div.page"));
+    assert_eq!(s.cta_classes, ["v-btn"]);
+    assert_eq!(s.files, Site::default().files);
+    assert_eq!(s.dir, None);
+    let m = messages(load(
+        "extends = \"small\"\n[docs.site]\ngenerator = \"hugo\"\ncontent = \"main > p\"\nfiles = []\nbuild = 1\n",
+    ));
+    for want in [
+        "use \"zola\" or \"zensical\"",
+        "name a tag, `.class` or `tag.class`",
+        "docs.site.files is empty",
+        ":6: unknown key docs.site.build",
+    ] {
+        assert!(m.iter().any(|s| s.contains(want)), "{want}: {m:?}");
+    }
+}
+
+#[test]
 fn board_table() {
     let b = load("extends = \"small\"\n").unwrap().board;
     assert_eq!(b, Board::default());

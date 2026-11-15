@@ -33,7 +33,7 @@ cognitive-complexity-threshold = { value = 20, reason = "this team splits early"
 [dependents]                         # where the repos that build on this library are checked out
 scan = ["~/git"]
 
-[docs]                               # the Markdown pages the docs lints read
+[docs]                               # the pages the docs lints read: Markdown, or a built site
 reference = ["docs/lints/**"]        # pages that are looked up, not read through
 
 [cli]                                # how the CLI lints build and run the tools

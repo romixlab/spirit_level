@@ -114,6 +114,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `DOCS-5` readme-index-clash: no docs folder holds both `README.md` and `index.md`, since Zensical does not say which one it builds.
 - ✅ `DOCS-7` theme-feature-conflicts: theme features Zensical does not support together, and features that need `project.site_url` set.
 - ✅ `DOCS-6` page-links: a link between pages is a relative path to a Markdown file that exists, never `.html` or an absolute site path; checked on every page `[docs]` selects, book or not.
+- ✅ `DOCS-8` built-site-pages: `[docs.site]` reads a built site's HTML (zola, Zensical) in place of its Markdown sources for `spl pages` and the reading and word lints; content element, skipped classes, calls to action and terminal captures as keys.
 
 ## AI - code written with agents
 

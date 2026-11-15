@@ -1,5 +1,8 @@
-//! One Markdown page as a reader meets it: its title and front matter, and its content in document order as
-//! headings, prose, code and the other visual breaks, with its images and links.
+//! One page as a reader meets it.
+//!
+//! A page has its title and description, and its content in document order as headings, prose, code and the
+//! other visual breaks, with its images and links. It is read from Markdown here, or from a built site's HTML
+//! ([`crate::html`]); both build the same items through one builder.
 
 use crate::dialect::{self, BlockKind};
 use crate::text::words;
@@ -25,6 +28,16 @@ impl Kind {
     }
 }
 
+/// Where a page was read from
+#[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize)]
+#[serde(rename_all = "lowercase")]
+pub enum Source {
+    /// A Markdown file: lines are the source's
+    Markdown,
+    /// A built site's HTML file: lines are the built file's
+    Html,
+}
+
 /// A visual break that is not a heading or code
 #[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize)]
 #[serde(rename_all = "lowercase")]
@@ -41,6 +54,10 @@ pub enum Break {
     Admonition,
     /// A content tab
     Tab,
+    /// A call to action: a link or button styled to be pressed
+    Cta,
+    /// A terminal capture shown as a figure: a break, but no image to look at
+    Capture,
 }
 
 /// One piece of a page, in document order
@@ -159,16 +176,20 @@ pub struct Admonition {
     pub short_indent: Option<(u32, usize)>,
 }
 
-/// One Markdown page
+/// One page
 #[derive(Clone, Debug)]
 pub struct Page {
     /// Path relative to the project root
     pub rel: String,
     /// Guide or reference
     pub kind: Kind,
-    /// Front matter `title`
+    /// Markdown or a built page
+    pub source: Source,
+    /// The page's own language: a built page's `<html lang>`; None for Markdown
+    pub language: Option<String>,
+    /// Front matter `title`, or a built page's `<title>`
     pub title: Option<String>,
-    /// Front matter `description`
+    /// Front matter `description`, or a built page's description `<meta>`
     pub description: Option<String>,
     /// The content in document order
     pub items: Vec<Item>,
@@ -262,21 +283,64 @@ struct Open {
     strong: Option<usize>,
 }
 
-struct Walk {
+/// The builder of a page's items, fed in document order by the Markdown parser or the HTML front end
+pub(crate) struct Walk {
     starts: Vec<usize>,
-    items: Vec<Item>,
-    images: Vec<Image>,
-    links: Vec<Link>,
+    pub(crate) items: Vec<Item>,
+    pub(crate) images: Vec<Image>,
+    pub(crate) links: Vec<Link>,
     open: Vec<Open>,
     heading: Option<(u8, String, u32)>,
-    code: Option<(Option<String>, bool, String, u32)>,
+    /// The code block being read: its language, whether fenced, its text and line
+    pub(crate) code: Option<(Option<String>, bool, String, u32)>,
     table: usize,
     alt: Option<(String, u32)>,
 }
 
 impl Walk {
-    fn line(&self, offset: usize) -> u32 {
+    /// A builder over `text`, whose byte offsets [`Self::line`] turns into lines
+    pub(crate) fn new(text: &str) -> Self {
+        Self {
+            starts: line_starts(text),
+            items: Vec::new(),
+            images: Vec::new(),
+            links: Vec::new(),
+            open: Vec::new(),
+            heading: None,
+            code: None,
+            table: 0,
+            alt: None,
+        }
+    }
+
+    /// The 1-based line of a byte offset
+    pub(crate) fn line(&self, offset: usize) -> u32 {
         self.starts.partition_point(|s| *s <= offset) as u32
+    }
+
+    /// A visual break: it ends the prose gathered so far
+    pub(crate) fn brk(&mut self, what: Break, line: u32) {
+        self.flush();
+        self.items.push(Item::Break { what, line });
+    }
+
+    /// An HTML image in the flow of the page: a figure of its own outside a paragraph; a paragraph of images
+    /// only is a figure too
+    pub(crate) fn html_image(&mut self, alt: Option<String>, line: u32) {
+        self.images.push(Image {
+            line,
+            alt,
+            html: true,
+        });
+        if let Some(o) = self.open.last_mut() {
+            o.images += 1;
+            o.line.get_or_insert(line);
+        } else {
+            self.items.push(Item::Break {
+                what: Break::Figure,
+                line,
+            });
+        }
     }
 
     /// Emits the text gathered so far by every open paragraph: a break inside a list item splits its prose
@@ -315,7 +379,7 @@ impl Walk {
     }
 
     /// Inline code: its text, marked
-    fn code(&mut self, t: &str, line: u32) {
+    pub(crate) fn code(&mut self, t: &str, line: u32) {
         let start = self.open.last().map(|o| o.text.len());
         self.text(t, line);
         if self.heading.is_none()
@@ -331,7 +395,7 @@ impl Walk {
         }
     }
 
-    fn text(&mut self, t: &str, line: u32) {
+    pub(crate) fn text(&mut self, t: &str, line: u32) {
         if let Some((_, h, _)) = &mut self.heading {
             h.push_str(t);
         } else if let Some((a, _)) = &mut self.alt {
@@ -374,12 +438,11 @@ impl Walk {
             .iter()
             .find(|(tag, _)| !html_tags(html, tag).is_empty())
         {
-            self.flush();
-            self.items.push(Item::Break { what: *what, line });
+            self.brk(*what, line);
         }
     }
 
-    fn start(&mut self, tag: Tag<'_>, line: u32) {
+    pub(crate) fn start(&mut self, tag: Tag<'_>, line: u32) {
         match tag {
             Tag::Heading { level, .. } => {
                 self.flush();
@@ -394,12 +457,8 @@ impl Walk {
                 self.code = Some((lang, fenced, String::new(), line));
             }
             Tag::Table(_) => {
-                self.flush();
+                self.brk(Break::Table, line);
                 self.table += 1;
-                self.items.push(Item::Break {
-                    what: Break::Table,
-                    line,
-                });
             }
             Tag::Paragraph | Tag::Item if self.table == 0 => self.open.push(Open {
                 text: String::new(),
@@ -429,7 +488,7 @@ impl Walk {
         }
     }
 
-    fn end(&mut self, tag: TagEnd, line: u32) {
+    pub(crate) fn end(&mut self, tag: TagEnd, line: u32) {
         match tag {
             TagEnd::Heading(_) => {
                 if let Some((level, text, line)) = self.heading.take() {
@@ -491,6 +550,19 @@ impl Walk {
     }
 }
 
+/// The level of a heading tag, 1 for `h1`
+pub(crate) fn level_of(level: u8) -> Option<HeadingLevel> {
+    Some(match level {
+        1 => HeadingLevel::H1,
+        2 => HeadingLevel::H2,
+        3 => HeadingLevel::H3,
+        4 => HeadingLevel::H4,
+        5 => HeadingLevel::H5,
+        6 => HeadingLevel::H6,
+        _ => return None,
+    })
+}
+
 fn heading_level(l: HeadingLevel) -> u8 {
     match l {
         HeadingLevel::H1 => 1,
@@ -504,7 +576,7 @@ fn heading_level(l: HeadingLevel) -> u8 {
 
 /// The language of a fence's info string: its first word (`rust`, from `rust title="x"`), or the first class of an
 /// attribute list (`rust`, from `{ .rust .copy }`)
-fn fence_lang(info: &str) -> Option<String> {
+pub(crate) fn fence_lang(info: &str) -> Option<String> {
     let info = info.trim();
     let first = if let Some(attrs) = info.strip_prefix('{') {
         attrs
@@ -535,17 +607,7 @@ impl Page {
             | Options::ENABLE_STRIKETHROUGH
             | Options::ENABLE_TASKLISTS
             | Options::ENABLE_HEADING_ATTRIBUTES;
-        let mut w = Walk {
-            starts: line_starts(&body),
-            items: Vec::new(),
-            images: Vec::new(),
-            links: Vec::new(),
-            open: Vec::new(),
-            heading: None,
-            code: None,
-            table: 0,
-            alt: None,
-        };
+        let mut w = Walk::new(&body);
         for (ev, range) in Parser::new_ext(&body, opts).into_offset_iter() {
             let line = w.line(range.start);
             w.event(ev, line);
@@ -569,6 +631,8 @@ impl Page {
         Self {
             rel: rel.into(),
             kind,
+            source: Source::Markdown,
+            language: None,
             title,
             description,
             items: w.items,

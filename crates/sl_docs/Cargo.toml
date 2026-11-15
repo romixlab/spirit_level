@@ -1,6 +1,6 @@
 [package]
 name = "sl_docs"
-description = "Markdown pages as a reader meets them: their shape, reading metrics, and the Zensical book they belong to"
+description = "Pages as a reader meets them, from Markdown or a built site: their shape, reading metrics, and the Zensical book they belong to"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -9,8 +9,10 @@ repository.workspace = true
 publish = false
 
 [dependencies]
+html5gum.workspace = true
 pulldown-cmark.workspace = true
 serde.workspace = true
+sl_config.workspace = true
 sl_core.workspace = true
 sl_model.workspace = true
 toml_edit.workspace = true

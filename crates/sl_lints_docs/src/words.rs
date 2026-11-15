@@ -137,7 +137,9 @@ pub(crate) fn run(cx: &Context<'_>, pages: &[Page], english: bool) {
         if cx.enabled("term-synonyms") && judges(cx.params("term-synonyms"), p.kind) {
             synonym_findings(cx, p, w);
         }
-        if english && (cx.enabled("passive-voice") || cx.enabled("reading-ease")) {
+        if crate::page_english(p, english)
+            && (cx.enabled("passive-voice") || cx.enabled("reading-ease"))
+        {
             let s = sl_docs::stats::stats(p, &speed, true);
             if cx.enabled("passive-voice") {
                 passive(cx, p, &s);

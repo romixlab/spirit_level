@@ -106,6 +106,10 @@ pub struct Stats {
     pub tables: usize,
     /// Admonitions
     pub admonitions: usize,
+    /// Calls to action: links and buttons styled to be pressed
+    pub ctas: usize,
+    /// Terminal captures shown as figures
+    pub captures: usize,
     /// Flesch reading ease of the prose; None for a page not in English or without prose
     pub flesch: Option<f64>,
     /// Sentences that read as passive ([`passive`]); 0 for a page not in English
@@ -219,6 +223,8 @@ pub fn stats(page: &Page, speed: &ReadingSpeed, english: bool) -> Stats {
         code_lines: code.iter().sum(),
         tables: count(Break::Table),
         admonitions: page.admonitions.len(),
+        ctas: count(Break::Cta),
+        captures: count(Break::Capture),
         flesch: if english {
             flesch(prose_words, sent.len(), syl)
         } else {

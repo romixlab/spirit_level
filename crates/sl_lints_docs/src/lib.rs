@@ -2,7 +2,8 @@
 //! images without alternative text, code without a language), its words (abbreviations, terms, synonyms, passive
 //! voice, reading ease) and the practices of a Zensical book (a navigation that names real pages, no page nobody
 //! reaches, one title, admonitions that render). One analysis, [`DOCS`]; the
-//! same numbers feed `spl pages` through [`report`].
+//! same numbers feed `spl pages` through [`report`]. A built site that `[docs.site]` names is read in place of
+//! its Markdown sources by the reading and word lints; the book lints always read the sources.
 
 mod book;
 mod links;
@@ -14,7 +15,7 @@ pub use words::{Synonym, Words};
 use sl_analysis::{Analysis, Context, lint};
 use sl_config::Config;
 use sl_core::{LintMeta, Params};
-use sl_docs::{Book, Kind, Page, ReadingSpeed, Selection, Stats};
+use sl_docs::{Book, Kind, Page, ReadingSpeed, Selection, Site, SiteError, Source, Stats};
 use sl_model::Project;
 
 lint!(PROSE_RUN_WORDS, "D0001", "prose-run-words", "reading", "prose between two visual breaks stays short",
@@ -134,10 +135,18 @@ impl Analysis for Docs {
     }
 
     fn run(&self, cx: &Context<'_>) {
-        let pages = pages(cx.project, cx.config);
-        reading::run(cx, &pages);
-        words::run(cx, &pages, english(cx.project, cx.config));
-        links::run(cx, &pages);
+        match pages(cx.project, cx.config) {
+            Ok(pages) => {
+                reading::run(cx, &pages);
+                words::run(cx, &pages, english(cx.project, cx.config));
+                links::run(cx, &pages);
+            }
+            Err(e) => {
+                for m in DOCS_LINTS.iter().filter(|m| m.category != "book") {
+                    cx.not_run(m.id, "file:spirit_level.toml", format!("[docs.site]: {e}"));
+                }
+            }
+        }
         match Book::read(&cx.project.root) {
             Ok(Some(b)) => book::run(cx, &b),
             Ok(None) => {}
@@ -155,15 +164,29 @@ fn members(project: &Project) -> Vec<&str> {
     project.packages.iter().map(|p| p.dir.as_str()).collect()
 }
 
-/// The pages the `[docs]` table selects
-fn pages(project: &Project, config: &Config) -> Vec<Page> {
+/// The pages the `[docs]` table selects: its Markdown files, and the built site's pages in place of their
+/// sources when it names one
+fn pages(project: &Project, config: &Config) -> Result<Vec<Page>, SiteError> {
     let d = &config.docs;
     let sel = Selection {
         files: &d.files,
         skip: &d.skip,
         reference: &d.reference,
     };
-    sl_docs::pages(&project.root, &members(project), &sel)
+    let mut pages = sl_docs::pages(&project.root, &members(project), &sel);
+    if let Some(table) = &d.site {
+        let site = Site::resolve(&project.root, table)?;
+        pages.retain(|p| !site.is_source(&p.rel));
+        pages.extend(site.pages(&project.root, |rel| sel.kind(rel)));
+    }
+    Ok(pages)
+}
+
+/// Whether a page is in English: a built page's own language, else the project's
+fn page_english(p: &Page, project: bool) -> bool {
+    p.language
+        .as_deref()
+        .map_or(project, |l| l.to_ascii_lowercase().starts_with("en"))
 }
 
 /// Whether a lint's `pages` parameter judges a page of this kind
@@ -204,6 +227,8 @@ pub struct PageReport {
     pub page: String,
     /// Guide or reference
     pub kind: Kind,
+    /// Markdown or a built page
+    pub source: Source,
     /// Its metrics
     #[serde(flatten)]
     pub stats: Stats,
@@ -213,21 +238,26 @@ pub struct PageReport {
 }
 
 /// The metrics of every page the `[docs]` table selects, as the lints measure them
-pub fn report(project: &Project, config: &Config) -> Vec<PageReport> {
+///
+/// # Errors
+///
+/// The built site that `[docs.site]` names cannot be read.
+pub fn report(project: &Project, config: &Config) -> Result<Vec<PageReport>, SiteError> {
     let speed = reading_speed(config);
     let en = english(project, config);
-    let pages = pages(project, config);
+    let pages = pages(project, config)?;
     let words = Words::all(config, &pages);
-    pages
+    Ok(pages
         .iter()
         .zip(words)
         .map(|(p, words)| PageReport {
             page: p.rel.clone(),
             kind: p.kind,
-            stats: sl_docs::stats::stats(p, &speed, en),
+            source: p.source,
+            stats: sl_docs::stats::stats(p, &speed, page_english(p, en)),
             words,
         })
-        .collect()
+        .collect())
 }
 
 /// The first `n` words of a text, for a finding's stable item

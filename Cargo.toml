@@ -49,6 +49,7 @@ syn = { version = "3", default-features = false, features = [
   "clone-impls",
   "extra-traits",
 ] }
+html5gum = { version = "0.9", default-features = false }
 pulldown-cmark = { version = "0.13", default-features = false }
 # sl_board_model (the board description, read with spans):
 toml = { version = "1", default-features = false, features = ["parse", "serde"] }

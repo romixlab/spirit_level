@@ -4,3 +4,6 @@ at = "README.md:3"
 [[finding]]
 at = "README.md:9"
 
+
+[[finding]]
+at = "public/index.html:8"

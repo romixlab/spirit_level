@@ -29,7 +29,7 @@
 //! [dependents]                        # the repos that build on this one (see [`dependents`])
 //! scan = ["~/git"]
 //!
-//! [docs]                              # the Markdown pages (see [`docs`])
+//! [docs]                              # the pages: Markdown, or a built site (see [`docs`])
 //! reference = ["docs/lints/**"]
 //!
 //! [cli]                               # how the CLI lints build and run the tools (see [`cli`])
@@ -56,7 +56,7 @@ pub use board::Board;
 pub use cli::CliProbe;
 pub use clippy::{ClippyConfig, ClippyLint, ClippySet};
 pub use dependents::Dependents;
-pub use docs::Docs;
+pub use docs::{Docs, Generator, Site};
 pub use embedded::Embedded;
 pub use error::ConfigError;
 pub use map::{External, Layer, Map, MapCrate};

@@ -311,7 +311,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e35d6e78f4cebb90e51d543db8fe41528851d6deeef6ef21ebd4bfdc1e784776"
 dependencies = [
  "libc",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -501,6 +501,12 @@ name = "heck"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
+
+[[package]]
+name = "html5gum"
+version = "0.9.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "469fd7ad11d167b79385adccbba0fae87a50a9adb0c081e8ce7b130faa51f3bb"
 
 [[package]]
 name = "icu_collections"
@@ -890,7 +896,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys 0.12.1",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -1038,8 +1044,10 @@ dependencies = [
 name = "sl_docs"
 version = "0.4.32"
 dependencies = [
+ "html5gum",
  "pulldown-cmark",
  "serde",
+ "sl_config",
  "sl_core",
  "sl_model",
  "toml_edit",
@@ -1637,7 +1645,7 @@ dependencies = [
  "getrandom 0.4.3",
  "once_cell",
  "rustix 1.1.6",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]

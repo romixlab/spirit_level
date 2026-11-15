@@ -406,6 +406,61 @@ fn pages_table_detail_and_json() {
 }
 
 #[test]
+fn pages_and_reading_lints_over_a_built_site() {
+    let p = workspace(
+        "extends = \"small\"\n\n[docs.site]\ncta-classes = [\"v-btn\"]\nskip-classes = [\"v-label\"]\n\n[lints.image-alt]\nlevel = \"deny\"\nreason = \"test\"\n\n[lints.prose-run-words]\nlevel = \"deny\"\nreason = \"test\"\nmax-words = 5\n",
+    );
+    let w = |rel: &str, text: &str| {
+        let f = p.0.join(rel);
+        std::fs::create_dir_all(f.parent().expect("a parent")).expect("a folder");
+        std::fs::write(f, text).expect("a file");
+    };
+    w("config.toml", "base_url = \"https://example.org\"\n");
+    w(
+        "content/_index.md",
+        "+++\ntitle = \"Home\"\n+++\nOne two three four five six seven.\n",
+    );
+    let o = run(&p.0, &["pages"]);
+    assert_eq!(o.status.code(), Some(2), "{}", text(&o));
+    assert!(
+        text(&o).contains("the built site public/ is missing: build it first (`zola build`)"),
+        "{}",
+        text(&o)
+    );
+    w(
+        "public/index.html",
+        "<html lang=\"en\"><body><nav><p>Home About Blog Contact Shop Team</p></nav>\n<main>\n<p class=\"v-label\">A label of many words that is no prose</p>\n<p>One two three.</p>\n<a class=\"v-btn\" href=\"https://example.org/contact/\">Talk to us now please</a>\n<p>Four five six seven eight nine.</p>\n<figure><img src=\"b.png\"></figure>\n</main></body></html>\n",
+    );
+    let o = run(&p.0, &["pages", "--page", "public/index.html"]);
+    assert_eq!(o.status.code(), Some(0), "{}", text(&o));
+    let t = text(&o);
+    assert!(t.contains("runs (words@line): 3@4 6@6"), "{t}");
+    assert!(t.contains("links 1 internal, 0 external"), "{t}");
+    assert!(t.contains("calls to action 1; terminal captures 0"), "{t}");
+    let o = run(&p.0, &["pages"]);
+    assert!(!text(&o).contains("content/_index.md"), "{}", text(&o));
+    let o = run(&p.0, &["check", "--format", "json"]);
+    let v: serde_json::Value = serde_json::from_slice(&o.stdout).expect("JSON");
+    let found: Vec<(String, String)> = v["diagnostics"]
+        .as_array()
+        .expect("diagnostics")
+        .iter()
+        .map(|d| {
+            (
+                d["lint"].as_str().unwrap_or("").to_owned(),
+                d["spans"][0]["file"].as_str().unwrap_or("").to_owned(),
+            )
+        })
+        .collect();
+    for want in ["image-alt", "prose-run-words"] {
+        assert!(
+            found.contains(&(want.to_owned(), "public/index.html".to_owned())),
+            "{want}: {found:?}"
+        );
+    }
+}
+
+#[test]
 fn long_help_is_the_about_not_a_flattened_struct_s_rustdoc() {
     let dir = std::env::temp_dir();
     let o = run(&dir, &["--help"]);

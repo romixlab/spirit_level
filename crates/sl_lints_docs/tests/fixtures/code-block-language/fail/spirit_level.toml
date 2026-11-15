@@ -1,0 +1,6 @@
+[lints.code-block-language]
+level = "deny"
+reason = "fixture"
+
+[docs.site]
+generator = "zola"

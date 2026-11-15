@@ -1,10 +1,11 @@
 //! Page-to-page links: Zensical links by a relative path to the page's Markdown source and rewrites it when it
 //! builds the site. `zensical build --strict` checks that a link resolves, but only inside a book; this lint reads
-//! the same pages as the other docs lints, book or not.
+//! the same Markdown pages as the other docs lints, book or not; a built page's links are the generator's.
 
 use crate::book::target;
 use sl_analysis::Context;
 use sl_core::{Diagnostic, Span};
+use sl_docs::Source;
 use sl_docs::page::Page;
 
 pub(crate) fn run(cx: &Context<'_>, pages: &[Page]) {
@@ -12,7 +13,7 @@ pub(crate) fn run(cx: &Context<'_>, pages: &[Page]) {
     if !cx.enabled(id) {
         return;
     }
-    for p in pages {
+    for p in pages.iter().filter(|p| p.source == Source::Markdown) {
         for l in p.links.iter().filter(|l| !l.external()) {
             check(cx, id, p, &l.dest, l.line);
         }
