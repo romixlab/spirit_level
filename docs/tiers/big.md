@@ -110,6 +110,7 @@ Use it with `extends = "big"` in `spirit_level.toml`.
 | [M0028](../lints/M0028.md) | test-binaries | `warn` | each integration-test binary links the library again; one tests/it binary links it once | medium |
 | [M0029](../lints/M0029.md) | macro-compile-fail | `warn` | a proc macro must refuse bad input with a clear error, and only compile-fail cases show that | medium |
 | [M0030](../lints/M0030.md) | contract-snapshot | `deny` | every party of a contract knows its version and what that version looks like; a released snapshot never changes | big |
+| [M0031](../lints/M0031.md) | fuzz-corpus-test | `warn` | a fuzz target's interesting inputs are a regression suite only once they are in git and replayed on every ordinary test run | medium |
 | [P0001](../lints/P0001.md) | agent-file-lines | `warn` | agents read AGENTS.md whole every session; a long one is skimmed, not followed | small |
 | [P0003](../lints/P0003.md) | agent-rules-match-lints | `warn` | limits AGENTS.md states are the limits the lints check | big |
 | [P0007](../lints/P0007.md) | commit-subject-length | `warn` | the subject is what one-line logs and reviews show | medium |

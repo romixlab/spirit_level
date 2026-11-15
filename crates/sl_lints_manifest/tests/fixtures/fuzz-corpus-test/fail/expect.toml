@@ -1,0 +1,13 @@
+[[finding]]
+at = "fuzz/fuzz_targets/checksum.rs"
+confidence = "estimate"
+contains = "has no #[test] whose name mentions checksum"
+
+[[finding]]
+at = "fuzz/fuzz_targets/leaked.rs"
+contains = "has no corpus tracked at fuzz/corpus/leaked/"
+
+[[finding]]
+at = "fuzz/fuzz_targets/parse_header.rs"
+contains = "has no corpus tracked at fuzz/corpus/parse_header/"
+

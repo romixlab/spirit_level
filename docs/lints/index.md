@@ -461,6 +461,7 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [M0019](M0019.md) | [toolchain-pinned](M0019.md) | the repo pins its toolchain in rust-toolchain.toml | off | off | warn | deny | off | off | off | off | off | off |
 | [M0026](M0026.md) | [profile-no-lto](M0026.md) | the profiles of the edit-build-test loop and the deploy profile build without LTO | warn | warn | warn | warn | off | off | off | off | off | off |
 | [M0028](M0028.md) | [test-binaries](M0028.md) | a crate builds its integration tests as one binary | off | off | warn | warn | off | off | off | off | off | off |
+| [M0031](M0031.md) | [fuzz-corpus-test](M0031.md) | every fuzz target has a corpus tracked in git and a test that replays it | off | off | warn | warn | off | off | off | off | off | off |
 
 ## rustfmt
 

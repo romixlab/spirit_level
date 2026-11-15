@@ -88,6 +88,7 @@ Use it with `extends = "medium"` in `spirit_level.toml`.
 | [M0027](../lints/M0027.md) | patch-outside-workspace | `deny` | a committed patch into a sibling checkout builds differently on every machine; it lives in an ignored .cargo/config.toml | small |
 | [M0028](../lints/M0028.md) | test-binaries | `warn` | each integration-test binary links the library again; one tests/it binary links it once | medium |
 | [M0029](../lints/M0029.md) | macro-compile-fail | `warn` | a proc macro must refuse bad input with a clear error, and only compile-fail cases show that | medium |
+| [M0031](../lints/M0031.md) | fuzz-corpus-test | `warn` | a fuzz target's interesting inputs are a regression suite only once they are in git and replayed on every ordinary test run | medium |
 | [P0001](../lints/P0001.md) | agent-file-lines | `warn` | agents read AGENTS.md whole every session; a long one is skimmed, not followed | small |
 | [P0007](../lints/P0007.md) | commit-subject-length | `warn` | the subject is what one-line logs and reviews show | medium |
 | [P0009](../lints/P0009.md) | changelog-entry-length | `warn` | a CHANGELOG is a list: one short line per change | small |
@@ -294,6 +295,10 @@ reason = "fakes and test helpers never ship: cfg(test), a test-support feature f
 [lints.macro-compile-fail]
 level = "warn"
 reason = "a proc macro must refuse bad input with a clear error, and only compile-fail cases show that"
+
+[lints.fuzz-corpus-test]
+level = "warn"
+reason = "a fuzz target's interesting inputs are a regression suite only once they are in git and replayed on every ordinary test run"
 
 [lints.orphan-source-file]
 level = "warn"

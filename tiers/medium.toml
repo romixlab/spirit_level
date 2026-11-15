@@ -109,6 +109,10 @@ reason = "fakes and test helpers never ship: cfg(test), a test-support feature f
 level = "warn"
 reason = "a proc macro must refuse bad input with a clear error, and only compile-fail cases show that"
 
+[lints.fuzz-corpus-test]
+level = "warn"
+reason = "a fuzz target's interesting inputs are a regression suite only once they are in git and replayed on every ordinary test run"
+
 [lints.orphan-source-file]
 level = "warn"
 reason = "a file no mod reaches is never compiled or tested, yet reads like live code"

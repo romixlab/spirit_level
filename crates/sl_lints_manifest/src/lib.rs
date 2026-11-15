@@ -4,6 +4,7 @@
 mod clippy;
 mod contract;
 mod deps;
+mod fuzz;
 mod macros;
 mod package;
 mod patch;
@@ -91,6 +92,8 @@ lint!(CONTRACT_SNAPSHOT, "M0030", "contract-snapshot", "workspace", "a contract 
         ("base", Str, "\"main\"", "the branch work merges into; a snapshot it has must not change"),
     ],
     needs: [Need::Map], fix: None);
+lint!(FUZZ_CORPUS_TEST, "M0031", "fuzz-corpus-test", "repo", "every fuzz target has a corpus tracked in git and a test that replays it",
+    params: [], needs: [], fix: None);
 
 /// The manifest analysis
 pub struct Manifest;
@@ -129,6 +132,7 @@ static LINTS: &[&LintMeta] = &[
     &TEST_BINARIES,
     &MACRO_COMPILE_FAIL,
     &CONTRACT_SNAPSHOT,
+    &FUZZ_CORPUS_TEST,
 ];
 
 impl Analysis for Manifest {
@@ -150,6 +154,7 @@ impl Analysis for Manifest {
         patch::run(cx);
         macros::run(cx);
         contract::run(cx);
+        fuzz::run(cx);
     }
 }
 

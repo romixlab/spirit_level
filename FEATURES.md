@@ -60,6 +60,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - 📋 `MAN-6` `default-members`: a workspace past a size parameter names its main binary in `default-members`.
 - 📋 `MAN-7` `example-metadata`: every example carries name, description and category in the manifest; the examples index is generated.
 - 📋 `MAN-8` Markdown check of READMEs and docs as a tool adapter.
+- ✅ `MAN-9` `fuzz-corpus-test` (M0031): every `fuzz/fuzz_targets/*.rs` has a corpus tracked in git and a `#[test]` naming it.
 
 ## GRAPH - crate graph and map
 
