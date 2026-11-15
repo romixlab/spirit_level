@@ -26,7 +26,7 @@ lint!(CORE_CRATE_DEPS, "G0001", "core-crate-deps", "graph", "a _core crate depen
     params: [
         ("suffix", Str, "\"_core\"", "the name suffix of type-only crates"),
         ("layers", StrList, "[]", "map layers a _core crate may depend on besides other _core crates"),
-        ("vocabulary", StrList, "[\"serde\", \"serde_derive\", \"thiserror\"]", "third-party crates a _core crate may use"),
+        ("vocabulary", StrList, "[\"serde\", \"serde_derive\", \"thiserror\"]", "third-party or workspace crates a _core crate may use"),
     ],
     needs: [], fix: None);
 lint!(CORE_CRATE_TYPES, "G0002", "core-crate-types", "graph", "a _core crate holds types: no I/O, no threads, no async runtime",
@@ -335,17 +335,20 @@ fn core_deps(cx: &Context<'_>, p: &Project) {
     let suffix = params.str("suffix");
     let layers = params.list("layers");
     let vocab = params.list("vocabulary");
+    let hack = p.workspace_hack();
     for pkg in p.packages.iter().filter(|k| k.name.ends_with(suffix)) {
-        for d in pkg.deps.iter().filter(|d| d.kind != DepKind::Dev) {
-            let ok = if d.member {
-                d.name.ends_with(suffix)
-                    || cx
-                        .map()
-                        .and_then(|m| m.crates.get(&d.name))
-                        .is_some_and(|c| layers.contains(&c.layer))
-            } else {
-                vocab.contains(&d.name)
-            };
+        for d in pkg
+            .deps
+            .iter()
+            .filter(|d| d.kind != DepKind::Dev && hack.as_ref() != Some(&d.name))
+        {
+            let ok = vocab.contains(&d.name)
+                || (d.member
+                    && (d.name.ends_with(suffix)
+                        || cx
+                            .map()
+                            .and_then(|m| m.crates.get(&d.name))
+                            .is_some_and(|c| layers.contains(&c.layer))));
             if !ok {
                 cx.emit(
                     Diagnostic::new("core-crate-deps", format!("{}:{}", pkg.name, d.name), format!("{} is a {suffix} crate but depends on {}", pkg.name, d.name))

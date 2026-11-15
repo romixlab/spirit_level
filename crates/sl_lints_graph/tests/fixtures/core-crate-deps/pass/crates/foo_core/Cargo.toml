@@ -7,3 +7,5 @@ description = "the foo_core crate"
 [dependencies]
 serde = "1"
 ids_core = { path = "../ids_core" }
+units = { path = "../units" }
+h = { path = "../h" }

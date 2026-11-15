@@ -1,3 +1,4 @@
 [lints.core-crate-deps]
 level = "deny"
 reason = "fixture"
+vocabulary = ["serde", "serde_derive", "thiserror", "units"]
