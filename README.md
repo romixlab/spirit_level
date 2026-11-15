@@ -58,7 +58,7 @@ Working name. Private for now.
 | [`sl_tool_udeps`](crates/sl_tool_udeps) | lints | spirit_level adapter of cargo-udeps: dependencies the compiler never loaded, on nightly |
 | [`sl_engine`](crates/sl_engine) | engine | spirit_level's engine: picks the analyses a configuration enables, checks their needs, runs them, applies levels, exceptions and waivers, and applies exact fixes |
 | [`sl_report`](crates/sl_report) | engine | spirit_level's report output: coloured text for people, a stable JSON document for CI and agents |
-| [`sl_book`](crates/sl_book) | app | Generates spirit_level's book pages (one per lint, one per tier, the indexes and the nav) from the lints' own metadata and the shipped tiers |
+| [`sl_book`](crates/sl_book) | app | Generates spirit_level's book pages (one per lint, one per tier, the indexes and the nav) from the lints' own metadata and the shipped tiers, and a book's footer build stamp |
 | [`spirit_level`](crates/spirit_level) | app | spirit_level as a library: the registry of every analysis, the shipped tier files, and a one-call check |
 | [`spirit_level_cli`](crates/spirit_level_cli) | app | The spl command: check a project, explain a lint, list lints and tiers, show the resolved configuration, write the book pages, list the dependents to retest, measure the docs pages, count its own usage |
 | [`sl_testkit`](crates/sl_testkit) | tests | Golden fixture harness for spirit_level analyses: runs one lint on small projects and compares the findings with each project's expect.toml |

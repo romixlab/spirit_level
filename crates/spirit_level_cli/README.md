@@ -13,6 +13,7 @@ spl tiers                    # the shipped tiers
 spl config                   # the resolved levels, overrides and exceptions with reasons and expiries
 spl init --tier small        # write a spirit_level.toml
 spl book docs                # write the book's generated pages (--check: fail when stale)
+spl book stamp a.html a.js   # write the footer build stamp and the reader-clock age script
 spl dependents               # the dependent repos and crates to retest after this change ([dependents] turns it on)
 spl pages                    # reading metrics per Markdown page: words, reading time, longest run, headings
 ```

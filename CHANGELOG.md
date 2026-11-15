@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `spl book stamp`: a book's footer build stamp and reader-clock age script, for any project (BOOK-3).
+
 ## [0.4.23] - 2026-11-15
 
 ### Added

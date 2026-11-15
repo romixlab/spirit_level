@@ -134,3 +134,4 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 
 - ✅ `BOOK-1` Lint and tier pages generated from metadata; `book --check` fails when stale.
 - ✅ `BOOK-2` Logo and brand assets from a Typst source (`assets/`); book favicon, header logo, README header.
+- ✅ `BOOK-3` `spl book stamp`: a book's footer build stamp (crate version, git commit, build time) and the reader-clock age script, serving `book-build-stamp` (D0017); `sl_book::stamp`.

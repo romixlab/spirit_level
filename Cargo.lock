@@ -988,6 +988,8 @@ dependencies = [
  "sl_config",
  "sl_core",
  "spirit_level",
+ "toml",
+ "vc_build",
 ]
 
 [[package]]

@@ -12,6 +12,7 @@ use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 use vc_ui::{Exit, Paint};
 
+mod book;
 mod dependents;
 mod pages;
 mod panics;
@@ -28,7 +29,7 @@ const NOT_RUN: Exit = Exit::category(3, "not_run");
 #[derive(Parser)]
 #[command(name = "spl", version = vc_build::version!(), about = "A linter for Rust projects of every size: tiers of lints in TOML, from one crate to a workspace of hundreds", long_about = None)]
 #[command(
-    after_help = "Examples:\n  spl check\n  spl check --all --group-by crate\n  spl check --format json --only S0001\n  spl explain workspace-lints\n  spl init --tier small-workspace\n  spl dependents --base main\n  spl pages\n  spl usage --unused"
+    after_help = "Examples:\n  spl check\n  spl check --all --group-by crate\n  spl check --format json --only S0001\n  spl explain workspace-lints\n  spl init --tier small-workspace\n  spl dependents --base main\n  spl pages\n  spl book stamp\n  spl usage --unused"
 )]
 struct Cli {
     #[command(flatten)]
@@ -124,19 +125,9 @@ enum Cmd {
     /// last day; the never-used ones with 0
     #[command(after_help = usage::AFTER_HELP)]
     Usage(usage::UsageArgs),
-    /// Write the book's generated pages (lints, tiers, nav) from the lints' metadata
-    #[command(after_help = "Examples:\n  spl book\n  spl book docs --check")]
-    Book {
-        /// The docs directory
-        #[arg(default_value = "docs")]
-        docs: PathBuf,
-        /// The zensical.toml whose nav block is generated
-        #[arg(long, default_value = "zensical.toml")]
-        zensical: PathBuf,
-        /// Write nothing; fail when a page is stale
-        #[arg(long)]
-        check: bool,
-    },
+    /// Write the book's generated pages, or its footer build stamp
+    #[command(subcommand)]
+    Book(book::BookCmd),
 }
 
 #[derive(clap::Args)]
@@ -261,11 +252,7 @@ fn run(cli: Cli) -> Result<Exit, String> {
         Cmd::Panics(a) => panics::run(a),
         Cmd::Tools(cmd) => tools::run(cmd),
         Cmd::Usage(a) => usage::run(a),
-        Cmd::Book {
-            docs,
-            zensical,
-            check,
-        } => book(&docs, &zensical, check),
+        Cmd::Book(cmd) => book::run(cmd),
     }
 }
 
@@ -578,16 +565,4 @@ fn init(path: &Path, tier: &[String]) -> Result<Exit, String> {
     std::fs::write(&file, text).map_err(|e| e.to_string())?;
     println!("wrote {}", file.display());
     Ok(Exit::SUCCESS)
-}
-
-fn book(docs: &Path, zensical: &Path, check: bool) -> Result<Exit, String> {
-    let changed = sl_book::write(docs, zensical, check).map_err(|e| e.to_string())?;
-    for c in &changed {
-        println!("{} {c}", if check { "stale" } else { "wrote" });
-    }
-    Ok(if check && !changed.is_empty() {
-        Exit::FAILURE
-    } else {
-        Exit::SUCCESS
-    })
 }
