@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.4.17] - 2026-11-15
+
 ### Added
 
 - `theme-feature-conflicts` (D0018): a Zensical book's theme features do not conflict, and `navigation.instant` has a `site_url` (DOCS-7).
