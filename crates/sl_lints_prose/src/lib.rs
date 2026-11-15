@@ -10,6 +10,7 @@ mod fixes;
 mod hygiene;
 mod style;
 mod text;
+mod tracking;
 mod units;
 
 use sl_analysis::{Analysis, Context, lint};
@@ -112,6 +113,12 @@ lint!(COMMIT_MIXED_MOVE, "P0020", "commit-mixed-move", "commits", "a commit that
              ("path-lines", StrList, "[\"use \", \"pub use \", \"pub(crate) use \", \"mod \", \"pub mod \", \"pub(crate) mod \", \"#[path\", \"//!\"]", "starts of changed lines that only follow the move"),
              ("base", Str, "\"main\"", "the branch work merges into; commits in base..HEAD are checked")],
     needs: [Need::Tool("git")], fix: None);
+lint!(URL_TRACKING_PARAMS, "P0021", "url-tracking-params", "prose", "a link in docs or a comment carries no tracking query parameter",
+    params: [("params", StrList, "[\"utm_\", \"?si=\", \"&si=\", \"fbclid=\", \"gclid=\", \"msclkid=\", \"igshid=\", \"mc_cid=\", \"mc_eid=\", \"yclid=\", \"ref_src=\", \"spm=\", \"_hsenc=\", \"_hsmi=\"]", "the tracking parameters, matched as substrings, case-insensitive"),
+             ("files", StrList, "[\"**/*.md\"]", "globs of the Markdown files checked, relative to the root"),
+             ("skip", StrList, "[]", "globs of Markdown files left out"),
+             ("comments", Bool, "true", "also check Rust comments")],
+    needs: [], fix: None);
 
 /// The prose analysis; the commit lints read the history with git and need it
 pub struct Prose;
@@ -140,6 +147,7 @@ static PROSE_LINTS: &[&LintMeta] = &[
     &FIX_WITHOUT_TEST,
     &COMMIT_TESTED_LINE,
     &COMMIT_MIXED_MOVE,
+    &URL_TRACKING_PARAMS,
 ];
 
 impl Analysis for Prose {
@@ -158,5 +166,6 @@ impl Analysis for Prose {
         commits::run(cx);
         fixes::run(cx);
         hygiene::run(cx);
+        tracking::run(cx);
     }
 }

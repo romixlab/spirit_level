@@ -45,6 +45,7 @@ Use it with `extends = "ai"` in `spirit_level.toml`.
 | [P0018](../lints/P0018.md) | fix-without-test | `warn` | an agent writes the failing test first; a warning, since a fix is judged from its subject | ai |
 | [P0019](../lints/P0019.md) | commit-tested-line | `warn` | an agent says how it tested, or that it did not; a warning while branches begun before the rule land | ai |
 | [P0020](../lints/P0020.md) | commit-mixed-move | `warn` | a move edited in the same commit cuts every line's history; a warning, since it judges lines by their start | ai |
+| [P0021](../lints/P0021.md) | url-tracking-params | `warn` | a link pasted from a browser or a chat app carries an id that tells the reader nothing and goes stale | ai |
 
 ## Clippy set (with what it extends)
 
@@ -163,6 +164,10 @@ reason = "emoji do not grep, diff or render the same everywhere"
 [lints.restating-comments]
 level = "warn"
 reason = "a comment says what the code cannot"
+
+[lints.url-tracking-params]
+level = "warn"
+reason = "a link pasted from a browser or a chat app carries an id that tells the reader nothing and goes stale"
 
 # Stop-gap smells (the top rule)
 

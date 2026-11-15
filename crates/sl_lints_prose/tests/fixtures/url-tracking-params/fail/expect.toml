@@ -1,0 +1,12 @@
+[[finding]]
+at = "README.md:3:42"
+
+[[finding]]
+at = "README.md:3:64"
+
+[[finding]]
+at = "README.md:4:33"
+
+[[finding]]
+at = "src/lib.rs:3:42"
+

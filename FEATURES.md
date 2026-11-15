@@ -99,6 +99,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `PROSE-2` AI-isms and agent files: filler, narration, stream-of-thought, emoji, restating comments, diff descriptions; CLAUDE.md pointer, links, stated limits match the lints.
 - ✅ `PROSE-3` Fix commits: `fixes-tag` checks `Fixes:` hash and subject, `fix-without-test` wants a test in a fix.
 - ✅ `PROSE-4` Commit hygiene: `commit-tested-line` wants a `Tested:` trailer, `commit-mixed-move` a move without edits.
+- ✅ `PROSE-5` url-tracking-params: a link in docs or a comment carries no tracking query parameter (`utm_`, `?si=`, and similar).
 
 ## DOCS - docs as the reader meets them
 

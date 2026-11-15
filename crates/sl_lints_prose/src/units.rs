@@ -1,7 +1,7 @@
 //! The prose of a project: the lines of its Markdown files and the comments of its Rust sources, masked so that
 //! code and quoted text never match.
 
-use crate::text::{markdown_lines, mask};
+use crate::text::{markdown_lines, markdown_lines_keep_links, mask, mask_keep_links};
 use sl_analysis::Context;
 use sl_analysis::comments::{CommentKind, comments};
 use sl_core::Params;
@@ -49,12 +49,25 @@ pub fn files(cx: &Context<'_>, include: &[String], skip: &[String]) -> Vec<Strin
 
 /// The masked lines of the Markdown files a lint's `files` and `skip` parameters select
 pub fn doc_lines(cx: &Context<'_>, params: &Params) -> Vec<Line> {
+    doc_lines_with(cx, params, markdown_lines)
+}
+
+/// Like [`doc_lines`], but a link target (`](x)`) is left as is: a lint over URLs needs to see it
+pub fn doc_lines_keep_links(cx: &Context<'_>, params: &Params) -> Vec<Line> {
+    doc_lines_with(cx, params, markdown_lines_keep_links)
+}
+
+fn doc_lines_with(
+    cx: &Context<'_>,
+    params: &Params,
+    md_lines: impl Fn(&str) -> Vec<(u32, String)>,
+) -> Vec<Line> {
     let mut out = Vec::new();
     for f in files(cx, params.list("files"), params.list("skip")) {
         let Some(text) = cx.project.read(&f) else {
             continue;
         };
-        for (line, text) in markdown_lines(&text) {
+        for (line, text) in md_lines(&text) {
             out.push(Line {
                 file: f.clone(),
                 line,
@@ -72,6 +85,15 @@ pub fn doc_lines(cx: &Context<'_>, params: &Params) -> Vec<Line> {
 /// The masked comment lines of every Rust source of the workspace members; code blocks inside doc comments are
 /// left out
 pub fn comment_lines(cx: &Context<'_>) -> Vec<Line> {
+    comment_lines_with(cx, mask)
+}
+
+/// Like [`comment_lines`], but a link target (`](x)`) is left as is: a lint over URLs needs to see it
+pub fn comment_lines_keep_links(cx: &Context<'_>) -> Vec<Line> {
+    comment_lines_with(cx, mask_keep_links)
+}
+
+fn comment_lines_with(cx: &Context<'_>, mask_line: impl Fn(&str) -> String) -> Vec<Line> {
     let mut out = Vec::new();
     for pkg in &cx.project.packages {
         for src in cx.project.sources(pkg) {
@@ -91,7 +113,7 @@ pub fn comment_lines(cx: &Context<'_>) -> Vec<Line> {
                     out.push(Line {
                         file: src.rel.clone(),
                         line: n,
-                        text: mask(l),
+                        text: mask_line(l),
                         from: From::Comment(c.kind),
                         krate: Some(pkg.name.clone()),
                         base: raw.find(l).unwrap_or(0),
@@ -114,6 +136,17 @@ pub fn lines(cx: &Context<'_>, id: &str) -> Vec<Line> {
     let mut out = doc_lines(cx, params);
     if params.bool("comments") {
         out.extend(comment_lines(cx));
+    }
+    out
+}
+
+/// Like [`lines`], but with [`doc_lines_keep_links`] and [`comment_lines_keep_links`]: a link target is left
+/// as is, for a lint over URLs
+pub fn lines_keep_links(cx: &Context<'_>, id: &str) -> Vec<Line> {
+    let params = cx.params(id);
+    let mut out = doc_lines_keep_links(cx, params);
+    if params.bool("comments") {
+        out.extend(comment_lines_keep_links(cx));
     }
     out
 }

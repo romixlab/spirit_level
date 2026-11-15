@@ -4,6 +4,15 @@
 /// The line with inline code (`` `x` ``), quoted text ("x", “x”) and link targets (`](x)`) replaced by spaces:
 /// a phrase there is mentioned, not used. Byte offsets and so columns stay where they were
 pub fn mask(line: &str) -> String {
+    mask_inner(line, true)
+}
+
+/// Like [`mask`], but a link target (`](x)`) is left as is: a lint over URLs needs to see it
+pub fn mask_keep_links(line: &str) -> String {
+    mask_inner(line, false)
+}
+
+fn mask_inner(line: &str, mask_links: bool) -> String {
     let mut out = String::with_capacity(line.len());
     let mut close: Option<&str> = None;
     let mut rest = line;
@@ -22,7 +31,7 @@ pub fn mask(line: &str) -> String {
                     '`' => Some("`"),
                     '"' => Some("\""),
                     '“' => Some("”"),
-                    ']' if rest[1..].starts_with('(') => Some(")"),
+                    ']' if mask_links && rest[1..].starts_with('(') => Some(")"),
                     _ => None,
                 };
                 match open {
@@ -46,6 +55,15 @@ fn push_blank(out: &mut String, s: &str) {
 
 /// The lines of a Markdown text with fenced code blocks emptied and the rest [`mask`]ed, numbered from 1
 pub fn markdown_lines(text: &str) -> Vec<(u32, String)> {
+    markdown_lines_with(text, mask)
+}
+
+/// Like [`markdown_lines`], but with [`mask_keep_links`] instead of [`mask`]: fenced code blocks still empty
+pub fn markdown_lines_keep_links(text: &str) -> Vec<(u32, String)> {
+    markdown_lines_with(text, mask_keep_links)
+}
+
+fn markdown_lines_with(text: &str, mask_line: impl Fn(&str) -> String) -> Vec<(u32, String)> {
     let mut fence: Option<&str> = None;
     let mut out = Vec::new();
     for (i, l) in text.lines().enumerate() {
@@ -61,7 +79,7 @@ pub fn markdown_lines(text: &str) -> Vec<(u32, String)> {
                 out.push((i as u32 + 1, String::new()));
             }
             (Some(_), _) => out.push((i as u32 + 1, String::new())),
-            (None, None) => out.push((i as u32 + 1, mask(l))),
+            (None, None) => out.push((i as u32 + 1, mask_line(l))),
         }
     }
     out
@@ -70,8 +88,22 @@ pub fn markdown_lines(text: &str) -> Vec<(u32, String)> {
 /// Byte offsets of every occurrence of `phrase` in `text`, case-insensitive (ASCII), standing as whole words:
 /// no letter or digit right before or after it
 pub fn find_phrase(text: &str, phrase: &str) -> Vec<usize> {
+    find_occurrences(text, phrase, boundary)
+}
+
+/// Byte offsets of every occurrence of `needle` in `text`, case-insensitive (ASCII); unlike [`find_phrase`], it
+/// may land inside a word, for a needle (`utm_`, `?si=`) that is never a word on its own
+pub fn find_substring(text: &str, needle: &str) -> Vec<usize> {
+    find_occurrences(text, needle, |_, _, _, _| true)
+}
+
+fn find_occurrences(
+    text: &str,
+    needle: &str,
+    at_boundary: impl Fn(&str, usize, usize, &str) -> bool,
+) -> Vec<usize> {
     let hay = text.to_ascii_lowercase();
-    let needle = phrase.to_ascii_lowercase();
+    let needle = needle.to_ascii_lowercase();
     let mut out = Vec::new();
     if needle.is_empty() {
         return out;
@@ -79,7 +111,7 @@ pub fn find_phrase(text: &str, phrase: &str) -> Vec<usize> {
     let mut from = 0;
     while let Some(i) = hay[from..].find(&needle) {
         let at = from + i;
-        if boundary(&hay, at, at + needle.len(), &needle) {
+        if at_boundary(&hay, at, at + needle.len(), &needle) {
             out.push(at);
         }
         from = at + needle.len();
@@ -132,6 +164,10 @@ mod tests {
         let md = markdown_lines("text\n```\nlet me\n```\nmore\n");
         assert_eq!(md[2], (3, String::new()));
         assert_eq!(md[4], (5, "more".into()));
+        assert_eq!(
+            mask_keep_links("[docs](https://x/?utm_source=y) \"note that\""),
+            format!("[docs](https://x/?utm_source=y) {}", " ".repeat(11))
+        );
     }
 
     #[test]
@@ -140,6 +176,16 @@ mod tests {
         assert_eq!(find_phrase("hackathon", "hack"), [] as [usize; 0]);
         assert_eq!(find_phrase("wait, what", "wait,"), vec![0]);
         assert_eq!(find_phrase("ÄÖ note that", "note that"), vec![5]);
+    }
+
+    #[test]
+    fn substrings() {
+        assert_eq!(
+            find_substring("see ?utm_source=newsletter here", "utm_"),
+            vec![5]
+        );
+        assert_eq!(find_substring("see ?si=abc here", "?si="), vec![4]);
+        assert_eq!(find_substring("no tracking here", "utm_"), [] as [usize; 0]);
     }
 
     #[test]

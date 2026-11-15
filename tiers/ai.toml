@@ -92,6 +92,10 @@ reason = "emoji do not grep, diff or render the same everywhere"
 level = "warn"
 reason = "a comment says what the code cannot"
 
+[lints.url-tracking-params]
+level = "warn"
+reason = "a link pasted from a browser or a chat app carries an id that tells the reader nothing and goes stale"
+
 # Stop-gap smells (the top rule)
 
 [lints.stop-gap-comments]

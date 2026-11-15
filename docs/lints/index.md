@@ -424,6 +424,7 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [P0014](P0014.md) | [restating-comments](P0014.md) | a comment says what the code cannot | off | off | off | off | warn | off | off | off | off | off |
 | [P0015](P0015.md) | [sentence-words](P0015.md) | sentences in docs stay short | off | off | off | off | warn | off | off | off | off | off |
 | [P0016](P0016.md) | [thinking-comments](P0016.md) | comments state conclusions, not a stream of thought | off | off | off | off | deny | off | off | off | off | off |
+| [P0021](P0021.md) | [url-tracking-params](P0021.md) | a link in docs or a comment carries no tracking query parameter | off | off | off | off | warn | off | off | off | off | off |
 
 ## pwr
 
