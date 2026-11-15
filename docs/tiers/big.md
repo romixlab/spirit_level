@@ -122,8 +122,8 @@ Use it with `extends = "big"` in `spirit_level.toml`.
 | [X0020](../lints/X0020.md) | deny-bans | `deny` | banned crates (OpenSSL, a second runtime) and duplicate versions stay out of a big graph | big |
 | [X0021](../lints/X0021.md) | deny-licenses | `deny` | every linked licence is one the project accepts, listed once in deny.toml | big |
 | [X0022](../lints/X0022.md) | deny-sources | `deny` | crates come only from the registries and git hosts deny.toml trusts | big |
-| [X0024](../lints/X0024.md) | hakari-generate | `warn` | a workspace-hack builds each shared dependency once; warn, as the lint needs spl built with the hakari feature | big |
-| [X0025](../lints/X0025.md) | hakari-manage-deps | `warn` | the workspace-hack helps only the members that depend on it; warn, as the lint needs the hakari feature | big |
+| [X0024](../lints/X0024.md) | hakari-generate | `warn` | a workspace-hack builds each shared dependency once; warn, as not every workspace wants one | big |
+| [X0025](../lints/X0025.md) | hakari-manage-deps | `warn` | the workspace-hack helps only the members that depend on it; warn, as adding one is each workspace's choice | big |
 | [X0026](../lints/X0026.md) | machete-unused-deps | `deny` | an unused dependency in a big graph costs every build; false positives are listed in the manifest | big |
 | [X0028](../lints/X0028.md) | semver-checks-breaking | `deny` | a crate the map marks stable changes its API only with the version bump it needs | big |
 | [X0031](../lints/X0031.md) | taplo-fmt | `deny` | manifests are edited by people and by tools; one TOML formatting keeps their diffs about the change | big |
@@ -402,11 +402,11 @@ reason = "a crate the map marks stable changes its API only with the version bum
 
 [lints.hakari-generate]
 level = "warn"
-reason = "a workspace-hack builds each shared dependency once; warn, as the lint needs spl built with the hakari feature"
+reason = "a workspace-hack builds each shared dependency once; warn, as not every workspace wants one"
 
 [lints.hakari-manage-deps]
 level = "warn"
-reason = "the workspace-hack helps only the members that depend on it; warn, as the lint needs the hakari feature"
+reason = "the workspace-hack helps only the members that depend on it; warn, as adding one is each workspace's choice"
 
 [lints.compound-assert]
 level = "warn"

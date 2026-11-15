@@ -9,19 +9,13 @@ repository.workspace = true
 publish = false
 
 [dependencies]
-guppy = { workspace = true, optional = true }
-hakari = { workspace = true, optional = true }
+guppy.workspace = true
+hakari.workspace = true
 sl_analysis.workspace = true
 sl_core.workspace = true
 sl_model.workspace = true
 
-[features]
-# links hakari and guppy, so the lints run (without it they report that they did not run)
-link = ["dep:guppy", "dep:hakari"]
-
 [dev-dependencies]
-# the fixtures run the linked analysis
-sl_tool_hakari = { workspace = true, features = ["link"] }
 sl_testkit.workspace = true
 
 [lints]

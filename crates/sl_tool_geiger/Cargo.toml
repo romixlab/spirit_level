@@ -9,18 +9,12 @@ repository.workspace = true
 publish = false
 
 [dependencies]
-geiger = { workspace = true, optional = true }
+geiger.workspace = true
 sl_analysis.workspace = true
 sl_core.workspace = true
 sl_tools.workspace = true
 
-[features]
-# links geiger, so the lint runs (without it it reports that it did not run)
-link = ["dep:geiger"]
-
 [dev-dependencies]
-# the fixtures run the linked analysis
-sl_tool_geiger = { workspace = true, features = ["link"] }
 sl_testkit.workspace = true
 
 [lints]

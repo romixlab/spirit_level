@@ -3,8 +3,6 @@
 //! Every package the workspace members reach through normal and build edges is scanned: each `.rs` file under
 //! its directory (tests left out), parsed with syn by geiger. A package whose library root declares
 //! `#![forbid(unsafe_code)]` and counts nothing is skipped.
-//!
-//! The library is linked only with the `link` feature; without it the lint reports that it did not run.
 
 use sl_analysis::{Analysis, Context, lint};
 use sl_core::{LintMeta, Need};
@@ -37,15 +35,6 @@ impl Analysis for Geiger {
     }
 }
 
-#[cfg(not(feature = "link"))]
-fn run(cx: &Context<'_>) {
-    cx.not_run_all(
-        "feature:geiger",
-        "spl was built without the `geiger` feature (`cargo install spirit_level_cli --features geiger`)",
-    );
-}
-
-#[cfg(feature = "link")]
 fn run(cx: &Context<'_>) {
     use sl_core::{Confidence, Diagnostic, Span};
     use std::collections::BTreeSet;
@@ -90,7 +79,6 @@ fn run(cx: &Context<'_>) {
 }
 
 /// Unsafe uses in the `.rs` files under `dir`, and the number of files that have any
-#[cfg(feature = "link")]
 fn scan(dir: &std::path::Path) -> (u64, usize) {
     let mut uses = 0;
     let mut files = 0;

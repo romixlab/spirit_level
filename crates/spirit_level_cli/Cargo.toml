@@ -40,11 +40,5 @@ vc_build.workspace = true
 serde_json.workspace = true
 sl_firmware = { workspace = true, features = ["synth"] }
 
-[features]
-# the hakari lints run (links hakari)
-hakari = ["spirit_level/hakari"]
-# geiger-unsafe-deps runs (links geiger)
-geiger = ["spirit_level/geiger"]
-
 [lints]
 workspace = true

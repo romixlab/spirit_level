@@ -14,11 +14,11 @@ allow = [
   "unicode-width",
   "windows-sys",
 ]
-reason = "second versions come only with the optional linked adapters (features hakari, geiger); deny.toml skips the same trees"
+reason = "second versions come only from the linked adapters (hakari, geiger); deny.toml skips the same trees"
 
 [lints.no-sys-crates]
 allow = ["rayon-core"]
-reason = "rayon-core sets `links` only to keep one copy in a graph; it builds no C (optional hakari feature)"
+reason = "rayon-core sets `links` only to keep one copy in a graph; it builds no C (pulled in by hakari)"
 
 [lints.publish-false]
 published = ["sl_board_model"]

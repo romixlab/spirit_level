@@ -47,11 +47,5 @@ sl_tool_shear.workspace = true
 sl_tool_semver.workspace = true
 toml_edit.workspace = true
 
-[features]
-# links hakari: hakari-generate and hakari-manage-deps run (70+ crates)
-hakari = ["sl_tool_hakari/link"]
-# links geiger: geiger-unsafe-deps runs (pulls syn 2)
-geiger = ["sl_tool_geiger/link"]
-
 [lints]
 workspace = true

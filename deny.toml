@@ -8,10 +8,10 @@ allow = ["Apache-2.0", "Apache-2.0 WITH LLVM-exception", "BSD-2-Clause", "MIT", 
 
 [bans]
 multiple-versions = "deny"
-# duplicates that only the optional linked adapters (hakari, geiger) bring in
+# duplicates that only the linked adapters (hakari, geiger) bring in
 skip-tree = [
-  { crate = "hakari", reason = "optional `hakari` feature; its graph libraries pin older versions" },
-  { crate = "geiger", reason = "optional `geiger` feature; it parses with syn 2" },
+  { crate = "hakari", reason = "hakari is always linked in; its graph libraries pin older versions" },
+  { crate = "geiger", reason = "geiger is always linked in; it parses with syn 2" },
 ]
 
 [sources]

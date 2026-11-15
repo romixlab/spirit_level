@@ -62,8 +62,8 @@ Lint ids are kebab-case and stable. Tool adapters prefix the tool's own ids (`cl
 
 - All in `[workspace.dependencies]`, `default-features = false`, only the features in use.
 - No bundled C, no `-sys` crates with a native build. Check `cargo tree -e normal,build` when adding one.
-- External tools: a tool with a usable library on stable Rust is linked behind a cargo feature (`hakari`, `geiger`); the others run as executables found on PATH, with a tested version range in `crates/sl_tools/tools.toml` ([docs/tools.md](docs/tools.md)).
-- `rayon-core` (with `hakari`) sets `links` only to stay unique in a graph; it builds no C.
+- External tools: a tool with a usable library on stable Rust is linked in, always built (`hakari`, `geiger`); the others run as executables found on PATH, with a tested version range in `crates/sl_tools/tools.toml` ([docs/tools.md](docs/tools.md)).
+- `rayon-core` (pulled in by hakari) sets `links` only to stay unique in a graph; it builds no C.
 
 ## 7. FEATURES.md and CHANGELOG.md
 

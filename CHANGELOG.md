@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Changed
+
+- hakari and geiger are always linked into `spl`; the `hakari`/`geiger` cargo features are gone (TOOL-4).
+- `rust-version` moves to 1.91: hakari and guppy need it.
+
 ## [0.4.9] - 2026-11-15
 
 ### Fixed

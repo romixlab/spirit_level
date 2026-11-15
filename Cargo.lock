@@ -1347,7 +1347,6 @@ dependencies = [
  "sl_analysis",
  "sl_core",
  "sl_testkit",
- "sl_tool_geiger",
  "sl_tools",
 ]
 
@@ -1361,7 +1360,6 @@ dependencies = [
  "sl_core",
  "sl_model",
  "sl_testkit",
- "sl_tool_hakari",
 ]
 
 [[package]]

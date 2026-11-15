@@ -4,10 +4,9 @@ spirit_level reuses established Rust lint tools instead of reimplementing them. 
 
 ## How tools are run
 
-- **Library or executable.** A tool with a library on stable Rust that does the whole job is linked. The others run as executables, and the adapter reads their machine-readable output (JSON where the tool has it, its stable text where not).
-- **Optional.** A linked tool is a cargo feature of `spirit_level` and `spirit_level_cli` (`hakari`, `geiger`), off by default. An executable adapter costs nothing to build, so it is always compiled in; it runs only when one of its lints is on.
+- **Library or executable.** A tool with a library on stable Rust that does the whole job is linked in, always compiled; it runs only when one of its lints is on. The others run as executables, and the adapter reads their machine-readable output (JSON where the tool has it, its stable text where not).
 - **Found on PATH.** spl installs nothing. Each tool is found on PATH and its version read, so it comes from whatever installs tools here: `cargo binstall`, `cargo install`, a distribution's package, mise.
-- **Missing tools.** A lint whose executable is not installed, or whose feature was not built, is reported as not run with the reason and the `crate@version` that installs it. The run then exits with code 3, at `warn` as at `deny` ([exit codes](output.md#exit-codes)).
+- **Missing tools.** A lint whose executable is not installed is reported as not run with the reason and the `crate@version` that installs it. The run then exits with code 3, at `warn` as at `deny` ([exit codes](output.md#exit-codes)).
 - **Tested versions.** `crates/sl_tools/tools.toml` gives each tool the range of versions its parser is tested against. A tool outside that range still runs; `tool-version` (deny from the small tier) reports its results as untested and fails the run.
 - **What a project needs.** `spl tools needed` lists what the project's enabled lints need: their tools, the toolchain of each `rust-version` for `cargo-msrv`, and the targets of `cargo-no-std` and `cargo-wasm` when the map marks crates. Install them before `check` in CI, so no lint is left not run.
 
@@ -27,8 +26,8 @@ Cost of linking: a scratch project depending only on the library (`default-featu
 | taplo | executable | the config and file-walk layer (taplo-common) needs a tokio runtime | taplo 53, 16 s; taplo-common 158, 41 s |
 | cargo-semver-checks | executable | heavy, builds C, and its library report has no per-check detail | 308, 115 s, ring |
 | cargo-udeps | executable | needs nightly, and links cargo itself (libgit2, curl) | not linkable on stable |
-| hakari | library (`hakari` feature) | guppy and hakari are libraries first; no C | 86, 20 s, none |
-| geiger | library (`geiger` feature) | a small library that counts `unsafe` with syn | 41, 11 s, none |
+| hakari | library | guppy and hakari are libraries first; no C | 86, 20 s, none |
+| geiger | library | a small library that counts `unsafe` with syn | 41, 11 s, none |
 
 ## Lint mapping
 
@@ -113,12 +112,12 @@ In both cases the item (the fingerprint waivers and baselines use) carries the t
 
 - **Library:** guppy reads the full `cargo metadata`; hakari computes the workspace-hack from `.config/hakari.toml` (or `.guppy/hakari.toml`), as `cargo hakari` does.
 - **Equivalent commands:** `cargo hakari generate --diff` and `cargo hakari manage-deps --dry-run`.
-- **Lints:** `hakari-generate` (the generated section of the workspace-hack's `Cargo.toml` is current; exact fix writes it) and `hakari-manage-deps` (every managed member depends on the workspace-hack, and no other crate does). Built with the `hakari` feature; without it they are not run.
+- **Lints:** `hakari-generate` (the generated section of the workspace-hack's `Cargo.toml` is current; exact fix writes it) and `hakari-manage-deps` (every managed member depends on the workspace-hack, and no other crate does). Always linked in.
 
 ## geiger (linked)
 
 - **Library:** every package the members reach through normal and build edges is scanned, each `.rs` file outside tests parsed with syn. A package whose library root says `#![forbid(unsafe_code)]` and counts nothing is skipped.
-- **Lints:** `geiger-unsafe-deps`, one finding per dependency with more unsafe uses than `max-uses` that is not in `allow`. Built with the `geiger` feature.
+- **Lints:** `geiger-unsafe-deps`, one finding per dependency with more unsafe uses than `max-uses` that is not in `allow`. Always linked in.
 
 ## Cargo checks
 
