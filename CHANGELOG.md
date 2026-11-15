@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.4.10] - 2026-11-15
+
 ### Changed
 
 - hakari and geiger are always linked into `spl`; the `hakari`/`geiger` cargo features are gone (TOOL-4).
