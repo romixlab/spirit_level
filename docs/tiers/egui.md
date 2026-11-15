@@ -24,6 +24,7 @@ Use it with `extends = "egui"` in `spirit_level.toml`.
 | [U0012](../lints/U0012.md) | egui-id-in-loop | `warn` | widgets that share an id share their state, and egui reports the clash on screen | egui |
 | [U0013](../lints/U0013.md) | egui-repaint-every-frame | `warn` | an unconditional repaint request keeps the app drawing at full rate and burns a core while idle | egui |
 | [U0014](../lints/U0014.md) | ui-unwrap-external-data | `warn` | panic-in-library skips binary crates; a UI app's bad file, parse or connection still deserves an error, not a crash; an estimate, since the chain may be known good or already checked | ui |
+| [U0015](../lints/U0015.md) | egui-panel-api | `warn` | panel and App code written for an older egui keeps compiling under a deprecation warning, then breaks on the next bump; an estimate, without type information | egui |
 
 ## The file
 
@@ -178,4 +179,8 @@ reason = "widgets that share an id share their state, and egui reports the clash
 [lints.egui-repaint-every-frame]
 level = "warn"
 reason = "an unconditional repaint request keeps the app drawing at full rate and burns a core while idle"
+
+[lints.egui-panel-api]
+level = "warn"
+reason = "panel and App code written for an older egui keeps compiling under a deprecation warning, then breaks on the next bump; an estimate, without type information"
 ```

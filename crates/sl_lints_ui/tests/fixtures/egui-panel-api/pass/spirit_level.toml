@@ -1,0 +1,3 @@
+[lints.egui-panel-api]
+level = "deny"
+reason = "fixture"

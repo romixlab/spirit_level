@@ -73,7 +73,7 @@ The same practices, specialised by the `egui` tier's parameters, and the practic
 | A widget's id is unique within its parent: no constant id given in a loop | egui's id rules; vhrd_egui `FoldRest` docs | [`egui-id-in-loop`](lints/U0012.md) | estimate |
 | `request_repaint` is called by the worker that has news, not by every frame | UX guide §9; egui's repaint model | [`egui-repaint-every-frame`](lints/U0013.md) | estimate |
 | One egui version in the whole graph | UX guide §12 | [`duplicate-versions`](lints/M0002.md) | certain |
-| Every widget sits in `ve_frame::WidgetFrame`; panels use the egui 0.34 API | UX guide §6; app skill "Panels" | by review; egui's deprecations flag the old panel API | - |
+| Every widget sits in `ve_frame::WidgetFrame`; panels use the egui API the version in use ships | UX guide §6; app skill "Panels" | [`egui-panel-api`](lints/U0015.md) for the API egui's own deprecations name (`SidePanel`, `TopBottomPanel`, `.show` on a `Context`, `App::update`); `WidgetFrame` itself is by review | estimate |
 | A dropdown of checkboxes is a `ve_basics::Checklist`, open while ticked | UX guide §7 | by review | - |
 | Labels are not selectable (`ve_basics::setup_labels`); ids and paths are copyable | UX guide §5 | by review | - |
 | A crash at start is recovered with `ve_basics::StartupGuard`; build info and the app menu sit in the top bar | UX guide §4, §9 | by review | - |

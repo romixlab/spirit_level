@@ -148,3 +148,7 @@ reason = "widgets that share an id share their state, and egui reports the clash
 [lints.egui-repaint-every-frame]
 level = "warn"
 reason = "an unconditional repaint request keeps the app drawing at full rate and burns a core while idle"
+
+[lints.egui-panel-api]
+level = "warn"
+reason = "panel and App code written for an older egui keeps compiling under a deprecation warning, then breaks on the next bump; an estimate, without type information"

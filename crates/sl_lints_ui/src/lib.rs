@@ -121,6 +121,16 @@ ui_lint!(REPAINT_EVERY_FRAME, "U0013", "egui-repaint-every-frame", "egui", "UI c
         ("interval-ms-min", Int, "100", "a delay below which an unconditional repaint request is a busy loop"),
     ],
     fix: None);
+ui_lint!(PANEL_API, "U0015", "egui-panel-api", "egui", "egui panel and App code uses the API the version in use ships, never one it replaced",
+    params: [
+        ("constructors", StrList, "[\"SidePanel::*\", \"TopBottomPanel::*\"]", "constructors of panel types the egui version in use replaced with a single `Panel`; any call on their chain is flagged, `*` matches within a segment"),
+        ("context-types", StrList, "[\"CentralPanel::*\"]", "constructors whose `context-method` directly on a `Context` the egui version in use replaced with `show_inside` on a `Ui`"),
+        ("context-method", Str, "\"show\"", "the method that shows a panel directly on a `Context`"),
+        ("app-traits", StrList, "[\"App\", \"eframe::App\"]", "traits whose impl is an app's entry point"),
+        ("app-method", Str, "\"update\"", "the trait method the egui version in use replaced"),
+        ("replacement", Str, "\"Panel, `.show_inside` on the Ui (not `.show` on the Context), and `App::ui` (not `App::update`)\"", "what replaces the flagged API, named in the help"),
+    ],
+    fix: None);
 
 /// The UI analysis
 pub struct Ui;
@@ -143,6 +153,7 @@ static LINTS: &[&LintMeta] = &[
     &STATUS_GLYPH,
     &ID_IN_LOOP,
     &REPAINT_EVERY_FRAME,
+    &PANEL_API,
 ];
 
 /// The lints that skip the theme

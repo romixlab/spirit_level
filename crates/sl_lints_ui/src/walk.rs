@@ -75,6 +75,12 @@ struct P {
     repaint_after: Vec<String>,
     ui_types: Vec<String>,
     repaint_ms_min: f64,
+    panel_paths: Vec<String>,
+    context_types: Vec<String>,
+    context_method: String,
+    app_traits: Vec<String>,
+    app_method: String,
+    panel_replacement: String,
 }
 
 impl P {
@@ -159,6 +165,14 @@ impl P {
             p.repaint_after = q.list("after-calls").to_vec();
             p.ui_types = q.list("ui-types").to_vec();
             p.repaint_ms_min = q.int("interval-ms-min") as f64;
+        }
+        if let Some(q) = get("egui-panel-api") {
+            p.panel_paths = q.list("constructors").to_vec();
+            p.context_types = q.list("context-types").to_vec();
+            p.context_method = q.str("context-method").to_owned();
+            p.app_traits = q.list("app-traits").to_vec();
+            p.app_method = q.str("app-method").to_owned();
+            p.panel_replacement = q.str("replacement").to_owned();
         }
         p
     }
@@ -545,6 +559,35 @@ impl<'ast> Visit<'ast> for Walk<'_> {
         self.fns.pop();
     }
 
+    fn visit_item_impl(&mut self, i: &'ast syn::ItemImpl) {
+        if let Some((path, _)) = &i.trait_
+            && let Some(trait_name) = self.uses.resolve(path).last().cloned()
+            && self
+                .p
+                .app_traits
+                .iter()
+                .any(|a| a.rsplit("::").next() == Some(trait_name.as_str()))
+        {
+            for item in &i.items {
+                if let syn::ImplItem::Fn(f) = item
+                    && f.sig.ident == self.p.app_method
+                {
+                    self.push(
+                        "egui-panel-api",
+                        range(&f.sig.ident),
+                        format!(
+                            "`{trait_name}::{}` is the egui version in use replaced",
+                            f.sig.ident
+                        ),
+                        format!("implement `{}`", self.p.panel_replacement),
+                        Confidence::Estimate,
+                    );
+                }
+            }
+        }
+        visit::visit_item_impl(self, i);
+    }
+
     fn visit_block(&mut self, b: &'ast syn::Block) {
         let track = !self.p.disable_calls.is_empty();
         for (i, s) in b.stmts.iter().enumerate() {
@@ -661,6 +704,15 @@ impl<'ast> Visit<'ast> for Walk<'_> {
             if path_in(&self.p.setup_calls, &segs) {
                 self.out.has_setup = true;
             }
+            if path_in(&self.p.panel_paths, &segs) {
+                self.push(
+                    "egui-panel-api",
+                    r,
+                    format!("`{shown}` is panel code the egui version in use replaced"),
+                    format!("use `{}`", self.p.panel_replacement),
+                    Confidence::Estimate,
+                );
+            }
             self.check_texts(|l| path_in(l, &segs), &args, r);
         }
         self.visit_expr(&c.func);
@@ -707,7 +759,18 @@ impl<'ast> Visit<'ast> for Walk<'_> {
         if method_in(&self.p.size_calls, &name) {
             self.check_sizes(&format!("`.{name}()`"), &args);
         }
-        if method_in(&self.p.panic_methods, &name) && self.external_data_root(&m.receiver) {
+        if name == self.p.context_method && self.chain_root(&m.receiver, &self.p.context_types) {
+            self.push(
+                "egui-panel-api",
+                r,
+                format!("`.{name}()` shows a panel directly on a Context; the egui version in use replaced it with `.show_inside` on a Ui"),
+                format!("use `{}`", self.p.panel_replacement),
+                Confidence::Estimate,
+            );
+        }
+        if method_in(&self.p.panic_methods, &name)
+            && self.chain_root(&m.receiver, &self.p.unwrap_calls)
+        {
             self.push(
                 "ui-unwrap-external-data",
                 r,
@@ -854,9 +917,9 @@ impl Walk<'_> {
         }
     }
 
-    /// Whether a chain of method calls, tries and parens is rooted in a call matching `ui-unwrap-external-data`'s
-    /// `calls` (`std::fs::read_to_string(path).unwrap()`, `serde_json::from_str(&s).map_err(..).expect("..")`)
-    fn external_data_root(&self, mut e: &Expr) -> bool {
+    /// Whether a chain of method calls, tries, parens and references is rooted in a call matching `list`
+    /// (`std::fs::read_to_string(path).unwrap()`, `egui::CentralPanel::default().frame(f).show(ctx, ..)`)
+    fn chain_root(&self, mut e: &Expr, list: &[String]) -> bool {
         loop {
             e = match e {
                 Expr::MethodCall(m) => &m.receiver,
@@ -865,7 +928,7 @@ impl Walk<'_> {
                 Expr::Reference(r) => &r.expr,
                 Expr::Call(c) => {
                     return match &*c.func {
-                        Expr::Path(p) => path_in(&self.p.unwrap_calls, &self.uses.resolve(&p.path)),
+                        Expr::Path(p) => path_in(list, &self.uses.resolve(&p.path)),
                         _ => false,
                     };
                 }

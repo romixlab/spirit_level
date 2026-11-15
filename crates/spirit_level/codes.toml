@@ -257,6 +257,7 @@ U0011 = { id = "egui-status-glyph", group = "ui", status = "active" }
 U0012 = { id = "egui-id-in-loop", group = "ui", status = "active" }
 U0013 = { id = "egui-repaint-every-frame", group = "ui", status = "active" }
 U0014 = { id = "ui-unwrap-external-data", group = "ui", status = "active" }
+U0015 = { id = "egui-panel-api", group = "ui", status = "active" }
 X0001 = { id = "audit-unmaintained", group = "external", status = "active" }
 X0002 = { id = "audit-unsound", group = "external", status = "active" }
 X0003 = { id = "audit-vulnerabilities", group = "external", status = "active" }

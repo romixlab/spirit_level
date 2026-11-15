@@ -211,6 +211,7 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [U0011](U0011.md) | [egui-status-glyph](U0011.md) | a status glyph is painted in its tone, never written into a label | off | off | off | off | off | off | off | deny | off | off |
 | [U0012](U0012.md) | [egui-id-in-loop](U0012.md) | a widget made in a loop gets an id that differs per iteration | off | off | off | off | off | off | off | warn | off | off |
 | [U0013](U0013.md) | [egui-repaint-every-frame](U0013.md) | UI code asks for a repaint when something changed, not on every frame | off | off | off | off | off | off | off | warn | off | off |
+| [U0015](U0015.md) | [egui-panel-api](U0015.md) | egui panel and App code uses the API the version in use ships, never one it replaced | off | off | off | off | off | off | off | warn | off | off |
 
 ## embedded
 
