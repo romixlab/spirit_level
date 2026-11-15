@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.4.25] - 2026-11-15
+
 ### Added
 
 - `cli-no-abbreviations` (C0038): a CLI runs no subcommand from its unique prefix (CODE-12).
