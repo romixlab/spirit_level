@@ -116,6 +116,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 
 - ✅ `TOOL-1` Adapters for clippy, cargo-deny, machete, shear, typos, taplo, semver-checks, hakari and geiger (linked), udeps, rustfmt, cargo-audit; cargo checks (MSRV, no_std, wasm, doc) ([tools](docs/tools.md)).
 - ✅ `TOOL-2` `tools-needed`: tools found on PATH with their version checked against a tested range (`tool-version`); `spl tools needed` lists what a project needs, as a table, `crate@version` specs or JSON; any enabled lint that cannot run fails the run (`--allow-warn-not-run` lets warn-level ones through) ([tools](docs/tools.md#installing-the-tools)).
+- ✅ `TOOL-3` `deny-licenses` without `deny.toml`: one finding asking for the file, not one per crate (cargo-deny's own default policy allows no licence).
 
 ## BOOK - the book
 

@@ -55,6 +55,10 @@ impl Analysis for Deny {
             if !cx.enabled(lint) {
                 continue;
             }
+            if *check == "licenses" && !cx.project.exists("deny.toml") {
+                cx.emit(no_config(lint));
+                continue;
+            }
             let mut args = vec!["deny", "--format", "json", "--color", "never"];
             if *check == "advisories" && !cx.params(lint).bool("fetch") {
                 args.push("--offline");
@@ -181,6 +185,18 @@ fn errors(stderr: &str) -> Option<String> {
     (!v.is_empty()).then(|| v.join(" | "))
 }
 
+/// Without `deny.toml`, cargo-deny's default policy allows no licence at all, so every crate would be rejected:
+/// one finding asking for the file, instead of one per crate
+fn no_config(lint: &str) -> Diagnostic {
+    Diagnostic::new(
+        lint,
+        "missing-config",
+        "no deny.toml: cargo-deny's default policy allows no licence, so every crate would be rejected",
+    )
+    .span(Span::new("deny.toml", 0))
+    .help("add deny.toml with a [licenses] section listing the licences this project accepts, e.g. allow = [\"MIT\", \"Apache-2.0\"]")
+}
+
 impl Finding {
     /// The fingerprint: code and crate (`banned:itoa@1.0.19`, `vulnerability:RUSTSEC-2021-0003:smallvec@1.6.0`)
     pub fn item(&self) -> String {
@@ -268,5 +284,12 @@ mod tests {
             r#"{"fields":{"level":"ERROR","message":"failed to parse deny.toml"},"type":"log"}"#;
         assert_eq!(errors(e).as_deref(), Some("failed to parse deny.toml"));
         assert_eq!(parse(e), [] as [Finding; 0]);
+    }
+
+    #[test]
+    fn no_config_is_one_finding() {
+        let d = no_config("deny-licenses");
+        assert_eq!(d.item, "missing-config");
+        assert_eq!(d.spans, [Span::new("deny.toml", 0)]);
     }
 }
