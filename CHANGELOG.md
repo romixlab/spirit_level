@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.4.27] - 2026-11-15
+
 ### Added
 
 - `fuzz-corpus-test` (M0031): every fuzz target has a corpus tracked in git and a test naming it (MAN-9).
