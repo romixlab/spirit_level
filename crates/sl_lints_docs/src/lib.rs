@@ -1,10 +1,14 @@
 //! Docs lints: the shape of a page as a reader meets it (long runs of prose, reading time, headings, walls of code,
-//! images without alternative text, code without a language) and the practices of a Zensical book (a navigation
-//! that names real pages, no page nobody reaches, one title, admonitions that render). One analysis, [`DOCS`]; the
+//! images without alternative text, code without a language), its words (abbreviations, terms, synonyms, passive
+//! voice, reading ease) and the practices of a Zensical book (a navigation that names real pages, no page nobody
+//! reaches, one title, admonitions that render). One analysis, [`DOCS`]; the
 //! same numbers feed `spl pages` through [`report`].
 
 mod book;
 mod reading;
+mod words;
+
+pub use words::{Synonym, Words};
 
 use sl_analysis::{Analysis, Context, lint};
 use sl_config::Config;
@@ -49,6 +53,29 @@ lint!(PAGE_TITLE, "D0010", "page-title", "book", "every page of the book has one
 lint!(ADMONITION_SYNTAX, "D0011", "admonition-syntax", "book", "admonitions use a type Zensical styles and a body indented four spaces",
     params: [("types", StrList, "[\"note\", \"abstract\", \"info\", \"tip\", \"success\", \"question\", \"warning\", \"failure\", \"danger\", \"bug\", \"example\", \"quote\"]", "the admonition types the book styles")],
     needs: [], fix: None);
+lint!(ABBREVIATION_FIRST_USE, "D0012", "abbreviation-first-use", "words", "an abbreviation is spelled out at its first use on a page",
+    params: [("known", StrList, "[\"API\", \"ASCII\", \"CI\", \"CLI\", \"CPU\", \"CSS\", \"CSV\", \"DNS\", \"GPU\", \"HTML\", \"HTTP\", \"HTTPS\", \"ID\", \"IDE\", \"IP\", \"JSON\", \"OK\", \"OS\", \"PCB\", \"PDF\", \"PNG\", \"PR\", \"RAM\", \"README\", \"SDK\", \"SQL\", \"SSH\", \"SVG\", \"TCP\", \"TLS\", \"TOML\", \"UDP\", \"UI\", \"URL\", \"USB\", \"UTF\", \"XML\", \"YAML\"]", "abbreviations every reader knows, never spelled out"),
+             ("pages", Choice["all", "guide", "reference"], "\"all\"", "the kinds of page judged")],
+    needs: [], fix: None);
+lint!(TERM_BEFORE_DEFINITION, "D0013", "term-before-definition", "words", "a page defines a term before it uses it",
+    params: [("ignore", StrList, "[\"note\", \"tip\", \"warning\", \"important\", \"example\", \"why\", \"how\", \"not\", \"never\", \"only\", \"always\", \"must\", \"no\", \"all\", \"none\", \"do\", \"don't\"]", "bold words that stress or label and define nothing"),
+             ("pages", Choice["all", "guide", "reference"], "\"guide\"", "the kinds of page judged")],
+    needs: [], fix: None);
+lint!(TERM_SYNONYMS, "D0014", "term-synonyms", "words", "one concept has one name",
+    params: [("words", StrList, "[\"directory, folder\", \"sign in, log in\", \"email, e-mail\"]", "each entry is one concept's names separated by commas, the preferred first"),
+             ("across", Choice["page", "all"], "\"page\"", "names compared on each page, or across all pages"),
+             ("pages", Choice["all", "guide", "reference"], "\"all\"", "the kinds of page judged")],
+    needs: [], fix: None);
+lint!(PASSIVE_VOICE, "D0015", "passive-voice", "words", "a guide says who does what: few passive sentences",
+    params: [("max-percent", Float, "25", "percent of a page's sentences that may read as passive"),
+             ("min-sentences", Int, "10", "sentences from which a page is judged"),
+             ("pages", Choice["all", "guide", "reference"], "\"guide\"", "the kinds of page judged")],
+    needs: [], fix: None);
+lint!(READING_EASE, "D0016", "reading-ease", "words", "a guide reads easily: short sentences of short words",
+    params: [("min-score", Float, "30", "the lowest Flesch reading ease a page may score (0 hard, 100 easy)"),
+             ("min-sentences", Int, "10", "sentences from which a page is judged"),
+             ("pages", Choice["all", "guide", "reference"], "\"guide\"", "the kinds of page judged")],
+    needs: [], fix: None);
 
 /// The docs analysis
 pub struct Docs;
@@ -68,6 +95,11 @@ static DOCS_LINTS: &[&LintMeta] = &[
     &ORPHAN_PAGES,
     &PAGE_TITLE,
     &ADMONITION_SYNTAX,
+    &ABBREVIATION_FIRST_USE,
+    &TERM_BEFORE_DEFINITION,
+    &TERM_SYNONYMS,
+    &PASSIVE_VOICE,
+    &READING_EASE,
 ];
 
 impl Analysis for Docs {
@@ -82,6 +114,7 @@ impl Analysis for Docs {
     fn run(&self, cx: &Context<'_>) {
         let pages = pages(cx.project, cx.config);
         reading::run(cx, &pages);
+        words::run(cx, &pages, english(cx.project, cx.config));
         match Book::read(&cx.project.root) {
             Ok(Some(b)) => book::run(cx, &b),
             Ok(None) => {}
@@ -151,18 +184,25 @@ pub struct PageReport {
     /// Its metrics
     #[serde(flatten)]
     pub stats: Stats,
+    /// Its words, as the word lints judge them
+    #[serde(flatten)]
+    pub words: Words,
 }
 
 /// The metrics of every page the `[docs]` table selects, as the lints measure them
 pub fn report(project: &Project, config: &Config) -> Vec<PageReport> {
     let speed = reading_speed(config);
     let en = english(project, config);
-    pages(project, config)
+    let pages = pages(project, config);
+    let words = Words::all(config, &pages);
+    pages
         .iter()
-        .map(|p| PageReport {
+        .zip(words)
+        .map(|(p, words)| PageReport {
             page: p.rel.clone(),
             kind: p.kind,
             stats: sl_docs::stats::stats(p, &speed, en),
+            words,
         })
         .collect()
 }

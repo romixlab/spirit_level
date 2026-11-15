@@ -1,0 +1,9 @@
+[[finding]]
+at = "README.md:3"
+contains = "\"tier\" is used on line 3 before its definition on line 5"
+confidence = "candidate"
+
+[[finding]]
+at = "README.md:7"
+contains = "\"waiver\" is used on line 7 before its definition on line 9"
+confidence = "candidate"

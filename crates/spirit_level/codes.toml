@@ -294,3 +294,8 @@ D0008 = { id = "nav-entries", group = "docs", status = "active" }
 D0009 = { id = "orphan-pages", group = "docs", status = "active" }
 D0010 = { id = "page-title", group = "docs", status = "active" }
 D0011 = { id = "admonition-syntax", group = "docs", status = "active" }
+D0012 = { id = "abbreviation-first-use", group = "docs", status = "active" }
+D0013 = { id = "term-before-definition", group = "docs", status = "active" }
+D0014 = { id = "term-synonyms", group = "docs", status = "active" }
+D0015 = { id = "passive-voice", group = "docs", status = "active" }
+D0016 = { id = "reading-ease", group = "docs", status = "active" }

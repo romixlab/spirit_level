@@ -1,0 +1,6 @@
+params = { min-score = 30, min-sentences = 2 }
+
+[[finding]]
+at = "README.md:1"
+contains = "Flesch reading ease"
+confidence = "estimate"

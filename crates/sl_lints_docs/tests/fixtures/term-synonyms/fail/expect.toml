@@ -1,0 +1,4 @@
+[[finding]]
+at = "README.md:5"
+contains = "directory (1), folder (1); this page says \"folder\" where \"directory\" is preferred"
+confidence = "candidate"

@@ -1,0 +1,9 @@
+[[finding]]
+at = "README.md:3"
+contains = "MCU is not spelled out"
+confidence = "candidate"
+
+[[finding]]
+at = "README.md:3"
+contains = "PWM is not spelled out"
+confidence = "candidate"

@@ -1,0 +1,6 @@
+params = { max-percent = 25, min-sentences = 3 }
+
+[[finding]]
+at = "README.md:1"
+contains = "75% of the sentences read as passive, 3 of 4"
+confidence = "estimate"
