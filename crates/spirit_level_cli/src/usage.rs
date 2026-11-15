@@ -1,8 +1,8 @@
 //! `spl usage`: how often each command and flag ran on this machine, from the records a run leaves when usage
 //! recording is enabled (CLI-2, opt-in: CLI-5)
 
-use crate::{Cli, Format, TOOL};
-use clap::CommandFactory;
+use crate::registry::{Registered, Run};
+use crate::{Format, TOOL, cli};
 use serde_json::json;
 use vc_ui::{Exit, Paint};
 
@@ -10,10 +10,13 @@ use vc_ui::{Exit, Paint};
 const SCHEMA: &str = "spirit_level.usage/1";
 
 /// The tail of `spl usage --help`
-pub const AFTER_HELP: &str = "Examples:\n  spl usage\n  spl usage --unused\n  spl usage --format json\n\nOpt-in, off by default: SPL_USAGE_DIR=DIR or SPL_USAGE=on enables it, counting each run's command and the flags given (never paths or names) in DIR or $XDG_STATE_HOME/spl/usage (default ~/.local/state/spl/usage); SPL_USAGE_DIR=off turns it off even then. Nothing leaves the machine. Exit codes: 0 listed, 2 recording is off or the records cannot be read";
+const AFTER_HELP: &str = "Examples:\n  spl usage\n  spl usage --unused\n  spl usage --format json\n\nOpt-in, off by default: SPL_USAGE_DIR=DIR or SPL_USAGE=on enables it, counting each run's command and the flags given (never paths or names) in DIR or $XDG_STATE_HOME/spl/usage (default ~/.local/state/spl/usage); SPL_USAGE_DIR=off turns it off even then. Nothing leaves the machine. Exit codes: 0 listed, 2 recording is off or the records cannot be read";
 
-#[derive(Clone, Copy, clap::Args)]
-pub struct UsageArgs {
+/// How often each command and flag ran on this machine: runs per source (terminal, script, agent) and the
+/// last day; the never-used ones with 0
+#[derive(Clone, Copy, clap::Parser)]
+#[command(name = "usage", display_order = 11, after_help = AFTER_HELP)]
+pub(crate) struct Usage {
     /// Only the commands and flags never used
     #[arg(long)]
     unused: bool,
@@ -22,13 +25,21 @@ pub struct UsageArgs {
     format: Format,
 }
 
-pub fn run(a: UsageArgs) -> Result<Exit, String> {
+inventory::submit! { Registered::of::<Usage>() }
+
+impl Run for Usage {
+    fn run(self) -> Result<Exit, String> {
+        run(self)
+    }
+}
+
+fn run(a: Usage) -> Result<Exit, String> {
     let dir = vc_usage::Store::locate(TOOL, |k| std::env::var_os(k))
         .ok_or("usage records are off: enable with SPL_USAGE_DIR=DIR or SPL_USAGE=on")?;
     let counts = vc_usage::Store::new(&dir)
         .read()
         .map_err(|e| format!("{}: {e}", dir.display()))?;
-    let mut rows = vc_usage::rows(&vc_usage::known(&Cli::command()), &counts);
+    let mut rows = vc_usage::rows(&vc_usage::known(&cli()), &counts);
     if a.unused {
         rows.retain(|r| r.entry.is_none());
     }

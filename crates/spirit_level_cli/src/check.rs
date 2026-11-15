@@ -1,5 +1,6 @@
 //! `spl check`: run every lint the configuration enables, report the findings, apply the exact fixes
 
+use crate::registry::{Registered, Run};
 use crate::{DENIED, Format, NOT_RUN, lint_candidates, tier_candidates, today};
 use clap::ValueEnum;
 use clap_complete::engine::ArgValueCandidates;
@@ -7,7 +8,7 @@ use std::path::PathBuf;
 use vc_ui::{Exit, Paint};
 
 #[derive(Clone, Copy, ValueEnum)]
-pub(crate) enum GroupByArg {
+enum GroupByArg {
     /// One group per lint (an adapter's tool rule makes its own)
     Lint,
     /// One group per crate
@@ -16,8 +17,14 @@ pub(crate) enum GroupByArg {
     File,
 }
 
-#[derive(clap::Args)]
-pub(crate) struct CheckArgs {
+/// Check the project: run every lint its configuration enables
+#[derive(clap::Parser)]
+#[command(
+    name = "check",
+    display_order = 0,
+    after_help = "Examples:\n  spl check\n  spl check --all --group-by crate\n  spl check --tier small --only cli ../other_repo\n  spl check --format json --fix\n  spl check --allow-warn-not-run\n\nExit codes: 0 clean, 1 a denied finding, 2 a configuration or usage error, 3 an enabled lint could not run (a warn-level one not with --allow-warn-not-run)"
+)]
+pub(crate) struct Check {
     /// The project directory (cargo's search for the workspace root starts here)
     #[arg(default_value = ".")]
     path: PathBuf,
@@ -66,8 +73,16 @@ pub(crate) struct CheckArgs {
     allow_warn_not_run: bool,
 }
 
-pub(crate) fn check(a: CheckArgs) -> Result<Exit, String> {
-    let CheckArgs {
+inventory::submit! { Registered::of::<Check>() }
+
+impl Run for Check {
+    fn run(self) -> Result<Exit, String> {
+        check(self)
+    }
+}
+
+fn check(a: Check) -> Result<Exit, String> {
+    let Check {
         path,
         config,
         tier,

@@ -1,9 +1,36 @@
 //! `spl codes`: the registry of lint codes, listed or held to the lints
 
 use crate::TOOL;
+use crate::registry::{Registered, Run};
 use vc_ui::{Exit, Paint};
 
-pub(crate) fn codes(check: bool, base: Option<&str>) -> Result<Exit, String> {
+/// List every lint code ever given, with its lint id, group and status; `--check` holds the registry to the
+/// lints (for `spirit_level`'s own `just lint`)
+#[derive(clap::Parser)]
+#[command(
+    name = "codes",
+    display_order = 2,
+    after_help = "Examples:\n  spl codes\n  spl codes --check --base main\n\nA code is never reused or changed; a retired lint keeps its code reserved."
+)]
+pub(crate) struct Codes {
+    /// Check the registry instead of listing it: every lint has its code, no code or id twice
+    #[arg(long)]
+    check: bool,
+    /// With --check: the git revision whose registry every row must still match (rows only go from active to
+    /// retired)
+    #[arg(long, requires = "check", value_name = "REV")]
+    base: Option<String>,
+}
+
+inventory::submit! { Registered::of::<Codes>() }
+
+impl Run for Codes {
+    fn run(self) -> Result<Exit, String> {
+        codes(self.check, self.base.as_deref())
+    }
+}
+
+fn codes(check: bool, base: Option<&str>) -> Result<Exit, String> {
     use spirit_level::codes;
     if !check {
         for r in codes::rows() {

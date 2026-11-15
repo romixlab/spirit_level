@@ -4,6 +4,7 @@
     reason = "writing to a String cannot fail"
 )]
 
+use crate::registry::{Registered, Run};
 use clap::{ArgGroup, Args, Subcommand};
 use serde_json::{Value, json};
 use sl_tools::{Detection, PinKind, State};
@@ -27,8 +28,24 @@ its results as untested.
 Exit codes: 0 everything needed is there and in range, 1 something needed is missing or outside its tested range,
 2 usage or configuration error";
 
+/// The external tools of the adapters: what the project needs, the tested versions, what is found on PATH
+#[derive(clap::Parser)]
+#[command(name = "tools", display_order = 10)]
+pub(crate) struct Tools {
+    #[command(subcommand)]
+    cmd: ToolsCmd,
+}
+
+inventory::submit! { Registered::of::<Tools>() }
+
+impl Run for Tools {
+    fn run(self) -> Result<Exit, String> {
+        run(self.cmd)
+    }
+}
+
 #[derive(Subcommand)]
-pub enum ToolsCmd {
+enum ToolsCmd {
     /// The external tools the project's enabled lints run, with their tested versions and what is found on PATH;
     /// the toolchains and targets of `cargo-msrv`, `cargo-no-std` and `cargo-wasm`
     #[command(after_help = NEEDED_HELP)]
@@ -189,7 +206,7 @@ impl Needed {
     }
 }
 
-pub fn run(cmd: ToolsCmd) -> Result<Exit, String> {
+fn run(cmd: ToolsCmd) -> Result<Exit, String> {
     match cmd {
         ToolsCmd::Needed(a) => needed(&a),
     }

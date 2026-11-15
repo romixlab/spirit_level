@@ -5,6 +5,7 @@
     reason = "fmt::Write into a String cannot fail"
 )]
 
+use crate::registry::{Registered, Run};
 use crate::{Format, today};
 use sl_firmware::panics::{Inventory, Site};
 use sl_lints_embedded::FirmwarePanics;
@@ -16,10 +17,13 @@ use vc_ui::{Exit, Paint};
 const SCHEMA: &str = "spirit_level.panics/1";
 
 /// The tail of `spl panics --help`
-pub const AFTER_HELP: &str = "Examples:\n  spl panics --elf target/thumbv7em-none-eabihf/release/app\n  spl panics --elf target/thumbv7em-none-eabihf/release/app --format json\n  spl panics --elf target/thumbv7em-none-eabihf/release/app --ack > fw/panics.toml\n\nA site is a call from the firmware's code into a panic entry of the standard library, placed by the ELF's DWARF; the release profile needs `debug = 2`. The lint pan-1 holds each site to an entry of the acknowledgement file (`spl explain pan-1`). Exit codes: 0 listed, 2 a configuration error or an ELF that cannot be read for its panic sites";
+const AFTER_HELP: &str = "Examples:\n  spl panics --elf target/thumbv7em-none-eabihf/release/app\n  spl panics --elf target/thumbv7em-none-eabihf/release/app --format json\n  spl panics --elf target/thumbv7em-none-eabihf/release/app --ack > fw/panics.toml\n\nA site is a call from the firmware's code into a panic entry of the standard library, placed by the ELF's DWARF; the release profile needs `debug = 2`. The lint pan-1 holds each site to an entry of the acknowledgement file (`spl explain pan-1`). Exit codes: 0 listed, 2 a configuration error or an ELF that cannot be read for its panic sites";
 
-#[derive(clap::Args)]
-pub struct PanicsArgs {
+/// What can panic in a firmware release: every panic site of the linked ELF with its function, kind, place
+/// and task class
+#[derive(clap::Parser)]
+#[command(name = "panics", display_order = 9, after_help = AFTER_HELP)]
+pub(crate) struct Panics {
     /// The project directory
     #[arg(default_value = ".")]
     path: PathBuf,
@@ -43,7 +47,15 @@ pub struct PanicsArgs {
     today: Option<String>,
 }
 
-pub fn run(a: PanicsArgs) -> Result<Exit, String> {
+inventory::submit! { Registered::of::<Panics>() }
+
+impl Run for Panics {
+    fn run(self) -> Result<Exit, String> {
+        run(self)
+    }
+}
+
+fn run(a: Panics) -> Result<Exit, String> {
     let project = sl_model::Project::load(&a.path).map_err(|e| e.to_string())?;
     let mut opts = spirit_level::Options::new(today(a.today)?);
     opts.config = a.config;

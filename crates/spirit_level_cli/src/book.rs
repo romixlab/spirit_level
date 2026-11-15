@@ -1,13 +1,30 @@
 //! `spl book`: the book's generated pages (lints, tiers, nav) and its footer build stamp (D0017).
 
+use crate::registry::{Registered, Run};
 use clap::{Args, Subcommand};
 use std::path::{Path, PathBuf};
 use vc_ui::{Exit, Paint};
 
 const STAMP_AFTER_HELP: &str = "Examples:\n  spl book stamp docs-overrides/partials/stamp.html docs/javascripts/book-stamp-age.js\n  spl book stamp --repo ../exact_units --name exact_units overrides/partials/stamp.html docs/javascripts/book-stamp-age.js";
 
+/// Write the book's generated pages, or its footer build stamp
+#[derive(clap::Parser)]
+#[command(name = "book", display_order = 12)]
+pub(crate) struct Book {
+    #[command(subcommand)]
+    cmd: BookCmd,
+}
+
+inventory::submit! { Registered::of::<Book>() }
+
+impl Run for Book {
+    fn run(self) -> Result<Exit, String> {
+        run(self.cmd)
+    }
+}
+
 #[derive(Subcommand)]
-pub enum BookCmd {
+enum BookCmd {
     /// Write the book's generated pages (lints, tiers, nav) from the lints' metadata
     #[command(after_help = "Examples:\n  spl book docs\n  spl book docs --check")]
     Docs(DocsArgs),
@@ -46,7 +63,7 @@ pub struct StampArgs {
     script_out: PathBuf,
 }
 
-pub fn run(cmd: BookCmd) -> Result<Exit, String> {
+fn run(cmd: BookCmd) -> Result<Exit, String> {
     match cmd {
         BookCmd::Docs(a) => docs(&a),
         BookCmd::Stamp(a) => stamp(&a),

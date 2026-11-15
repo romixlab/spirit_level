@@ -34,6 +34,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `CLI-4` The generic CLI parts from vhrd_cli: `--version` (vc_build), `--color`, error line, exit codes (vc_ui), completion (vc_complete).
 - ✅ `CLI-5` Usage records are opt-in, off by default (`vc_usage` USAGE-2): `SPL_USAGE_DIR=DIR` or `SPL_USAGE=on` enables them; `spl usage` says so when off ([usage records](docs/usage.md)).
 - ✅ `CLI-6` `cli-secret-flags`: an option whose long name looks like it holds a secret (token, password, secret, api-key) and takes a value is a candidate finding, unless it points at the secret (`--*-file`, `--*-env`).
+- ✅ `CLI-7` spl's commands register themselves per module (inventory); the root command, completion and usage signals come from the registry.
 
 ## DEP - dependents (crater-lite)
 

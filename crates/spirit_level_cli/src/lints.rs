@@ -1,10 +1,49 @@
 //! `spl lints` and `spl tiers`: the shipped lints with their levels, and the shipped tiers
 
 use crate::Format;
+use crate::registry::{Registered, Run};
 use sl_core::Level;
 use vc_ui::Exit;
 
-pub(crate) fn list_lints(format: Format) -> Result<Exit, String> {
+/// List every lint with its level in each shipped tier
+#[derive(clap::Parser)]
+#[command(
+    name = "lints",
+    display_order = 3,
+    after_help = "Examples:\n  spl lints\n  spl lints --format json"
+)]
+pub(crate) struct Lints {
+    /// Output for people or for machines
+    #[arg(long, value_enum, default_value = "text")]
+    format: Format,
+}
+
+inventory::submit! { Registered::of::<Lints>() }
+
+impl Run for Lints {
+    fn run(self) -> Result<Exit, String> {
+        list_lints(self.format)
+    }
+}
+
+/// List the shipped tiers
+#[derive(clap::Parser)]
+#[command(
+    name = "tiers",
+    display_order = 4,
+    after_help = "Examples:\n  spl tiers"
+)]
+pub(crate) struct Tiers;
+
+inventory::submit! { Registered::of::<Tiers>() }
+
+impl Run for Tiers {
+    fn run(self) -> Result<Exit, String> {
+        Ok(tiers())
+    }
+}
+
+fn list_lints(format: Format) -> Result<Exit, String> {
     let tiers = sl_book::tier_levels()?;
     let mut lints = spirit_level::lints();
     lints.sort_by_key(|m| m.code);
@@ -42,7 +81,7 @@ pub(crate) fn list_lints(format: Format) -> Result<Exit, String> {
     Ok(Exit::SUCCESS)
 }
 
-pub(crate) fn tiers() -> Exit {
+fn tiers() -> Exit {
     for (n, t) in spirit_level::TIERS {
         println!("{n:16} {}", spirit_level::tier_description(t));
     }

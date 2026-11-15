@@ -1,12 +1,21 @@
 //! `spl config` and `spl init`: the project's resolved configuration, and a new `spirit_level.toml`
 
-use crate::today;
+use crate::registry::{Registered, Run};
+use crate::{tier_candidates, today};
+use clap_complete::engine::ArgValueCandidates;
 use sl_core::Level;
 use std::path::{Path, PathBuf};
 use vc_ui::{Exit, Paint};
 
-#[derive(clap::Args)]
-pub(crate) struct ConfigArgs {
+/// Show the project's resolved configuration: levels with where they were set, overrides and exceptions with
+/// their reasons and expiries
+#[derive(clap::Parser)]
+#[command(
+    name = "config",
+    display_order = 5,
+    after_help = "Examples:\n  spl config\n  spl config --all ../other_repo"
+)]
+pub(crate) struct Config {
     /// The project directory
     #[arg(default_value = ".")]
     path: PathBuf,
@@ -18,8 +27,40 @@ pub(crate) struct ConfigArgs {
     today: Option<String>,
 }
 
-pub(crate) fn show_config(a: ConfigArgs) -> Result<Exit, String> {
-    let ConfigArgs {
+inventory::submit! { Registered::of::<Config>() }
+
+impl Run for Config {
+    fn run(self) -> Result<Exit, String> {
+        show_config(self)
+    }
+}
+
+/// Write a `spirit_level.toml` extending a tier
+#[derive(clap::Parser)]
+#[command(
+    name = "init",
+    display_order = 6,
+    after_help = "Examples:\n  spl init\n  spl init --tier medium --tier ai"
+)]
+pub(crate) struct Init {
+    /// The project directory
+    #[arg(default_value = ".")]
+    path: PathBuf,
+    /// The tier to extend
+    #[arg(long, default_value = "small", add = ArgValueCandidates::new(tier_candidates))]
+    tier: Vec<String>,
+}
+
+inventory::submit! { Registered::of::<Init>() }
+
+impl Run for Init {
+    fn run(self) -> Result<Exit, String> {
+        init(&self.path, &self.tier)
+    }
+}
+
+fn show_config(a: Config) -> Result<Exit, String> {
+    let Config {
         path,
         all,
         today: t,
@@ -93,7 +134,7 @@ pub(crate) fn show_config(a: ConfigArgs) -> Result<Exit, String> {
     Ok(Exit::SUCCESS)
 }
 
-pub(crate) fn init(path: &Path, tier: &[String]) -> Result<Exit, String> {
+fn init(path: &Path, tier: &[String]) -> Result<Exit, String> {
     let file = path.join(sl_config::FILE);
     if file.exists() {
         return Err(format!("{} exists already", file.display()));

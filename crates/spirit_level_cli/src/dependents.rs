@@ -1,15 +1,19 @@
 //! `spl dependents`: the repos that build on this library and the crates in them to retest
 
+use crate::registry::{Registered, Run};
 use crate::{Format, today};
 use clap_complete::engine::{ArgValueCandidates, CompletionCandidate};
 use std::path::PathBuf;
 use vc_ui::{Exit, Paint};
 
 /// The tail of `spl dependents --help`
-pub const AFTER_HELP: &str = "Examples:\n  spl dependents\n  spl dependents --base origin/main\n  spl dependents --all --format json\n\nOff until spirit_level.toml names the checkouts:\n  [dependents]\n  scan = [\"~/git\"]          # folders whose subfolders are checkouts\n  repos = [\"../io_weaver\"]  # single checkouts\n\nNothing is built or written. Exit codes: 0 listed (or off), 2 a configuration or git error";
+const AFTER_HELP: &str = "Examples:\n  spl dependents\n  spl dependents --base origin/main\n  spl dependents --all --format json\n\nOff until spirit_level.toml names the checkouts:\n  [dependents]\n  scan = [\"~/git\"]          # folders whose subfolders are checkouts\n  repos = [\"../io_weaver\"]  # single checkouts\n\nNothing is built or written. Exit codes: 0 listed (or off), 2 a configuration or git error";
 
-#[derive(clap::Args)]
-pub struct DependentsArgs {
+/// The repos that build on this library and the crates in them to retest: what changed against a base, the
+/// crates of the dependents' locks that reach it, the command to run in each
+#[derive(clap::Parser)]
+#[command(name = "dependents", display_order = 7, after_help = AFTER_HELP)]
+pub(crate) struct Dependents {
     /// The library's directory
     #[arg(default_value = ".")]
     path: PathBuf,
@@ -51,7 +55,15 @@ fn rev_candidates() -> Vec<CompletionCandidate> {
         .collect()
 }
 
-pub fn run(a: DependentsArgs) -> Result<Exit, String> {
+inventory::submit! { Registered::of::<Dependents>() }
+
+impl Run for Dependents {
+    fn run(self) -> Result<Exit, String> {
+        run(self)
+    }
+}
+
+fn run(a: Dependents) -> Result<Exit, String> {
     let project = sl_model::Project::load(&a.path).map_err(|e| e.to_string())?;
     let mut opts = spirit_level::Options::new(today(a.today)?);
     opts.config = a.config;

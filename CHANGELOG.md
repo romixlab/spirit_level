@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- spl's commands register themselves per module, so `command-registry` passes on spl itself (CLI-7).
+
 ## [0.4.30] - 2026-11-15
 
 ### Added

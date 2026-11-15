@@ -4,6 +4,7 @@
     reason = "fmt::Write into a String cannot fail"
 )]
 
+use crate::registry::{Registered, Run};
 use crate::{Format, today};
 use sl_lints_docs::PageReport;
 use std::fmt::Write;
@@ -14,10 +15,13 @@ use vc_ui::{Exit, Paint};
 const SCHEMA: &str = "spirit_level.pages/1";
 
 /// The tail of `spl pages --help`
-pub const AFTER_HELP: &str = "Examples:\n  spl pages\n  spl pages --page docs/start.md\n  spl pages --format json > before.json\n\nThe pages are the Markdown files of the [docs] table (default: every .md but CHANGELOG, FEATURES, agent files and tests). Reading speed and image times come from the page-reading-time lint's parameters. Exit codes: 0 listed, 2 a configuration error or an unknown page";
+const AFTER_HELP: &str = "Examples:\n  spl pages\n  spl pages --page docs/start.md\n  spl pages --format json > before.json\n\nThe pages are the Markdown files of the [docs] table (default: every .md but CHANGELOG, FEATURES, agent files and tests). Reading speed and image times come from the page-reading-time lint's parameters. Exit codes: 0 listed, 2 a configuration error or an unknown page";
 
-#[derive(clap::Args)]
-pub struct PagesArgs {
+/// The reading metrics of every Markdown page: words, reading time, longest run of prose, paragraphs,
+/// sentences, figures, headings, links, code
+#[derive(clap::Parser)]
+#[command(name = "pages", display_order = 8, after_help = AFTER_HELP)]
+pub(crate) struct Pages {
     /// The project directory
     #[arg(default_value = ".")]
     path: PathBuf,
@@ -38,7 +42,15 @@ pub struct PagesArgs {
     today: Option<String>,
 }
 
-pub fn run(a: PagesArgs) -> Result<Exit, String> {
+inventory::submit! { Registered::of::<Pages>() }
+
+impl Run for Pages {
+    fn run(self) -> Result<Exit, String> {
+        run(self)
+    }
+}
+
+fn run(a: Pages) -> Result<Exit, String> {
     let project = sl_model::Project::load(&a.path).map_err(|e| e.to_string())?;
     let mut opts = spirit_level::Options::new(today(a.today)?);
     opts.config = a.config;
