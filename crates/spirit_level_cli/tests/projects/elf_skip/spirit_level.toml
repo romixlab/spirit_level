@@ -1,0 +1,6 @@
+# fw_app is held to the embedded tier; fw_tool is a firmware binary too, held to no tier; host is a library.
+
+[[crate-tiers]]
+tiers = ["embedded"]
+crates = ["fw_app"]
+reason = "the firmware the board runs"

@@ -445,6 +445,15 @@ impl Dependency<'_> {
     }
 }
 
+/// The firmware crates of the project that build a binary: the crates a linked ELF can come from
+pub fn firmware_binaries(project: &Project) -> Vec<&Package> {
+    project
+        .packages
+        .iter()
+        .filter(|p| p.has_bin() && is_firmware(project, p))
+        .collect()
+}
+
 /// Whether a member is a firmware crate: what `[package.metadata.spirit-level] firmware` says when it is set, else
 /// it builds a binary, and its binary's root is `#![no_std]`, or it has a `memory.x` or a `bedrock_fw.json`, or
 /// cargo builds it for a bare-metal target (`-none-` in `[build] target` or a `[target.<triple>]` section)

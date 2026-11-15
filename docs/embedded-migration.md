@@ -15,7 +15,11 @@ spirit_level carries every automatic check of embedded_bedrock's firmware lint, 
 | `checks list --all`, `explain EXE-3` | `spl lints`, `spl explain exe-3`, and the [lint pages](lints/index.md) |
 | `code-size <ELF> --by-crate` | not ported: a report, not a check |
 
-A firmware crate is a workspace member with a binary whose root is `#![no_std]`, or with a `memory.x`, a `bedrock_fw.json` or a `-none-` target in its `.cargo/config.toml`. `[package.metadata.spirit-level] firmware = true` (or `false`) in the crate's `Cargo.toml` decides it by hand.
+## Firmware crates
+
+A firmware crate is a workspace member with a binary whose root is `#![no_std]`, or with a `memory.x`, a `bedrock_fw.json` or a `-none-` target in its `.cargo/config.toml` (`[build] target` or a `[target.<triple>]` section). `[package.metadata.spirit-level] firmware = true` (or `false`) in the crate's `Cargo.toml` decides it by hand.
+
+A firmware binary is a firmware crate that builds a binary: the crates an ELF comes from. A workspace without one, such as a host workspace with `no_std` libraries, has the lints that read the ELF [skipped](output.md#skipped-lints): the run says so and passes.
 
 ## Configuration
 
@@ -76,7 +80,7 @@ Overrides may expire (`expires = "2027-03-31"` or a release); see [configuration
 
 ## What runs where
 
-bedrock-lint reported a check as not run when the firmware lacked what it needs (no ELF, no `memory.x`, no chip). In spirit_level only the ELF is a need of the run: the lints that read it say "not run" without `--elf`. The other needs are per crate: a lint checks the firmware crates that have a `memory.x`, a build script, a known chip, Thumb code in the ELF, and finds nothing in the others. The chip comes from `bedrock_fw.json`, else from the HAL's chip feature (`embassy-stm32`, `embassy-rp`, `embassy-nrf`).
+bedrock-lint reported a check as not run when the firmware lacked what it needs (no ELF, no `memory.x`, no chip). In spirit_level only the ELF is a need of the run: with a firmware binary they are enabled on, the lints that read it say "not run" without `--elf`, and the run exits with 3; without one they are skipped. The other needs are per crate: a lint checks the firmware crates that have a `memory.x`, a build script, a known chip, Thumb code in the ELF, and finds nothing in the others. The chip comes from `bedrock_fw.json`, else from the HAL's chip feature (`embassy-stm32`, `embassy-rp`, `embassy-nrf`).
 
 Places are relative to the workspace root (`fw/src/main.rs`), not to the firmware crate.
 

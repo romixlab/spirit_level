@@ -89,7 +89,8 @@ pub enum Need {
     Tool(&'static str),
     /// A nightly toolchain (`cargo +nightly`)
     Nightly,
-    /// A linked ELF of the project's firmware, given with `--elf`
+    /// A linked ELF of the project's firmware, given with `--elf`; a lint that needs it is skipped where no firmware
+    /// binary has it enabled
     Elf,
 }
 

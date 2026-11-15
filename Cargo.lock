@@ -1036,6 +1036,7 @@ dependencies = [
  "sl_analysis",
  "sl_config",
  "sl_core",
+ "sl_firmware",
  "sl_model",
  "sl_tools",
  "syn 3.0.10",

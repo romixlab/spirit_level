@@ -95,7 +95,7 @@ fn need(n: &Need) -> String {
         Need::Map => "the crate map ([map] or map-file)".into(),
         Need::Tool(t) => format!("`{t}` installed"),
         Need::Nightly => "a nightly toolchain".into(),
-        Need::Elf => "the firmware's linked ELF (`--elf`)".into(),
+        Need::Elf => "the firmware's linked ELF (`--elf`); skipped without a firmware binary".into(),
     }
 }
 

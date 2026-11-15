@@ -58,6 +58,7 @@ Colour is off when the output is not a terminal, with `NO_COLOR`, or with `--col
   ],
   "ran": ["crate-lines", "..."],
   "not_run": [{ "lint": "deny-licenses", "code": "X0021", "level": "deny", "need": "tool:cargo-deny", "reason": "..." }],
+  "skipped": [{ "lint": "stk-3", "code": "F0093", "level": "deny", "need": "elf", "reason": "no firmware binary" }],
   "timings": [{ "analysis": "size", "ms": 41 }]
 }
 ```
@@ -78,3 +79,9 @@ JSON is complete and ungrouped: every finding, whatever `--all` and `--group-by`
 | 3 | no denied finding, but an enabled lint could not run (a tool, toolchain, target, the crate map or the resolved graph is missing) |
 
 A lint that cannot run fails the run at `warn` as well as at `deny`: a check that silently skips part of its work never passes green. `spl check --allow-warn-not-run` lets warn-level lints that cannot run through: they are listed under "not run" and in the summary, and the exit code follows the findings. A deny-level lint that cannot run still exits with 3. There is no configuration key for this; a project that never wants a tool turns its lints off.
+
+## Skipped lints
+
+A lint is skipped when the project has nothing of the kind it checks. A skipped lint never fails the run and is not "not run": the text report gives one line per reason, `skipped: no firmware binary: dma-1, err-3, mem-3, stk-3`, the summary counts them, and JSON lists them under `skipped`.
+
+The lints that read the linked ELF (`--elf`) apply to the firmware binaries: the [firmware crates](embedded-migration.md#firmware-crates) that build a binary. They are skipped when the workspace has none, or when every one allows the lint, by its own [tiers](configuration.md#tiers-for-some-crates) and exceptions (`no firmware binary it is enabled on`). With a firmware binary the lint is enabled on, a run without its ELF fails with exit code 3, as any lint that cannot run.

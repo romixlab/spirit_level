@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- ELF lints are skipped, not failed, in a workspace without a firmware binary they are enabled on (ENG-11).
+
 ## [0.4.5] - 2026-11-15
 
 ### Fixed

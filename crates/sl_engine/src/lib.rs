@@ -84,6 +84,22 @@ pub struct NotRun {
     pub reason: String,
 }
 
+/// A lint enabled but skipped: nothing in the project is of the kind it checks. Unlike [`NotRun`] it never fails
+/// the run.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+pub struct Skipped {
+    /// The lint
+    pub lint: String,
+    /// Its code
+    pub code: String,
+    /// Its configured level
+    pub level: Level,
+    /// The need it has nothing to apply to (`elf`)
+    pub need: String,
+    /// Why (`no firmware binary`)
+    pub reason: String,
+}
+
 /// How long one analysis took
 #[derive(Clone, Debug, PartialEq, Serialize)]
 pub struct Timing {
@@ -108,6 +124,8 @@ pub struct Report {
     pub ran: Vec<String>,
     /// Lints enabled but not run
     pub not_run: Vec<NotRun>,
+    /// Lints enabled but skipped: the project has nothing they apply to
+    pub skipped: Vec<Skipped>,
     /// Time per analysis
     pub timings: Vec<Timing>,
 }
@@ -210,6 +228,35 @@ fn missing(
     }
 }
 
+/// Why a lint has nothing in the project to apply to, or None when it has: a lint that needs the linked ELF applies
+/// to the firmware binaries ([`sl_firmware::firmware_binaries`]) it is enabled on, by the crate's own tiers and
+/// exceptions
+fn inapplicable<'f>(
+    need: Need,
+    lint: &str,
+    config: &Config,
+    firmware: impl FnOnce() -> &'f [String],
+) -> Option<String> {
+    match need {
+        Need::Elf => {
+            let firmware = firmware();
+            if firmware.is_empty() {
+                return Some("no firmware binary".to_owned());
+            }
+            firmware
+                .iter()
+                .all(|k| config.level(lint, Some(k), None).0 == Level::Allow)
+                .then(|| {
+                    format!(
+                        "no firmware binary it is enabled on ({} allow it)",
+                        firmware.join(", ")
+                    )
+                })
+        }
+        Need::Resolve | Need::Map | Need::Tool(_) | Need::Nightly => None,
+    }
+}
+
 /// Detects every tool of `pins` that a lint of `wanted` needs
 fn detect_tools<'m>(
     wanted: impl Iterator<Item = &'m LintMeta>,
@@ -297,6 +344,7 @@ pub fn run(
         |m: &LintMeta| opts.only.is_empty() || opts.only.iter().any(|o| m.is(o) || o == m.category);
     let mut diagnostics = Vec::new();
     let mut not_run = Vec::new();
+    let mut skipped = Vec::new();
     let mut ran = Vec::new();
     let mut timings = Vec::new();
     let tools = detect_tools(
@@ -307,10 +355,33 @@ pub fn run(
         project,
         opts,
     );
+    let firmware = std::cell::OnceCell::<Vec<String>>::new();
     for a in analyses {
         let mut runnable = Vec::new();
         for m in a.lints() {
             if !config.enabled(m.id) || !selected(m) {
+                continue;
+            }
+            let firmware = || -> &[String] {
+                firmware.get_or_init(|| {
+                    sl_firmware::firmware_binaries(project)
+                        .into_iter()
+                        .map(|p| p.name.clone())
+                        .collect()
+                })
+            };
+            if let Some((need, reason)) = m
+                .needs
+                .iter()
+                .find_map(|n| inapplicable(*n, m.id, config, firmware).map(|r| (n, r)))
+            {
+                skipped.push(Skipped {
+                    lint: m.id.to_owned(),
+                    code: m.code.to_owned(),
+                    level: config.highest_level(m.id),
+                    need: need.name(),
+                    reason,
+                });
                 continue;
             }
             match m
@@ -415,6 +486,7 @@ pub fn run(
         (b.level, &a.lint, a.primary(), &a.item).cmp(&(a.level, &b.lint, b.primary(), &b.item))
     });
     not_run.sort_by(|a, b| a.lint.cmp(&b.lint));
+    skipped.sort_by(|a, b| a.lint.cmp(&b.lint));
     ran.sort();
     Report {
         schema: "spirit_level.report/1",
@@ -423,6 +495,7 @@ pub fn run(
         diagnostics,
         ran,
         not_run,
+        skipped,
         timings,
     }
 }

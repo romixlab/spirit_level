@@ -1,6 +1,6 @@
 //! The report for people: findings grouped by lint (or crate, or file), denied groups first, each with up to a
-//! few places, a source excerpt and the command that lists the rest; then the lints that did not run, and the
-//! summary line last.
+//! few places, a source excerpt and the command that lists the rest; then the lints that did not run, the lints
+//! skipped, and the summary line last.
 #![expect(
     clippy::let_underscore_must_use,
     reason = "fmt::Write into a String cannot fail"
@@ -8,7 +8,7 @@
 
 use crate::excerpt;
 use sl_core::{Confidence, Diagnostic, Level, LintMeta};
-use sl_engine::{NotRun, Report};
+use sl_engine::{NotRun, Report, Skipped};
 use std::collections::BTreeMap;
 use std::fmt::Write;
 use std::path::Path;
@@ -105,6 +105,7 @@ pub fn text(r: &Report, lints: &[&LintMeta], o: TextOptions) -> String {
         group(&mut s, &g, lints, Path::new(&r.root), o);
     }
     not_run(&mut s, r, o);
+    skipped(&mut s, &r.skipped, o);
     if o.timings {
         for t in &r.timings {
             let line = format!("  {:>6} ms  {}", t.ms, t.analysis);
@@ -308,6 +309,25 @@ fn not_run(s: &mut String, r: &Report, o: TextOptions) {
     s.push('\n');
 }
 
+/// One line per reason: `skipped: no firmware binary: dma-1, err-3`
+fn skipped(s: &mut String, skipped: &[Skipped], o: TextOptions) {
+    let mut by_reason: BTreeMap<&str, Vec<&str>> = BTreeMap::new();
+    for k in skipped {
+        by_reason.entry(&k.reason).or_default().push(&k.lint);
+    }
+    for (reason, lints) in &by_reason {
+        let _ = writeln!(
+            s,
+            "{} {reason}: {}",
+            o.paint.paint(HEADING, "skipped:"),
+            lints.join(", ")
+        );
+    }
+    if !by_reason.is_empty() {
+        s.push('\n');
+    }
+}
+
 fn summary(s: &mut String, r: &Report, o: TextOptions) {
     let p = o.paint;
     let (deny, warn, allowed) = r.counts();
@@ -344,6 +364,9 @@ fn summary(s: &mut String, r: &Report, o: TextOptions) {
                 ids.join(", ")
             ),
         ));
+    }
+    if !r.skipped.is_empty() {
+        parts.push(format!("{} skipped", r.skipped.len()));
     }
     let head = if r.failing() == 0 && !r.incomplete(o.allow_warn_not_run) {
         p.paint(OK, "ok")
@@ -389,6 +412,7 @@ mod tests {
             diagnostics: ds,
             ran: vec!["a".into(), "b".into()],
             not_run: Vec::new(),
+            skipped: Vec::new(),
             timings: Vec::new(),
         }
     }
@@ -404,6 +428,31 @@ mod tests {
 
     fn plain(s: &str) -> String {
         vc_ui::strip_ansi(s)
+    }
+
+    #[test]
+    fn skipped_lints_are_one_line_per_reason_and_pass() {
+        let mut r = report(Vec::new());
+        r.skipped = ["dma-1", "err-3"]
+            .iter()
+            .map(|l| Skipped {
+                lint: (*l).into(),
+                code: String::new(),
+                level: Level::Deny,
+                need: "elf".into(),
+                reason: "no firmware binary".into(),
+            })
+            .collect();
+        let t = plain(&text(&r, &[], TextOptions::default()));
+        assert!(
+            t.contains("skipped: no firmware binary: dma-1, err-3\n"),
+            "{t}"
+        );
+        assert!(
+            t.contains("ok: 2 lints ran on /nonexistent (small): 2 skipped"),
+            "{t}"
+        );
+        assert!(!t.contains("not run"), "{t}");
     }
 
     #[test]

@@ -204,3 +204,81 @@ fn crate_tiers_hold_only_their_crates() {
         "{text}"
     );
 }
+
+/// The lint ids of a report's `skipped` list, each with its reason
+fn skipped(report: &serde_json::Value) -> Vec<(String, String)> {
+    report["skipped"]
+        .as_array()
+        .expect("a report has skipped")
+        .iter()
+        .map(|s| {
+            (
+                s["lint"].as_str().unwrap_or("?").to_owned(),
+                s["reason"].as_str().unwrap_or("?").to_owned(),
+            )
+        })
+        .collect()
+}
+
+#[test]
+fn elf_lints_skip_a_workspace_without_a_firmware_binary() {
+    // fw is held to the embedded tier but is a library: nothing builds an ELF
+    let p = copy("crate_tiers", "elf_skip_none");
+    let (code, report, err) = spl(&p, &["check", "--format", "json", "--tier", "embedded"]);
+    let elf_lints = [
+        "dma-1", "err-3", "mem-10", "mem-3", "mem-6", "perf-2", "perf-3", "siz-1", "siz-6",
+        "stk-3", "stk-5", "stk-6",
+    ];
+    let expected: Vec<(String, String)> = elf_lints
+        .iter()
+        .map(|l| ((*l).to_owned(), "no firmware binary".to_owned()))
+        .collect();
+    assert_eq!(skipped(&report), expected, "{report}");
+    assert_eq!(report["not_run"], serde_json::json!([]), "{report}");
+    assert_eq!(code, 0, "{err}{report}");
+
+    let out = crate::spl()
+        .args(["check", "--only", "stk-6", "--only", "dma-1"])
+        .current_dir(&*p)
+        .env("SPIRIT_LEVEL_TODAY", "2026-11-13")
+        .env("NO_COLOR", "1")
+        .output()
+        .expect("spl starts");
+    let text = String::from_utf8_lossy(&out.stdout);
+    assert_eq!(out.status.code(), Some(0), "{text}");
+    assert!(
+        text.contains("skipped: no firmware binary: dma-1, stk-6\n"),
+        "{text}"
+    );
+    assert!(text.contains(": 2 skipped"), "{text}");
+}
+
+#[test]
+fn elf_lints_hold_only_the_firmware_binaries_their_tier_is_on() {
+    // fw_app is held to the embedded tier: its ELF is needed, and a run without it fails
+    let p = copy("elf_skip", "elf_skip_tiers");
+    let (code, report, err) = spl(&p, &["check", "--format", "json", "--only", "stk-6"]);
+    assert_eq!(code, 3, "{err}{report}");
+    assert_eq!(report["not_run"][0]["lint"], "stk-6", "{report}");
+    assert_eq!(report["not_run"][0]["need"], "elf", "{report}");
+    assert_eq!(skipped(&report), [], "{report}");
+
+    // allowed on fw_app too, no firmware binary is left for it
+    let config = p.join("spirit_level.toml");
+    let mut text = std::fs::read_to_string(&config).unwrap();
+    text.push_str(
+        "\n[[exceptions]]\nlint = \"stk-6\"\ncrates = [\"fw_app\"]\nlevel = \"allow\"\nreason = \"no stack lints yet\"\n",
+    );
+    std::fs::write(&config, text).unwrap();
+    let (code, report, err) = spl(&p, &["check", "--format", "json", "--only", "stk-6"]);
+    assert_eq!(
+        skipped(&report),
+        [(
+            "stk-6".to_owned(),
+            "no firmware binary it is enabled on (fw_app, fw_tool allow it)".to_owned()
+        )],
+        "{report}"
+    );
+    assert_eq!(report["not_run"], serde_json::json!([]), "{report}");
+    assert_eq!(code, 0, "{err}{report}");
+}
