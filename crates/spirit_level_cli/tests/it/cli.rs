@@ -361,8 +361,7 @@ fn dependents_are_off_without_the_table() {
 #[test]
 fn pages_table_detail_and_json() {
     let p = workspace("extends = \"small\"\n\n[docs]\nreference = [\"docs/ref/**\"]\n");
-    let guide =
-        "# Guide\n\nOne two three four five.\n\n## Part\n\n![The board](b.png)\n\nSix seven.\n";
+    let guide = "# Guide\n\nOne two three four five.\n\n## Part\n\n![The board](b.png)\n\nSix seven.\n\nThe MCU is read by a **tier**. Each folder.\n\nA tier is a set. The directory.\n";
     std::fs::create_dir_all(p.0.join("docs/ref")).expect("docs folder");
     std::fs::write(p.0.join("docs/guide.md"), guide).expect("guide");
     std::fs::write(p.0.join("docs/ref/api.md"), "# API\n\nLooked up.\n").expect("reference");
@@ -379,7 +378,17 @@ fn pages_table_detail_and_json() {
     );
     let o = run(&p.0, &["pages", "--page", "docs/guide.md"]);
     let t = text(&o);
-    assert!(t.contains("runs (words@line): 5@3 2@9"), "{t}");
+    assert!(t.contains("runs (words@line): 5@3 18@9"), "{t}");
+    assert!(t.contains("passive sentences 1 of 6"), "{t}");
+    assert!(t.contains("abbreviations not spelled out: MCU@11"), "{t}");
+    assert!(
+        t.contains("terms used before their definition: none"),
+        "{t}"
+    );
+    assert!(
+        t.contains("other names for a concept: folder@11 for directory"),
+        "{t}"
+    );
     let o = run(&p.0, &["pages", "--format", "json"]);
     let v: serde_json::Value = serde_json::from_slice(&o.stdout).expect("JSON");
     assert_eq!(v["schema"], "spirit_level.pages/1");
@@ -388,7 +397,9 @@ fn pages_table_detail_and_json() {
         .and_then(|a| a.iter().find(|x| x["page"] == "docs/guide.md"))
         .expect("the guide's row");
     assert_eq!(g["kind"], "guide");
-    assert_eq!(g["words"], 9);
+    assert_eq!(g["words"], 25);
+    assert_eq!(g["abbreviations"][0]["abbr"], "MCU");
+    assert!(g["passive_percent"].is_number(), "{g}");
     assert_eq!(g["figures"], 1);
     let o = run(&p.0, &["pages", "--page", "nope.md"]);
     assert_eq!(o.status.code(), Some(2), "{}", text(&o));

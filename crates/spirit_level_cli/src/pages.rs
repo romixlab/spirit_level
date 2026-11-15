@@ -80,20 +80,31 @@ pub fn run(a: PagesArgs) -> Result<Exit, String> {
     Ok(Exit::SUCCESS)
 }
 
-fn flesch(f: Option<f64>) -> String {
+/// A score rounded, or `-` where none applies
+fn score(f: Option<f64>) -> String {
     f.map_or_else(|| "-".to_owned(), |f| format!("{f:.0}"))
+}
+
+/// A list of findings on one line, or `none`
+fn listed(items: &[String]) -> String {
+    if items.is_empty() {
+        "none".to_owned()
+    } else {
+        items.join(", ")
+    }
 }
 
 /// One row per page, columns aligned
 fn table(pages: &[PageReport]) -> String {
     let head = [
-        "page", "kind", "words", "read", "run", "para", "sent", "flesch", "img", "h", "links",
-        "code",
+        "page", "kind", "words", "read", "run", "para", "sent", "flesch", "pass%", "abbr", "terms",
+        "syn", "img", "h", "links", "code",
     ];
-    let rows: Vec<[String; 12]> = pages
+    let rows: Vec<[String; 16]> = pages
         .iter()
         .map(|p| {
             let s = &p.stats;
+            let w = &p.words;
             [
                 p.page.clone(),
                 p.kind.name().to_owned(),
@@ -102,7 +113,11 @@ fn table(pages: &[PageReport]) -> String {
                 s.longest_run.to_string(),
                 s.paragraph_max.to_string(),
                 format!("{:.0}", s.sentence_median),
-                flesch(s.flesch),
+                score(s.flesch),
+                score(s.passive_percent),
+                w.abbreviations.len().to_string(),
+                w.early_terms.len().to_string(),
+                w.synonyms.len().to_string(),
                 s.figures.to_string(),
                 s.headings.len().to_string(),
                 format!("{}/{}", s.links_internal, s.links_external),
@@ -198,5 +213,35 @@ fn detail(p: &PageReport) -> String {
         s.flesch
             .map_or_else(|| "- (not English)".to_owned(), |f| format!("{f:.1}"))
     );
+    let _ = writeln!(
+        out,
+        "  passive sentences {} of {} ({}%)",
+        s.passive_sentences,
+        s.sentences,
+        score(s.passive_percent)
+    );
+    let w = &p.words;
+    let abbr: Vec<String> = w
+        .abbreviations
+        .iter()
+        .map(|a| format!("{}@{}", a.abbr, a.line))
+        .collect();
+    let _ = writeln!(out, "  abbreviations not spelled out: {}", listed(&abbr));
+    let terms: Vec<String> = w
+        .early_terms
+        .iter()
+        .map(|t| format!("{} (used {}, defined {})", t.term, t.used, t.defined))
+        .collect();
+    let _ = writeln!(
+        out,
+        "  terms used before their definition: {}",
+        listed(&terms)
+    );
+    let syn: Vec<String> = w
+        .synonyms
+        .iter()
+        .map(|y| format!("{}@{} for {}", y.word, y.line, y.preferred))
+        .collect();
+    let _ = writeln!(out, "  other names for a concept: {}", listed(&syn));
     out
 }
