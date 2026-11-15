@@ -1770,11 +1770,13 @@ checksum = "3a3b425286980a367278453f3b6d28cdcb134b574e5a35824a6ff5eebad50bb6"
 
 [[package]]
 name = "vc_build"
-version = "0.0.2"
+version = "0.0.3"
+source = "git+https://github.com/vhrdtech/vhrd_cli#294227ac673be776c45aa4b6e99baa04d83059db"
 
 [[package]]
 name = "vc_complete"
-version = "0.0.2"
+version = "0.0.3"
+source = "git+https://github.com/vhrdtech/vhrd_cli#294227ac673be776c45aa4b6e99baa04d83059db"
 dependencies = [
  "clap",
  "clap_complete",
@@ -1782,7 +1784,8 @@ dependencies = [
 
 [[package]]
 name = "vc_ui"
-version = "0.0.2"
+version = "0.0.3"
+source = "git+https://github.com/vhrdtech/vhrd_cli#294227ac673be776c45aa4b6e99baa04d83059db"
 dependencies = [
  "anstyle",
  "clap",
@@ -1792,7 +1795,8 @@ dependencies = [
 
 [[package]]
 name = "vc_usage"
-version = "0.0.2"
+version = "0.0.3"
+source = "git+https://github.com/vhrdtech/vhrd_cli#294227ac673be776c45aa4b6e99baa04d83059db"
 dependencies = [
  "clap",
  "vc_build",
