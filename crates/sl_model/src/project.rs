@@ -17,6 +17,13 @@ pub enum LoadError {
     Metadata(String),
     /// A manifest could not be read or parsed as TOML
     Manifest(String),
+    /// A nested workspace's directory is not the root of a workspace of its own
+    NotOwnWorkspace {
+        /// The directory, relative to the outer project's root
+        dir: String,
+        /// The workspace cargo found it in instead, relative to the outer project's root
+        found: String,
+    },
 }
 
 impl fmt::Display for LoadError {
@@ -24,6 +31,14 @@ impl fmt::Display for LoadError {
         match self {
             Self::Metadata(e) => write!(f, "cargo metadata failed: {e}"),
             Self::Manifest(e) => write!(f, "manifest: {e}"),
+            Self::NotOwnWorkspace { dir, found } if found.is_empty() => write!(
+                f,
+                "{dir} is not a workspace root: cargo reads it as part of the workspace at the project root"
+            ),
+            Self::NotOwnWorkspace { dir, found } => write!(
+                f,
+                "{dir} is not a workspace root: cargo reads it as part of the workspace in {found}/"
+            ),
         }
     }
 }
@@ -278,10 +293,17 @@ impl Resolve {
 pub const HAKARI_CONFIG_PATHS: &[&str] = &[".config/hakari.toml", ".guppy/hakari.toml"];
 
 /// The project: a workspace (or one crate) as cargo sees it
+///
+/// Every relative path in it (a package's `dir`, a manifest's `rel`, a source file's path) is relative to `root`.
+/// A nested workspace ([`Project::nested`]) keeps the outer project's root, so its paths name the same files a
+/// finding of the outer project would.
 #[derive(Debug)]
 pub struct Project {
-    /// The workspace root, absolute
+    /// The root every relative path starts from: the checked workspace's root, absolute
     pub root: PathBuf,
+    /// The workspace's own directory relative to `root`: empty for the checked workspace, `tools` for a nested
+    /// workspace in `tools/`
+    pub workspace: String,
     /// The root manifest
     pub root_manifest: TomlFile,
     /// Workspace members, ordered by directory
@@ -296,29 +318,45 @@ pub struct Project {
 impl Project {
     /// Reads the project whose manifest is in `dir` or above (cargo's own search)
     pub fn load(dir: &Path) -> Result<Self, LoadError> {
-        let out = cargo(dir)
-            .args(["metadata", "--format-version", "1", "--no-deps"])
-            .output()
-            .map_err(|e| LoadError::Metadata(format!("cannot run cargo: {e}")))?;
-        if !out.status.success() {
-            return Err(LoadError::Metadata(
-                String::from_utf8_lossy(&out.stderr).trim().to_owned(),
-            ));
-        }
-        let meta = cargo_metadata::MetadataCommand::parse(String::from_utf8_lossy(&out.stdout))
-            .map_err(|e| LoadError::Metadata(e.to_string()))?;
-        Self::from_metadata(&meta)
+        let meta = metadata(dir)?;
+        let root: PathBuf = meta.workspace_root.clone().into();
+        Self::from_metadata(&meta, root)
     }
 
-    fn from_metadata(meta: &Metadata) -> Result<Self, LoadError> {
-        let root: PathBuf = meta.workspace_root.clone().into();
+    /// Reads the workspace whose root is `dir`, relative to this project's root (a tools workspace beside the
+    /// main one); its paths stay relative to this project's root
+    pub fn nested(&self, dir: &str) -> Result<Self, LoadError> {
+        let abs = self.root.join(dir);
+        if !abs.join("Cargo.toml").is_file() {
+            return Err(LoadError::Manifest(format!(
+                "{dir}/Cargo.toml: no such file"
+            )));
+        }
+        let meta = metadata(&abs)?;
+        let found: PathBuf = meta.workspace_root.clone().into();
+        let same = match (abs.canonicalize(), found.canonicalize()) {
+            (Ok(a), Ok(b)) => a == b,
+            _ => false,
+        };
+        if !same {
+            return Err(LoadError::NotOwnWorkspace {
+                dir: dir.to_owned(),
+                found: rel_path(&self.root, &found),
+            });
+        }
+        Self::from_metadata(&meta, self.root.clone())
+    }
+
+    fn from_metadata(meta: &Metadata, root: PathBuf) -> Result<Self, LoadError> {
+        let ws: PathBuf = meta.workspace_root.clone().into();
+        let workspace = rel_path(&root, &ws);
         let read = |abs: &Path| -> Result<TomlFile, LoadError> {
             let rel = rel_path(&root, abs);
             let text = std::fs::read_to_string(abs)
                 .map_err(|e| LoadError::Manifest(format!("{rel}: {e}")))?;
             TomlFile::parse(rel, text).map_err(LoadError::Manifest)
         };
-        let root_manifest = read(&root.join("Cargo.toml"))?;
+        let root_manifest = read(&ws.join("Cargo.toml"))?;
         let member_names: Vec<String> = meta
             .workspace_members
             .iter()
@@ -415,6 +453,7 @@ impl Project {
             .and_then(Version::parse);
         Ok(Self {
             root,
+            workspace,
             root_manifest,
             packages,
             version,
@@ -490,9 +529,10 @@ impl Project {
     }
 
     fn load_resolve(&self) -> Result<Resolve, String> {
-        let mut cmd = cargo(&self.root);
+        let ws = self.root.join(&self.workspace);
+        let mut cmd = cargo(&ws);
         cmd.args(["metadata", "--format-version", "1"]);
-        if self.root.join("Cargo.lock").exists() {
+        if ws.join("Cargo.lock").exists() {
             cmd.arg("--locked");
         }
         let out = cmd.output().map_err(|e| format!("cannot run cargo: {e}"))?;
@@ -559,8 +599,10 @@ impl Project {
     /// The workspace-hack package hakari's configuration names (`hakari-package` in the first of
     /// [`HAKARI_CONFIG_PATHS`] that exists); None without one, or when it does not parse
     pub fn workspace_hack(&self) -> Option<String> {
-        let path = HAKARI_CONFIG_PATHS.iter().find(|c| self.exists(c))?;
-        let doc: toml_edit::DocumentMut = self.read(path)?.parse().ok()?;
+        let ws = self.root.join(&self.workspace);
+        let path = HAKARI_CONFIG_PATHS.iter().find(|c| ws.join(c).exists())?;
+        let doc: toml_edit::DocumentMut =
+            std::fs::read_to_string(ws.join(path)).ok()?.parse().ok()?;
         doc.get("hakari-package")?.as_str().map(str::to_owned)
     }
 
@@ -596,6 +638,21 @@ impl Project {
     pub fn commits_read(&self) -> Vec<std::sync::Arc<[crate::git::Commit]>> {
         self.commits.read_so_far()
     }
+}
+
+/// `cargo metadata --no-deps` for the workspace whose manifest is in `dir` or above
+fn metadata(dir: &Path) -> Result<Metadata, LoadError> {
+    let out = cargo(dir)
+        .args(["metadata", "--format-version", "1", "--no-deps"])
+        .output()
+        .map_err(|e| LoadError::Metadata(format!("cannot run cargo: {e}")))?;
+    if !out.status.success() {
+        return Err(LoadError::Metadata(
+            String::from_utf8_lossy(&out.stderr).trim().to_owned(),
+        ));
+    }
+    cargo_metadata::MetadataCommand::parse(String::from_utf8_lossy(&out.stdout))
+        .map_err(|e| LoadError::Metadata(e.to_string()))
 }
 
 /// `cargo` with the environment of an outer cargo removed, so a run under `cargo test` or a build script sees
@@ -703,5 +760,52 @@ mod tests {
         assert!(d.git_under("git@github.com:A/"));
         assert!(!d.git_under("github.com/ab"));
         assert_eq!(git_url_key("git@github.com:a/b.git"), "github.com/a/b");
+    }
+
+    #[test]
+    #[expect(
+        clippy::let_underscore_must_use,
+        reason = "a test removes its scratch directory as far as it can"
+    )]
+    fn nested_workspaces() {
+        let dir = std::env::temp_dir().join(format!("sl_model_nested_{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&dir);
+        let krate = |d: &Path, name: &str| {
+            std::fs::create_dir_all(d.join("src")).unwrap();
+            std::fs::write(d.join("src/lib.rs"), "").unwrap();
+            std::fs::write(
+                d.join("Cargo.toml"),
+                format!("[package]\nname = \"{name}\"\nversion = \"0.1.0\"\nedition = \"2024\"\n"),
+            )
+            .unwrap();
+        };
+        krate(&dir.join("a"), "a");
+        krate(&dir.join("tools/t"), "t");
+        std::fs::write(
+            dir.join("Cargo.toml"),
+            "[workspace]\nmembers = [\"a\"]\nexclude = [\"tools\"]\nresolver = \"3\"\n",
+        )
+        .unwrap();
+        std::fs::write(
+            dir.join("tools/Cargo.toml"),
+            "[workspace]\nmembers = [\"t\"]\nresolver = \"3\"\n",
+        )
+        .unwrap();
+        let p = Project::load(&dir).unwrap();
+        assert_eq!(p.workspace, "");
+        let t = p.nested("tools").unwrap();
+        assert_eq!(t.workspace, "tools");
+        assert_eq!(t.root, p.root);
+        assert_eq!(t.packages[0].dir, "tools/t");
+        assert_eq!(t.packages[0].manifest.rel, "tools/t/Cargo.toml");
+        assert_eq!(t.root_manifest.rel, "tools/Cargo.toml");
+        let e = p.nested("a").unwrap_err().to_string();
+        assert_eq!(
+            e,
+            "a is not a workspace root: cargo reads it as part of the workspace at the project root"
+        );
+        let e = p.nested("gone").unwrap_err().to_string();
+        assert_eq!(e, "manifest: gone/Cargo.toml: no such file");
+        let _ = std::fs::remove_dir_all(&dir);
     }
 }
