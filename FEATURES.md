@@ -108,7 +108,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 ## DOCS - docs as the reader meets them
 
 - ✅ `DOCS-1` Reading metrics per page (`spl pages`, text and JSON) and lints: prose runs, reading time, heading length, sections, code walls, image text, code languages; the `[docs]` table (`sl_docs`, `sl_lints_docs`).
-- ✅ `DOCS-2` Zensical book lints: navigation entries that exist, orphan pages, one title per page, admonition syntax, zensical.toml naming only keys Zensical reads.
+- ✅ `DOCS-2` Zensical book lints: navigation entries that exist, orphan pages, one title per page, admonition syntax, the configuration naming only keys Zensical reads; `zensical.toml` or, the same way, `mkdocs.yml`.
 - ✅ `DOCS-3` Readable words: abbreviations spelled out at first use, terms defined before use, one name per concept (a project word list), passive share and Flesch reading ease per page, in `spl pages` and as lints.
 - ✅ `DOCS-4` book-build-stamp: a Zensical book's footer carries a build stamp (version, commit, UTC time) and a script showing its age from the reader's own clock.
 - ✅ `DOCS-5` readme-index-clash: no docs folder holds both `README.md` and `index.md`, since Zensical does not say which one it builds.

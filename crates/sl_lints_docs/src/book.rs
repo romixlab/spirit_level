@@ -6,7 +6,6 @@ use sl_analysis::Context;
 use sl_core::{Diagnostic, Span};
 use sl_docs::page::Page;
 use sl_docs::{Book, Kind, walk};
-use sl_model::toml_edit::{Item, Key, TableLike};
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 
@@ -63,7 +62,7 @@ fn nav_entries(cx: &Context<'_>, book: &Book) {
                         e.path, book.docs_dir
                     ),
                 )
-                .span(Span::new(book.file.rel.clone(), e.line))
+                .span(Span::new(book.file_rel.clone(), e.line))
                 .help("correct the path, relative to the docs folder, or drop the entry"),
             );
         }
@@ -106,7 +105,7 @@ fn build_stamp(cx: &Context<'_>, root: &Path, book: &Book) {
                 "the book's footer shows no build stamp: a reader cannot tell which version or commit of the \
                  project they are reading",
             )
-            .span(Span::new(book.file.rel.clone(), 0))
+            .span(Span::new(book.file_rel.clone(), 0))
             .help(format!(
                 "add an override partial under the theme's custom_dir that includes a generated stamp (crate \
                  version, commit, build time) into {partial}"
@@ -152,7 +151,7 @@ fn feature_conflicts(cx: &Context<'_>, book: &Book) {
                         "`{a}` and `{b}` are both in project.theme.features, but Zensical does not support them together"
                     ),
                 )
-                .span(Span::new(book.file.rel.clone(), 0))
+                .span(Span::new(book.file_rel.clone(), 0))
                 .help(format!("drop one of `{a}` or `{b}` from the theme's features")),
             );
         }
@@ -167,16 +166,17 @@ fn feature_conflicts(cx: &Context<'_>, book: &Book) {
                         "`{feature}` is on, but project.site_url is not set: Zensical's generated sitemap.xml, which it relies on, is empty without it"
                     ),
                 )
-                .span(Span::new(book.file.rel.clone(), 0))
+                .span(Span::new(book.file_rel.clone(), 0))
                 .help("set project.site_url in zensical.toml"),
             );
         }
     }
 }
 
-/// Zensical reads `zensical.toml` key by key and never complains about one it does not know: a typo (`sitename`
-/// for `site_name`, `theme.customdir` for `theme.custom_dir`) silently does nothing. Checks the keys actually
-/// written against the `known` parameter's dotted paths, under `[project]` when the file nests that way.
+/// Zensical reads `zensical.toml` or `mkdocs.yml` key by key and never complains about one it does not know: a
+/// typo (`sitename` for `site_name`, `theme.customdir` for `theme.custom_dir`) silently does nothing. Checks
+/// `book.keys` (every key written, flattened to its dotted path, in file order, read the same way whichever
+/// format the book is configured in) against the `known` parameter's paths.
 fn zensical_keys(cx: &Context<'_>, book: &Book) {
     let id = "zensical-keys";
     let known: BTreeSet<&str> = cx
@@ -186,61 +186,38 @@ fn zensical_keys(cx: &Context<'_>, book: &Book) {
         .map(String::as_str)
         .collect();
     let opaque: BTreeSet<&str> = known.iter().filter_map(|k| k.strip_suffix(".*")).collect();
-    let root = book.file.root();
-    let table: &dyn TableLike = root
-        .get("project")
-        .and_then(Item::as_table_like)
-        .unwrap_or(root);
-    zensical_keys_walk(cx, id, book, &known, &opaque, table, "");
-}
-
-fn zensical_keys_walk(
-    cx: &Context<'_>,
-    id: &str,
-    book: &Book,
-    known: &BTreeSet<&str>,
-    opaque: &BTreeSet<&str>,
-    table: &dyn TableLike,
-    prefix: &str,
-) {
-    for (key, item) in table.iter() {
-        let path = if prefix.is_empty() {
-            key.to_owned()
-        } else {
-            format!("{prefix}.{key}")
-        };
-        if !known.contains(path.as_str()) {
+    // the dotted path of an unknown or opaque (`.*`) key whose own subtree is skipped: a path found while it is
+    // still that key's descendant is inside the skipped subtree
+    let mut skip: Option<&str> = None;
+    for k in &book.keys {
+        if let Some(prefix) = skip {
+            if k.path.starts_with(prefix) && k.path.as_bytes().get(prefix.len()) == Some(&b'.') {
+                continue;
+            }
+            skip = None;
+        }
+        if !known.contains(k.path.as_str()) {
             let near = known
                 .iter()
-                .filter(|k| !k.ends_with(".*"))
-                .map(|k| (sl_config::distance(k, &path), *k))
+                .filter(|x| !x.ends_with(".*"))
+                .map(|x| (sl_config::distance(x, &k.path), *x))
                 .filter(|(d, _)| *d <= 2)
                 .min_by_key(|(d, _)| *d);
-            let hint = near.map_or_else(String::new, |(_, k)| format!("; did you mean {k}?"));
-            let line = table
-                .key(key)
-                .and_then(Key::span)
-                .map_or(0, |r| book.file.line_of_offset(r.start));
+            let hint = near.map_or_else(String::new, |(_, x)| format!("; did you mean {x}?"));
             cx.emit(
                 Diagnostic::new(
                     id,
-                    format!("key:{path}"),
-                    format!("{path} is not a key Zensical reads{hint}"),
+                    format!("key:{}", k.path),
+                    format!("{} is not a key Zensical reads{hint}", k.path),
                 )
-                .span(Span::new(book.file.rel.clone(), line))
+                .span(Span::new(book.file_rel.clone(), k.line))
                 .help("correct the key, or drop it: Zensical ignores a key it does not know, silently"),
             );
+            skip = Some(k.path.as_str());
             continue;
         }
-        if opaque.contains(path.as_str()) {
-            continue;
-        }
-        if let Some(t) = item.as_table_like() {
-            zensical_keys_walk(cx, id, book, known, opaque, t, &path);
-        } else if let Some(arr) = item.as_array_of_tables() {
-            for entry in arr {
-                zensical_keys_walk(cx, id, book, known, opaque, entry, &path);
-            }
+        if opaque.contains(k.path.as_str()) {
+            skip = Some(k.path.as_str());
         }
     }
 }

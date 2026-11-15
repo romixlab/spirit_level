@@ -152,7 +152,7 @@ impl Analysis for Docs {
             Ok(None) => {}
             Err(e) => {
                 for m in DOCS_LINTS.iter().filter(|m| m.category == "book") {
-                    cx.not_run(m.id, "file:zensical.toml", format!("cannot read it: {e}"));
+                    cx.not_run(m.id, "file:book-config", format!("cannot read it: {e}"));
                 }
             }
         }

@@ -1,0 +1,5 @@
+site_name: fx
+nav:
+  - index.md
+  - Guide: guide.md
+  - Gone: gone.md

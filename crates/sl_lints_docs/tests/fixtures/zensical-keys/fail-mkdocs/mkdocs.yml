@@ -1,0 +1,4 @@
+site_name: fx
+reop_url: https://example.org
+theme:
+  cutsom_dir: overrides

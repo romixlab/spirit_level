@@ -1,0 +1,23 @@
+site_name: fx
+site_description: d
+repo_url: https://example.org
+theme:
+  name: material
+  custom_dir: overrides
+  font:
+    text: Inter
+    code: JetBrains Mono
+  icon:
+    admonition:
+      custom-note: material/alert
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      primary: custom
+      accent: custom
+      toggle:
+        icon: lucide/sun
+        name: Switch to dark mode
+extra:
+  anything_goes: "yes"
+  plugins:
+    - search

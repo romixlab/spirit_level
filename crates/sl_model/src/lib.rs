@@ -7,12 +7,15 @@
 //! }
 //! ```
 
+pub mod config_tree;
 pub mod git;
 pub mod lines;
 pub mod project;
 pub mod source;
 pub mod toml_file;
+pub mod yaml_file;
 
+pub use config_tree::{ConfigNode, ConfigValue};
 pub use lines::{LineCount, count_lines};
 pub use project::{
     Dep, DepKind, HAKARI_CONFIG_PATHS, LoadError, Package, Project, Resolve, ResolvedPackage,
@@ -21,3 +24,4 @@ pub use project::{
 pub use source::{FileKind, SourceFile};
 pub use toml_edit;
 pub use toml_file::TomlFile;
+pub use yaml_file::YamlFile;
