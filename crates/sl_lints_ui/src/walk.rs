@@ -81,6 +81,10 @@ struct P {
     app_traits: Vec<String>,
     app_method: String,
     panel_replacement: String,
+    menu_calls: Vec<String>,
+    checkbox_calls: Vec<String>,
+    min_checkboxes: usize,
+    checklist_widget: String,
 }
 
 impl P {
@@ -173,6 +177,12 @@ impl P {
             p.app_traits = q.list("app-traits").to_vec();
             p.app_method = q.str("app-method").to_owned();
             p.panel_replacement = q.str("replacement").to_owned();
+        }
+        if let Some(q) = get("egui-checklist-menu") {
+            p.menu_calls = q.list("menu-calls").to_vec();
+            p.checkbox_calls = q.list("checkbox-calls").to_vec();
+            p.min_checkboxes = q.count("min-checkboxes");
+            p.checklist_widget = q.str("widget").to_owned();
         }
         p
     }
@@ -515,6 +525,25 @@ fn has_call(s: &Stmt, names: &[String]) -> bool {
     v.1
 }
 
+/// The number of `checkbox-calls` method calls inside `body`
+fn checkbox_count(body: &Expr, methods: &[String]) -> usize {
+    struct V<'a>(&'a [String], usize);
+    impl<'ast> Visit<'ast> for V<'_> {
+        fn visit_expr_method_call(&mut self, m: &'ast syn::ExprMethodCall) {
+            self.1 += usize::from(method_in(self.0, &m.method.to_string()));
+            visit::visit_expr_method_call(self, m);
+        }
+        fn visit_macro(&mut self, m: &'ast syn::Macro) {
+            for a in macro_args(m) {
+                self.visit_expr(&a);
+            }
+        }
+    }
+    let mut v = V(methods, 0);
+    v.visit_expr(body);
+    v.1
+}
+
 /// Whether a function body names a confirmation or an undo
 fn confirms(block: &syn::Block, words: &[String]) -> bool {
     struct V<'a>(&'a [String], bool);
@@ -765,6 +794,21 @@ impl<'ast> Visit<'ast> for Walk<'_> {
                 r,
                 format!("`.{name}()` shows a panel directly on a Context; the egui version in use replaced it with `.show_inside` on a Ui"),
                 format!("use `{}`", self.p.panel_replacement),
+                Confidence::Estimate,
+            );
+        }
+        if method_in(&self.p.menu_calls, &name)
+            && let Some(Expr::Closure(c)) = args.last()
+            && checkbox_count(&c.body, &self.p.checkbox_calls) >= self.p.min_checkboxes
+        {
+            self.push(
+                "egui-checklist-menu",
+                r,
+                format!("`.{name}()` holds several checkboxes that close the menu on each click"),
+                format!(
+                    "use `{}`, which keeps the menu open while ticking",
+                    self.p.checklist_widget
+                ),
                 Confidence::Estimate,
             );
         }

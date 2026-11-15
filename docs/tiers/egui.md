@@ -25,6 +25,7 @@ Use it with `extends = "egui"` in `spirit_level.toml`.
 | [U0013](../lints/U0013.md) | egui-repaint-every-frame | `warn` | an unconditional repaint request keeps the app drawing at full rate and burns a core while idle | egui |
 | [U0014](../lints/U0014.md) | ui-unwrap-external-data | `warn` | panic-in-library skips binary crates; a UI app's bad file, parse or connection still deserves an error, not a crash; an estimate, since the chain may be known good or already checked | ui |
 | [U0015](../lints/U0015.md) | egui-panel-api | `warn` | panel and App code written for an older egui keeps compiling under a deprecation warning, then breaks on the next bump; an estimate, without type information | egui |
+| [U0016](../lints/U0016.md) | egui-checklist-menu | `warn` | a menu_button closes on the first tick inside it; ve_basics::Checklist keeps it open for several | egui |
 
 ## The file
 
@@ -183,4 +184,8 @@ reason = "an unconditional repaint request keeps the app drawing at full rate an
 [lints.egui-panel-api]
 level = "warn"
 reason = "panel and App code written for an older egui keeps compiling under a deprecation warning, then breaks on the next bump; an estimate, without type information"
+
+[lints.egui-checklist-menu]
+level = "warn"
+reason = "a menu_button closes on the first tick inside it; ve_basics::Checklist keeps it open for several"
 ```

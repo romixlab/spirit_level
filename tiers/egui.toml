@@ -152,3 +152,7 @@ reason = "an unconditional repaint request keeps the app drawing at full rate an
 [lints.egui-panel-api]
 level = "warn"
 reason = "panel and App code written for an older egui keeps compiling under a deprecation warning, then breaks on the next bump; an estimate, without type information"
+
+[lints.egui-checklist-menu]
+level = "warn"
+reason = "a menu_button closes on the first tick inside it; ve_basics::Checklist keeps it open for several"

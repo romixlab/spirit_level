@@ -212,6 +212,7 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [U0012](U0012.md) | [egui-id-in-loop](U0012.md) | a widget made in a loop gets an id that differs per iteration | off | off | off | off | off | off | off | warn | off | off |
 | [U0013](U0013.md) | [egui-repaint-every-frame](U0013.md) | UI code asks for a repaint when something changed, not on every frame | off | off | off | off | off | off | off | warn | off | off |
 | [U0015](U0015.md) | [egui-panel-api](U0015.md) | egui panel and App code uses the API the version in use ships, never one it replaced | off | off | off | off | off | off | off | warn | off | off |
+| [U0016](U0016.md) | [egui-checklist-menu](U0016.md) | a checklist of checkboxes sits in the shared checklist widget, not a menu_button that closes on each click | off | off | off | off | off | off | off | warn | off | off |
 
 ## embedded
 

@@ -131,6 +131,14 @@ ui_lint!(PANEL_API, "U0015", "egui-panel-api", "egui", "egui panel and App code 
         ("replacement", Str, "\"Panel, `.show_inside` on the Ui (not `.show` on the Context), and `App::ui` (not `App::update`)\"", "what replaces the flagged API, named in the help"),
     ],
     fix: None);
+ui_lint!(CHECKLIST_MENU, "U0016", "egui-checklist-menu", "egui", "a checklist of checkboxes sits in the shared checklist widget, not a menu_button that closes on each click",
+    params: [
+        ("menu-calls", StrList, "[\"menu_button\"]", "calls whose closure draws a menu that closes on each click inside it"),
+        ("checkbox-calls", StrList, "[\"checkbox\"]", "calls that make a checkbox"),
+        ("min-checkboxes", Int, "2", "checkboxes inside a menu's closure before it is a checklist"),
+        ("widget", Str, "\"ve_basics::Checklist\"", "the shared checklist widget, named in the help"),
+    ],
+    fix: None);
 
 /// The UI analysis
 pub struct Ui;
@@ -154,6 +162,7 @@ static LINTS: &[&LintMeta] = &[
     &ID_IN_LOOP,
     &REPAINT_EVERY_FRAME,
     &PANEL_API,
+    &CHECKLIST_MENU,
 ];
 
 /// The lints that skip the theme

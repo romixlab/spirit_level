@@ -6,6 +6,7 @@
 
 - `ui-unwrap-external-data` (U0014): `unwrap`/`expect` on a file, parse or connection in a UI crate (UI-2).
 - `egui-panel-api` (U0015): egui panel and App API the version in use replaced (UI-6).
+- `egui-checklist-menu` (U0016): a `menu_button` with several checkboxes closes on each click (UI-7).
 
 ## [0.4.28] - 2026-11-15
 

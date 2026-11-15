@@ -125,6 +125,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `UI-1` `ui-practice-lints`: UI practices as lints: `ui` tier (toolkit-neutral, calls as parameters), `egui` tier (egui calls, ids, repaints, theme, glyphs); map keys `ui` and `theme` ([UI practices](docs/ui.md)).
 - ✅ `UI-2` `ui-unwrap-external-data`: `unwrap`/`expect` on a file, parse or connection call in a UI crate; `panic-in-library` covers only library crates.
 - ✅ `UI-6` `egui-panel-api`: `SidePanel`/`TopBottomPanel`, a panel's `.show` on a `Context`, and `App::update`, named as parameters so they follow egui releases.
+- ✅ `UI-7` `egui-checklist-menu`: a `menu_button` closure with several checkboxes closes on each click; the shared checklist widget keeps it open.
 
 ## TOOL - external tools
 
