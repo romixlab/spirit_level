@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.4.23] - 2026-11-15
+
 ### Added
 
 - `cli-secret-flags`: a flag whose long name looks like it takes a secret as its value, candidate confidence (CLI-6).
