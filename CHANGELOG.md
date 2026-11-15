@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.4.26] - 2026-11-15
+
 ### Added
 
 - `command-registry` (C0039): a CLI past `size` subcommands registers them per module with inventory or linkme, estimate (CODE-6).
