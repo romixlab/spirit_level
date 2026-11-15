@@ -153,7 +153,7 @@ fn check_names(cx: &Context<'_>, pkg: &Package) {
                 )
                 .span(pkg.manifest.span(&["package", "name"]))
                 .krate(&pkg.name)
-                .help("name the directory after the crate (flat crates/<name>)"),
+                .help("name the directory after the crate: crates/<crate>, crates/<layer>/<crate> or crates/<layer>/<discipline>/<crate>"),
             );
         }
     }

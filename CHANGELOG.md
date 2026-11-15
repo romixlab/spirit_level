@@ -7,6 +7,10 @@
 - `crate-folder-layer` (G0011): a crate's folder is its map layer, then its new `discipline` key; never deeper (GRAPH-4).
 - `crate-folder-size` (S0006): a folder past its limit of crate folders is reported, flat or per layer (SIZE-3).
 
+### Changed
+
+- `crate-dir-name` documents and tests crates in layer and discipline folders (MAN-1).
+
 ## [0.4.7] - 2026-11-15
 
 ### Changed

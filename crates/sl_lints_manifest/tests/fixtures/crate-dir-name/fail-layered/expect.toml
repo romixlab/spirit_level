@@ -1,0 +1,3 @@
+[[finding]]
+at = "crates/core/fx_a/Cargo.toml:2"
+contains = "crate fx_other lives in a directory named fx_a"
