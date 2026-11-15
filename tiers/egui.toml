@@ -177,3 +177,18 @@ label-calls = [
 ]
 hover-calls = ["on_hover_text", "on_disabled_hover_text"]
 reason = "a tooltip that only repeats the label cost the person a hover for nothing; certain, since the match is exact"
+
+[lints.ui-locale-strings]
+calls = [
+  "label",
+  "button",
+  "small_button",
+  "heading",
+  "selectable_label",
+  "checkbox",
+  "Label::new",
+  "Button::new",
+  "RichText::new",
+]
+level = "allow"
+reason = "opt-in: a project that has not started translating its UI would see this fire on every label; a project that translates turns it on"

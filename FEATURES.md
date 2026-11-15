@@ -127,6 +127,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `UI-6` `egui-panel-api`: `SidePanel`/`TopBottomPanel`, a panel's `.show` on a `Context`, and `App::update`, named as parameters so they follow egui releases.
 - ✅ `UI-7` `egui-checklist-menu`: a `menu_button` closure with several checkboxes closes on each click; the shared checklist widget keeps it open.
 - ✅ `UI-3` `ui-tooltip-repeats-label`: a tooltip whose text exactly repeats the label of the control it is attached to.
+- ✅ `UI-4` `ui-locale-strings`, opt-in: a string literal with a letter, passed to a text call, needs a translation catalogue entry.
 
 ## TOOL - external tools
 

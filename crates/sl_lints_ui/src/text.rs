@@ -21,6 +21,22 @@ pub(crate) fn has_debug(value: &str) -> bool {
     value.contains(":?}") || value.contains(":#?}")
 }
 
+/// Whether a literal shown to a person needs a translation catalogue entry: outside any `{..}` format placeholder,
+/// it holds a letter, not just numbers, placeholders or punctuation
+pub(crate) fn needs_locale(value: &str) -> bool {
+    let mut depth = 0u32;
+    let mut letter = false;
+    for c in value.chars() {
+        match c {
+            '{' => depth += 1,
+            '}' => depth = depth.saturating_sub(1),
+            _ if depth == 0 && c.is_alphabetic() => letter = true,
+            _ => {}
+        }
+    }
+    letter
+}
+
 /// The verb a label starts with, when it is one of `verbs` and the label does not open a dialog (ends in "…")
 pub(crate) fn destructive_verb(value: &str, verbs: &[String]) -> Option<String> {
     let v = value.trim();
@@ -101,6 +117,18 @@ mod tests {
         assert!(more_count("3 others", &w));
         assert!(!more_count("Show more", &w));
         assert!(!more_count("more options", &w));
+    }
+
+    #[test]
+    fn locale_needs_a_letter() {
+        assert!(needs_locale("Save"));
+        assert!(needs_locale("3 items left"));
+        assert!(!needs_locale("{}"));
+        assert!(!needs_locale("..."));
+        assert!(!needs_locale(""));
+        // a named placeholder's letters are not prose
+        assert!(!needs_locale("{count}"));
+        assert!(needs_locale("{count} items left"));
     }
 
     #[test]

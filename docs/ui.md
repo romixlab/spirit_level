@@ -55,7 +55,7 @@ One row per practice. Sources: the vhrd_egui UX guide (`docs/ux-guide.md`, by se
 | No unwrap or expect on data from disk, the network or the person | UX guide §9 | [`panic-in-library`](lints/C0005.md) for library crates; [`ui-unwrap-external-data`](lints/U0014.md) for a file, parse or connection call in a UI crate | estimate |
 | Settings and layout survive a restart; transient state is never saved | UX guide §9 | by review | - |
 | Everything works from the keyboard | UX guide §8 (planned there) | by review | - |
-| Text a person reads comes from locale files | UX guide §2 | by review: no app does it yet, so a lint would fire on every label | - |
+| Text a person reads comes from locale files | UX guide §2 | [`ui-locale-strings`](lints/U0018.md), opt-in: off until a project translates its UI | certain |
 | The UI keeps its shape; big data stays fast; nothing updates itself unasked | UX guide §6, §7 | by review | - |
 | Say why when doing something non-obvious; measure an input, then confirm | UX guide §2 | by review | - |
 
@@ -73,6 +73,7 @@ The same practices, specialised by the `egui` tier's parameters, and the practic
 | A widget's id is unique within its parent: no constant id given in a loop | egui's id rules; vhrd_egui `FoldRest` docs | [`egui-id-in-loop`](lints/U0012.md) | estimate |
 | `request_repaint` is called by the worker that has news, not by every frame | UX guide §9; egui's repaint model | [`egui-repaint-every-frame`](lints/U0013.md) | estimate |
 | `on_hover_text` and `on_disabled_hover_text` add to the label, never repeat it | UX guide §4 | `ui-tooltip-repeats-label` with egui's label and hover calls | certain |
+| Literals passed to `label`, `button`, `heading` and the like come from the catalogue | UX guide §2 | `ui-locale-strings` with egui's calls, opt-in | certain |
 | One egui version in the whole graph | UX guide §12 | [`duplicate-versions`](lints/M0002.md) | certain |
 | Every widget sits in `ve_frame::WidgetFrame`; panels use the egui API the version in use ships | UX guide §6; app skill "Panels" | [`egui-panel-api`](lints/U0015.md) for the API egui's own deprecations name (`SidePanel`, `TopBottomPanel`, `.show` on a `Context`, `App::update`); `WidgetFrame` itself is by review | estimate |
 | A dropdown of checkboxes is a `ve_basics::Checklist`, open while ticked | UX guide §7 | [`egui-checklist-menu`](lints/U0016.md) | estimate |
@@ -87,7 +88,7 @@ Nothing is built for them yet. These general lints carry over once their paramet
 
 - `ui-colour-literal`: CSS colour strings in Rust are found already (`hex-strings`); a web crate names its style builders in `constructors`.
 - `ui-disabled-without-reason` and `ui-destructive-unconfirmed`: a bot keyboard builder (`InlineKeyboardButton::callback`) is a label call like a button.
-- `ui-more-count`, `ui-label-punctuation`, `ui-debug-text`: the text of a page or a bot reply is text a person reads.
+- `ui-more-count`, `ui-label-punctuation`, `ui-debug-text`, `ui-locale-strings`: the text of a page or a bot reply is text a person reads.
 - `ui-tooltip-repeats-label`: once `label-calls` and `hover-calls` name a framework's own calls, the same check applies.
 
 Web-only and bot-only practices (`textContent` over `innerHTML` with data; button text from known values, never model output) would need lints of their own over JavaScript or the bot's handlers.

@@ -145,6 +145,9 @@ ui_lint!(TOOLTIP_REPEATS_LABEL, "U0017", "ui-tooltip-repeats-label", "ui", "a to
         ("hover-calls", StrList, "[]", "calls that attach a tooltip"),
     ],
     fix: None);
+ui_lint!(LOCALE_STRINGS, "U0018", "ui-locale-strings", "ui", "string literals shown to a person come from the translation catalogue, not written in the call",
+    params: [("calls", StrList, "[]", "calls that show text to a person")],
+    fix: None);
 
 /// The UI analysis
 pub struct Ui;
@@ -170,6 +173,7 @@ static LINTS: &[&LintMeta] = &[
     &PANEL_API,
     &CHECKLIST_MENU,
     &TOOLTIP_REPEATS_LABEL,
+    &LOCALE_STRINGS,
 ];
 
 /// The lints that skip the theme

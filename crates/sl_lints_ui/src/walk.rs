@@ -87,6 +87,7 @@ struct P {
     checklist_widget: String,
     tooltip_label_calls: Vec<String>,
     tooltip_hover_calls: Vec<String>,
+    locale_calls: Vec<String>,
 }
 
 impl P {
@@ -189,6 +190,9 @@ impl P {
         if let Some(q) = get("ui-tooltip-repeats-label") {
             p.tooltip_label_calls = q.list("label-calls").to_vec();
             p.tooltip_hover_calls = q.list("hover-calls").to_vec();
+        }
+        if let Some(q) = get("ui-locale-strings") {
+            p.locale_calls = q.list("calls").to_vec();
         }
         p
     }
@@ -366,6 +370,7 @@ impl Walk<'_> {
             &self.p.debug_calls,
             &self.p.glyph_calls,
             &self.p.destructive_calls,
+            &self.p.locale_calls,
         ]
         .iter()
         .any(|l| name_matches(l));
@@ -381,6 +386,7 @@ impl Walk<'_> {
         let debug = name_matches(&self.p.debug_calls);
         let glyph = name_matches(&self.p.glyph_calls);
         let destructive = name_matches(&self.p.destructive_calls);
+        let locale = name_matches(&self.p.locale_calls);
         for lit in &literals {
             let v = lit.value();
             let r = range(lit);
@@ -428,6 +434,9 @@ impl Walk<'_> {
                 && let Some(verb) = text::destructive_verb(&v, &self.p.verbs)
             {
                 self.push("ui-destructive-unconfirmed", call, format!("{v:?} throws work away ({verb}) with no confirmation or undo in this function"), "ask first, saying what will be lost, or let it be undone for a few seconds; a label that opens a confirming dialog ends in \"…\"".into(), Confidence::Estimate);
+            }
+            if locale && text::needs_locale(&v) {
+                self.push("ui-locale-strings", r, format!("{v:?} is a literal string shown to a person"), "move it to the project's translation catalogue, and pass the catalogue key here instead".into(), Confidence::Certain);
             }
         }
     }

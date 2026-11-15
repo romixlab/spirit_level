@@ -48,3 +48,7 @@ reason = "panic-in-library skips binary crates; a UI app's bad file, parse or co
 [lints.ui-tooltip-repeats-label]
 level = "warn"
 reason = "a tooltip that only repeats the label cost the person a hover for nothing; certain, since the match is exact"
+
+[lints.ui-locale-strings]
+level = "allow"
+reason = "opt-in: a project that has not started translating its UI would see this fire on every label; a project that translates turns it on"

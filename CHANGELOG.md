@@ -5,6 +5,7 @@
 ### Added
 
 - `ui-tooltip-repeats-label`: a tooltip that only repeats its control's label (UI-3).
+- `ui-locale-strings`, opt-in: a literal string passed to a UI text call (UI-4).
 
 ## [0.4.29] - 2026-11-15
 
