@@ -1,5 +1,5 @@
 //! The Markdown pages of a project as a reader meets them: each page's headings, prose, code and visual breaks in
-//! order ([`page`]), its reading metrics ([`stats`]), and the Zensical book it belongs to ([`book`]).
+//! order ([`page`]), its reading metrics ([`stats`]), the words it names things with ([`terms`]), and the Zensical book it belongs to ([`book`]).
 //!
 //! Pages are read from the Markdown sources, never from a built site. Zensical's admonitions and content tabs are
 //! read with their bodies ([`dialect`]).
@@ -8,6 +8,7 @@ pub mod book;
 pub mod dialect;
 pub mod page;
 pub mod stats;
+pub mod terms;
 pub mod text;
 pub mod walk;
 

@@ -99,6 +99,123 @@ pub fn flesch(words: usize, sentences: usize, syllables: usize) -> Option<f64> {
     })
 }
 
+/// Forms of "to be" that start a passive
+const BE: &[&str] = &[
+    "am", "is", "are", "was", "were", "be", "been", "being", "isn't", "aren't", "wasn't", "weren't",
+];
+
+/// Words that may stand between "to be" and the participle
+const BETWEEN: &[&str] = &[
+    "not", "also", "always", "never", "often", "then", "now", "only", "still", "first", "all",
+    "both", "each", "rarely", "seldom", "just", "already", "even",
+];
+
+/// Past participles that do not end in `-ed`
+const IRREGULAR: &[&str] = &[
+    "beaten",
+    "begun",
+    "bitten",
+    "blown",
+    "bound",
+    "broken",
+    "brought",
+    "bought",
+    "built",
+    "caught",
+    "chosen",
+    "cut",
+    "done",
+    "drawn",
+    "driven",
+    "eaten",
+    "fallen",
+    "fed",
+    "felt",
+    "flown",
+    "forbidden",
+    "forgotten",
+    "found",
+    "frozen",
+    "given",
+    "grown",
+    "heard",
+    "held",
+    "hidden",
+    "hit",
+    "hung",
+    "kept",
+    "known",
+    "laid",
+    "led",
+    "left",
+    "lit",
+    "lost",
+    "made",
+    "meant",
+    "mistaken",
+    "overridden",
+    "paid",
+    "put",
+    "read",
+    "rewritten",
+    "ridden",
+    "run",
+    "said",
+    "seen",
+    "sent",
+    "set",
+    "shaken",
+    "shown",
+    "shut",
+    "sold",
+    "spent",
+    "split",
+    "spoken",
+    "stolen",
+    "struck",
+    "stuck",
+    "sworn",
+    "taken",
+    "taught",
+    "thought",
+    "thrown",
+    "told",
+    "understood",
+    "undone",
+    "won",
+    "worn",
+    "written",
+];
+
+/// Whether a sentence reads as passive.
+///
+/// A form of "to be", at most two words such as "not" or an `-ly` adverb, then a past participle (`-ed`, or an
+/// irregular one such as "written"). A heuristic: "is tired" counts too.
+pub fn passive(sentence: &str) -> bool {
+    let ws: Vec<String> = words(sentence).iter().map(|w| w.to_lowercase()).collect();
+    ws.iter().enumerate().any(|(i, w)| {
+        if !BE.contains(&w.as_str()) {
+            return false;
+        }
+        let mut j = i + 1;
+        while j < ws.len()
+            && j <= i + 2
+            && (BETWEEN.contains(&ws[j].as_str()) || (ws[j].len() > 4 && ws[j].ends_with("ly")))
+        {
+            j += 1;
+        }
+        ws.get(j).is_some_and(|p| participle(p))
+    })
+}
+
+fn participle(w: &str) -> bool {
+    IRREGULAR.contains(&w)
+        || (w.len() >= 4
+            && w.ends_with("ed")
+            && !w.ends_with("eed")
+            && w.chars().all(|c| c.is_ascii_alphabetic()))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -124,6 +241,27 @@ mod tests {
         assert_eq!(syllables("configuration"), 5);
         assert_eq!(syllables("jumped"), 1);
         assert_eq!(syllables("42"), 0);
+    }
+
+    #[test]
+    fn passive_sentences() {
+        for s in [
+            "The page is read from front to back.",
+            "Findings are not reported twice.",
+            "It was usually checked by hand.",
+            "Pages aren't written for machines.",
+        ] {
+            assert!(passive(s), "{s}");
+        }
+        for s in [
+            "The reader reads the page.",
+            "It is indeed fast.",
+            "This is red.",
+            "A tier is a set of lints.",
+            "It is ready.",
+        ] {
+            assert!(!passive(s), "{s}");
+        }
     }
 
     #[test]

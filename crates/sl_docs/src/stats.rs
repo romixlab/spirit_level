@@ -1,7 +1,7 @@
 //! The reading metrics of a page: how much there is to read and how it is shaped.
 
 use crate::page::{Break, Item, Page};
-use crate::text::{flesch, sentences, syllables, words};
+use crate::text::{flesch, passive, sentences, syllables, words};
 
 /// The constants of the reading time
 #[derive(Clone, Copy, Debug, PartialEq, serde::Serialize)]
@@ -108,6 +108,10 @@ pub struct Stats {
     pub admonitions: usize,
     /// Flesch reading ease of the prose; None for a page not in English or without prose
     pub flesch: Option<f64>,
+    /// Sentences that read as passive ([`passive`]); 0 for a page not in English
+    pub passive_sentences: usize,
+    /// Percent of the sentences that read as passive; None for a page not in English or without sentences
+    pub passive_percent: Option<f64>,
 }
 
 fn median(mut v: Vec<usize>) -> f64 {
@@ -147,11 +151,15 @@ pub fn stats(page: &Page, speed: &ReadingSpeed, english: bool) -> Stats {
     let mut para = Vec::new();
     let mut sent = Vec::new();
     let mut syl = 0;
+    let mut passives = 0;
     for (text, _) in page.prose() {
         let ws = words(text);
         para.push(ws.len());
         syl += ws.iter().map(|w| syllables(w)).sum::<usize>();
-        sent.extend(sentences(text).into_iter().map(|s| words(s).len()));
+        for s in sentences(text) {
+            sent.push(words(s).len());
+            passives += usize::from(english && passive(s));
+        }
     }
     let headings: Vec<HeadingStat> = page
         .headings()
@@ -216,6 +224,9 @@ pub fn stats(page: &Page, speed: &ReadingSpeed, english: bool) -> Stats {
         } else {
             None
         },
+        passive_sentences: passives,
+        passive_percent: (english && !sent.is_empty())
+            .then(|| passives as f64 * 100.0 / sent.len() as f64),
     }
 }
 
@@ -256,6 +267,20 @@ mod tests {
         assert_eq!(s.code_lines, 1);
         assert!(s.flesch.is_some());
         assert_eq!(stats(&p, &SPEED, false).flesch, None);
+        assert_eq!(s.passive_percent, Some(0.0));
+        assert_eq!(stats(&p, &SPEED, false).passive_percent, None);
+    }
+
+    #[test]
+    fn passive_share() {
+        let p = Page::parse(
+            "p.md",
+            Kind::Guide,
+            "It is written by hand. The tool reads it. Lints are run in order. It ends.\n",
+        );
+        let s = stats(&p, &SPEED, true);
+        assert_eq!(s.passive_sentences, 2);
+        assert_eq!(s.passive_percent, Some(50.0));
     }
 
     #[test]
