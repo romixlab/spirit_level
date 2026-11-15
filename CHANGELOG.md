@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.4.5] - 2026-11-15
+
 ### Fixed
 
 - `layer-edges` exempts edges to the workspace-hack package that `.config/hakari.toml` names (GRAPH-1).
