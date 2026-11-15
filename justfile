@@ -27,11 +27,11 @@ panic-fixture:
     cp target/panic-fixture/thumbv7em-none-eabihf/release/panic_sites crates/sl_lints_embedded/tests/projects/panic_sites/firmware.elf
     cp target/panic-fixture/thumbv7em-none-eabihf/release/panic_sites crates/sl_lints_embedded/tests/projects/panic_sites_service/firmware.elf
 
-# Install the external tools spl on itself needs that are missing or outside their tested range, with cargo-binstall
-# (cargo-udeps, off here, also needs a nightly toolchain); then list them all
+# Install every adapter's tool that is missing or outside its tested range, with cargo-binstall: the tool fixtures
+# run them all and fail on a missing one (cargo-udeps also needs a nightly toolchain); then list them
 tools:
-    cargo run -q -p spirit_level_cli -- tools needed --spec --missing | xargs -r cargo binstall -y
-    cargo run -q -p spirit_level_cli -- tools needed
+    cargo run -q -p spirit_level_cli -- tools needed --all --spec --missing | xargs -r cargo binstall -y
+    cargo run -q -p spirit_level_cli -- tools needed --all
 
 # Regenerate the book's generated pages (lints, tiers, nav)
 book:

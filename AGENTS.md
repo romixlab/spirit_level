@@ -78,7 +78,7 @@ just            # the recipes
 just test       # nextest; `just test --changed` tests only what changed against main
 just lint       # fmt, clippy -D warnings, spl on itself at the big tier, book freshness
 just book       # regenerate the book's generated pages
-just tools      # install the missing external tools with cargo-binstall (`spl tools needed`)
+just tools      # install every adapter's missing tool with cargo-binstall (`spl tools needed --all`)
 just docs       # serve the book (uv, Zensical)
 just install    # build with the deploy profile, put spl on PATH
 ```
