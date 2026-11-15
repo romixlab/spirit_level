@@ -2,7 +2,6 @@
 //! without it.
 
 use std::path::{Path, PathBuf};
-use std::process::Command;
 
 fn project() -> PathBuf {
     Path::new(env!("CARGO_MANIFEST_DIR"))
@@ -10,7 +9,7 @@ fn project() -> PathBuf {
 }
 
 fn check(extra: &[&str]) -> (i32, serde_json::Value) {
-    let out = Command::new(env!("CARGO_BIN_EXE_spl"))
+    let out = crate::spl()
         .arg("check")
         .arg(project())
         .args(["--tier", "embedded", "--only", "stk-6", "--format", "json"])
@@ -57,7 +56,7 @@ fn elf_lints_are_not_run_without_it() {
 
 #[test]
 fn a_missing_elf_is_a_usage_error() {
-    let out = Command::new(env!("CARGO_BIN_EXE_spl"))
+    let out = crate::spl()
         .arg("check")
         .arg(project())
         .args(["--tier", "embedded", "--elf", "no/such/file.elf"])
@@ -72,7 +71,7 @@ fn panics(project: &str, extra: &[&str]) -> (i32, String) {
         .join("../sl_lints_embedded/tests/projects")
         .join(project);
     let elf = dir.join("firmware.elf");
-    let out = Command::new(env!("CARGO_BIN_EXE_spl"))
+    let out = crate::spl()
         .arg("panics")
         .arg(&dir)
         .arg("--elf")

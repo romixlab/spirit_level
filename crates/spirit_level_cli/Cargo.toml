@@ -1,6 +1,6 @@
 [package]
 name = "spirit_level_cli"
-description = "The spl command: check a project, explain a lint, list lints and tiers, show the resolved configuration, write the book pages, list the dependents to retest, measure the docs pages"
+description = "The spl command: check a project, explain a lint, list lints and tiers, show the resolved configuration, write the book pages, list the dependents to retest, measure the docs pages, count its own usage"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -31,6 +31,7 @@ spirit_level.workspace = true
 vc_build.workspace = true
 vc_complete.workspace = true
 vc_ui.workspace = true
+vc_usage.workspace = true
 
 [build-dependencies]
 vc_build.workspace = true

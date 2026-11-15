@@ -30,6 +30,7 @@ clap_complete = { version = "4", default-features = false, features = ["unstable
 vc_build = { git = "https://github.com/vhrdtech/vhrd_cli", default-features = false }
 vc_complete = { git = "https://github.com/vhrdtech/vhrd_cli", default-features = false }
 vc_ui = { git = "https://github.com/vhrdtech/vhrd_cli", default-features = false }
+vc_usage = { git = "https://github.com/vhrdtech/vhrd_cli", default-features = false }
 # linked tool libraries (features of spirit_level):
 geiger = { version = "0.5", default-features = false }
 guppy = { version = "0.19", default-features = false }

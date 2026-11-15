@@ -6,7 +6,7 @@
 )]
 
 use std::path::{Path, PathBuf};
-use std::process::{Command, Output};
+use std::process::Output;
 
 /// A scratch project directory, removed on drop
 struct Scratch(PathBuf);
@@ -36,7 +36,7 @@ impl Drop for Scratch {
 }
 
 fn run(dir: &Path, args: &[&str]) -> Output {
-    Command::new(env!("CARGO_BIN_EXE_spl"))
+    crate::spl()
         .args(args)
         .current_dir(dir)
         .env("SPIRIT_LEVEL_TODAY", "2026-11-13")

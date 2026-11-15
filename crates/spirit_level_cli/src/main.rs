@@ -5,7 +5,7 @@
     reason = "the binary: printing its report and errors is its job"
 )]
 
-use clap::{Parser, Subcommand, ValueEnum};
+use clap::{CommandFactory, FromArgMatches, Parser, Subcommand, ValueEnum};
 use clap_complete::engine::{ArgValueCandidates, CompletionCandidate};
 use sl_core::{Date, Level};
 use std::path::{Path, PathBuf};
@@ -16,6 +16,7 @@ mod dependents;
 mod pages;
 mod panics;
 mod tools;
+mod usage;
 
 /// The tool's name, in front of its error lines
 const TOOL: &str = "spl";
@@ -27,7 +28,7 @@ const NOT_RUN: Exit = Exit::category(3, "not_run");
 #[derive(Parser)]
 #[command(name = "spl", version = vc_build::version!(), about = "A linter for Rust projects of every size: tiers of lints in TOML, from one crate to a workspace of hundreds", long_about = None)]
 #[command(
-    after_help = "Examples:\n  spl check\n  spl check --all --group-by crate\n  spl check --format json --only S0001\n  spl explain workspace-lints\n  spl init --tier small-workspace\n  spl dependents --base main\n  spl pages"
+    after_help = "Examples:\n  spl check\n  spl check --all --group-by crate\n  spl check --format json --only S0001\n  spl explain workspace-lints\n  spl init --tier small-workspace\n  spl dependents --base main\n  spl pages\n  spl usage --unused"
 )]
 struct Cli {
     #[command(flatten)]
@@ -119,6 +120,10 @@ enum Cmd {
     /// The external tools of the adapters: what the project needs, the tested versions, what is found on PATH
     #[command(subcommand)]
     Tools(tools::ToolsCmd),
+    /// How often each command and flag ran on this machine: runs per source (terminal, script, agent) and the
+    /// last day; the never-used ones with 0
+    #[command(after_help = usage::AFTER_HELP)]
+    Usage(usage::UsageArgs),
     /// Write the book's generated pages (lints, tiers, nav) from the lints' metadata
     #[command(after_help = "Examples:\n  spl book\n  spl book docs --check")]
     Book {
@@ -229,8 +234,14 @@ fn today(s: Option<String>) -> Result<Date, String> {
 
 fn main() -> ExitCode {
     vc_ui::restore_sigpipe();
-    vc_complete::complete(<Cli as clap::CommandFactory>::command);
-    let cli = Cli::parse();
+    vc_complete::complete(Cli::command);
+    let matches = Cli::command().get_matches();
+    // the records' day follows the injected today, so a test's records are the same on every run
+    let day = std::env::var("SPIRIT_LEVEL_TODAY")
+        .ok()
+        .and_then(|d| vc_usage::Day::parse(&d));
+    vc_usage::record(&Cli::command(), &matches, day);
+    let cli = Cli::from_arg_matches(&matches).unwrap_or_else(|e| e.exit());
     cli.color.apply();
     // every error that ends a run is a configuration or usage error (exit 2)
     vc_ui::finish(TOOL, run(cli), |_| Some(Exit::BAD_ARGS)).into()
@@ -249,6 +260,7 @@ fn run(cli: Cli) -> Result<Exit, String> {
         Cmd::Pages(a) => pages::run(a),
         Cmd::Panics(a) => panics::run(a),
         Cmd::Tools(cmd) => tools::run(cmd),
+        Cmd::Usage(a) => usage::run(a),
         Cmd::Book {
             docs,
             zensical,

@@ -28,7 +28,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 ## CLI - the command
 
 - ✅ `CLI-1` check, explain, lints, tiers, config, init, book, dependents; dynamic completion; version with SHA.
-- 📋 `CLI-2` Usage records per subcommand.
+- ✅ `CLI-2` Usage records: every run counts its command and flags in `~/.local/state/spl/usage` (vc_usage); `spl usage` lists them, `--unused` ([usage records](docs/usage.md)).
 - ✅ `CLI-3` The binary is `spl`; crate and repo stay spirit_level.
 - ✅ `CLI-4` The generic CLI parts from vhrd_cli: `--version` (vc_build), `--color`, error line, exit codes (vc_ui), completion (vc_complete).
 

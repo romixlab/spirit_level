@@ -54,7 +54,7 @@ fn copy_dir(from: &Path, to: &Path) {
 
 /// Exit code, the JSON report (Null when stdout is not one) and stderr of `spl <args>` in `dir`
 fn spl(dir: &Path, args: &[&str]) -> (i32, serde_json::Value, String) {
-    let out = Command::new(env!("CARGO_BIN_EXE_spl"))
+    let out = crate::spl()
         .args(args)
         .current_dir(dir)
         .env("SPIRIT_LEVEL_TODAY", "2026-11-13")
@@ -168,7 +168,7 @@ fn contract_snapshot_holds_a_released_snapshot() {
 
 #[test]
 fn contract_snapshot_explain_names_the_fix() {
-    let out = Command::new(env!("CARGO_BIN_EXE_spl"))
+    let out = crate::spl()
         .args(["explain", "M0030"])
         .output()
         .expect("spl starts");
@@ -187,7 +187,7 @@ fn crate_tiers_hold_only_their_crates() {
     assert_eq!(code, 1, "{err}{report}");
     assert_eq!(denied(&report), ["readme-per-crate fw"], "{report}");
 
-    let out = Command::new(env!("CARGO_BIN_EXE_spl"))
+    let out = crate::spl()
         .arg("config")
         .current_dir(&*p)
         .env("SPIRIT_LEVEL_TODAY", "2026-11-13")

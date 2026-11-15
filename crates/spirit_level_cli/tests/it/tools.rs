@@ -8,7 +8,7 @@
 
 use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
-use std::process::{Command, Output};
+use std::process::Output;
 
 /// A scratch project and a `bin/` of fake tools beside it, removed on drop
 struct Setup(PathBuf);
@@ -61,7 +61,7 @@ impl Setup {
     }
 
     fn spl(&self, args: &[&str]) -> Output {
-        Command::new(env!("CARGO_BIN_EXE_spl"))
+        crate::spl()
             .args(args)
             .current_dir(self.project())
             .env("PATH", self.0.join("bin"))

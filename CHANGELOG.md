@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Added
+
+- Usage records: every run counts its command and flags locally; `spl usage` shows them, `--unused` the never-used (CLI-2).
+
+### Changed
+
+- Building spl needs Rust 1.89 (`rust-version`), for the usage records' file lock (CLI-2).
+
 ## [0.4.2] - 2026-11-15
 
 ### Added

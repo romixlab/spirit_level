@@ -142,10 +142,12 @@ spirit_level_cli = { layer = "app", cli = true }
 sl_testkit = { layer = "tests" }
 
 [map.external]
-# the generic CLI parts: colour, error line, exit codes (any layer above core), --version and completion (the binary)
+# the generic CLI parts: colour, error line, exit codes (any layer above core), --version, completion and usage
+# records (the binary)
 vc_ui = { git = "https://github.com/vhrdtech/vhrd_cli", branch = "main", role = "core" }
 vc_build = { git = "https://github.com/vhrdtech/vhrd_cli", branch = "main", role = "app" }
 vc_complete = { git = "https://github.com/vhrdtech/vhrd_cli", branch = "main", role = "app" }
+vc_usage = { git = "https://github.com/vhrdtech/vhrd_cli", branch = "main", role = "app" }
 
 [map.forbid]
 # the library a project links to check itself never pulls the CLI's dependencies
