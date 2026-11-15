@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `ui-unwrap-external-data` (U0014): `unwrap`/`expect` on a file, parse or connection in a UI crate (UI-2).
+
 ## [0.4.28] - 2026-11-15
 
 ### Added

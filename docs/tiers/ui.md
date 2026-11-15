@@ -17,6 +17,7 @@ Use it with `extends = "ui"` in `spirit_level.toml`.
 | [U0007](../lints/U0007.md) | ui-more-count | `warn` | "N more" hides items the person may need; a fold shows them on demand | ui |
 | [U0008](../lints/U0008.md) | ui-label-punctuation | `deny` | one way to write the ellipsis and button labels; certain, rare, and `spl check --fix` applies it | ui |
 | [U0009](../lints/U0009.md) | ui-debug-text | `warn` | Rust's debug form is for developers; a person reads what happened and what to do | ui |
+| [U0014](../lints/U0014.md) | ui-unwrap-external-data | `warn` | panic-in-library skips binary crates; a UI app's bad file, parse or connection still deserves an error, not a crash; an estimate, since the chain may be known good or already checked | ui |
 
 ## The file
 
@@ -63,4 +64,8 @@ reason = "one way to write the ellipsis and button labels; certain, rare, and `s
 [lints.ui-debug-text]
 level = "warn"
 reason = "Rust's debug form is for developers; a person reads what happened and what to do"
+
+[lints.ui-unwrap-external-data]
+level = "warn"
+reason = "panic-in-library skips binary crates; a UI app's bad file, parse or connection still deserves an error, not a crash; an estimate, since the chain may be known good or already checked"
 ```

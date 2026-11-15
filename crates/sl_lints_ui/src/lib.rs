@@ -86,6 +86,12 @@ ui_lint!(LABEL_PUNCTUATION, "U0008", "ui-label-punctuation", "ui", "UI text writ
 ui_lint!(DEBUG_TEXT, "U0009", "ui-debug-text", "ui", "text shown to a person never holds Rust's debug formatting",
     params: [("calls", StrList, "[]", "calls that show text to a person")],
     fix: None);
+ui_lint!(UNWRAP_EXTERNAL_DATA, "U0014", "ui-unwrap-external-data", "ui", "UI code returns an error for a bad file, parse or connection, never unwraps or expects it",
+    params: [
+        ("calls", StrList, "[\"std::fs::read\", \"std::fs::read_to_string\", \"std::fs::write\", \"std::fs::File::open\", \"std::fs::File::create\", \"std::fs::metadata\", \"std::fs::read_dir\", \"serde_json::from_str\", \"serde_json::from_slice\", \"serde_json::from_reader\", \"toml::from_str\", \"toml_edit::de::from_str\", \"ron::from_str\", \"ron::de::from_str\", \"bincode::deserialize\", \"std::net::TcpStream::connect\", \"reqwest::blocking::get\", \"reqwest::get\", \"ureq::get\", \"ureq::post\"]", "constructors and calls whose result a file, a parse or a connection decides, resolved through the file's `use` items"),
+        ("panic-methods", StrList, "[\"unwrap\", \"expect\"]", "methods that panic on an `Err` or a `None`"),
+    ],
+    fix: None);
 ui_lint!(SHARED_THEME, "U0010", "egui-shared-theme", "egui", "every egui app installs the shared theme",
     params: [
         ("entry-calls", StrList, "[\"eframe::run_native\", \"eframe::run_simple_native\"]", "calls that start an app"),
@@ -132,6 +138,7 @@ static LINTS: &[&LintMeta] = &[
     &MORE_COUNT,
     &LABEL_PUNCTUATION,
     &DEBUG_TEXT,
+    &UNWRAP_EXTERNAL_DATA,
     &SHARED_THEME,
     &STATUS_GLYPH,
     &ID_IN_LOOP,

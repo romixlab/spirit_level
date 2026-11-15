@@ -582,6 +582,7 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [U0007](U0007.md) | [ui-more-count](U0007.md) | a cut list ends in a fold that opens to every item, never in "N more" | off | off | off | off | off | off | warn | warn | off | off |
 | [U0008](U0008.md) | [ui-label-punctuation](U0008.md) | UI text writes the ellipsis as one character and button labels end without a full stop | off | off | off | off | off | off | deny | deny | off | off |
 | [U0009](U0009.md) | [ui-debug-text](U0009.md) | text shown to a person never holds Rust's debug formatting | off | off | off | off | off | off | warn | warn | off | off |
+| [U0014](U0014.md) | [ui-unwrap-external-data](U0014.md) | UI code returns an error for a bad file, parse or connection, never unwraps or expects it | off | off | off | off | off | off | warn | warn | off | off |
 
 ## units
 

@@ -23,6 +23,7 @@ Use it with `extends = "egui"` in `spirit_level.toml`.
 | [U0011](../lints/U0011.md) | egui-status-glyph | `deny` | a glyph in a label takes the text colour; ve_theme::status_icon paints it in its tone with a tooltip | egui |
 | [U0012](../lints/U0012.md) | egui-id-in-loop | `warn` | widgets that share an id share their state, and egui reports the clash on screen | egui |
 | [U0013](../lints/U0013.md) | egui-repaint-every-frame | `warn` | an unconditional repaint request keeps the app drawing at full rate and burns a core while idle | egui |
+| [U0014](../lints/U0014.md) | ui-unwrap-external-data | `warn` | panic-in-library skips binary crates; a UI app's bad file, parse or connection still deserves an error, not a crash; an estimate, since the chain may be known good or already checked | ui |
 
 ## The file
 

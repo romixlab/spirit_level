@@ -123,6 +123,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 ## UI - user interface lints
 
 - ✅ `UI-1` `ui-practice-lints`: UI practices as lints: `ui` tier (toolkit-neutral, calls as parameters), `egui` tier (egui calls, ids, repaints, theme, glyphs); map keys `ui` and `theme` ([UI practices](docs/ui.md)).
+- ✅ `UI-2` `ui-unwrap-external-data`: `unwrap`/`expect` on a file, parse or connection call in a UI crate; `panic-in-library` covers only library crates.
 
 ## TOOL - external tools
 

@@ -40,3 +40,7 @@ reason = "one way to write the ellipsis and button labels; certain, rare, and `s
 [lints.ui-debug-text]
 level = "warn"
 reason = "Rust's debug form is for developers; a person reads what happened and what to do"
+
+[lints.ui-unwrap-external-data]
+level = "warn"
+reason = "panic-in-library skips binary crates; a UI app's bad file, parse or connection still deserves an error, not a crash; an estimate, since the chain may be known good or already checked"

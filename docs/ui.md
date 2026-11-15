@@ -52,7 +52,7 @@ One row per practice. Sources: the vhrd_egui UX guide (`docs/ux-guide.md`, by se
 | UI code spawns work through one wrapper that names it, reports a crash and repaints | the rust-repo rules; workspace guideline §5; rerun's `spawn_local` ban | [`ui-raw-spawn`](lints/U0001.md) | certain |
 | Slow work shows what runs and how far | UX guide §9 | by review | - |
 | Errors say what happened and what to do, in plain words | UX guide §9 | [`ui-debug-text`](lints/U0009.md) finds Rust's debug form shown to a person; the wording is by review | estimate |
-| No unwrap or expect on data from disk, the network or the person | UX guide §9 | [`panic-in-library`](lints/C0005.md) for library crates; app crates by review | - |
+| No unwrap or expect on data from disk, the network or the person | UX guide §9 | [`panic-in-library`](lints/C0005.md) for library crates; [`ui-unwrap-external-data`](lints/U0014.md) for a file, parse or connection call in a UI crate | estimate |
 | Settings and layout survive a restart; transient state is never saved | UX guide §9 | by review | - |
 | Everything works from the keyboard | UX guide §8 (planned there) | by review | - |
 | Text a person reads comes from locale files | UX guide §2 | by review: no app does it yet, so a lint would fire on every label | - |

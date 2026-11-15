@@ -60,6 +60,8 @@ struct P {
     text_calls: Vec<String>,
     button_calls: Vec<String>,
     debug_calls: Vec<String>,
+    unwrap_calls: Vec<String>,
+    panic_methods: Vec<String>,
     entry_calls: Vec<String>,
     setup_calls: Vec<String>,
     glyph_calls: Vec<String>,
@@ -132,6 +134,10 @@ impl P {
         }
         if let Some(q) = get("ui-debug-text") {
             p.debug_calls = q.list("calls").to_vec();
+        }
+        if let Some(q) = get("ui-unwrap-external-data") {
+            p.unwrap_calls = q.list("calls").to_vec();
+            p.panic_methods = q.list("panic-methods").to_vec();
         }
         if let Some(q) = get("egui-shared-theme") {
             p.entry_calls = q.list("entry-calls").to_vec();
@@ -701,6 +707,15 @@ impl<'ast> Visit<'ast> for Walk<'_> {
         if method_in(&self.p.size_calls, &name) {
             self.check_sizes(&format!("`.{name}()`"), &args);
         }
+        if method_in(&self.p.panic_methods, &name) && self.external_data_root(&m.receiver) {
+            self.push(
+                "ui-unwrap-external-data",
+                r,
+                format!("`.{name}()` panics on a bad file, parse or connection"),
+                "return the error (`?` from a function that returns `Result`) or show it to the person; a UI binary crashing on bad input is not a library's panic-in-library exemption".into(),
+                Confidence::Estimate,
+            );
+        }
         self.check_disable(&name, &args, r);
         if method_in(&self.p.id_calls, &name)
             && self.loop_depth > 0
@@ -836,6 +851,26 @@ impl Walk<'_> {
                 _ => false,
             },
             _ => false,
+        }
+    }
+
+    /// Whether a chain of method calls, tries and parens is rooted in a call matching `ui-unwrap-external-data`'s
+    /// `calls` (`std::fs::read_to_string(path).unwrap()`, `serde_json::from_str(&s).map_err(..).expect("..")`)
+    fn external_data_root(&self, mut e: &Expr) -> bool {
+        loop {
+            e = match e {
+                Expr::MethodCall(m) => &m.receiver,
+                Expr::Try(t) => &t.expr,
+                Expr::Paren(p) => &p.expr,
+                Expr::Reference(r) => &r.expr,
+                Expr::Call(c) => {
+                    return match &*c.func {
+                        Expr::Path(p) => path_in(&self.p.unwrap_calls, &self.uses.resolve(&p.path)),
+                        _ => false,
+                    };
+                }
+                _ => return false,
+            };
         }
     }
 }
