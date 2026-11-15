@@ -43,6 +43,7 @@ nav = [
     ] },
     { "Lints" = [
         "lints/index.md",
+        "lints/A0000.md",
         "lints/A0001.md",
         "lints/A0002.md",
         "lints/A0003.md",

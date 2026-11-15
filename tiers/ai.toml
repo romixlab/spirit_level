@@ -144,6 +144,10 @@ reason = "a feature that enables nothing and gates nothing is left over"
 level = "deny"
 reason = "merge, editor and scratch leftovers and session notes do not belong in history"
 
+[lints.large-blobs]
+level = "warn"
+reason = "a large tracked file stays in every clone forever; agents commit dumps and binaries with git add -A"
+
 [lints.agent-config-secrets]
 level = "deny"
 reason = "a committed key is public to every reader and stays in history"

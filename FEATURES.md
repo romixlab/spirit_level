@@ -114,6 +114,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 
 - ✅ `AI-1` Stop-gap comments, commented-out code, lint-table allows without reason, near-duplicate fns and modules, dead features, leftover files, agent-config secrets, permissions and transcripts (`sl_lints_ai`).
 - ✅ `AI-2` `fixme-before-land`: a FIXME is a candidate on the branch and a finding in a landing run; `stop-gap-comments` leaves FIXME to it.
+- ✅ `AI-3` `large-blobs`: a git-tracked file over `max-bytes` that matches no glob in `allow`.
 
 ## UI - user interface lints
 

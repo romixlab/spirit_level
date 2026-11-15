@@ -1,0 +1,5 @@
+params = { max-bytes = 100 }
+
+[[finding]]
+at = "blob.bin"
+contains = "is 150 bytes, over the 100-byte limit"

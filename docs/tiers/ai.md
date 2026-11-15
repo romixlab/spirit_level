@@ -8,6 +8,7 @@ Use it with `extends = "ai"` in `spirit_level.toml`.
 
 | Code | Lint | Level | Reason | Set in |
 |---|---|---|---|---|
+| [A0000](../lints/A0000.md) | large-blobs | `warn` | a large tracked file stays in every clone forever; agents commit dumps and binaries with git add -A | ai |
 | [A0001](../lints/A0001.md) | agent-config-permissions | `deny` | committed settings apply to every agent; a blanket grant lets any of them run anything | ai |
 | [A0002](../lints/A0002.md) | agent-config-secrets | `deny` | a committed key is public to every reader and stays in history | ai |
 | [A0003](../lints/A0003.md) | agent-session-files | `deny` | transcripts and per-person agent files hold private context and secrets | ai |
@@ -214,6 +215,10 @@ reason = "a feature that enables nothing and gates nothing is left over"
 [lints.leftover-files]
 level = "deny"
 reason = "merge, editor and scratch leftovers and session notes do not belong in history"
+
+[lints.large-blobs]
+level = "warn"
+reason = "a large tracked file stays in every clone forever; agents commit dumps and binaries with git add -A"
 
 [lints.agent-config-secrets]
 level = "deny"

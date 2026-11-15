@@ -1,0 +1,1 @@
+params = { max-bytes = 100, allow = ["allowed.bin"] }

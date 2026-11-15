@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `large-blobs`: a git-tracked file over a size limit outside an allow list (AI-3).
+
 ## [0.4.19] - 2026-11-15
 
 ### Added

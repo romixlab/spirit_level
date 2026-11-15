@@ -6,6 +6,7 @@ use sl_core::{Confidence, Diagnostic, Span, glob};
 
 const LINTS: &[&str] = &[
     "leftover-files",
+    "large-blobs",
     "agent-config-secrets",
     "agent-config-permissions",
     "agent-session-files",
@@ -38,6 +39,7 @@ pub(crate) fn run(cx: &Context<'_>) {
     matching(cx, files, "agent-session-files", |f| {
         (format!("{f} is an agent session file (transcript, history or per-person settings)"), "remove it from git (`git rm --cached`) and ignore it; transcripts hold private context and secrets".to_owned())
     });
+    large_blobs(cx, files);
     secrets(cx, files);
     permissions(cx, files);
 }
@@ -56,6 +58,34 @@ fn matching(cx: &Context<'_>, files: &[String], id: &str, say: impl Fn(&str) -> 
             Diagnostic::new(id, format!("file:{f}"), msg)
                 .span(Span::new(f.clone(), 0))
                 .help(help),
+        );
+    }
+}
+
+fn large_blobs(cx: &Context<'_>, files: &[String]) {
+    let id = "large-blobs";
+    if !cx.enabled(id) {
+        return;
+    }
+    let p = cx.params(id);
+    let max = p.count("max-bytes") as u64;
+    let allow = p.list("allow");
+    for f in files
+        .iter()
+        .filter(|f| !allow.iter().any(|g| glob::matches(g, f)))
+    {
+        let Ok(meta) = std::fs::metadata(cx.project.root.join(f)) else {
+            continue;
+        };
+        let size = meta.len();
+        if size <= max {
+            continue;
+        }
+        cx.emit(
+            Diagnostic::new(id, format!("file:{f}"), format!("{f} is {size} bytes, over the {max}-byte limit"))
+                .span(Span::new(f.clone(), 0))
+                .metric("bytes", size as f64, Some(max as f64))
+                .help("keep it out of git (Git LFS, a download step, or a smaller fixture) or add its glob to `allow`"),
         );
     }
 }
