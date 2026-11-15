@@ -1,6 +1,7 @@
 //! CLI lints, one analysis: [`CLI`]. It builds every CLI binary of the workspace and runs it with arguments that
-//! only print: `-h` and `--help` of every command, `--version`, an unknown flag and `COMPLETE=<shell>`. The lints
-//! read what it printed, so a derive struct, the builder API and self-registering commands look the same.
+//! only print: `-h` and `--help` of every command, `--version`, an unknown flag, `COMPLETE=<shell>`, and (per
+//! command with subcommands) one subcommand's unique prefix. The lints read what it printed, so a derive struct,
+//! the builder API and self-registering commands look the same.
 
 mod checks;
 mod help;
@@ -61,6 +62,9 @@ lint!(SECRET_FLAGS, "C0037", "cli-secret-flags", "cli", "no option takes a secre
         ("safe-suffixes", StrList, "[\"file\", \"path\", \"env\", \"stdin\"]", "a word right after a match that means the flag points at the secret, not holds it"),
     ],
     needs: [Need::Tool("cargo")], fix: None);
+lint!(NO_ABBREV, "C0038", "cli-no-abbreviations", "cli", "a CLI runs no subcommand from a unique prefix",
+    params: [("exempt", StrList, "[]", "subcommand paths allowed to run from a unique prefix, words separated by spaces (`* add`; `*` one word, `**` any)")],
+    needs: [Need::Tool("cargo")], fix: None);
 
 /// The CLI analysis
 pub struct Cli;
@@ -80,6 +84,7 @@ static LINTS: &[&LintMeta] = &[
     &JSON_OUTPUT,
     &STANDARD_FLAGS,
     &SECRET_FLAGS,
+    &NO_ABBREV,
 ];
 
 impl Analysis for Cli {
@@ -122,6 +127,7 @@ impl Analysis for Cli {
                     version: None,
                     usage: None,
                     completions: Vec::new(),
+                    abbrev: Vec::new(),
                     cut: false,
                 };
                 if let Err(e) = probe_tool(cx, Path::new(&exe.path), &mut tool) {
@@ -198,12 +204,14 @@ fn probe_tool(cx: &Context<'_>, exe: &Path, tool: &mut Tool) -> std::io::Result<
         "cli-json-output",
         "cli-standard-flags",
         "cli-secret-flags",
+        "cli-no-abbreviations",
     ]
     .iter()
     .any(|id| cx.enabled(id));
     let p = cx.params("cli-completion");
     let wants = Wants {
         help,
+        no_abbrev: cx.enabled("cli-no-abbreviations"),
         version: cx.enabled("cli-version-line") || cx.enabled("cli-plain-when-piped"),
         usage: cx.enabled("cli-usage-error") || cx.enabled("cli-plain-when-piped"),
         completion: cx

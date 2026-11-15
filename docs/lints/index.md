@@ -94,6 +94,7 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [C0028](C0028.md) | [cli-json-output](C0028.md) | every leaf command of a CLI has a machine-readable output flag | off | off | off | off | off | off | off | off | off | off |
 | [C0029](C0029.md) | [cli-standard-flags](C0029.md) | a CLI's short flags keep their standard meaning | warn | warn | warn | warn | off | off | off | off | off | off |
 | [C0037](C0037.md) | [cli-secret-flags](C0037.md) | no option takes a secret as its value | warn | warn | warn | warn | off | off | off | off | off | off |
+| [C0038](C0038.md) | [cli-no-abbreviations](C0038.md) | a CLI runs no subcommand from a unique prefix | warn | warn | deny | deny | off | off | off | off | off | off |
 
 ## clippy
 

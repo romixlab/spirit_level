@@ -26,6 +26,7 @@ Use it with `extends = "small"` in `spirit_level.toml`.
 | [C0033](../lints/C0033.md) | exact-units-quantity | `warn` | a unit in a name is checked by no one; in the type the compiler checks every use. Names only, so a warning | small |
 | [C0035](../lints/C0035.md) | exact-units-bounds | `warn` | a range the code enforces belongs in the type, where every value is checked when it is made | small |
 | [C0037](../lints/C0037.md) | cli-secret-flags | `warn` | a candidate: a flag's name is a guess at its purpose, so a human reads each hit; the shell history and the process list both see a value passed on the command line | small |
+| [C0038](../lints/C0038.md) | cli-no-abbreviations | `warn` | a caller's shorthand for one subcommand can silently point at a different one once a sibling is added | small |
 | [D0001](../lints/D0001.md) | prose-run-words | `warn` | a long stretch of prose with no heading, figure, table or code block is skimmed, not read | small |
 | [D0002](../lints/D0002.md) | page-reading-time | `warn` | a guide longer than one sitting is left half read | small |
 | [D0003](../lints/D0003.md) | heading-words | `warn` | headings are scanned to find a section; a sentence is read slowly | small |
@@ -289,6 +290,10 @@ reason = "an estimate: help does not say which commands print data, so it fires 
 [lints.cli-secret-flags]
 level = "warn"
 reason = "a candidate: a flag's name is a guess at its purpose, so a human reads each hit; the shell history and the process list both see a value passed on the command line"
+
+[lints.cli-no-abbreviations]
+level = "warn"
+reason = "a caller's shorthand for one subcommand can silently point at a different one once a sibling is added"
 
 [lints.float-partial-cmp-unwrap]
 level = "warn"

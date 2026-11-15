@@ -38,6 +38,10 @@ reason = "fixture"
 level = "deny"
 reason = "fixture"
 
+[lints.cli-no-abbreviations]
+level = "deny"
+reason = "fixture"
+
 [map.layers.app]
 allow = ["app"]
 

@@ -30,7 +30,7 @@ fn main() -> ExitCode {
     match args.as_slice() {
         ["--version"] => println!("tool-cli 0.1.0 (built 3 Oct 2026)"),
         ["-h" | "--help"] => print!("{ROOT}"),
-        ["sync" | "prune", "-h" | "--help"] => print!("{LEAF}"),
+        ["sync" | "prune" | "s", "-h" | "--help"] => print!("{LEAF}"),
         _ => {
             println!("\x1b[31merror:\x1b[0m no such argument {}", args.join(" "));
             return ExitCode::from(1);

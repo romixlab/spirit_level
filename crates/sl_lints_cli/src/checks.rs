@@ -22,6 +22,7 @@ pub(crate) fn run(cx: &Context<'_>, tool: &Tool) {
     json_output(cx, tool, heading);
     standard_flags(cx, tool);
     secret_flags(cx, tool);
+    no_abbrev(cx, tool);
 }
 
 /// A finding about `tool`, keyed on the binary and `what`, placed at its main file
@@ -515,6 +516,42 @@ fn secret_flags(cx: &Context<'_>, tool: &Tool) {
                     .help("read it from a file (a `--*-file` flag) or stdin, or an environment variable; never as a flag's value, where the shell history and the process list both see it"),
             );
         }
+    }
+}
+
+fn no_abbrev(cx: &Context<'_>, tool: &Tool) {
+    const ID: &str = "cli-no-abbreviations";
+    if !cx.enabled(ID) {
+        return;
+    }
+    let p = cx.config.params_for(ID, &tool.krate);
+    for a in &tool.abbrev {
+        if failed(&a.run).is_some() {
+            continue;
+        }
+        let mut target_words = a.parent.clone();
+        target_words.push(a.full.clone());
+        let Some(real) = tool.commands.iter().find(|c| c.words == target_words) else {
+            continue;
+        };
+        if exempt(real, p.list("exempt")) || a.run.stdout != real.short.stdout {
+            continue;
+        }
+        let full_name = crate::probe::path_name(&tool.bin, &target_words);
+        let prefix_call = format!(
+            "{} {}",
+            crate::probe::path_name(&tool.bin, &a.parent),
+            a.prefix
+        );
+        cx.emit(
+            diag(
+                ID,
+                tool,
+                &full_name,
+                format!("`{prefix_call} -h` runs `{full_name}` from its unique prefix `{}`", a.prefix),
+            )
+            .help("don't call `Command::infer_subcommands(true)`: a prefix unique today can point at a different command once a new one is added"),
+        );
     }
 }
 

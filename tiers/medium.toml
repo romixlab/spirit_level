@@ -131,6 +131,10 @@ reason = "colour escapes in a pipe break grep, diffs and scripts"
 level = "deny"
 reason = "a caller tells a wrong call from a failure by exit code 2; clap gives it for free"
 
+[lints.cli-no-abbreviations]
+level = "deny"
+reason = "clap defaults to exact subcommand names for free; turning inference on is a choice, not an accident"
+
 # On top of small's Clippy set: pedantic and cargo, with the opt-outs rerun found to be noise (each with its reason),
 # and the restriction and nursery lints a workspace of this size wants.
 

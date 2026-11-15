@@ -96,6 +96,7 @@ C0034 = { id = "exact-units-plain-number", group = "code", status = "active" }
 C0035 = { id = "exact-units-bounds", group = "code", status = "active" }
 C0036 = { id = "exact-units-in-bodies", group = "code", status = "active" }
 C0037 = { id = "cli-secret-flags", group = "code", status = "active" }
+C0038 = { id = "cli-no-abbreviations", group = "code", status = "active" }
 P0001 = { id = "agent-file-lines", group = "prose", status = "active" }
 P0002 = { id = "agent-file-links", group = "prose", status = "active" }
 P0003 = { id = "agent-rules-match-lints", group = "prose", status = "active" }

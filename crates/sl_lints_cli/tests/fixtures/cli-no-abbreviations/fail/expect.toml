@@ -1,0 +1,5 @@
+project = "../../../projects/bad"
+
+[[finding]]
+at = "src/main.rs"
+contains = "runs `tool sync` from its unique prefix"

@@ -181,6 +181,10 @@ reason = "an estimate: help does not say which commands print data, so it fires 
 level = "warn"
 reason = "a candidate: a flag's name is a guess at its purpose, so a human reads each hit; the shell history and the process list both see a value passed on the command line"
 
+[lints.cli-no-abbreviations]
+level = "warn"
+reason = "a caller's shorthand for one subcommand can silently point at a different one once a sibling is added"
+
 [lints.float-partial-cmp-unwrap]
 level = "warn"
 reason = "partial_cmp(..).unwrap() panics on the first NaN; total_cmp orders every float"
