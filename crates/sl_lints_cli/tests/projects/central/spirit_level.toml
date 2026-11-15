@@ -1,0 +1,10 @@
+[lints.command-registry]
+level = "deny"
+reason = "fixture"
+
+[map.layers.app]
+allow = ["app"]
+
+[map.crates]
+central = { layer = "app", cli = true }
+stub_derive = { layer = "app" }

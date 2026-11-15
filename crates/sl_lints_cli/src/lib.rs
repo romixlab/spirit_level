@@ -1,11 +1,13 @@
 //! CLI lints, one analysis: [`CLI`]. It builds every CLI binary of the workspace and runs it with arguments that
 //! only print: `-h` and `--help` of every command, `--version`, an unknown flag, `COMPLETE=<shell>`, and (per
 //! command with subcommands) one subcommand's unique prefix. The lints read what it printed, so a derive struct,
-//! the builder API and self-registering commands look the same.
+//! the builder API and self-registering commands look the same; only `command-registry` also reads the sources, to
+//! tell them apart.
 
 mod checks;
 mod help;
 mod probe;
+mod registry;
 mod run;
 mod version;
 
@@ -65,6 +67,9 @@ lint!(SECRET_FLAGS, "C0037", "cli-secret-flags", "cli", "no option takes a secre
 lint!(NO_ABBREV, "C0038", "cli-no-abbreviations", "cli", "a CLI runs no subcommand from a unique prefix",
     params: [("exempt", StrList, "[]", "subcommand paths allowed to run from a unique prefix, words separated by spaces (`* add`; `*` one word, `**` any)")],
     needs: [Need::Tool("cargo")], fix: None);
+lint!(REGISTRY, "C0039", "command-registry", "cli", "a CLI with many commands registers each command group in its own module",
+    params: [("size", Int, "8", "subcommands a CLI may have, counted over its whole tree, before they must register themselves")],
+    needs: [Need::Tool("cargo")], fix: None);
 
 /// The CLI analysis
 pub struct Cli;
@@ -85,6 +90,7 @@ static LINTS: &[&LintMeta] = &[
     &STANDARD_FLAGS,
     &SECRET_FLAGS,
     &NO_ABBREV,
+    &REGISTRY,
 ];
 
 impl Analysis for Cli {
@@ -134,7 +140,7 @@ impl Analysis for Cli {
                     cx.not_run_all("tool:cargo", &format!("cannot run {}: {e}", exe.path));
                     return;
                 }
-                checks::run(cx, &tool);
+                checks::run(cx, &tool, pkg);
             }
         }
     }
@@ -205,6 +211,7 @@ fn probe_tool(cx: &Context<'_>, exe: &Path, tool: &mut Tool) -> std::io::Result<
         "cli-standard-flags",
         "cli-secret-flags",
         "cli-no-abbreviations",
+        "command-registry",
     ]
     .iter()
     .any(|id| cx.enabled(id));

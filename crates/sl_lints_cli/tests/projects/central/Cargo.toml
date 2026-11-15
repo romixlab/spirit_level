@@ -1,0 +1,15 @@
+[workspace]
+members = ["stub_derive"]
+
+[package]
+name = "central"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[[bin]]
+name = "tool"
+path = "src/main.rs"
+
+[dependencies]
+stub_derive = { path = "stub_derive" }

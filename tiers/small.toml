@@ -185,6 +185,10 @@ reason = "a candidate: a flag's name is a guess at its purpose, so a human reads
 level = "warn"
 reason = "a caller's shorthand for one subcommand can silently point at a different one once a sibling is added"
 
+[lints.command-registry]
+level = "warn"
+reason = "an estimate: past a handful of commands, one central list is the line every new command edits and every parallel branch conflicts on"
+
 [lints.float-partial-cmp-unwrap]
 level = "warn"
 reason = "partial_cmp(..).unwrap() panics on the first NaN; total_cmp orders every float"

@@ -1,15 +1,17 @@
 //! The lints, each reading what the probe of one tool printed.
 
 use crate::probe::{Cmd, Tool};
+use crate::registry;
 use crate::run::Run;
 use crate::version;
 use sl_analysis::Context;
 use sl_core::{Confidence, Diagnostic, Span, glob};
+use sl_model::Package;
 use std::collections::BTreeSet;
 use std::path::Path;
 
 /// Every lint over one probed tool
-pub(crate) fn run(cx: &Context<'_>, tool: &Tool) {
+pub(crate) fn run(cx: &Context<'_>, tool: &Tool, pkg: &Package) {
     let heading = cx.config.cli.commands_heading.as_str();
     examples(cx, tool, heading);
     help_text(cx, tool, heading);
@@ -23,6 +25,7 @@ pub(crate) fn run(cx: &Context<'_>, tool: &Tool) {
     standard_flags(cx, tool);
     secret_flags(cx, tool);
     no_abbrev(cx, tool);
+    command_registry(cx, tool, pkg);
 }
 
 /// A finding about `tool`, keyed on the binary and `what`, placed at its main file
@@ -553,6 +556,47 @@ fn no_abbrev(cx: &Context<'_>, tool: &Tool) {
             .help("don't call `Command::infer_subcommands(true)`: a prefix unique today can point at a different command once a new one is added"),
         );
     }
+}
+
+fn command_registry(cx: &Context<'_>, tool: &Tool, pkg: &Package) {
+    const ID: &str = "command-registry";
+    if !cx.enabled(ID) {
+        return;
+    }
+    let size = cx.config.params_for(ID, &tool.krate).int("size");
+    let count = tool.commands.iter().filter(|c| !c.words.is_empty()).count();
+    if i64::try_from(count).is_ok_and(|n| n <= size) && !tool.cut {
+        return;
+    }
+    let reg = registry::scan(cx, pkg);
+    if reg.element.is_some() {
+        return;
+    }
+    let at_least = if tool.cut { "at least " } else { "" };
+    let head = format!(
+        "{} has {at_least}{count} subcommands (size {size}) and none registers itself",
+        tool.bin
+    );
+    let none = "no inventory::submit! or linkme distributed_slice element is in its crate or the workspace crates it uses";
+    let d = match &reg.central {
+        Some((file, line, name, variants)) => Diagnostic::new(
+            ID,
+            format!("{}:registry", tool.bin),
+            format!("{head}: `enum {name}` lists {variants} commands, and {none}; assumed: commands are added by editing that list"),
+        )
+        .span(Span::new(file, *line))
+        .krate(&tool.krate),
+        None => diag(
+            ID,
+            tool,
+            "registry",
+            format!("{head}: {none}; assumed: they are listed in one place"),
+        ),
+    };
+    cx.emit(
+        d.confidence(Confidence::Estimate)
+            .help("let each command group register itself in its own module (`inventory::submit!` of a value that builds its clap `Command` and runs it), build the root command from `inventory::iter`, and test the registered names against the expected list"),
+    );
 }
 
 /// Whether the project root is inside a git checkout

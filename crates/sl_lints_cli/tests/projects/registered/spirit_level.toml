@@ -1,0 +1,12 @@
+[lints.command-registry]
+level = "deny"
+reason = "fixture"
+
+[map.layers.app]
+allow = ["app"]
+
+[map.crates]
+big = { layer = "app", cli = true }
+mini = { layer = "app", cli = true }
+cmds = { layer = "app" }
+inventory = { layer = "app" }

@@ -1,0 +1,7 @@
+project = "../../../projects/central"
+
+[[finding]]
+at = "src/cli.rs:26"
+confidence = "estimate"
+
+contains = "`enum Cmd` lists 9 commands"
