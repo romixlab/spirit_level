@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.4.22] - 2026-11-15
+
 ### Added
 
 - `url-tracking-params`: a link in docs or a comment carries no tracking query parameter (PROSE-5).
