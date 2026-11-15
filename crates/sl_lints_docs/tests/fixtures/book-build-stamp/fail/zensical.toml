@@ -1,0 +1,5 @@
+[project]
+site_name = "fx"
+
+[project.theme]
+custom_dir = "overrides"

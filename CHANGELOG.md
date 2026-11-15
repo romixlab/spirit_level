@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `book-build-stamp`: a Zensical book's footer shows version, commit and build age (DOCS-4).
+
 ## [0.4.14] - 2026-11-15
 
 ### Added

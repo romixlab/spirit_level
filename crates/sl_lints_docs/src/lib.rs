@@ -76,6 +76,11 @@ lint!(READING_EASE, "D0016", "reading-ease", "words", "a guide reads easily: sho
              ("min-sentences", Int, "10", "sentences from which a page is judged"),
              ("pages", Choice["all", "guide", "reference"], "\"guide\"", "the kinds of page judged")],
     needs: [], fix: None);
+lint!(BOOK_BUILD_STAMP, "D0017", "book-build-stamp", "book", "the book's footer shows the crate's version, commit and build age",
+    params: [("partial", Str, "\"partials/copyright.html\"", "the override template, relative to the theme's custom_dir, that is expected to carry the footer's build stamp"),
+             ("marker", Str, "\"stamp\"", "text that marks a build stamp in the partial, an extra_javascript file or the built site's index.html"),
+             ("age-marker", Str, "\"ago\"", "text that marks the stamp showing the build's age from the reader's own clock, beside the absolute build time")],
+    needs: [], fix: None);
 
 /// The docs analysis
 pub struct Docs;
@@ -100,6 +105,7 @@ static DOCS_LINTS: &[&LintMeta] = &[
     &TERM_SYNONYMS,
     &PASSIVE_VOICE,
     &READING_EASE,
+    &BOOK_BUILD_STAMP,
 ];
 
 impl Analysis for Docs {

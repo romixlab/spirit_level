@@ -270,6 +270,10 @@ reason = "a passive sentence hides who acts; a page of them reads as things that
 level = "warn"
 reason = "long sentences of long words are read slowly and understood less"
 
+[lints.book-build-stamp]
+level = "warn"
+reason = "without a version, commit and age in the footer, a reader cannot tell which build they are looking at"
+
 # Units in types (exact_units)
 
 [lints.exact-units-quantity]

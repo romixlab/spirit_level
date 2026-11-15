@@ -11,6 +11,9 @@ pub const FILE: &str = "zensical.toml";
 /// The docs folder when the configuration names none
 const DEFAULT_DOCS_DIR: &str = "docs";
 
+/// The built site folder when the configuration names none
+const DEFAULT_SITE_DIR: &str = "site";
+
 /// One page path the navigation names
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct NavEntry {
@@ -35,6 +38,13 @@ pub struct Book {
     pub excluded: Vec<String>,
     /// The theme language (`en`)
     pub language: Option<String>,
+    /// The theme's override directory (`project.theme.custom_dir`), relative to the project root; a book has no
+    /// place for a custom footer partial without one
+    pub overrides_dir: Option<String>,
+    /// `extra_javascript` paths, relative to the docs folder (Zensical resolves them the same way)
+    pub extra_javascript: Vec<String>,
+    /// The built site's folder (`project.site_dir`), relative to the project root
+    pub site_dir: String,
 }
 
 /// Whether a nav string is a page path rather than a link: not a URL, not absolute
@@ -118,6 +128,16 @@ impl Book {
                 .get(&["project", "theme", "language"])
                 .and_then(Item::as_str)
                 .map(str::to_owned),
+            overrides_dir: file
+                .get(&["project", "theme", "custom_dir"])
+                .and_then(Item::as_str)
+                .map(str::to_owned),
+            extra_javascript: patterns(project("extra_javascript")),
+            site_dir: project("site_dir")
+                .and_then(Item::as_str)
+                .unwrap_or(DEFAULT_SITE_DIR)
+                .trim_matches('/')
+                .to_owned(),
             file,
         }))
     }
@@ -186,9 +206,23 @@ mod tests {
         assert!(!b.builds("docs/drafts/x.md"));
         assert!(!b.builds("README.md"));
         assert_eq!(b.language.as_deref(), Some("de"));
+        assert_eq!(b.overrides_dir, None);
+        assert_eq!(b.extra_javascript, Vec::<String>::new());
+        assert_eq!(b.site_dir, "site");
         assert!(pattern_matches("/hidden.md", "hidden.md"));
         assert!(!pattern_matches("/hidden.md", "a/hidden.md"));
         assert!(pattern_matches("hidden.md", "a/hidden.md"));
+    }
+
+    #[test]
+    fn theme_overrides_and_site_dir() {
+        let b = book(
+            "overrides",
+            "[project]\nsite_name = \"x\"\nsite_dir = \"/out/\"\nextra_javascript = [\"javascripts/a.js\", \"javascripts/b.js\"]\n[project.theme]\ncustom_dir = \"overrides\"\n",
+        );
+        assert_eq!(b.overrides_dir.as_deref(), Some("overrides"));
+        assert_eq!(b.extra_javascript, ["javascripts/a.js", "javascripts/b.js"]);
+        assert_eq!(b.site_dir, "out");
     }
 
     #[test]

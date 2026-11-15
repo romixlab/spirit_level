@@ -1,4 +1,4 @@
-//! The book lints: the navigation, pages nobody reaches, titles, admonitions.
+//! The book lints: the navigation, pages nobody reaches, titles, admonitions, the footer's build stamp.
 
 use crate::members;
 use sl_analysis::Context;
@@ -6,11 +6,15 @@ use sl_core::{Diagnostic, Span};
 use sl_docs::page::Page;
 use sl_docs::{Book, Kind, walk};
 use std::collections::BTreeSet;
+use std::path::Path;
 
 pub(crate) fn run(cx: &Context<'_>, book: &Book) {
     let root = &cx.project.root;
     if cx.enabled("nav-entries") {
         nav_entries(cx, book);
+    }
+    if cx.enabled("book-build-stamp") {
+        build_stamp(cx, root, book);
     }
     let all = [format!("{}/**/*.md", book.docs_dir)];
     let pages: Vec<Page> = walk::files(root, &members(cx.project), &all, &[])
@@ -52,6 +56,69 @@ fn nav_entries(cx: &Context<'_>, book: &Book) {
                 .help("correct the path, relative to the docs folder, or drop the entry"),
             );
         }
+    }
+}
+
+/// The committed sources that could carry a build stamp: the theme's override partial, every `extra_javascript`
+/// file, and the built site's home page when it is there
+fn build_stamp(cx: &Context<'_>, root: &Path, book: &Book) {
+    let id = "book-build-stamp";
+    let p = cx.params(id);
+    let partial = p.str("partial");
+    let marker = p.str("marker").to_lowercase();
+    let age_marker = p.str("age-marker").to_lowercase();
+    let mut sources = Vec::new();
+    if let Some(dir) = &book.overrides_dir {
+        let rel = format!("{dir}/{partial}");
+        if let Some(text) = walk::read_page(root, &rel) {
+            sources.push((rel, text));
+        }
+    }
+    for js in &book.extra_javascript {
+        let rel = book.rel(js);
+        if let Some(text) = walk::read_page(root, &rel) {
+            sources.push((rel, text));
+        }
+    }
+    let index = format!("{}/index.html", book.site_dir);
+    if let Some(text) = walk::read_page(root, &index) {
+        sources.push((index, text));
+    }
+    let Some((stamp_file, _)) = sources
+        .iter()
+        .find(|(_, text)| text.to_lowercase().contains(&marker))
+    else {
+        cx.emit(
+            Diagnostic::new(
+                id,
+                "stamp",
+                "the book's footer shows no build stamp: a reader cannot tell which version or commit of the \
+                 project they are reading",
+            )
+            .span(Span::new(book.file.rel.clone(), 0))
+            .help(format!(
+                "add an override partial under the theme's custom_dir that includes a generated stamp (crate \
+                 version, commit, build time) into {partial}"
+            )),
+        );
+        return;
+    };
+    if !sources
+        .iter()
+        .any(|(_, text)| text.to_lowercase().contains(&age_marker))
+    {
+        cx.emit(
+            Diagnostic::new(
+                id,
+                "age",
+                "the build stamp shows only the absolute build time: no age from the reader's own clock",
+            )
+            .span(Span::new(stamp_file.clone(), 1))
+            .help(
+                "add a small script that turns the build time into \"built 3 h ago\", coarser as it grows \
+                 (seconds, then minutes, hours, days), beside the absolute UTC time",
+            ),
+        );
     }
 }
 
