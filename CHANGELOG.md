@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `page-links`: a link between pages resolves to a relative `.md` path, never `.html` or absolute, book or not (DOCS-6).
+
 ## [0.4.18] - 2026-11-15
 
 ### Added

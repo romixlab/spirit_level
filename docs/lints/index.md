@@ -340,6 +340,12 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [F0063](F0063.md) | [irq-6](F0063.md) | interrupts are disabled through critical sections, never nested by hand | off | off | off | off | off | warn | off | off | off | off |
 | [F0064](F0064.md) | [irq-8](F0064.md) | the default interrupt handler records which IRQ fired | off | off | off | off | off | warn | off | off | off | off |
 
+## links
+
+| Code | Lint | Rule | small | small-workspace | medium | big | ai | embedded | ui | egui | units-strict | units-paranoid |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| [D0018](D0018.md) | [page-links](D0018.md) | a link between pages is a relative path to a Markdown file that exists | deny | deny | deny | deny | off | off | off | off | off | off |
+
 ## log
 
 | Code | Lint | Rule | small | small-workspace | medium | big | ai | embedded | ui | egui | units-strict | units-paranoid |

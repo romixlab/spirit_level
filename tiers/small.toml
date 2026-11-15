@@ -242,6 +242,10 @@ reason = "a navigation entry that names no page renders as a link that leads now
 level = "warn"
 reason = "a page nobody reaches is published, unread and left to go stale"
 
+[lints.page-links]
+level = "deny"
+reason = "a link to a page that moved or never existed, or to the built site, leads a reader nowhere"
+
 [lints.page-title]
 level = "warn"
 reason = "a page without a title is shown under its file name"

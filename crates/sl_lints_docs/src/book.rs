@@ -247,7 +247,7 @@ fn zensical_keys_walk(
 
 /// The page a relative link of `from` points at, relative to the root: its `#anchor` and `?query` dropped, `..`
 /// resolved; None for an external link or one that leaves the root
-fn target(from: &str, dest: &str) -> Option<String> {
+pub(crate) fn target(from: &str, dest: &str) -> Option<String> {
     let path = dest.split(['#', '?']).next().unwrap_or("");
     if path.is_empty() {
         return None;

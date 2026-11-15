@@ -5,6 +5,7 @@
 //! same numbers feed `spl pages` through [`report`].
 
 mod book;
+mod links;
 mod reading;
 mod words;
 
@@ -76,6 +77,8 @@ lint!(READING_EASE, "D0016", "reading-ease", "words", "a guide reads easily: sho
              ("min-sentences", Int, "10", "sentences from which a page is judged"),
              ("pages", Choice["all", "guide", "reference"], "\"guide\"", "the kinds of page judged")],
     needs: [], fix: None);
+lint!(PAGE_LINKS, "D0021", "page-links", "links", "a link between pages is a relative path to a Markdown file that exists",
+    params: [], needs: [], fix: None);
 lint!(BOOK_BUILD_STAMP, "D0017", "book-build-stamp", "book", "the book's footer shows the crate's version, commit and build age",
     params: [("partial", Str, "\"partials/copyright.html\"", "the override template, relative to the theme's custom_dir, that is expected to carry the footer's build stamp"),
              ("marker", Str, "\"stamp\"", "text that marks a build stamp in the partial, an extra_javascript file or the built site's index.html"),
@@ -118,6 +121,7 @@ static DOCS_LINTS: &[&LintMeta] = &[
     &README_INDEX_CLASH,
     &THEME_FEATURE_CONFLICTS,
     &ZENSICAL_KEYS,
+    &PAGE_LINKS,
 ];
 
 impl Analysis for Docs {
@@ -133,6 +137,7 @@ impl Analysis for Docs {
         let pages = pages(cx.project, cx.config);
         reading::run(cx, &pages);
         words::run(cx, &pages, english(cx.project, cx.config));
+        links::run(cx, &pages);
         match Book::read(&cx.project.root) {
             Ok(Some(b)) => book::run(cx, &b),
             Ok(None) => {}
