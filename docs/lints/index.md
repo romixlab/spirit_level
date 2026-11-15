@@ -154,6 +154,7 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [C0030](C0030.md) | [compound-assert](C0030.md) | an assertion checks one condition, so a failure names the one that broke | off | off | off | warn | off | warn | off | off | off | off |
 | [C0031](C0031.md) | [assert-message](C0031.md) | every assertion says in words what it checks | off | off | off | warn | off | warn | off | off | off | off |
 | [C0032](C0032.md) | [float-partial-cmp-unwrap](C0032.md) | floats are ordered with total_cmp, not partial_cmp that panics on NaN | warn | warn | warn | warn | off | off | off | off | off | off |
+| [C0040](C0040.md) | [build-script-clock](C0040.md) | build.rs reads no clock and resolves git through the real git dir | warn | warn | warn | warn | off | off | off | off | off | off |
 
 ## commits
 

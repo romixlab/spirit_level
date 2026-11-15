@@ -4,7 +4,7 @@
 
 ### Added
 
-- `build-script-clock` (C0039): build.rs reads no clock and resolves git through the real git dir (CODE-5).
+- `build-script-clock` (C0040): build.rs reads no clock and resolves git through the real git dir (CODE-5).
 
 ## [0.4.27] - 2026-11-15
 

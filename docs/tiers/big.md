@@ -47,6 +47,7 @@ Use it with `extends = "big"` in `spirit_level.toml`.
 | [C0037](../lints/C0037.md) | cli-secret-flags | `warn` | a candidate: a flag's name is a guess at its purpose, so a human reads each hit; the shell history and the process list both see a value passed on the command line | small |
 | [C0038](../lints/C0038.md) | cli-no-abbreviations | `deny` | clap defaults to exact subcommand names for free; turning inference on is a choice, not an accident | medium |
 | [C0039](../lints/C0039.md) | command-registry | `warn` | an estimate: past a handful of commands, one central list is the line every new command edits and every parallel branch conflicts on | small |
+| [C0040](../lints/C0040.md) | build-script-clock | `warn` | a clock read makes the build unreproducible; a hardcoded .git path breaks in a worktree checkout | small |
 | [D0001](../lints/D0001.md) | prose-run-words | `warn` | a long stretch of prose with no heading, figure, table or code block is skimmed, not read | small |
 | [D0002](../lints/D0002.md) | page-reading-time | `warn` | a guide longer than one sitting is left half read | small |
 | [D0003](../lints/D0003.md) | heading-words | `warn` | headings are scanned to find a section; a sentence is read slowly | small |

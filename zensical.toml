@@ -94,6 +94,7 @@ nav = [
         "lints/C0037.md",
         "lints/C0038.md",
         "lints/C0039.md",
+        "lints/C0040.md",
         "lints/D0001.md",
         "lints/D0002.md",
         "lints/D0003.md",
