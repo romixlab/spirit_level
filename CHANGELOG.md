@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.4.9] - 2026-11-15
+
 ### Fixed
 
 - `deny-licenses` without `deny.toml` reports one finding, not one per crate (TOOL-3).
