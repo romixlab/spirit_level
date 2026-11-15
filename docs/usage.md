@@ -1,8 +1,8 @@
 # Usage records
 
-Every run of spl counts which command and which flags it was given, in a small file on the machine that ran it. `spl usage` shows the counts for every part of the command line, the never-used ones included. The point is to find the parts nobody uses, so they can be removed.
+Every run of spl can count which command and which flags it was given, in a small file on the machine that ran it. `spl usage` shows the counts for every part of the command line, the never-used ones included. The point is to find the parts nobody uses, so they can be removed.
 
-Nothing leaves the machine. There is no network access, no upload and no identifier: the file holds counts per command and flag, by day.
+Opt-in, off by default: nothing is recorded, and no directory is created, until it is enabled. Nothing leaves the machine either way. There is no network access, no upload and no identifier: the file holds counts per command and flag, by day.
 
 ## What is counted
 
@@ -32,11 +32,14 @@ Each run also records where it came from:
 
 ## Where the records are
 
+Off by default.
+
 | Setting | Directory |
 |---|---|
 | `SPL_USAGE_DIR=DIR` | `DIR` |
-| `SPL_USAGE_DIR=off` | none: recording is off |
-| otherwise | `$XDG_STATE_HOME/spl/usage`, by default `~/.local/state/spl/usage` |
+| `SPL_USAGE=on` | `$XDG_STATE_HOME/spl/usage`, by default `~/.local/state/spl/usage` |
+| `SPL_USAGE_DIR=off` | none: recording is off, even with `SPL_USAGE=on` |
+| neither set | none: recording is off |
 
 The directory holds two files:
 
@@ -67,7 +70,7 @@ spl usage --format json
 
 `--unused` lists only the never-used ones. `--format json` prints the same rows as one document (`schema`, `dir`, `signals`), each with `signal`, `runs`, `terminal`, `script`, `agent`, `first`, `last` and `known`.
 
-`spl usage` exits 2 when recording is off or the records cannot be read.
+`spl usage` exits 2 when recording is off or the records cannot be read; off, it says how to enable it.
 
 ## For other CLIs
 

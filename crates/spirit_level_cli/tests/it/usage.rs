@@ -1,5 +1,6 @@
 //! `spl usage` and the records every run leaves (CLI-2): counted per command and flag, from a script, on the
-//! injected day, in a scratch store.
+//! injected day, in a scratch store. Made opt-in, off by default, in `vc_usage` (CLI-5); these tests still opt
+//! in explicitly, so they pass under the locked `vc_usage` either way.
 #![expect(
     clippy::let_underscore_must_use,
     reason = "a test removes its scratch directory as far as it can"

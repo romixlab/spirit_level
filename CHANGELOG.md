@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Usage records become opt-in, off by default: `SPL_USAGE_DIR=DIR` or `SPL_USAGE=on` enables them (CLI-5).
+
 ## [0.4.3] - 2026-11-15
 
 ### Added
