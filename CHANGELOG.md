@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `tool-shadowed`: an out-of-range tool shadowing an in-range one on PATH is named, not told to reinstall (TOOL-5).
+
 ## [0.4.20] - 2026-11-15
 
 ### Added

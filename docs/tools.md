@@ -130,7 +130,7 @@ Builds that cargo does itself, reported from `--message-format json`. Other tool
 
 ## Installing the tools
 
-`spl tools needed` shows each tool the project needs: its tested range, the version found and where, whether it is in range, whether it runs on nightly, and the lints that run it. It exits with 1 while something needed is missing or outside its tested range. Its other outputs feed an installer:
+`spl tools needed` shows each tool the project needs: its tested range, the version found and where, whether it is in range, whether it runs on nightly, a later PATH entry that already has it in range, and the lints that run it. It exits with 1 while something needed is missing or outside its tested range. Its other outputs feed an installer:
 
 | Flag | Prints | For |
 |---|---|---|
@@ -138,7 +138,7 @@ Builds that cargo does itself, reported from `--message-format json`. Other tool
 | `--components` | one rustup component per line | `xargs -r rustup component add` |
 | `--toolchains` | one toolchain per line (`cargo-msrv`) | `xargs -r -n1 rustup toolchain install --profile minimal` |
 | `--targets` | one target per line (`cargo-no-std`, `cargo-wasm`) | `xargs -r rustup target add` |
-| `--json` | every record: crate, version, tested range, path, version found, state, lints | scripts and packagers |
+| `--json` | every record: crate, version, tested range, path, version found, state, shadow, lints | scripts and packagers |
 
 `--missing` keeps only what is missing, outside its tested range or prints no version. `--all` lists every tool that has an adapter, without reading a project. For example, in CI:
 
@@ -149,3 +149,7 @@ spl check
 ```
 
 The version in `--spec` is the one the parser is tested at. A tool's version is the first word shaped like one in the output of its `version-args` (default `--version`); `cargo-udeps` runs on a nightly toolchain, which `rustup toolchain install nightly --profile minimal` adds.
+
+### A tool shadowed on PATH
+
+PATH is searched in order, and the first match wins. An earlier directory holding an out-of-range copy (a distribution package ahead of `~/.cargo/bin`) hides an in-range one further down: `--spec` and `--components` never list such a tool, since installing it again changes nothing. The table's `shadowed by` column, the JSON `shadow` field and the `tool-version` finding's help all name the later path and version instead, and say to remove the earlier one from PATH or move its directory after the later one's.

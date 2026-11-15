@@ -10,8 +10,8 @@ use std::os::unix::fs::PermissionsExt;
 use std::path::{Path, PathBuf};
 use std::process::Output;
 
-/// A scratch project and a `bin/` of fake tools beside it, removed on drop
-struct Setup(PathBuf);
+/// A scratch project and one or more `bin*/` directories of fake tools, joined into PATH in order; removed on drop
+struct Setup(PathBuf, Vec<PathBuf>);
 
 const ROOT: &str = "[workspace]\nmembers = [\"crates/*\"]\nresolver = \"3\"\n";
 const A: &str = "[package]\nname = \"a\"\nversion = \"0.1.0\"\nedition = \"2024\"\n";
@@ -31,6 +31,11 @@ impl Setup {
     }
 
     fn with_config(name: &str, config: &str, tools: &[(&str, &str)]) -> Self {
+        Self::build(name, config, &[tools])
+    }
+
+    /// `path_dirs`: one slice of fake tools per PATH directory, in PATH order; `cargo` is linked into the first
+    fn build(name: &str, config: &str, path_dirs: &[&[(&str, &str)]]) -> Self {
         let dir = std::env::temp_dir().join(format!("sl_cli_tools_{}_{name}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         for (p, t) in [
@@ -44,16 +49,32 @@ impl Setup {
                 .expect("create the scratch directory");
             std::fs::write(f, t).expect("write a scratch file");
         }
-        let bin = dir.join("bin");
-        std::fs::create_dir_all(&bin).expect("create the fake PATH directory");
-        std::os::unix::fs::symlink(env!("CARGO"), bin.join("cargo")).expect("link cargo");
-        for (exe, script) in tools {
-            let f = bin.join(exe);
-            std::fs::write(&f, format!("#!/bin/sh\n{script}\n")).expect("write a fake tool");
-            std::fs::set_permissions(&f, std::fs::Permissions::from_mode(0o755))
-                .expect("make a fake tool executable");
+        let mut bins = Vec::new();
+        for (i, tools) in path_dirs.iter().enumerate() {
+            let bin = dir.join(format!("bin{i}"));
+            std::fs::create_dir_all(&bin).expect("create the fake PATH directory");
+            if i == 0 {
+                std::os::unix::fs::symlink(env!("CARGO"), bin.join("cargo")).expect("link cargo");
+            }
+            for (exe, script) in *tools {
+                let f = bin.join(exe);
+                std::fs::write(&f, format!("#!/bin/sh\n{script}\n")).expect("write a fake tool");
+                std::fs::set_permissions(&f, std::fs::Permissions::from_mode(0o755))
+                    .expect("make a fake tool executable");
+            }
+            bins.push(bin);
         }
-        Self(dir)
+        Self(dir, bins)
+    }
+
+    /// Two PATH directories: `front`'s tools shadow `back`'s
+    fn with_shadow(
+        name: &str,
+        config: &str,
+        front: &[(&str, &str)],
+        back: &[(&str, &str)],
+    ) -> Self {
+        Self::build(name, config, &[front, back])
     }
 
     fn project(&self) -> PathBuf {
@@ -61,10 +82,11 @@ impl Setup {
     }
 
     fn spl(&self, args: &[&str]) -> Output {
+        let path = std::env::join_paths(&self.1).expect("join the fake PATH directories");
         crate::spl()
             .args(args)
             .current_dir(self.project())
-            .env("PATH", self.0.join("bin"))
+            .env("PATH", path)
             .env("SPIRIT_LEVEL_TODAY", "2026-11-13")
             .env("NO_COLOR", "1")
             .output()
@@ -72,7 +94,12 @@ impl Setup {
     }
 
     fn bin(&self, exe: &str) -> String {
-        self.0.join("bin").join(exe).display().to_string()
+        self.1[0].join(exe).display().to_string()
+    }
+
+    /// The executable in the `i`-th PATH directory
+    fn bin_at(&self, i: usize, exe: &str) -> String {
+        self.1[i].join(exe).display().to_string()
     }
 }
 
@@ -122,18 +149,18 @@ fn table_lists_each_tool_and_exits_1_when_one_is_missing() {
     assert_eq!(
         line("cargo-deny"),
         format!(
-            "cargo-deny >=0.20, <0.21 0.20.9 in range {} deny-bans",
+            "cargo-deny >=0.20, <0.21 0.20.9 in range {} - deny-bans",
             s.bin("cargo-deny")
         )
     );
     assert_eq!(
         line("cargo-machete"),
-        "cargo-machete >=0.9, <0.10 - missing - machete-unused-deps"
+        "cargo-machete >=0.9, <0.10 - missing - - machete-unused-deps"
     );
     assert_eq!(
         line("typos"),
         format!(
-            "typos >=1.52, <1.53 1.50.3 out of range {} typos-misspelling",
+            "typos >=1.52, <1.53 1.50.3 out of range {} - typos-misspelling",
             s.bin("typos")
         )
     );
@@ -380,6 +407,86 @@ fn allow_warn_not_run_never_lets_a_deny_level_lint_through() {
         assert_eq!(o.status.code(), Some(3), "{args:?}: {t}");
         assert!(t.contains("failed: ") && t.contains("1 not run"), "{t}");
     }
+}
+
+const TYPOS_ONLY: &str = "[lints.typos-misspelling]\nlevel = \"warn\"\nreason = \"r\"\n\n[lints.tool-version]\nlevel = \"warn\"\nreason = \"r\"\n";
+
+/// typos out of range in the first PATH directory, in range in the second
+fn shadow(name: &str) -> Setup {
+    let script = |v: &str| format!("[ \"$1\" = --version ] && echo 'typos-cli {v}'; exit 0");
+    Setup::with_shadow(
+        name,
+        TYPOS_ONLY,
+        &[("typos", &script("1.50.3"))],
+        &[("typos", &script("1.52.2"))],
+    )
+}
+
+#[test]
+fn table_names_a_shadowed_in_range_tool_instead_of_installing() {
+    let s = shadow("shadow_table");
+    let o = s.spl(&["tools", "needed"]);
+    let t = all(&o);
+    assert_eq!(o.status.code(), Some(1), "{t}");
+    assert!(t.contains(&s.bin("typos")), "{t}");
+    assert!(t.contains(&s.bin_at(1, "typos")), "{t}");
+    assert!(t.contains("1.52.2"), "{t}");
+    assert!(
+        t.contains("shadows it") || t.contains("already in range"),
+        "{t}"
+    );
+    assert!(
+        !t.contains("cargo binstall"),
+        "a shadowed tool needs no reinstall: {t}"
+    );
+}
+
+#[test]
+fn spec_and_components_skip_a_shadowed_tool() {
+    let s = shadow("shadow_spec");
+    let o = s.spl(&["tools", "needed", "--spec"]);
+    assert_eq!(stdout(&o), "", "{}", all(&o));
+}
+
+#[test]
+fn json_names_the_shadow_path_and_version() {
+    let s = shadow("shadow_json");
+    let o = s.spl(&["tools", "needed", "--json"]);
+    let v: serde_json::Value =
+        serde_json::from_slice(&o.stdout).unwrap_or_else(|e| panic!("{e}: {}", all(&o)));
+    let typos = &v["tools"][0];
+    assert_eq!(typos["name"], "typos");
+    assert_eq!(typos["state"], "out of range");
+    assert_eq!(typos["path"], s.bin("typos"));
+    assert_eq!(typos["shadow"]["version"], "1.52.2");
+    assert_eq!(typos["shadow"]["path"], s.bin_at(1, "typos"));
+    let reason = typos["reason"].as_str().expect("a reason");
+    assert!(
+        reason.contains("1.50.3") && reason.contains("1.52.2"),
+        "{reason}"
+    );
+    assert!(reason.contains("shadows it"), "{reason}");
+}
+
+#[test]
+fn check_names_the_shadow_in_its_help_not_an_install() {
+    let s = shadow("shadow_check");
+    let o = s.spl(&["check", "--format", "json"]);
+    let v: serde_json::Value =
+        serde_json::from_slice(&o.stdout).unwrap_or_else(|e| panic!("{e}: {}", all(&o)));
+    let d = v["diagnostics"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .find(|d| d["lint"] == "tool-version")
+        .expect("a tool-version finding");
+    let help = d["help"].as_str().expect("a help line");
+    assert!(
+        help.contains("remove") && help.contains(&s.bin("typos")),
+        "{help}"
+    );
+    assert!(help.contains(&s.bin_at(1, "typos")), "{help}");
+    assert!(!help.contains("cargo binstall"), "{help}");
 }
 
 #[test]

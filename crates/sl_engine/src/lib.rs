@@ -366,7 +366,7 @@ fn untested_tools(tools: &Tools, ran: &[String], lints: &[&'static LintMeta]) ->
             .span(Span::new("spirit_level.toml", 0))
             .help(format!(
                 "{}; `spl tools needed` lists every tool",
-                d.pin.install_help()
+                d.fix_help()
             )),
         );
     }

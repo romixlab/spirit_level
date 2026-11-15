@@ -17,7 +17,7 @@ mod detect;
 mod pins;
 pub mod rustup;
 
-pub use detect::{Detection, State, detect};
+pub use detect::{Detection, Shadowed, State, detect};
 pub use pins::{Pin, PinKind, pin, pins};
 
 use std::ffi::OsStr;

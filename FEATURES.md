@@ -126,6 +126,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `TOOL-2` `tools-needed`: tools found on PATH with their version checked against a tested range (`tool-version`); `spl tools needed` lists what a project needs, as a table, `crate@version` specs or JSON; any enabled lint that cannot run fails the run (`--allow-warn-not-run` lets warn-level ones through) ([tools](docs/tools.md#installing-the-tools)).
 - ✅ `TOOL-3` `deny-licenses` without `deny.toml`: one finding asking for the file, not one per crate (cargo-deny's own default policy allows no licence).
 - ✅ `TOOL-4` full-by-default: hakari and geiger are always linked into `spl`, no cargo feature to build them in ([tools](docs/tools.md)).
+- ✅ `TOOL-5` `tool-shadowed`: an out-of-range tool with an in-range one further down PATH is named by both path and version, in the table's `shadowed by` column, the JSON `shadow` field and the lint's help; `--spec`/`--components` skip it ([tools](docs/tools.md#a-tool-shadowed-on-path)).
 
 ## BOOK - the book
 

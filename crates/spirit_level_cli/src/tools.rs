@@ -201,9 +201,9 @@ fn needed(a: &NeededArgs) -> Result<Exit, String> {
         n.only_wanted();
     }
     let out = if a.spec {
-        lines(n.tools.iter().filter_map(|t| t.found.pin.spec()))
+        lines(not_shadowed(&n).filter_map(|t| t.found.pin.spec()))
     } else if a.components {
-        lines(n.tools.iter().filter_map(|t| match &t.found.pin.kind {
+        lines(not_shadowed(&n).filter_map(|t| match &t.found.pin.kind {
             PinKind::Component(c) => Some(c.clone()),
             PinKind::Crate { .. } => None,
         }))
@@ -232,6 +232,11 @@ fn lines(items: impl Iterator<Item = String>) -> String {
     items.map(|l| l + "\n").collect()
 }
 
+/// `n`'s tools that are not shadowed: an in-range tool further down PATH needs no install, only PATH fixed
+fn not_shadowed(n: &Needed) -> impl Iterator<Item = &Tool> {
+    n.tools.iter().filter(|t| t.found.shadowed.is_none())
+}
+
 fn to_json(n: &Needed) -> Value {
     let tools: Vec<Value> = n
         .tools
@@ -258,6 +263,10 @@ fn to_json(n: &Needed) -> Value {
                 "state": d.state().as_str(),
                 "reason": d.missing_reason().or_else(|| d.untested_reason()),
                 "install": p.install_help(),
+                "shadow": d.shadowed.as_ref().map(|s| json!({
+                    "path": s.exe.display().to_string(),
+                    "version": s.version.to_string(),
+                })),
                 "lints": t.lints,
             })
         })
@@ -333,7 +342,14 @@ fn table(n: &Needed, p: Paint) -> String {
     if !n.tools.is_empty() {
         let mut rows = vec![
             [
-                "tool", "tested", "found", "state", "nightly", "path", "lints",
+                "tool",
+                "tested",
+                "found",
+                "state",
+                "nightly",
+                "path",
+                "shadowed by",
+                "lints",
             ]
             .map(|h| p.paint(vc_ui::HEADING, h))
             .to_vec(),
@@ -351,6 +367,10 @@ fn table(n: &Needed, p: Paint) -> String {
                 d.exe
                     .as_ref()
                     .map_or_else(|| "-".to_owned(), |e| e.display().to_string()),
+                d.shadowed.as_ref().map_or_else(
+                    || "-".to_owned(),
+                    |s| format!("{} {}", s.version, s.exe.display()),
+                ),
                 t.lints.join(", "),
             ]);
         }
@@ -406,12 +426,13 @@ fn next_hints(n: &Needed, p: Paint) -> String {
     let mut hints = Vec::new();
     if wanted
         .iter()
-        .any(|t| matches!(t.found.pin.kind, PinKind::Crate { .. }))
+        .any(|t| t.found.shadowed.is_none() && matches!(t.found.pin.kind, PinKind::Crate { .. }))
     {
         hints.push("spl tools needed --spec --missing | xargs -r cargo binstall -y".to_owned());
     }
     let components: Vec<&str> = wanted
         .iter()
+        .filter(|t| t.found.shadowed.is_none())
         .filter_map(|t| match &t.found.pin.kind {
             PinKind::Component(c) => Some(c.as_str()),
             PinKind::Crate { .. } => None,
@@ -419,6 +440,9 @@ fn next_hints(n: &Needed, p: Paint) -> String {
         .collect();
     if !components.is_empty() {
         hints.push(format!("rustup component add {}", components.join(" ")));
+    }
+    for t in wanted.iter().filter(|t| t.found.shadowed.is_some()) {
+        hints.push(t.found.fix_help());
     }
     for t in n.toolchains.iter().filter(|t| t.missing.is_some()) {
         hints.push(format!(
