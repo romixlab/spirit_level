@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.4.1] - 2026-11-15
+
 ### Fixed
 
 - `spl tools needed` exits 1 when a tool is outside its tested range, not only when one is missing (TOOL-2).
