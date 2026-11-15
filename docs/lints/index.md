@@ -298,6 +298,7 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [G0008](G0008.md) | [map-complete](G0008.md) | the crate map and the workspace list the same crates | off | off | off | deny | off | off | off | off | off | off |
 | [G0009](G0009.md) | [third-party-placement](G0009.md) | heavy third-party crates are used only by the crates the map names | off | off | off | deny | off | off | off | off | off | off |
 | [G0010](G0010.md) | [unsafe-allow-list](G0010.md) | unsafe code is forbidden except in the crates the map marks unsafe | off | off | off | deny | off | off | off | off | off | off |
+| [G0011](G0011.md) | [crate-folder-layer](G0011.md) | a crate's folder is its layer in the map, then its discipline where the map gives one | off | off | off | deny | off | off | off | off | off | off |
 
 ## hakari
 
@@ -483,6 +484,7 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [S0003](S0003.md) | [function-lines](S0003.md) | a function stays under its line limit | warn | warn | warn | warn | off | off | off | off | off | off |
 | [S0004](S0004.md) | [module-lines](S0004.md) | a source file stays under its line limit | off | off | warn | warn | off | off | off | off | off | off |
 | [S0005](S0005.md) | [test-lines](S0005.md) | a crate's test code stays under its line limit | off | off | off | warn | off | off | off | off | off | off |
+| [S0006](S0006.md) | [crate-folder-size](S0006.md) | a folder holds no more crate folders than its limit | off | off | warn | deny | off | off | off | off | off | off |
 
 ## state
 

@@ -83,6 +83,7 @@ Use it with `extends = "medium"` in `spirit_level.toml`.
 | [S0002](../lints/S0002.md) | function-complexity | `warn` | more paths than can be tested or held in one's head | small |
 | [S0003](../lints/S0003.md) | function-lines | `warn` | a function longer than a screen is changed without being read whole | small |
 | [S0004](../lints/S0004.md) | module-lines | `warn` | a file of thousands of lines holds several subjects and collects every edit | medium |
+| [S0006](../lints/S0006.md) | crate-folder-size | `warn` | a flat crates/ past a few dozen crates groups by layer; a layer of about 100 crates by discipline | medium |
 | [T0001](../lints/T0001.md) | lock-held-across | `warn` | a guard across .await or I/O stalls every other caller for as long as the slowest peer | small |
 | [T0002](../lints/T0002.md) | lock-unwrap | `warn` | the count of lock().unwrap() per crate shows where shared state concentrates | medium |
 | [T0003](../lints/T0003.md) | nested-locks | `warn` | two locks at once need one lock order everywhere | small-workspace |
@@ -203,6 +204,10 @@ reason = "a file of thousands of lines holds several subjects and collects every
 [lints.crate-lines]
 level = "warn"
 reason = "split a crate before it passes ~20,000 lines: one crate is one serial compile step"
+
+[lints.crate-folder-size]
+level = "warn"
+reason = "a flat crates/ past a few dozen crates groups by layer; a layer of about 100 crates by discipline"
 
 [lints.lock-unwrap]
 level = "warn"

@@ -65,6 +65,7 @@ Use it with `extends = "big"` in `spirit_level.toml`.
 | [G0008](../lints/G0008.md) | map-complete | `deny` | the crate map is the source of truth: every crate in it, nothing gone | big |
 | [G0009](../lints/G0009.md) | third-party-placement | `deny` | heavy dependencies sit in one crate each | big |
 | [G0010](../lints/G0010.md) | unsafe-allow-list | `deny` | unsafe is forbidden except in the crates the map lists | big |
+| [G0011](../lints/G0011.md) | crate-folder-layer | `deny` | the map decides the path: crates/<layer>/<crate>, a large layer by discipline, never deeper | big |
 | [M0001](../lints/M0001.md) | default-features-off | `deny` | feature creep in a big graph costs every build | big |
 | [M0002](../lints/M0002.md) | duplicate-versions | `deny` | two versions of a crate double its build time and split its types | big |
 | [M0003](../lints/M0003.md) | git-dependency-pins | `deny` | git dependencies follow a branch; a pin hides a break until it is old | medium |
@@ -106,6 +107,7 @@ Use it with `extends = "big"` in `spirit_level.toml`.
 | [S0003](../lints/S0003.md) | function-lines | `warn` | a function longer than a screen is changed without being read whole | small |
 | [S0004](../lints/S0004.md) | module-lines | `warn` | a file of thousands of lines holds several subjects and collects every edit | medium |
 | [S0005](../lints/S0005.md) | test-lines | `warn` | test code builds and links too | big |
+| [S0006](../lints/S0006.md) | crate-folder-size | `deny` | a flat crates/ past a few dozen crates groups by layer; a layer of about 100 crates by discipline | big |
 | [T0001](../lints/T0001.md) | lock-held-across | `deny` | a guard across .await or I/O stalls every other caller for as long as the slowest peer | big |
 | [T0002](../lints/T0002.md) | lock-unwrap | `warn` | the count of lock().unwrap() per crate shows where shared state concentrates | medium |
 | [T0003](../lints/T0003.md) | nested-locks | `warn` | two locks at once need one lock order everywhere | small-workspace |
@@ -265,6 +267,14 @@ reason = "the crate map is the source of truth: every crate in it, nothing gone"
 [lints.layer-edges]
 level = "deny"
 reason = "layers are declared and checked edge by edge; move a crate, never reorder layers"
+
+[lints.crate-folder-size]
+level = "deny"
+reason = "a flat crates/ past a few dozen crates groups by layer; a layer of about 100 crates by discipline"
+
+[lints.crate-folder-layer]
+level = "deny"
+reason = "the map decides the path: crates/<layer>/<crate>, a large layer by discipline, never deeper"
 
 [lints.forbidden-closure]
 level = "deny"
