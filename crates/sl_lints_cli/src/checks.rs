@@ -21,6 +21,7 @@ pub(crate) fn run(cx: &Context<'_>, tool: &Tool) {
     version_line(cx, tool);
     json_output(cx, tool, heading);
     standard_flags(cx, tool);
+    secret_flags(cx, tool);
 }
 
 /// A finding about `tool`, keyed on the binary and `what`, placed at its main file
@@ -460,7 +461,91 @@ fn standard_flags(cx: &Context<'_>, tool: &Tool) {
     }
 }
 
+/// Whether an option entry takes a value, as clap shows it: a placeholder after the flags (`<N>`, `[N]`)
+fn takes_value(name: &str) -> bool {
+    name.contains('<') || name.contains('[')
+}
+
+/// The index right after `word` in `tokens`, when it occurs there as a contiguous run
+fn word_end(tokens: &[&str], word: &[String]) -> Option<usize> {
+    if word.is_empty() || word.len() > tokens.len() {
+        return None;
+    }
+    tokens
+        .windows(word.len())
+        .position(|w| w.iter().zip(word).all(|(a, b)| a == b))
+        .map(|i| i + word.len())
+}
+
+fn secret_flags(cx: &Context<'_>, tool: &Tool) {
+    const ID: &str = "cli-secret-flags";
+    if !cx.enabled(ID) {
+        return;
+    }
+    let p = cx.config.params_for(ID, &tool.krate);
+    let words: Vec<Vec<String>> = p
+        .list("words")
+        .iter()
+        .map(|w| w.split('-').map(str::to_owned).collect())
+        .collect();
+    let safe = p.list("safe-suffixes");
+    let mut seen = BTreeSet::new();
+    for cmd in &tool.commands {
+        let Some(h) = &cmd.short_help else { continue };
+        let name = cmd.name(&tool.bin);
+        for e in h.args().filter(|e| takes_value(&e.name)) {
+            let Some(long) = e.flags().1 else { continue };
+            if !seen.insert(long.to_owned()) {
+                continue;
+            }
+            let tokens: Vec<&str> = long.trim_start_matches('-').split('-').collect();
+            let Some(word) = words.iter().find(|w| {
+                word_end(&tokens, w).is_some_and(|end| {
+                    tokens
+                        .get(end)
+                        .copied()
+                        .is_none_or(|next| !safe.iter().any(|s| s.as_str() == next))
+                })
+            }) else {
+                continue;
+            };
+            cx.emit(
+                diag(ID, tool, long, format!("`{name} {long}` takes a secret as its value ({})", word.join("-")))
+                    .confidence(Confidence::Candidate)
+                    .help("read it from a file (a `--*-file` flag) or stdin, or an environment variable; never as a flag's value, where the shell history and the process list both see it"),
+            );
+        }
+    }
+}
+
 /// Whether the project root is inside a git checkout
 fn in_git(root: &Path) -> bool {
     root.ancestors().any(|d| d.join(".git").exists())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::word_end;
+
+    fn tokens(flag: &str) -> Vec<&str> {
+        flag.trim_start_matches('-').split('-').collect()
+    }
+
+    fn word(s: &str) -> Vec<String> {
+        s.split('-').map(str::to_owned).collect()
+    }
+
+    #[test]
+    fn finds_a_word_at_either_end() {
+        assert_eq!(word_end(&tokens("--token"), &word("token")), Some(1));
+        assert_eq!(word_end(&tokens("--auth-token"), &word("token")), Some(2));
+        assert_eq!(word_end(&tokens("--api-key"), &word("api-key")), Some(2));
+    }
+
+    #[test]
+    fn no_match_without_the_whole_word() {
+        assert_eq!(word_end(&tokens("--name"), &word("token")), None);
+        assert_eq!(word_end(&tokens("--api-keys"), &word("api-key")), None);
+        assert_eq!(word_end(&tokens("--token"), &word("api-key")), None);
+    }
 }

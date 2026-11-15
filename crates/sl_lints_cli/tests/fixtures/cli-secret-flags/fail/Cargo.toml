@@ -1,0 +1,11 @@
+[workspace]
+
+[package]
+name = "secretcli"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[[bin]]
+name = "tool"
+path = "src/main.rs"

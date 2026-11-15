@@ -177,6 +177,10 @@ reason = "short flags are habits across tools; a different meaning turns a habit
 level = "allow"
 reason = "an estimate: help does not say which commands print data, so it fires on every setup command until a project lists them in exempt"
 
+[lints.cli-secret-flags]
+level = "warn"
+reason = "a candidate: a flag's name is a guess at its purpose, so a human reads each hit; the shell history and the process list both see a value passed on the command line"
+
 [lints.float-partial-cmp-unwrap]
 level = "warn"
 reason = "partial_cmp(..).unwrap() panics on the first NaN; total_cmp orders every float"

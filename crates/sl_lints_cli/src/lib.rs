@@ -55,6 +55,12 @@ lint!(JSON_OUTPUT, "C0028", "cli-json-output", "cli", "every leaf command of a C
 lint!(STANDARD_FLAGS, "C0029", "cli-standard-flags", "cli", "a CLI's short flags keep their standard meaning",
     params: [("pairs", StrList, "[\"-h=--help\", \"-V=--version\", \"-v=--verbose\", \"-q=--quiet\", \"-n=--dry-run\", \"-a=--all\", \"-o=--output\", \"-y=--yes\"]", "short flags and the long flag each must stand for")],
     needs: [Need::Tool("cargo")], fix: None);
+lint!(SECRET_FLAGS, "C0037", "cli-secret-flags", "cli", "no option takes a secret as its value",
+    params: [
+        ("words", StrList, "[\"token\", \"password\", \"secret\", \"api-key\"]", "words that mark a flag's long name as holding a secret"),
+        ("safe-suffixes", StrList, "[\"file\", \"path\", \"env\", \"stdin\"]", "a word right after a match that means the flag points at the secret, not holds it"),
+    ],
+    needs: [Need::Tool("cargo")], fix: None);
 
 /// The CLI analysis
 pub struct Cli;
@@ -73,6 +79,7 @@ static LINTS: &[&LintMeta] = &[
     &VERSION_LINE,
     &JSON_OUTPUT,
     &STANDARD_FLAGS,
+    &SECRET_FLAGS,
 ];
 
 impl Analysis for Cli {
@@ -190,6 +197,7 @@ fn probe_tool(cx: &Context<'_>, exe: &Path, tool: &mut Tool) -> std::io::Result<
         "cli-color-flag",
         "cli-json-output",
         "cli-standard-flags",
+        "cli-secret-flags",
     ]
     .iter()
     .any(|id| cx.enabled(id));

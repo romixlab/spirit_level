@@ -1,0 +1,10 @@
+[[finding]]
+at = "src/main.rs"
+contains = "`tool --db-password` takes a secret as its value (password)"
+confidence = "candidate"
+
+[[finding]]
+at = "src/main.rs"
+contains = "`tool --token` takes a secret as its value (token)"
+confidence = "candidate"
+

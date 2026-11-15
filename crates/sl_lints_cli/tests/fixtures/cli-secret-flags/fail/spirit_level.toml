@@ -1,0 +1,9 @@
+[lints.cli-secret-flags]
+level = "deny"
+reason = "fixture"
+
+[map.layers.app]
+allow = ["app"]
+
+[map.crates]
+secretcli = { layer = "app", cli = true }
