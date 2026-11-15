@@ -344,7 +344,7 @@ Every lint, grouped by category, with its stable code and its level in each ship
 
 | Code | Lint | Rule | small | small-workspace | medium | big | ai | embedded | ui | egui | units-strict | units-paranoid |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
-| [D0018](D0018.md) | [page-links](D0018.md) | a link between pages is a relative path to a Markdown file that exists | deny | deny | deny | deny | off | off | off | off | off | off |
+| [D0019](D0019.md) | [page-links](D0019.md) | a link between pages is a relative path to a Markdown file that exists | deny | deny | deny | deny | off | off | off | off | off | off |
 
 ## log
 
