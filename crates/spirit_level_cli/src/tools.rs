@@ -24,7 +24,8 @@ const NEEDED_HELP: &str = "Examples:
 A tool is found on PATH and its version read. One outside its tested range still runs; `tool-version` reports
 its results as untested.
 
-Exit codes: 0 everything needed is there, 1 something needed is missing, 2 usage or configuration error";
+Exit codes: 0 everything needed is there and in range, 1 something needed is missing or outside its tested range,
+2 usage or configuration error";
 
 #[derive(Subcommand)]
 pub enum ToolsCmd {
@@ -179,6 +180,13 @@ impl Needed {
             || self.targets.iter().any(|t| t.installed == Some(false))
             || self.nightly_missing
     }
+
+    /// Whether a tool is there but its output untested: outside its tested range, or its version unreadable
+    fn untested(&self) -> bool {
+        self.tools
+            .iter()
+            .any(|t| matches!(t.found.state(), State::OutOfRange | State::Unreadable))
+    }
 }
 
 pub fn run(cmd: ToolsCmd) -> Result<Exit, String> {
@@ -213,7 +221,7 @@ fn needed(a: &NeededArgs) -> Result<Exit, String> {
         table(&n, Paint::stdout())
     };
     print!("{out}");
-    Ok(if n.missing() {
+    Ok(if n.missing() || n.untested() {
         Exit::FAILURE
     } else {
         Exit::SUCCESS
@@ -277,6 +285,7 @@ fn to_json(n: &Needed) -> Value {
         "targets": targets,
         "nightly_missing": n.nightly_missing,
         "missing": n.missing(),
+        "untested": n.untested(),
     })
 }
 

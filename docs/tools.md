@@ -131,7 +131,7 @@ Builds that cargo does itself, reported from `--message-format json`. Other tool
 
 ## Installing the tools
 
-`spl tools needed` shows each tool the project needs: its tested range, the version found and where, whether it is in range, whether it runs on nightly, and the lints that run it. It exits with 1 while something needed is missing. Its other outputs feed an installer:
+`spl tools needed` shows each tool the project needs: its tested range, the version found and where, whether it is in range, whether it runs on nightly, and the lints that run it. It exits with 1 while something needed is missing or outside its tested range. Its other outputs feed an installer:
 
 | Flag | Prints | For |
 |---|---|---|

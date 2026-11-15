@@ -211,6 +211,28 @@ fn exit_0_when_everything_needed_is_there() {
 }
 
 #[test]
+fn exit_1_when_a_tool_is_outside_its_tested_range() {
+    let s = Setup::new(
+        "range",
+        &[
+            ("cargo-deny", "echo 'cargo-deny 0.20.2'"),
+            ("typos", "echo 'typos-cli 1.51.1'"),
+            ("cargo-machete", "echo '0.9.2'"),
+        ],
+    );
+    let o = s.spl(&["tools", "needed", "--missing"]);
+    let t = all(&o);
+    assert_eq!(o.status.code(), Some(1), "{t}");
+    assert!(t.contains("out of range"), "{t}");
+    let o = s.spl(&["tools", "needed", "--json"]);
+    let v: serde_json::Value = serde_json::from_str(&stdout(&o)).expect("JSON output");
+    assert_eq!(
+        (v["missing"].as_bool(), v["untested"].as_bool()),
+        (Some(false), Some(true))
+    );
+}
+
+#[test]
 fn all_lists_every_tool_and_components_apart() {
     let s = Setup::new(
         "all",
