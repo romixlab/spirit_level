@@ -156,3 +156,24 @@ reason = "panel and App code written for an older egui keeps compiling under a d
 [lints.egui-checklist-menu]
 level = "warn"
 reason = "a menu_button closes on the first tick inside it; ve_basics::Checklist keeps it open for several"
+
+[lints.ui-tooltip-repeats-label]
+label-calls = [
+  "label",
+  "button",
+  "small_button",
+  "heading",
+  "selectable_label",
+  "checkbox",
+  "radio",
+  "radio_value",
+  "selectable_value",
+  "menu_button",
+  "Label::new",
+  "Button::new",
+  "RichText::new",
+  "primary_button",
+  "danger_button",
+]
+hover-calls = ["on_hover_text", "on_disabled_hover_text"]
+reason = "a tooltip that only repeats the label cost the person a hover for nothing; certain, since the match is exact"

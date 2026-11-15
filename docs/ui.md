@@ -38,7 +38,7 @@ One row per practice. Sources: the vhrd_egui UX guide (`docs/ux-guide.md`, by se
 | A control that cannot be used now stays visible, greyed out | UX guide §2, §6 | by review: a hidden control is code that is not there | - |
 | A disabled control says why and what would enable it | UX guide §2 | [`ui-disabled-without-reason`](lints/U0005.md) | estimate |
 | Hovering a disabled control highlights its cause on screen | UX guide §2 | by review | - |
-| Every control, number and badge has a tooltip that adds to its label | UX guide §4 | by review | - |
+| Every control, number and badge has a tooltip that adds to its label | UX guide §4 | [`ui-tooltip-repeats-label`](lints/U0017.md) flags a tooltip that only repeats the label; whether it adds enough is by review | certain |
 | Related items light up together on hover | UX guide §5 | by review | - |
 | Colours come from the theme | UX guide §3; rerun's colour bans | [`ui-colour-literal`](lints/U0003.md) | certain |
 | Spacing, sizes, radii and type come from the theme; widths are learned, never fixed | UX guide §3, §6 | [`ui-size-literal`](lints/U0004.md) | certain |
@@ -72,6 +72,7 @@ The same practices, specialised by the `egui` tier's parameters, and the practic
 | A status glyph is painted in its tone with `ve_theme::status_icon`, never a character in a label | UX guide §3 | [`egui-status-glyph`](lints/U0011.md) | certain |
 | A widget's id is unique within its parent: no constant id given in a loop | egui's id rules; vhrd_egui `FoldRest` docs | [`egui-id-in-loop`](lints/U0012.md) | estimate |
 | `request_repaint` is called by the worker that has news, not by every frame | UX guide §9; egui's repaint model | [`egui-repaint-every-frame`](lints/U0013.md) | estimate |
+| `on_hover_text` and `on_disabled_hover_text` add to the label, never repeat it | UX guide §4 | `ui-tooltip-repeats-label` with egui's label and hover calls | certain |
 | One egui version in the whole graph | UX guide §12 | [`duplicate-versions`](lints/M0002.md) | certain |
 | Every widget sits in `ve_frame::WidgetFrame`; panels use the egui API the version in use ships | UX guide §6; app skill "Panels" | [`egui-panel-api`](lints/U0015.md) for the API egui's own deprecations name (`SidePanel`, `TopBottomPanel`, `.show` on a `Context`, `App::update`); `WidgetFrame` itself is by review | estimate |
 | A dropdown of checkboxes is a `ve_basics::Checklist`, open while ticked | UX guide §7 | [`egui-checklist-menu`](lints/U0016.md) | estimate |
@@ -87,5 +88,6 @@ Nothing is built for them yet. These general lints carry over once their paramet
 - `ui-colour-literal`: CSS colour strings in Rust are found already (`hex-strings`); a web crate names its style builders in `constructors`.
 - `ui-disabled-without-reason` and `ui-destructive-unconfirmed`: a bot keyboard builder (`InlineKeyboardButton::callback`) is a label call like a button.
 - `ui-more-count`, `ui-label-punctuation`, `ui-debug-text`: the text of a page or a bot reply is text a person reads.
+- `ui-tooltip-repeats-label`: once `label-calls` and `hover-calls` name a framework's own calls, the same check applies.
 
 Web-only and bot-only practices (`textContent` over `innerHTML` with data; button text from known values, never model output) would need lints of their own over JavaScript or the bot's handlers.

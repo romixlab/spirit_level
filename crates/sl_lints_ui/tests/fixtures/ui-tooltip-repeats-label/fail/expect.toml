@@ -1,0 +1,6 @@
+[[finding]]
+at = "src/lib.rs:4:45"
+
+[[finding]]
+at = "src/lib.rs:7:24"
+

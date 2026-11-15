@@ -85,6 +85,8 @@ struct P {
     checkbox_calls: Vec<String>,
     min_checkboxes: usize,
     checklist_widget: String,
+    tooltip_label_calls: Vec<String>,
+    tooltip_hover_calls: Vec<String>,
 }
 
 impl P {
@@ -183,6 +185,10 @@ impl P {
             p.checkbox_calls = q.list("checkbox-calls").to_vec();
             p.min_checkboxes = q.count("min-checkboxes");
             p.checklist_widget = q.str("widget").to_owned();
+        }
+        if let Some(q) = get("ui-tooltip-repeats-label") {
+            p.tooltip_label_calls = q.list("label-calls").to_vec();
+            p.tooltip_hover_calls = q.list("hover-calls").to_vec();
         }
         p
     }
@@ -426,6 +432,30 @@ impl Walk<'_> {
         }
     }
 
+    /// The check of `ui-tooltip-repeats-label`: a hover call (`name`, one of `hover-calls`) whose text exactly
+    /// repeats the label of the control reached through its receiver chain (a label call, one of `label-calls`)
+    fn check_tooltip_label(&mut self, name: &str, receiver: &Expr, args: &[&Expr]) {
+        if !method_in(&self.p.tooltip_hover_calls, name) {
+            return;
+        }
+        let Some(&arg) = args.first() else { return };
+        let Some(hover) = first_text(Some(arg)) else {
+            return;
+        };
+        let Some(label) = label_text(receiver, &self.p.tooltip_label_calls, &self.uses) else {
+            return;
+        };
+        if label == hover {
+            self.push(
+                "ui-tooltip-repeats-label",
+                range(arg),
+                format!("{label:?} tooltip only repeats the control's label"),
+                "say what the label cannot: what it does, a shortcut, a constraint, or what happens next".into(),
+                Confidence::Certain,
+            );
+        }
+    }
+
     fn check_sizes(&mut self, what: &str, args: &[&Expr]) {
         let mut nums = Vec::new();
         for a in args {
@@ -504,6 +534,47 @@ fn duration_ms(e: &Expr) -> Option<f64> {
         "from_secs" | "from_secs_f32" | "from_secs_f64" => v * 1000.0,
         _ => return None,
     })
+}
+
+/// The label text of a control-building call reachable from `e`: a call matching `label_calls` (a method, or a
+/// function `Type::new`), read from inside out, so a builder wrapped in another call (`ui.add(Button::new("x"))`)
+/// is still found
+fn label_text(e: &Expr, label_calls: &[String], uses: &Uses) -> Option<String> {
+    if label_calls.is_empty() {
+        return None;
+    }
+    match e {
+        Expr::Call(c) => {
+            if let Expr::Path(p) = &*c.func
+                && path_in(label_calls, &uses.resolve(&p.path))
+                && let Some(l) = first_text(c.args.first())
+            {
+                return Some(l);
+            }
+            c.args.iter().find_map(|a| label_text(a, label_calls, uses))
+        }
+        Expr::MethodCall(m) => {
+            let name = m.method.to_string();
+            if method_in(label_calls, &name)
+                && let Some(l) = first_text(m.args.first())
+            {
+                return Some(l);
+            }
+            label_text(&m.receiver, label_calls, uses)
+                .or_else(|| m.args.iter().find_map(|a| label_text(a, label_calls, uses)))
+        }
+        Expr::Reference(r) => label_text(&r.expr, label_calls, uses),
+        Expr::Paren(p) => label_text(&p.expr, label_calls, uses),
+        Expr::Group(g) => label_text(&g.expr, label_calls, uses),
+        _ => None,
+    }
+}
+
+/// The value of the first string literal `texts` finds in an argument
+fn first_text(arg: Option<&Expr>) -> Option<String> {
+    let mut list = Vec::new();
+    texts(arg?, &mut list);
+    list.first().map(syn::LitStr::value)
 }
 
 /// Whether a statement holds a call of one of `names`
@@ -831,6 +902,7 @@ impl<'ast> Visit<'ast> for Walk<'_> {
             self.push("egui-id-in-loop", r, format!("`.{name}()` gives the same id on every iteration of the loop"), "salt the id with the item (`(\"name\", i)`), so each iteration keeps its own state".into(), Confidence::Estimate);
         }
         self.check_texts(|l| method_in(l, &name), &args, r);
+        self.check_tooltip_label(&name, &m.receiver, &args);
         let salted = self.salted;
         self.salted = salted || method_in(&self.p.salt_methods, &name);
         self.visit_expr(&m.receiver);

@@ -139,6 +139,12 @@ ui_lint!(CHECKLIST_MENU, "U0016", "egui-checklist-menu", "egui", "a checklist of
         ("widget", Str, "\"ve_basics::Checklist\"", "the shared checklist widget, named in the help"),
     ],
     fix: None);
+ui_lint!(TOOLTIP_REPEATS_LABEL, "U0017", "ui-tooltip-repeats-label", "ui", "a tooltip says more than the label it is attached to",
+    params: [
+        ("label-calls", StrList, "[]", "calls that give a control its label"),
+        ("hover-calls", StrList, "[]", "calls that attach a tooltip"),
+    ],
+    fix: None);
 
 /// The UI analysis
 pub struct Ui;
@@ -163,6 +169,7 @@ static LINTS: &[&LintMeta] = &[
     &REPAINT_EVERY_FRAME,
     &PANEL_API,
     &CHECKLIST_MENU,
+    &TOOLTIP_REPEATS_LABEL,
 ];
 
 /// The lints that skip the theme

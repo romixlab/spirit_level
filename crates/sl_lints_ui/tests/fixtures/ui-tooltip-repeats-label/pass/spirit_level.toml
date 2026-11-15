@@ -1,0 +1,5 @@
+[lints.ui-tooltip-repeats-label]
+level = "deny"
+reason = "fixture"
+label-calls = ["label", "button", "Button::new"]
+hover-calls = ["on_hover_text"]

@@ -259,6 +259,7 @@ U0013 = { id = "egui-repaint-every-frame", group = "ui", status = "active" }
 U0014 = { id = "ui-unwrap-external-data", group = "ui", status = "active" }
 U0015 = { id = "egui-panel-api", group = "ui", status = "active" }
 U0016 = { id = "egui-checklist-menu", group = "ui", status = "active" }
+U0017 = { id = "ui-tooltip-repeats-label", group = "ui", status = "active" }
 X0001 = { id = "audit-unmaintained", group = "external", status = "active" }
 X0002 = { id = "audit-unsound", group = "external", status = "active" }
 X0003 = { id = "audit-vulnerabilities", group = "external", status = "active" }
