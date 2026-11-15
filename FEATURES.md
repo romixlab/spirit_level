@@ -104,6 +104,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 
 - ✅ `DOCS-1` Reading metrics per page (`spl pages`, text and JSON) and lints: prose runs, reading time, heading length, sections, code walls, image text, code languages; the `[docs]` table (`sl_docs`, `sl_lints_docs`).
 - ✅ `DOCS-2` Zensical book lints: navigation entries that exist, orphan pages, one title per page, admonition syntax.
+- ✅ `DOCS-3` Readable words: abbreviations spelled out at first use, terms defined before use, one name per concept (a project word list), passive share and Flesch reading ease per page, in `spl pages` and as lints.
 
 ## AI - code written with agents
 

@@ -1,18 +1,18 @@
 # Docs as the reader meets them
 
-The prose lints check the wording of a document: filler, narration, long sentences. The docs lints check its shape: how long a reader goes without a heading, a figure or a table, how long the page takes to read, whether a long page has sections, whether code comes with an explanation. They also check the practices of a [Zensical](https://zensical.org/docs/) book: a navigation that names real pages, no page that nobody can reach, one title per page, admonitions that render.
+The prose lints check the wording of a document: filler, narration, long sentences. The docs lints check its shape and its words: how long a reader goes without a heading, a figure or a table, how long the page takes to read, whether a long page has sections, whether code comes with an explanation, whether abbreviations and terms are explained before the reader needs them. They also check the practices of a [Zensical](https://zensical.org/docs/) book: a navigation that names real pages, no page that nobody can reach, one title per page, admonitions that render.
 
-The numbers are useful on their own, before any budget. `spl pages` prints them for every page, and the lints in the `reading` and `book` categories warn when a page goes over a budget.
+The numbers are useful on their own, before any budget. `spl pages` prints them for every page, and the lints in the `reading`, `words` and `book` categories warn when a page goes over a budget.
 
 ## The pages report
 
 `spl pages` prints one row per page:
 
 ```text
-page                     kind       words  read  run  para  sent  flesch  img   h  links  code
-README.md                guide        412  1.8m  140    48    14      52    1   6    9/3     4
-docs/configuration.md    guide       1630  7.1m  210    61    16      48    0  14   12/0    11
-docs/lints/D0001.md      reference    310  1.3m   88    40    11      55    0   6    8/0     1
+page                     kind       words  read  run  para  sent  flesch  pass%  abbr  terms  syn  img   h  links  code
+README.md                guide        412  1.8m  140    48    14      52     12     1      0    0    1   6    9/3     4
+docs/configuration.md    guide       1630  7.1m  210    61    16      48     21     0      2    1    0  14   12/0    11
+docs/lints/D0001.md      reference    310  1.3m   88    40    11      55     18     0      0    0    0   6    8/0     1
 ```
 
 | Column | Meaning |
@@ -24,12 +24,16 @@ docs/lints/D0001.md      reference    310  1.3m   88    40    11      55    0   
 | `para` | the longest paragraph, in words |
 | `sent` | the median sentence, in words |
 | `flesch` | Flesch reading ease, English pages only; `-` otherwise |
+| `pass%` | percent of the sentences that read as passive, English pages only |
+| `abbr` | abbreviations not spelled out at their first use |
+| `terms` | terms used before the page defines them |
+| `syn` | uses of a name the project's word list prefers otherwise |
 | `img` | figures: paragraphs that hold only images, and HTML figures |
 | `h` | headings |
 | `links` | internal and external links |
 | `code` | code blocks |
 
-`spl pages --page PAGE` prints every number of one page, with its runs and headings. `spl pages --format json` prints all of them for every page as one document. Two JSON files from two runs diff line by line, so a change to a page shows what it moved.
+`spl pages --page PAGE` prints every number of one page, with its runs, its headings and each abbreviation, term and name the last four columns count. `spl pages --format json` prints all of them for every page as one document. Two JSON files from two runs diff line by line, so a change to a page shows what it moved.
 
 The report uses the parameters of the lints, so the report and the lints count the same way: the reading speed and image times come from `page-reading-time`, the budgets from each lint.
 
@@ -53,6 +57,7 @@ A book configured by `mkdocs.yml` alone gets the reading lints but not the book 
 - **Figures** are paragraphs that hold only images (a row of badges is one figure), and HTML `<figure>` and `<img>` blocks.
 - **Reading time** is words divided by words per minute, plus a falling time per figure: the first figure costs `image-first-seconds`, each one after it a little less, down to `image-min-seconds` over `image-falloff-count` figures. Every further figure costs the floor.
 - **Sentences** are split after `.`, `!` or `?` and a space, except after a known abbreviation, a single letter or a number. The same splitter serves `sentence-words`.
+- **Words** in inline code are names, not prose: the word lints do not read them. A **definition** is bold text at a term's first use, or a sentence such as "A tier means ...".
 
 ## Which pages
 
@@ -76,7 +81,7 @@ A page is a reference page when one of the `reference` globs matches its path, a
 
 ## Language
 
-Flesch reading ease is a formula for English: its constants were fitted to English text, and its syllable count is an English heuristic. The report shows it only when the page language is English (`language` starts with `en`), and shows `-` for any other language. No lint judges it: a technical page full of exact terms scores low however clear it is.
+Flesch reading ease is a formula for English: its constants were fitted to English text, and its syllable count is an English heuristic. The report shows it only when the page language is English (`language` starts with `en`), and shows `-` for any other language. The same holds for the passive share. `reading-ease` and `passive-voice` judge English guides only, with a low floor by default: a technical page full of exact terms scores low however clear it is.
 
 Every other measure counts words and breaks and works in any language that separates words with spaces. Reading speeds differ by language; a project in another language sets `wpm` on `page-reading-time`.
 
@@ -107,5 +112,9 @@ Every practice the docs lints were built from, where it comes from, and how it i
 | Theme features that exclude each other are not both on | [Zensical: navigation](https://zensical.org/docs/setup/navigation/) | planned | |
 | A page meant as an entry point has a description | [Zensical: front matter](https://zensical.org/docs/authoring/frontmatter/) | review: which pages are entry points | |
 | A page has enough figures for its length | vhrd_site page stats (words per image) | review, with `img` in the report | |
-| The text is easy to read | vhrd_site page stats (Flesch) | review, with `flesch` in the report | |
-| Why and what come before how; terms are defined at first use | prose rules | review | |
+| The text is easy to read | vhrd_site page stats (Flesch) | [reading-ease](lints/D0016.md), `flesch` in the report | estimate: syllables by a spelling heuristic |
+| Sentences say who acts | prose rules | [passive-voice](lints/D0015.md), `pass%` in the report | estimate: "to be" before a past participle |
+| Abbreviations are spelled out at first use | prose rules | [abbreviation-first-use](lints/D0012.md) | candidate |
+| Terms are defined at first use | prose rules | [term-before-definition](lints/D0013.md) | candidate: bold or a definition sentence |
+| One concept has one name | prose rules | [term-synonyms](lints/D0014.md), with the project's word list | candidate |
+| Why and what come before how | prose rules | review | |

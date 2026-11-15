@@ -36,6 +36,11 @@ Use it with `extends = "small"` in `spirit_level.toml`.
 | [D0009](../lints/D0009.md) | orphan-pages | `warn` | a page nobody reaches is published, unread and left to go stale | small |
 | [D0010](../lints/D0010.md) | page-title | `warn` | a page without a title is shown under its file name | small |
 | [D0011](../lints/D0011.md) | admonition-syntax | `deny` | an unknown type loses its colour and a body indented less than four spaces renders outside the box | small |
+| [D0012](../lints/D0012.md) | abbreviation-first-use | `warn` | a reader arrives on any page and cannot look up an abbreviation the page never spells out | small |
+| [D0013](../lints/D0013.md) | term-before-definition | `warn` | a term used before its definition is guessed at, and a wrong guess is read into every sentence until then | small |
+| [D0014](../lints/D0014.md) | term-synonyms | `warn` | a reader takes two names for two things and looks for a difference that is not there | small |
+| [D0015](../lints/D0015.md) | passive-voice | `warn` | a passive sentence hides who acts; a page of them reads as things that happen on their own | small |
+| [D0016](../lints/D0016.md) | reading-ease | `warn` | long sentences of long words are read slowly and understood less | small |
 | [M0001](../lints/M0001.md) | default-features-off | `warn` | dependencies are added with default-features = false and only the features in use | small |
 | [M0003](../lints/M0003.md) | git-dependency-pins | `warn` | git dependencies follow a branch; Cargo.lock fixes the commit | small |
 | [M0004](../lints/M0004.md) | no-sys-crates | `deny` | pure-Rust crates only: no bundled C, no -sys bindings without a written reason | small |
@@ -347,6 +352,26 @@ reason = "a page without a title is shown under its file name"
 [lints.admonition-syntax]
 level = "deny"
 reason = "an unknown type loses its colour and a body indented less than four spaces renders outside the box"
+
+[lints.abbreviation-first-use]
+level = "warn"
+reason = "a reader arrives on any page and cannot look up an abbreviation the page never spells out"
+
+[lints.term-before-definition]
+level = "warn"
+reason = "a term used before its definition is guessed at, and a wrong guess is read into every sentence until then"
+
+[lints.term-synonyms]
+level = "warn"
+reason = "a reader takes two names for two things and looks for a difference that is not there"
+
+[lints.passive-voice]
+level = "warn"
+reason = "a passive sentence hides who acts; a page of them reads as things that happen on their own"
+
+[lints.reading-ease]
+level = "warn"
+reason = "long sentences of long words are read slowly and understood less"
 
 # Units in types (exact_units)
 

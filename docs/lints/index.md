@@ -589,6 +589,16 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [C0012](C0012.md) | [waiver-invalid](C0012.md) | a waiver comment names known lints, gives a reason and has not expired | deny | deny | deny | deny | off | off | off | off | off | off |
 | [C0013](C0013.md) | [waiver-unused](C0013.md) | every waiver comment allows a finding | warn | warn | warn | deny | off | off | off | off | off | off |
 
+## words
+
+| Code | Lint | Rule | small | small-workspace | medium | big | ai | embedded | ui | egui | units-strict | units-paranoid |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| [D0012](D0012.md) | [abbreviation-first-use](D0012.md) | an abbreviation is spelled out at its first use on a page | warn | warn | warn | warn | off | off | off | off | off | off |
+| [D0013](D0013.md) | [term-before-definition](D0013.md) | a page defines a term before it uses it | warn | warn | warn | warn | off | off | off | off | off | off |
+| [D0014](D0014.md) | [term-synonyms](D0014.md) | one concept has one name | warn | warn | warn | warn | off | off | off | off | off | off |
+| [D0015](D0015.md) | [passive-voice](D0015.md) | a guide says who does what: few passive sentences | warn | warn | warn | warn | off | off | off | off | off | off |
+| [D0016](D0016.md) | [reading-ease](D0016.md) | a guide reads easily: short sentences of short words | warn | warn | warn | warn | off | off | off | off | off | off |
+
 ## workspace
 
 | Code | Lint | Rule | small | small-workspace | medium | big | ai | embedded | ui | egui | units-strict | units-paranoid |

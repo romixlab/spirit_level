@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Added
+
+- `abbreviation-first-use` (D0012), `term-before-definition` (D0013), `term-synonyms` (D0014): candidates on the words a page uses (DOCS-3).
+- `passive-voice` (D0015) and `reading-ease` (D0016): a guide's passive share and Flesch score against a limit (DOCS-3).
+- `spl pages` shows each page's passive share, unspelled abbreviations, early terms and synonyms (DOCS-3).
+
 ## [0.4.13] - 2026-11-15
 
 ### Added
