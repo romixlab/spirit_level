@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.4.36] - 2026-11-17
+
 ### Added
 
 - The book is published at https://spl.vhrd.tech; CI runs `just lint` and `just test` (BOOK-5).
