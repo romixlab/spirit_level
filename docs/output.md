@@ -4,26 +4,19 @@
 
 For people, findings are grouped by lint, denied groups first, then warnings, each by count:
 
-```text
-deny M0024 workspace-lints ×28: the root declares [workspace.lints] and every member inherits them
-    --> Cargo.toml:15:1
-     |
-  13 | # under crates/ have their own
-  14 | # (`app_base::build`).
-  15 | [workspace]
-     | ^^^^^^^^^^^ the root declares no [workspace.lints]
-  16 | members = ["crates/*"]
-  17 |
-     |
-  help: add `[lints]` with `workspace = true` to its Cargo.toml
-  Cargo.toml  app does not inherit the workspace lints
-  Cargo.toml:15  the root declares no [workspace.lints]
-  crates/app_approve/Cargo.toml  app_approve does not inherit the workspace lints
-  crates/app_base/Cargo.toml  app_base does not inherit the workspace lints
-  crates/app_browse/Cargo.toml  app_browse does not inherit the workspace lints
-  fix (--fix): add [lints] workspace = true (27 of 28)
-  +23 more: `spl check --all` lists them (explain: `spl explain M0024`)
-```
+<!-- spirit-level:check assets/sample_workspace --only workspace-lints -->
+<pre class="sl-term"><code><span class="sl-term-c1 sl-term-b">deny</span> <span class="sl-term-c6">M0024</span> workspace-lints <span class="sl-term-d">×7</span>: the root declares [workspace.lints] and every member inherits them
+  <span class="sl-term-c5 sl-term-b">help:</span> add `[lints]` with `workspace = true` to its Cargo.toml
+  crates/station/Cargo.toml  station does not inherit the workspace lints
+  crates/station_cli/Cargo.toml  station_cli does not inherit the workspace lints
+  crates/station_core/Cargo.toml  station_core does not inherit the workspace lints
+  crates/station_io/Cargo.toml  station_io does not inherit the workspace lints
+  crates/station_net/Cargo.toml  station_net does not inherit the workspace lints
+  <span class="sl-term-d">fix (--fix): add [lints] workspace = true (7 of 7)</span>
+  <span class="sl-term-d">+2 more: `spl check --all` lists them (explain: `spl explain M0024`)</span>
+
+<span class="sl-term-c1 sl-term-b">failed</span>: 1 lints ran on assets/sample_workspace (small-workspace): <span class="sl-term-c1 sl-term-b">7 denied</span></code></pre>
+<!-- /spirit-level:check -->
 
 - **Header:** level, code, id, count and the lint's rule.
 - **Excerpt:** the source of the first place that points at a line, with 2 lines of context and its exact range marked with the finding's message. `--excerpts N` shows N per group; `0` turns them off.

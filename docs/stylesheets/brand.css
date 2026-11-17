@@ -66,3 +66,39 @@
 [data-md-color-scheme="slate"] .md-typeset .sl-hero .sl-hero--light {
   display: none;
 }
+
+/* spl's coloured output in generated check blocks (`spl book docs`): the CLI's own styles, one class per ANSI colour
+   and per weight. The light scheme takes darker shades so each colour keeps its contrast on white; the dark scheme
+   the shades of the README's picture. */
+.md-typeset pre.sl-term > code {
+  --sl-c0: #27272a; --sl-c1: #b91c1c; --sl-c2: #4d7c0f; --sl-c3: #a16207;
+  --sl-c4: #1d4ed8; --sl-c5: #a21caf; --sl-c6: #0e7490; --sl-c7: #52525b;
+  --sl-c8: #6b7280; --sl-c9: #dc2626; --sl-c10: #4d7c0f; --sl-c11: #b45309;
+  --sl-c12: #2563eb; --sl-c13: #c026d3; --sl-c14: #0891b2; --sl-c15: #18181b;
+}
+[data-md-color-scheme="slate"] .md-typeset pre.sl-term > code {
+  --sl-c0: #3b4048; --sl-c1: #f87171; --sl-c2: #a3e635; --sl-c3: #facc15;
+  --sl-c4: #60a5fa; --sl-c5: #e879f9; --sl-c6: #22d3ee; --sl-c7: #d4d4d8;
+  --sl-c8: #6b7280; --sl-c9: #fca5a5; --sl-c10: #bef264; --sl-c11: #fde047;
+  --sl-c12: #93c5fd; --sl-c13: #f0abfc; --sl-c14: #67e8f9; --sl-c15: #ffffff;
+}
+.sl-term-c0 { color: var(--sl-c0); }
+.sl-term-c1 { color: var(--sl-c1); }
+.sl-term-c2 { color: var(--sl-c2); }
+.sl-term-c3 { color: var(--sl-c3); }
+.sl-term-c4 { color: var(--sl-c4); }
+.sl-term-c5 { color: var(--sl-c5); }
+.sl-term-c6 { color: var(--sl-c6); }
+.sl-term-c7 { color: var(--sl-c7); }
+.sl-term-c8 { color: var(--sl-c8); }
+.sl-term-c9 { color: var(--sl-c9); }
+.sl-term-c10 { color: var(--sl-c10); }
+.sl-term-c11 { color: var(--sl-c11); }
+.sl-term-c12 { color: var(--sl-c12); }
+.sl-term-c13 { color: var(--sl-c13); }
+.sl-term-c14 { color: var(--sl-c14); }
+.sl-term-c15 { color: var(--sl-c15); }
+.sl-term-b { font-weight: 700; }
+.sl-term-d { opacity: 0.65; }
+.sl-term-i { font-style: italic; }
+.sl-term-u { text-decoration: underline; }

@@ -25,14 +25,25 @@ spl check --tier big              # tries another tier without editing the file
 
 ## Read a finding
 
-```text
-deny workspace-lints crates/foo/Cargo.toml
-  foo does not inherit the workspace lints
-  help: add `[lints]` with `workspace = true` to its Cargo.toml
-  fix (--fix): add [lints] workspace = true
-```
+<!-- spirit-level:check assets/sample --only panic-in-library -->
+<pre class="sl-term"><code><span class="sl-term-c1 sl-term-b">deny</span> <span class="sl-term-c6">C0005</span> panic-in-library <span class="sl-term-d">×2</span>: library code returns errors for what can fail and says why where it panics
+    <span class="sl-term-c12 sl-term-b">--&gt; </span>src/lib.rs:13:58
+     <span class="sl-term-c12 sl-term-b">|</span>
+  <span class="sl-term-c12 sl-term-b">11</span> <span class="sl-term-c12 sl-term-b">|</span> /// Parses a frame of three bytes
+  <span class="sl-term-c12 sl-term-b">12</span> <span class="sl-term-c12 sl-term-b">|</span> pub fn parse(bytes: &amp;[u8]) -&gt; Frame {
+  <span class="sl-term-c12 sl-term-b">13</span> <span class="sl-term-c12 sl-term-b">|</span>     let value = u16::from_le_bytes(bytes[1..3].try_into().unwrap());
+     <span class="sl-term-c12 sl-term-b">|</span>                                                          <span class="sl-term-c9 sl-term-b">^^^^^^^^^</span> <span class="sl-term-c9 sl-term-b">.unwrap() in library code (2 in telemetry)</span>
+  <span class="sl-term-c12 sl-term-b">14</span> <span class="sl-term-c12 sl-term-b">|</span>     Frame { channel: bytes[0], value }
+  <span class="sl-term-c12 sl-term-b">15</span> <span class="sl-term-c12 sl-term-b">|</span> }
+     <span class="sl-term-c12 sl-term-b">|</span>
+  <span class="sl-term-c5 sl-term-b">help:</span> return an error for what can fail; where it cannot, say why: `.expect("why")`, `unreachable!("why")`, or a waiver
+  src/lib.rs:13:58  .unwrap() in library code (2 in telemetry) <span class="sl-term-d">(panics 2, limit 0)</span>
+  src/lib.rs:19:5  todo! in library code (2 in telemetry) <span class="sl-term-d">(panics 2, limit 0)</span>
 
-`spl explain workspace-lints` prints the lint's page. `spl check --fix` applies the exact fixes and checks again.
+<span class="sl-term-c1 sl-term-b">failed</span>: 1 lints ran on assets/sample (medium): <span class="sl-term-c1 sl-term-b">2 denied</span></code></pre>
+<!-- /spirit-level:check -->
+
+`spl explain panic-in-library` prints the lint's page. `spl check --fix` applies the exact fixes and checks again.
 
 ## Change what does not fit
 

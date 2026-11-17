@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `spl book docs` writes coloured check output into marked blocks of hand-written pages (BOOK-6).
+
 ## [0.4.38] - 2026-11-17
 
 ### Changed

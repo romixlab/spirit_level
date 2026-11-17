@@ -1,5 +1,6 @@
 //! Text and JSON output of a report: [`text`] groups the findings for people, [`json`] is complete and ungrouped;
-//! [`dependents`] and [`dependents_json`] show `spl dependents`; [`svg`] draws coloured text as a picture.
+//! [`dependents`] and [`dependents_json`] show `spl dependents`; [`svg`] draws coloured text as a picture and
+//! [`html`] as a book page's block.
 #![expect(
     clippy::let_underscore_must_use,
     reason = "fmt::Write into a String cannot fail"
@@ -8,10 +9,12 @@
 mod ansi;
 mod dependents;
 mod excerpt;
+mod html;
 mod svg;
 mod text;
 
 pub use dependents::{dependents, dependents_json};
+pub use html::html;
 pub use svg::svg;
 
 pub use text::{GroupBy, TextOptions, text};

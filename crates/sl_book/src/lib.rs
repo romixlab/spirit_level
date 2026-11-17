@@ -360,12 +360,20 @@ pub fn nav() -> String {
     s
 }
 
-/// Writes (or with `check`, compares) the generated pages under `docs` and the nav in `zensical`.
+/// Writes (or with `check`, compares) the book's generated parts.
+///
+/// They are the generated pages under `docs`, the check blocks of the hand-written pages ([`sample::blocks`], their
+/// projects under the parent of `docs`, checked as of `today`), and the nav in `zensical`.
 ///
 /// Returns the files that differ (written, or stale when checking). Pages of lints that no longer exist are reported
 /// too.
-pub fn write(docs: &Path, zensical: &Path, check: bool) -> std::io::Result<Vec<String>> {
-    let mut changed = Vec::new();
+pub fn write(
+    docs: &Path,
+    zensical: &Path,
+    today: Date,
+    check: bool,
+) -> std::io::Result<Vec<String>> {
+    let mut changed = blocks(docs, today, check)?;
     let pages = pages().map_err(std::io::Error::other)?;
     for (rel, text) in &pages {
         let p = docs.join(rel);
@@ -419,8 +427,35 @@ pub fn write(docs: &Path, zensical: &Path, check: bool) -> std::io::Result<Vec<S
     Ok(changed)
 }
 
+/// Writes (or with `check`, compares) the check blocks of the hand-written pages; the pages that differ
+fn blocks(docs: &Path, today: Date, check: bool) -> std::io::Result<Vec<String>> {
+    let mut changed = Vec::new();
+    let root = docs.parent().unwrap_or(Path::new("."));
+    for (_, rel) in HAND_PAGES {
+        let p = docs.join(rel);
+        let Ok(old) = std::fs::read_to_string(&p) else {
+            continue;
+        };
+        let new = sample::blocks(&old, root, today)
+            .map_err(|e| std::io::Error::other(format!("{}: {e}", p.display())))?;
+        if new != old {
+            changed.push(p.display().to_string());
+            if !check {
+                std::fs::write(&p, new)?;
+            }
+        }
+    }
+    Ok(changed)
+}
+
 #[cfg(test)]
 mod tests {
+    const TODAY: sl_core::Date = sl_core::Date {
+        year: 2026,
+        month: 11,
+        day: 13,
+    };
+
     #[test]
     fn writing_twice_changes_nothing() {
         let dir = std::env::temp_dir().join(format!("sl_book_{}", std::process::id()));
@@ -437,11 +472,11 @@ mod tests {
         )
         .unwrap();
         assert_ne!(
-            super::write(&dir.join("docs"), &z, false).unwrap(),
+            super::write(&dir.join("docs"), &z, TODAY, false).unwrap(),
             [] as [String; 0]
         );
         assert_eq!(
-            super::write(&dir.join("docs"), &z, true).unwrap(),
+            super::write(&dir.join("docs"), &z, TODAY, true).unwrap(),
             Vec::<String>::new()
         );
         let _ = std::fs::remove_dir_all(&dir);

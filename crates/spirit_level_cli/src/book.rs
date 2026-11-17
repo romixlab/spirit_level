@@ -28,7 +28,8 @@ impl Run for Book {
 
 #[derive(Subcommand)]
 enum BookCmd {
-    /// Write the book's generated pages (lints, tiers, nav) from the lints' metadata
+    /// Write the book's generated pages (lints, tiers, nav) from the lints' metadata, and the coloured check blocks of
+    /// its hand-written pages
     #[command(after_help = "Examples:\n  spl book docs\n  spl book docs --check")]
     Docs(DocsArgs),
     /// Write the book's footer build stamp (crate version, git commit, build time) and the script that shows the
@@ -51,6 +52,9 @@ pub struct DocsArgs {
     /// The zensical.toml whose nav block is generated
     #[arg(long, default_value = "zensical.toml")]
     zensical: PathBuf,
+    /// Today's date for the checks of the generated blocks (YYYY-MM-DD); default: the system clock
+    #[arg(long, env = "SPIRIT_LEVEL_TODAY")]
+    today: Option<String>,
     /// Write nothing; fail when a page is stale
     #[arg(long)]
     check: bool,
@@ -103,7 +107,8 @@ fn run(cmd: BookCmd) -> Result<Exit, String> {
 }
 
 fn docs(a: &DocsArgs) -> Result<Exit, String> {
-    let changed = sl_book::write(&a.docs, &a.zensical, a.check).map_err(|e| e.to_string())?;
+    let changed = sl_book::write(&a.docs, &a.zensical, today(a.today.clone())?, a.check)
+        .map_err(|e| e.to_string())?;
     for c in &changed {
         println!("{} {c}", if a.check { "stale" } else { "wrote" });
     }
