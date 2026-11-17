@@ -5,65 +5,132 @@
   </picture>
 </p>
 
+<p align="center"><b>The rules your Rust project wrote down, checked on every run.</b></p>
+
 # spirit_level
 
-A linter for Rust projects of every size, from one crate to a workspace of hundreds. Tiers are TOML files of lints; a project picks one and adds its own spin.
+spirit_level is a linter for Rust projects of every size, from one crate to a workspace of hundreds. Clippy checks your code line by line. spirit_level checks everything around it: how the workspace is put together, which crate may depend on which, how big things grow, how code shares state, what the docs read like, and whether the firmware fits its flash.
 
-Working name. Private for now.
+Every project has rules like "no `unwrap` in library code", "every crate inherits the workspace lints" or "the UI never blocks". They live in a wiki page or in someone's head, and they drift. spirit_level turns them into over 300 lints with codes, documented pages and exact fixes, and runs them in one command, `spl check`.
 
-## Crates
+```text
+warn C0005 panic-in-library ×4: library code returns errors for what can fail and says why where it panics
+   --> src/lib.rs:3:34
+    |
+  3 | pub fn f(x: Option<u8>) -> u8 { x.unwrap() }
+    |                                  ^^^^^^^^^ .unwrap() in library code (4 in fx)
+    |
+  help: return an error for what can fail; where it cannot, say why: `.expect("why")`, `unreachable!("why")`, or a waiver
 
-<!-- spirit-level:crates -->
-| Crate | Layer | Description |
-|---|---|---|
-| [`sl_core`](crates/sl_core) | core | spirit_level's shared types: lint metadata, levels, parameters, diagnostics, spans, fixes, dates and globs |
-| [`sl_board`](crates/sl_board) | model | spirit_level's model of board descriptions: board.toml through sl_board_model, stm32-data chip JSON, the MCU's nets from the PCB geometry |
-| [`sl_board_model`](crates/sl_board_model) | model | The board description board.toml: schema, loading with source spans, revisions and reworks as patches |
-| [`sl_config`](crates/sl_config) | model | spirit_level's configuration format: tiers, extends, lint levels, parameters, reasons, expiries, scoped exceptions and the crate map |
-| [`sl_dependents`](crates/sl_dependents) | model | The repos that build on a library and the crates in them to retest when it changes (`spl dependents`) |
-| [`sl_docs`](crates/sl_docs) | model | Pages as a reader meets them, from Markdown or a built site: their shape, reading metrics, and the Zensical book they belong to |
-| [`sl_firmware`](crates/sl_firmware) | model | spirit_level's model of bare-metal firmware crates: cargo configuration, build script, memory.x, bedrock_fw.json, source facts, the linked ELF with frames and calls |
-| [`sl_model`](crates/sl_model) | model | spirit_level's project model: cargo metadata, manifests with spans, Rust sources parsed with syn, line counts |
-| [`sl_tools`](crates/sl_tools) | model | External tools for spirit_level's adapters: the tested versions, finding a tool on PATH and reading its version, running it, cargo's JSON messages |
-| [`sl_analysis`](crates/sl_analysis) | analysis | The one trait every spirit_level analysis implements, its run context, and syntax helpers shared by the source analyses |
-| [`sl_lints_ai`](crates/sl_lints_ai) | lints | spirit_level lints for code written with agents: stop-gap comments, commented-out code, near-duplicate functions, dead features, committed agent secrets and transcripts |
-| [`sl_lints_board`](crates/sl_lints_board) | lints | spirit_level board lints: the board description board.toml against itself, the chip's data and the PCB's nets, for every revision and rework |
-| [`sl_lints_cli`](crates/sl_lints_cli) | lints | spirit_level CLI lints: builds each command-line tool and checks its help, examples, completion, colour, version line and exit codes |
-| [`sl_lints_code`](crates/sl_lints_code) | lints | spirit_level source lints: todo!() and unimplemented!(), panics and prints in library code, allow without reason, float and hashing determinism, calls of the workspace's own CLIs |
-| [`sl_lints_dead`](crates/sl_lints_dead) | lints | spirit_level lint on dead code rustc cannot see: public items of workspace libraries no other crate names |
-| [`sl_lints_docs`](crates/sl_lints_docs) | lints | spirit_level lints on docs as a reader meets them: prose runs, reading time, headings, code walls, image text, and Zensical book practices |
-| [`sl_lints_embedded`](crates/sl_lints_embedded) | lints | spirit_level lints on bare-metal firmware: executors, interrupts, DMA, stack, memory, size, faults, boot, power, flash, pins, clocks, errata, USB, host input, logging, counters, build configuration (embedded_bedrock's bedrock_lint checks) |
-| [`sl_lints_errors`](crates/sl_lints_errors) | lints | spirit_level lints on error types: flat error enums that grow a variant per failure instead of wrapping the errors they come from |
-| [`sl_lints_graph`](crates/sl_lints_graph) | lints | spirit_level crate-graph lints against the crate map: layers edge by edge, forbidden closures, external git form, third-party placement, _core rules, cycles, the generated crate table, the unsafe allow-list |
-| [`sl_lints_manifest`](crates/sl_lints_manifest) | lints | spirit_level lints on manifests and repo files: package metadata, workspace inheritance and lints, dependency form, -sys crates, duplicates, profiles, toolchain, repo rule files, justfile, feature docs, contract snapshots |
-| [`sl_lints_modules`](crates/sl_lints_modules) | lints | spirit_level lints on a crate's module graph: the share of code caught in its biggest module cycle, and where to cut it |
-| [`sl_lints_prose`](crates/sl_lints_prose) | lints | spirit_level lints on prose: CHANGELOG and commit limits, agent files, filler, narration, emoji, comments that restate the code |
-| [`sl_lints_size`](crates/sl_lints_size) | lints | spirit_level size lints: god crates, modules and functions by code lines, test code size, cyclomatic complexity |
-| [`sl_lints_state`](crates/sl_lints_state) | lints | spirit_level shared-state lints from the fewer-locks rule: statics with interior mutability, static mut, thread-local state, lock().unwrap() counts, guards held across await or I/O, nested locks |
-| [`sl_lints_surface`](crates/sl_lints_surface) | lints | spirit_level lints on a library's public surface: public items reachable from the root per 1000 code lines |
-| [`sl_lints_ui`](crates/sl_lints_ui) | lints | spirit_level UI lints: theme colours and sizes, disabled controls with a reason, confirmed destructive actions, no blocking or raw spawns in UI code, wording, egui ids and repaints |
-| [`sl_lints_units`](crates/sl_lints_units) | lints | spirit_level lints that move plain numbers into exact_units types: quantities, positions and counts, bounds, and quantities inside function bodies |
-| [`sl_tool_audit`](crates/sl_tool_audit) | lints | spirit_level adapter of cargo-audit: vulnerable, unmaintained, unsound and yanked dependencies from the RustSec database |
-| [`sl_tool_cargo`](crates/sl_tool_cargo) | lints | spirit_level checks driven by cargo: the MSRV build, no_std and wasm builds of the map's crates, cargo doc without warnings |
-| [`sl_tool_clippy`](crates/sl_tool_clippy) | lints | spirit_level adapter of clippy: runs cargo clippy, reads its JSON messages, one lint per clippy group |
-| [`sl_tool_deny`](crates/sl_tool_deny) | lints | spirit_level adapter of cargo-deny: advisories, bans, licences and sources, one lint per check |
-| [`sl_tool_geiger`](crates/sl_tool_geiger) | lints | spirit_level adapter of geiger, linked: dependencies that use unsafe code, counted in their sources |
-| [`sl_tool_hakari`](crates/sl_tool_hakari) | lints | spirit_level adapter of hakari, linked: the workspace-hack package is up to date and every member depends on it |
-| [`sl_tool_machete`](crates/sl_tool_machete) | lints | spirit_level adapter of cargo-machete: unused dependencies, found fast by searching the sources |
-| [`sl_tool_rustfmt`](crates/sl_tool_rustfmt) | lints | spirit_level adapter of rustfmt: every Rust file is formatted the way cargo fmt writes it |
-| [`sl_tool_semver`](crates/sl_tool_semver) | lints | spirit_level adapter of cargo-semver-checks: stable crates change their API only with the version bump it needs |
-| [`sl_tool_shear`](crates/sl_tool_shear) | lints | spirit_level adapter of cargo-shear: unused and misplaced dependencies, also unused workspace entries |
-| [`sl_tool_taplo`](crates/sl_tool_taplo) | lints | spirit_level adapter of taplo: every TOML file is formatted as taplo writes it, with the formatted file as a fix |
-| [`sl_tool_typos`](crates/sl_tool_typos) | lints | spirit_level adapter of typos: misspelled words in code, comments and docs, with the correction as a fix |
-| [`sl_tool_udeps`](crates/sl_tool_udeps) | lints | spirit_level adapter of cargo-udeps: dependencies the compiler never loaded, on nightly |
-| [`sl_engine`](crates/sl_engine) | engine | spirit_level's engine: picks the analyses a configuration enables, checks their needs, runs them, applies levels, exceptions and waivers, and applies exact fixes |
-| [`sl_report`](crates/sl_report) | engine | spirit_level's report output: coloured text for people, a stable JSON document for CI and agents |
-| [`sl_book`](crates/sl_book) | app | Generates spirit_level's book pages (one per lint, one per tier, the indexes and the nav) from the lints' own metadata and the shipped tiers, and a book's footer build stamp |
-| [`spirit_level`](crates/spirit_level) | app | spirit_level as a library: the registry of every analysis, the shipped tier files, and a one-call check |
-| [`spirit_level_cli`](crates/spirit_level_cli) | app | The spl command: check a project, explain a lint, list lints and tiers, show the resolved configuration, write the book pages, list the dependents to retest, measure the docs pages, count its own usage |
-| [`sl_testkit`](crates/sl_testkit) | tests | Golden fixture harness for spirit_level analyses: runs one lint on small projects and compares the findings with each project's expect.toml |
-<!-- /spirit-level:crates -->
+deny M0012 readme-per-crate ×1: every crate has a README
+  help: write a short README: what the crate is, what it may depend on, how to use it
+  README.md  fx has no README.md
+```
+
+## Quick start
+
+```sh
+cargo install --locked --git https://github.com/romixlab/spirit_level spirit_level_cli
+spl init --tier small-workspace   # writes spirit_level.toml
+spl check                         # runs every lint the tier enables
+spl check --fix                   # applies the exact fixes, then checks again
+spl explain panic-in-library      # why a lint exists and how to fix a finding
+```
+
+## Tiers: start strict where it pays
+
+A tier is a TOML file of lints with a level and a reason for each. The size tiers extend each other, so a project grows into stricter rules as it grows:
+
+| Tier | For |
+|---|---|
+| `small` | one crate: metadata, docs, pure-Rust dependencies, build profiles, valid waivers |
+| `small-workspace` | a few crates: shared package keys, lints and dependencies declared once at the root |
+| `medium` | tens of crates: internal crates unpublished, MSRV declared, toolchain pinned |
+| `big` | a crate map with layers checked edge by edge, size limits with expiring exceptions |
+
+Topic tiers stack on top of a size tier with `extends = ["medium", "ai"]`:
+
+| Tier | For |
+|---|---|
+| `ai` | code and docs written with agents: stop-gap comments, near-duplicate functions, committed transcripts and secrets |
+| `embedded` | bare-metal firmware: interrupts, DMA, stack, flash, clocks, errata, USB, boot, power |
+| `ui`, `egui` | user interfaces: theme colours, confirmed destructive actions, no blocking on the UI thread |
+| `units-strict`, `units-paranoid` | plain numbers moved into typed units, up to the locals inside function bodies |
+
+A workspace that mixes firmware with host tools puts the `embedded` tier on the firmware crates only.
+
+## Exceptions carry a reason and an end date
+
+A lint that does not fit is changed in `spirit_level.toml`, never silenced. Each change carries a reason, and it can carry an expiry, a date or a release. When the expiry passes, the run fails until someone fixes the cause or renews the exception with a new reason.
+
+```toml
+extends = ["big", "ai"]
+
+[lints.duplicate-versions]
+level = "allow"
+reason = "syn 2 and 3 until clap moves"
+expires = "2027-01-31"
+
+[[exceptions]]
+lint = "crate-lines"
+crates = ["foo_sdk_types"]
+max-lines = 120000
+reason = "generated protocol types"
+expires = "v0.5.0"
+```
+
+A single finding is waived where it is, with the reason next to the code:
+
+```rust
+let n = digits.parse::<u32>().unwrap(); // spirit-level: allow(panic-in-library) the lexer only yields digits
+```
+
+A waiver without a reason, or one that no longer allows anything, is a finding itself. Unknown keys, lint ids and tier names stop the run before any lint runs, so a typo cannot switch a check off.
+
+## What it checks
+
+| Group | Examples |
+|---|---|
+| Manifests | workspace inheritance, `[lints]`, dependency form, `-sys` crates with native builds, profiles, toolchain pin, repo files |
+| Crate graph | declared layers edge by edge, forbidden closures, cycles, `_core` crates holding types only, the generated crate table |
+| Size | god crates, modules and functions by code lines, cyclomatic complexity, a crate's biggest module cycle |
+| Source | `todo!()`, panics and prints in library code, `#[allow]` without a reason, flat error enums, dead public items, float and hashing determinism |
+| Shared state | `static mut`, statics with interior mutability, lock guards held across `.await` or I/O, nested locks |
+| Prose and docs | CHANGELOG and commit limits, agent files, filler and narration, reading time, code walls, book navigation |
+| CLIs | each binary's help, examples, completion, colour, version line and exit codes, from running it |
+| Firmware | executors, interrupts, DMA, stack, memory, faults, clocks, errata, and every panic site in the linked ELF |
+| Boards | `board.toml` against the chip's data and the PCB's nets, for every revision and rework |
+| External tools | clippy, cargo-deny, cargo-audit, cargo-semver-checks, machete, shear, udeps, rustfmt, taplo, typos, geiger, hakari |
+
+External tools report through the same engine, levels and waivers as the built-in lints. `spl tools needed` lists the ones a project's tiers use, and `just tools` installs the missing ones.
+
+## Built for CI and agents
+
+- **Exit codes:** 0 when nothing is denied, 1 for a denied finding, 2 for a configuration error, 3 when an enabled lint could not run. A check that skips part of its work never passes green.
+- **JSON:** `spl check --format json` writes a stable document with every finding, its span, a fingerprint and its fix.
+- **Stable names:** each lint has a kebab-case id and a code (`C0005`) that never changes. Both work in configuration, waivers and `--only`.
+- **Deterministic:** dates come from `--today` or `SPIRIT_LEVEL_TODAY` in tests, and nothing reads the host's state.
+
+## More commands
+
+| Command | What it does |
+|---|---|
+| `spl config` | the resolved configuration: every level with the file that set it, every exception with its reason and expiry |
+| `spl lints` | every lint with its level in each shipped tier |
+| `spl dependents --base main` | the repos that build on this library and the crates in them to retest after a change |
+| `spl pages` | reading metrics for every docs page: words, reading time, longest run of prose |
+| `spl panics --elf <ELF>` | every panic site in a firmware release, with its function and task class |
+
+## spirit_level checks itself
+
+This repository runs `spl check` at the `big` tier as part of `just lint`. Its layers are declared in `spirit_level.toml`, its exceptions carry reasons, and its book is generated from the lints' own metadata. [ARCHITECTURE.md](ARCHITECTURE.md) shows the layers and every crate.
+
+## Documentation
+
+The book in [`docs/`](docs/index.md) has one page per lint and per tier, generated from the code, and guides for [getting started](docs/start.md), [configuration](docs/configuration.md), [waivers](docs/waivers.md), [the crate map](docs/map.md) and [writing lints](docs/writing-lints.md). `just docs` serves it locally.
+
+spirit_level is a working name, and the repository is private for now.
 
 ## Licence
 
-MIT OR Apache-2.0. See `CONTRIBUTING.md`.
+MIT OR Apache-2.0. See [`CONTRIBUTING.md`](CONTRIBUTING.md).
