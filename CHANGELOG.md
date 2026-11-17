@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.4.35] - 2026-11-17
+
 ### Added
 
 - `spl book sample`: a project's coloured check report as an SVG picture for a README (BOOK-4).
