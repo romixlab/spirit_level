@@ -66,6 +66,7 @@ Use it with `extends = "small"` in `spirit_level.toml`.
 | [M0025](../lints/M0025.md) | tier-clippy-set | `warn` | Clippy runs in the editor and CI from the project's own lint table; the tier says what belongs in it | small |
 | [M0026](../lints/M0026.md) | profile-no-lto | `warn` | LTO in the loop's profiles turns a link of a second into minutes; it belongs in a release profile | small |
 | [M0027](../lints/M0027.md) | patch-outside-workspace | `deny` | a committed patch into a sibling checkout builds differently on every machine; it lives in an ignored .cargo/config.toml | small |
+| [M0033](../lints/M0033.md) | manifest-homepage | `warn` | crates.io and docs.rs link to repository and homepage; when there is a book, it is the homepage a reader wants | small |
 | [P0001](../lints/P0001.md) | agent-file-lines | `warn` | agents read AGENTS.md whole every session; a long one is skimmed, not followed | small |
 | [P0009](../lints/P0009.md) | changelog-entry-length | `warn` | a CHANGELOG is a list: one short line per change | small |
 | [S0002](../lints/S0002.md) | function-complexity | `warn` | more paths than can be tested or held in one's head | small |
@@ -185,6 +186,10 @@ reason = "work lands under [Unreleased]; the release step turns it into a versio
 [lints.justfile-recipes]
 level = "warn"
 reason = "every repo answers to the same recipes: default, test, lint, install, deploy"
+
+[lints.manifest-homepage]
+level = "warn"
+reason = "crates.io and docs.rs link to repository and homepage; when there is a book, it is the homepage a reader wants"
 
 [lints.function-lines]
 level = "warn"

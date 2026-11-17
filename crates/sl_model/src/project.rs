@@ -185,6 +185,10 @@ pub struct Package {
     pub description: Option<String>,
     /// `license`
     pub license: Option<String>,
+    /// `repository`
+    pub repository: Option<String>,
+    /// `homepage`
+    pub homepage: Option<String>,
     /// `edition`
     pub edition: String,
     /// `rust-version`
@@ -433,6 +437,8 @@ impl Project {
                 manifest,
                 description: p.description.clone(),
                 license: p.license.clone(),
+                repository: p.repository.clone(),
+                homepage: p.homepage.clone(),
                 edition: p.edition.to_string(),
                 rust_version: p.rust_version.as_ref().map(|v| v.to_string()),
                 publish: p.publish.as_ref().is_none_or(|r| !r.is_empty()),

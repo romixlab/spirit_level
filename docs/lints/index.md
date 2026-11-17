@@ -379,6 +379,7 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [M0012](M0012.md) | [readme-per-crate](M0012.md) | every crate has a README | warn | deny | deny | deny | off | off | off | off | off | off |
 | [M0013](M0013.md) | [rust-version-set](M0013.md) | every crate declares its minimum Rust version | off | off | warn | deny | off | off | off | off | off | off |
 | [M0025](M0025.md) | [tier-clippy-set](M0025.md) | the project's [lints.clippy] and clippy.toml turn on the Clippy set its tiers expect, every opt-out with a reason | warn | warn | deny | deny | off | off | off | off | off | off |
+| [M0033](M0033.md) | [manifest-homepage](M0033.md) | the shared package keys set repository, and homepage is the book's site_url when it has one | warn | warn | warn | warn | off | off | off | off | off | off |
 
 ## mem
 

@@ -1220,6 +1220,7 @@ dependencies = [
  "sl_analysis",
  "sl_config",
  "sl_core",
+ "sl_docs",
  "sl_model",
  "sl_testkit",
  "syn 3.0.10",

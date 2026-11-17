@@ -5,6 +5,7 @@ mod ci;
 mod clippy;
 mod contract;
 mod deps;
+mod face;
 mod fuzz;
 mod macros;
 mod package;
@@ -97,6 +98,8 @@ lint!(FUZZ_CORPUS_TEST, "M0031", "fuzz-corpus-test", "repo", "every fuzz target 
     params: [], needs: [], fix: None);
 lint!(CI_WORKFLOW, "M0032", "ci-workflow", "repo", "the repo has a CI workflow and it runs the repo's checks",
     params: [("path", Str, "\".github/workflows/ci.yml\"", "the CI workflow, relative to the root")], needs: [], fix: None);
+lint!(MANIFEST_HOMEPAGE, "M0033", "manifest-homepage", "manifest", "the shared package keys set repository, and homepage is the book's site_url when it has one",
+    params: [], needs: [], fix: Exact);
 
 /// The manifest analysis
 pub struct Manifest;
@@ -137,6 +140,7 @@ static LINTS: &[&LintMeta] = &[
     &CONTRACT_SNAPSHOT,
     &FUZZ_CORPUS_TEST,
     &CI_WORKFLOW,
+    &MANIFEST_HOMEPAGE,
 ];
 
 impl Analysis for Manifest {
@@ -160,6 +164,7 @@ impl Analysis for Manifest {
         contract::run(cx);
         fuzz::run(cx);
         ci::run(cx);
+        face::run(cx);
     }
 }
 

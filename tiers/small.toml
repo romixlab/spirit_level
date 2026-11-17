@@ -74,6 +74,10 @@ reason = "work lands under [Unreleased]; the release step turns it into a versio
 level = "warn"
 reason = "every repo answers to the same recipes: default, test, lint, install, deploy"
 
+[lints.manifest-homepage]
+level = "warn"
+reason = "crates.io and docs.rs link to repository and homepage; when there is a book, it is the homepage a reader wants"
+
 [lints.function-lines]
 level = "warn"
 reason = "a function longer than a screen is changed without being read whole"

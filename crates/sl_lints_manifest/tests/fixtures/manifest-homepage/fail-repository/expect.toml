@@ -1,0 +1,3 @@
+[[finding]]
+at = "Cargo.toml:1:2"
+contains = "sets no repository"

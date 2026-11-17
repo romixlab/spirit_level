@@ -1,0 +1,3 @@
+[[finding]]
+at = "Cargo.toml:9:1"
+contains = "has homepage https://github.com/owner/fx"

@@ -5,6 +5,7 @@
 ### Added
 
 - `ci-workflow`: the repo has a CI workflow that runs `just lint` and `just test`, or Clippy and tests (MAN-10).
+- `manifest-homepage`: the manifest sets `repository`, and `homepage` is the book's `site_url`; `--fix` writes it (MAN-11).
 
 ## [0.4.36] - 2026-11-17
 
