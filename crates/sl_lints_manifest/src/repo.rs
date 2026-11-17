@@ -2,6 +2,7 @@
 
 use sl_analysis::Context;
 use sl_core::{Diagnostic, Span};
+use sl_model::Justfile;
 
 pub(crate) fn run(cx: &Context<'_>) {
     let p = cx.project;
@@ -82,12 +83,9 @@ pub(crate) fn run(cx: &Context<'_>) {
     }
 
     // justfile-recipes, justfile-simple
-    let jf = ["justfile", "Justfile", ".justfile"]
-        .into_iter()
-        .find(|f| p.exists(f));
-    let text = jf.and_then(|f| p.read(f));
-    let recipes = text.as_deref().map(recipes).unwrap_or_default();
-    let file = jf.unwrap_or("justfile");
+    let jf = Justfile::read(&p.root);
+    let recipes = jf.as_ref().map_or(&[][..], |j| j.recipes.as_slice());
+    let file = jf.as_ref().map_or("justfile", |j| j.rel.as_str());
     for want in cx.params("justfile-recipes").list("recipes") {
         if !recipes.iter().any(|r| &r.name == want) {
             cx.emit(
@@ -101,11 +99,12 @@ pub(crate) fn run(cx: &Context<'_>) {
         }
     }
     let max = cx.params("justfile-simple").count("max-lines");
-    for r in &recipes {
+    for r in recipes {
+        let commands = r.body.len();
         let why = if r.shebang {
             Some("is an inline script (a shebang recipe)".to_owned())
-        } else if r.commands > max {
-            Some(format!("has {} command lines (limit {max})", r.commands))
+        } else if commands > max {
+            Some(format!("has {commands} command lines (limit {max})"))
         } else {
             None
         };
@@ -113,7 +112,7 @@ pub(crate) fn run(cx: &Context<'_>) {
             cx.emit(
                 Diagnostic::new("justfile-simple", format!("recipe:{}", r.name), format!("recipe `{}` {why}", r.name))
                     .span(Span::new(file, r.line))
-                    .metric("command-lines", r.commands as f64, Some(max as f64))
+                    .metric("command-lines", commands as f64, Some(max as f64))
                     .help("move the logic into a Rust command (a subcommand or a small tool) and let the recipe call it"),
             );
         }
@@ -148,86 +147,5 @@ pub(crate) fn run(cx: &Context<'_>) {
                 );
             }
         }
-    }
-}
-
-struct Recipe {
-    name: String,
-    line: u32,
-    commands: usize,
-    shebang: bool,
-}
-
-/// The recipes of a justfile: name, line, command lines in the body, whether it is a shebang recipe
-fn recipes(text: &str) -> Vec<Recipe> {
-    let mut out: Vec<Recipe> = Vec::new();
-    for (i, l) in text.lines().enumerate() {
-        if l.starts_with([' ', '\t']) {
-            if let Some(r) = out.last_mut() {
-                let t = l.trim();
-                if t.starts_with("#!") {
-                    r.shebang = true;
-                } else if !t.is_empty() && !t.starts_with('#') {
-                    r.commands += 1;
-                }
-            }
-            continue;
-        }
-        let t = l.trim();
-        if t.is_empty() || t.starts_with('#') || t.starts_with('[') || t.contains(":=") {
-            if !t.is_empty() && !t.starts_with('#') && !t.starts_with('[') {
-                // a variable assignment ends the previous recipe
-                out.push(Recipe {
-                    name: String::new(),
-                    line: 0,
-                    commands: 0,
-                    shebang: false,
-                });
-                out.pop();
-            }
-            continue;
-        }
-        let Some((head, _)) = t.split_once(':') else {
-            continue;
-        };
-        let name = head
-            .trim_start_matches('@')
-            .split_whitespace()
-            .next()
-            .unwrap_or("");
-        if name.is_empty()
-            || !name
-                .chars()
-                .all(|c| c.is_alphanumeric() || c == '-' || c == '_')
-        {
-            continue;
-        }
-        if ["set", "export", "alias", "import", "mod"].contains(&name) {
-            continue;
-        }
-        out.push(Recipe {
-            name: name.to_owned(),
-            line: i as u32 + 1,
-            commands: 0,
-            shebang: false,
-        });
-    }
-    out
-}
-
-#[cfg(test)]
-mod tests {
-    use super::recipes;
-
-    #[test]
-    fn parses_recipes() {
-        let r = recipes(
-            "set shell := [\"bash\"]\n# doc\ndefault:\n    @just --list\n\ntest *flags:\n    cargo nextest run {{flags}}\n    # comment\n\n[private]\n_x a=\"1\": test\n    #!/usr/bin/env bash\n    echo\n",
-        );
-        let names: Vec<&str> = r.iter().map(|r| r.name.as_str()).collect();
-        assert_eq!(names, vec!["default", "test", "_x"]);
-        assert_eq!(r[1].commands, 1);
-        assert!(r[2].shebang);
-        assert_eq!(r[1].line, 6);
     }
 }
