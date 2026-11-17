@@ -1,0 +1,52 @@
+name: CI
+
+# The repo's own checks, as on a developer's PC: `just lint` (fmt, clippy, spl on itself at the big tier, the lint
+# codes, the generated pages) and `just test`. The adapters' tools come from `just tools`; cargo-udeps also needs a
+# nightly toolchain.
+
+on:
+  merge_group:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  lint:
+    name: just lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # `spl codes --check --base main` compares with main
+          fetch-depth: 0
+      - uses: actions-rust-lang/setup-rust-toolchain@v2
+      - run: rustup toolchain install nightly --profile minimal
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: just,cargo-binstall
+      - run: just tools
+      - run: just lint
+
+  test:
+    name: just test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions-rust-lang/setup-rust-toolchain@v2
+      - run: rustup toolchain install nightly --profile minimal
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: just,cargo-binstall,cargo-nextest
+      - run: just tools
+      - run: just test

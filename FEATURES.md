@@ -146,6 +146,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `BOOK-2` Logo and brand assets from a Typst source (`assets/`); book favicon, header logo, README header.
 - ✅ `BOOK-3` `spl book stamp`: a book's footer build stamp (crate version, git commit, build time) and the reader-clock age script, serving `book-build-stamp` (D0017); `sl_book::stamp`.
 - ✅ `BOOK-4` `spl book sample`: a sample project's coloured `spl check` report as an SVG picture for the README; `book sample --check` fails when stale.
+- ✅ `BOOK-5` The book is published at spl.vhrd.tech from GitHub Actions; CI runs `just lint` and `just test`.
 
 ## TESTKIT - the golden fixture harness
 
