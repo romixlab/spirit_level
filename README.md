@@ -7,6 +7,13 @@
 
 <p align="center"><b>The rules your Rust project wrote down, checked on every run.</b></p>
 
+<p align="center">
+  <a href="https://spl.vhrd.tech"><img alt="Book" src="https://img.shields.io/badge/book-spl.vhrd.tech-65a30d"></a>
+  <a href="https://github.com/romixlab/spirit_level/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/romixlab/spirit_level/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/romixlab/spirit_level/actions/workflows/docs.yml"><img alt="Book build" src="https://github.com/romixlab/spirit_level/actions/workflows/docs.yml/badge.svg"></a>
+  <a href="#licence"><img alt="License: MIT OR Apache-2.0" src="https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-373c42"></a>
+</p>
+
 # spirit_level
 
 spirit_level is a linter for Rust projects of every size, from one crate to a workspace of hundreds. Clippy checks your code line by line. spirit_level checks everything around it: how the workspace is put together, which crate may depend on which, how big things grow, how code shares state, what the docs read like, and whether the firmware fits its flash.
@@ -17,7 +24,7 @@ Every project has rules like "no `unwrap` in library code", "every crate inherit
 
 ## Quick start
 
-```sh
+```bash
 cargo install --locked --git https://github.com/romixlab/spirit_level spirit_level_cli
 spl init --tier small-workspace   # writes spirit_level.toml
 spl check                         # runs every lint the tier enables
@@ -115,9 +122,7 @@ This repository runs `spl check` at the `big` tier as part of `just lint`. Its l
 
 ## Documentation
 
-The book in [`docs/`](docs/index.md) has one page per lint and per tier, generated from the code, and guides for [getting started](docs/start.md), [configuration](docs/configuration.md), [waivers](docs/waivers.md), [the crate map](docs/map.md) and [writing lints](docs/writing-lints.md). `just docs` serves it locally.
-
-spirit_level is a working name, and the repository is private for now.
+The book at [spl.vhrd.tech](https://spl.vhrd.tech), built from [`docs/`](docs/index.md), has one page per lint and per tier, generated from the code, and guides for [getting started](docs/start.md), [configuration](docs/configuration.md), [waivers](docs/waivers.md), [the crate map](docs/map.md) and [writing lints](docs/writing-lints.md). `just docs` serves it locally.
 
 ## Licence
 
