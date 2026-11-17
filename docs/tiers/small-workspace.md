@@ -75,6 +75,7 @@ Use it with `extends = "small-workspace"` in `spirit_level.toml`.
 | [M0025](../lints/M0025.md) | tier-clippy-set | `warn` | Clippy runs in the editor and CI from the project's own lint table; the tier says what belongs in it | small |
 | [M0026](../lints/M0026.md) | profile-no-lto | `warn` | LTO in the loop's profiles turns a link of a second into minutes; it belongs in a release profile | small |
 | [M0027](../lints/M0027.md) | patch-outside-workspace | `deny` | a committed patch into a sibling checkout builds differently on every machine; it lives in an ignored .cargo/config.toml | small |
+| [M0032](../lints/M0032.md) | ci-workflow | `warn` | checks that only run on one PC get skipped; CI runs the repo's own checks on every push and pull request | small-workspace |
 | [P0001](../lints/P0001.md) | agent-file-lines | `warn` | agents read AGENTS.md whole every session; a long one is skimmed, not followed | small |
 | [P0009](../lints/P0009.md) | changelog-entry-length | `warn` | a CHANGELOG is a list: one short line per change | small |
 | [S0002](../lints/S0002.md) | function-complexity | `warn` | more paths than can be tested or held in one's head | small |
@@ -171,4 +172,8 @@ reason = "crates in a cycle cannot be built or tested apart"
 [lints.taplo-fmt]
 level = "warn"
 reason = "manifests are edited by people and by tools; one TOML formatting keeps their diffs about the change"
+
+[lints.ci-workflow]
+level = "warn"
+reason = "checks that only run on one PC get skipped; CI runs the repo's own checks on every push and pull request"
 ```

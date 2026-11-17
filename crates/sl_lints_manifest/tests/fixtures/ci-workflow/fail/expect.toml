@@ -1,0 +1,7 @@
+[[finding]]
+at = ".github/workflows/ci.yml:1"
+contains = "`just lint`"
+
+[[finding]]
+at = ".github/workflows/ci.yml:1"
+contains = "`just test`"

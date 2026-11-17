@@ -36,6 +36,7 @@ M0028 = { id = "test-binaries", group = "manifest", status = "active" }
 M0029 = { id = "macro-compile-fail", group = "manifest", status = "active" }
 M0030 = { id = "contract-snapshot", group = "manifest", status = "active" }
 M0031 = { id = "fuzz-corpus-test", group = "manifest", status = "active" }
+M0032 = { id = "ci-workflow", group = "manifest", status = "active" }
 S0001 = { id = "crate-lines", group = "size", status = "active" }
 S0002 = { id = "function-complexity", group = "size", status = "active" }
 S0003 = { id = "function-lines", group = "size", status = "active" }

@@ -14,6 +14,7 @@ pub mod lines;
 pub mod project;
 pub mod source;
 pub mod toml_file;
+pub mod workflow;
 pub mod yaml_file;
 
 pub use config_tree::{ConfigNode, ConfigValue};
@@ -26,4 +27,5 @@ pub use project::{
 pub use source::{FileKind, SourceFile};
 pub use toml_edit;
 pub use toml_file::TomlFile;
+pub use workflow::Workflow;
 pub use yaml_file::YamlFile;

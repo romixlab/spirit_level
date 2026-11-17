@@ -1,0 +1,3 @@
+[[finding]]
+at = ".github/workflows/ci.yml"
+contains = "no CI workflow"

@@ -47,3 +47,7 @@ reason = "crates in a cycle cannot be built or tested apart"
 [lints.taplo-fmt]
 level = "warn"
 reason = "manifests are edited by people and by tools; one TOML formatting keeps their diffs about the change"
+
+[lints.ci-workflow]
+level = "warn"
+reason = "checks that only run on one PC get skipped; CI runs the repo's own checks on every push and pull request"

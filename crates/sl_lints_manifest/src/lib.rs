@@ -1,6 +1,7 @@
 //! Manifest and repo-file lints. One analysis, [`MANIFEST`], reports them all: they share nothing heavier than
 //! the manifests cargo metadata already read.
 
+mod ci;
 mod clippy;
 mod contract;
 mod deps;
@@ -94,6 +95,8 @@ lint!(CONTRACT_SNAPSHOT, "M0030", "contract-snapshot", "workspace", "a contract 
     needs: [Need::Map], fix: None);
 lint!(FUZZ_CORPUS_TEST, "M0031", "fuzz-corpus-test", "repo", "every fuzz target has a corpus tracked in git and a test that replays it",
     params: [], needs: [], fix: None);
+lint!(CI_WORKFLOW, "M0032", "ci-workflow", "repo", "the repo has a CI workflow and it runs the repo's checks",
+    params: [("path", Str, "\".github/workflows/ci.yml\"", "the CI workflow, relative to the root")], needs: [], fix: None);
 
 /// The manifest analysis
 pub struct Manifest;
@@ -133,6 +136,7 @@ static LINTS: &[&LintMeta] = &[
     &MACRO_COMPILE_FAIL,
     &CONTRACT_SNAPSHOT,
     &FUZZ_CORPUS_TEST,
+    &CI_WORKFLOW,
 ];
 
 impl Analysis for Manifest {
@@ -155,6 +159,7 @@ impl Analysis for Manifest {
         macros::run(cx);
         contract::run(cx);
         fuzz::run(cx);
+        ci::run(cx);
     }
 }
 

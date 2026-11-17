@@ -1,0 +1,11 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # just lint and just test are what a person runs; this workflow runs cargo instead
+      - run: cargo clippy --all-targets -- -D warnings
+      - run: cargo nextest run
+      - run: echo "just lint"

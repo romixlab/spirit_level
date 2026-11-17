@@ -62,6 +62,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - 📋 `MAN-7` `example-metadata`: every example carries name, description and category in the manifest; the examples index is generated.
 - 📋 `MAN-8` Markdown check of READMEs and docs as a tool adapter.
 - ✅ `MAN-9` `fuzz-corpus-test` (M0031): every `fuzz/fuzz_targets/*.rs` has a corpus tracked in git and a `#[test]` naming it.
+- ✅ `MAN-10` `ci-workflow` (M0032): `.github/workflows/ci.yml` runs `just lint` and `just test`, or without those recipes Clippy and the tests.
 
 ## GRAPH - crate graph and map
 

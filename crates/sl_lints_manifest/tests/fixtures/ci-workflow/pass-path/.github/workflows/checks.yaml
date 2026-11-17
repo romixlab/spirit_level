@@ -1,0 +1,7 @@
+on: push
+jobs:
+  all:
+    runs-on: ubuntu-latest
+    steps:
+      - run: cargo clippy
+      - run: cargo test
