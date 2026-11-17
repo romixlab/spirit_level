@@ -64,6 +64,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `MAN-9` `fuzz-corpus-test` (M0031): every `fuzz/fuzz_targets/*.rs` has a corpus tracked in git and a `#[test]` naming it.
 - ✅ `MAN-10` `ci-workflow` (M0032): `.github/workflows/ci.yml` runs `just lint` and `just test`, or without those recipes Clippy and the tests.
 - ✅ `MAN-11` `manifest-homepage` (M0033): `[workspace.package]` (or `[package]`) sets `repository`, and `homepage` equals the book's `site_url`, with an exact fix.
+- ✅ `MAN-12` `readme-badges` (M0034): the README carries a badge for the book (`site_url`), the CI workflow (its `badge.svg`), and crates.io and docs.rs per published crate; `--fix` inserts them.
 
 ## GRAPH - crate graph and map
 

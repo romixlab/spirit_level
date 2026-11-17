@@ -467,6 +467,7 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [M0028](M0028.md) | [test-binaries](M0028.md) | a crate builds its integration tests as one binary | off | off | warn | warn | off | off | off | off | off | off |
 | [M0031](M0031.md) | [fuzz-corpus-test](M0031.md) | every fuzz target has a corpus tracked in git and a test that replays it | off | off | warn | warn | off | off | off | off | off | off |
 | [M0032](M0032.md) | [ci-workflow](M0032.md) | the repo has a CI workflow and it runs the repo's checks | off | warn | warn | warn | off | off | off | off | off | off |
+| [M0034](M0034.md) | [readme-badges](M0034.md) | the README carries a badge for the book, CI and every published crate, each linking to its target | warn | warn | warn | warn | off | off | off | off | off | off |
 
 ## rustfmt
 

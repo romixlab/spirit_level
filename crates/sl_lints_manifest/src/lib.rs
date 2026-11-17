@@ -100,6 +100,10 @@ lint!(CI_WORKFLOW, "M0032", "ci-workflow", "repo", "the repo has a CI workflow a
     params: [("path", Str, "\".github/workflows/ci.yml\"", "the CI workflow, relative to the root")], needs: [], fix: None);
 lint!(MANIFEST_HOMEPAGE, "M0033", "manifest-homepage", "manifest", "the shared package keys set repository, and homepage is the book's site_url when it has one",
     params: [], needs: [], fix: Exact);
+lint!(README_BADGES, "M0034", "readme-badges", "repo", "the README carries a badge for the book, CI and every published crate, each linking to its target",
+    params: [("file", Str, "\"README.md\"", "the README, relative to the root"),
+             ("workflow", Str, "\".github/workflows/ci.yml\"", "the CI workflow whose status badge the README shows")],
+    needs: [], fix: Exact);
 
 /// The manifest analysis
 pub struct Manifest;
@@ -141,6 +145,7 @@ static LINTS: &[&LintMeta] = &[
     &FUZZ_CORPUS_TEST,
     &CI_WORKFLOW,
     &MANIFEST_HOMEPAGE,
+    &README_BADGES,
 ];
 
 impl Analysis for Manifest {

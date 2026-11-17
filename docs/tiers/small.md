@@ -67,6 +67,7 @@ Use it with `extends = "small"` in `spirit_level.toml`.
 | [M0026](../lints/M0026.md) | profile-no-lto | `warn` | LTO in the loop's profiles turns a link of a second into minutes; it belongs in a release profile | small |
 | [M0027](../lints/M0027.md) | patch-outside-workspace | `deny` | a committed patch into a sibling checkout builds differently on every machine; it lives in an ignored .cargo/config.toml | small |
 | [M0033](../lints/M0033.md) | manifest-homepage | `warn` | crates.io and docs.rs link to repository and homepage; when there is a book, it is the homepage a reader wants | small |
+| [M0034](../lints/M0034.md) | readme-badges | `warn` | the top of the README tells a visitor whether the project passes and where its book, crate and API docs are | small |
 | [P0001](../lints/P0001.md) | agent-file-lines | `warn` | agents read AGENTS.md whole every session; a long one is skimmed, not followed | small |
 | [P0009](../lints/P0009.md) | changelog-entry-length | `warn` | a CHANGELOG is a list: one short line per change | small |
 | [S0002](../lints/S0002.md) | function-complexity | `warn` | more paths than can be tested or held in one's head | small |
@@ -190,6 +191,10 @@ reason = "every repo answers to the same recipes: default, test, lint, install, 
 [lints.manifest-homepage]
 level = "warn"
 reason = "crates.io and docs.rs link to repository and homepage; when there is a book, it is the homepage a reader wants"
+
+[lints.readme-badges]
+level = "warn"
+reason = "the top of the README tells a visitor whether the project passes and where its book, crate and API docs are"
 
 [lints.function-lines]
 level = "warn"

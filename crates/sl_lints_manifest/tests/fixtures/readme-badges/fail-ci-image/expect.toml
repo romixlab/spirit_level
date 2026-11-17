@@ -1,0 +1,7 @@
+[[finding]]
+at = "README.md:3"
+contains = "not the workflow's status"
+
+[[finding]]
+at = "README.md:6"
+contains = "no badge for fx on docs.rs"

@@ -1,0 +1,15 @@
+[[finding]]
+at = "README.md:9"
+contains = "no badge for the book"
+
+[[finding]]
+at = "README.md:9"
+contains = "no badge for the CI workflow"
+
+[[finding]]
+at = "README.md:9"
+contains = "no badge for fx on crates.io"
+
+[[finding]]
+at = "README.md:9"
+contains = "no badge for fx on docs.rs"

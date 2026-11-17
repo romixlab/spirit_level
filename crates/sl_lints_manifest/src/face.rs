@@ -1,23 +1,33 @@
-//! The repo's public face: the links its manifest gives crates.io and docs.rs.
+//! The repo's public face: the links its manifest gives crates.io and docs.rs, and the README's badges.
 
 use sl_analysis::Context;
-use sl_core::{Diagnostic, Edit, Fix};
+use sl_core::{Diagnostic, Edit, Fix, Span};
 use sl_docs::Book;
+use sl_docs::badges::{self, Badge};
 use sl_model::Project;
 
+const LINTS: [&str; 2] = ["manifest-homepage", "readme-badges"];
+
 pub(crate) fn run(cx: &Context<'_>) {
-    let id = "manifest-homepage";
-    if !cx.enabled(id) {
+    if !LINTS.iter().any(|id| cx.enabled(id)) {
         return;
     }
     let book = match Book::read(&cx.project.root) {
         Ok(b) => b,
         Err(e) => {
-            cx.not_run(id, "file:book-config", format!("cannot read it: {e}"));
+            for id in LINTS {
+                cx.not_run(id, "file:book-config", format!("cannot read it: {e}"));
+            }
             return;
         }
     };
-    homepage(cx, book.as_ref().and_then(|b| b.site_url.as_deref()));
+    let site_url = book.as_ref().and_then(|b| b.site_url.as_deref());
+    if cx.enabled("manifest-homepage") {
+        homepage(cx, site_url);
+    }
+    if cx.enabled("readme-badges") {
+        readme_badges(cx, site_url);
+    }
 }
 
 /// The table that holds the project's shared package keys: `[workspace.package]` in a workspace (or when the
@@ -128,6 +138,176 @@ fn homepage(cx: &Context<'_>, site_url: Option<&str>) {
     cx.emit(d);
 }
 
+/// A badge the README must carry
+struct Want {
+    /// Its fingerprint
+    item: String,
+    /// What it is for, in a message
+    what: String,
+    /// The address it links to, or a page under it
+    link: String,
+    /// The image a new badge shows
+    image: String,
+    /// The image's alternative text
+    alt: String,
+    /// The image it must show, or one under it; None when any image does
+    must_show: Option<String>,
+}
+
+/// Whether a link names `base` or a page under it: a trailing slash, a path, a query or a fragment may follow
+fn targets(link: &str, base: &str) -> bool {
+    let base = base.trim_end_matches('/');
+    link.strip_prefix(base)
+        .is_some_and(|rest| rest.is_empty() || rest.starts_with(['/', '?', '#']))
+}
+
+/// The `https://github.com/OWNER/REPO` of a repository URL on GitHub
+fn github(repository: &str) -> Option<String> {
+    let path = repository
+        .strip_prefix("https://github.com/")?
+        .trim_end_matches('/')
+        .trim_end_matches(".git");
+    let mut parts = path.split('/');
+    let (owner, repo) = (parts.next()?, parts.next()?);
+    (parts.next().is_none() && !owner.is_empty() && !repo.is_empty())
+        .then(|| format!("https://github.com/{owner}/{repo}"))
+}
+
+/// A text as a shields.io static badge segment: `-` and `_` doubled
+fn shields(text: &str) -> String {
+    text.replace('-', "--").replace('_', "__")
+}
+
+/// The badges the project's README must carry: the book, CI, and crates.io and docs.rs for every published crate
+fn wanted(cx: &Context<'_>, site_url: Option<&str>) -> Vec<Want> {
+    let p = cx.project;
+    let mut out = Vec::new();
+    if let Some(site) = site_url {
+        let host = site
+            .split("://")
+            .nth(1)
+            .unwrap_or(site)
+            .trim_end_matches('/');
+        out.push(Want {
+            item: "badge:book".into(),
+            what: format!("the book at {site}"),
+            link: site.to_owned(),
+            image: format!("https://img.shields.io/badge/book-{}-blue", shields(host)),
+            alt: "Book".into(),
+            must_show: None,
+        });
+    }
+    let workflow = cx.params("readme-badges").str("workflow");
+    let file = workflow.rsplit('/').next().unwrap_or(workflow);
+    if p.exists(workflow)
+        && let Some(gh) = key_value(p, "repository").as_deref().and_then(github)
+    {
+        let page = format!("{gh}/actions/workflows/{file}");
+        let image = format!("{page}/badge.svg");
+        out.push(Want {
+            item: "badge:ci".into(),
+            what: format!("the CI workflow {workflow}"),
+            link: page,
+            image: image.clone(),
+            alt: "CI".into(),
+            must_show: Some(image),
+        });
+    }
+    for pkg in p.packages.iter().filter(|pkg| pkg.publish) {
+        let n = &pkg.name;
+        out.push(Want {
+            item: format!("badge:crates.io:{n}"),
+            what: format!("{n} on crates.io"),
+            link: format!("https://crates.io/crates/{n}"),
+            image: format!("https://img.shields.io/crates/v/{n}"),
+            alt: "crates.io".into(),
+            must_show: None,
+        });
+        if pkg.has_lib() {
+            out.push(Want {
+                item: format!("badge:docs.rs:{n}"),
+                what: format!("{n} on docs.rs"),
+                link: format!("https://docs.rs/{n}"),
+                image: format!("https://img.shields.io/docsrs/{n}"),
+                alt: "docs.rs".into(),
+                must_show: None,
+            });
+        }
+    }
+    out
+}
+
+fn readme_badges(cx: &Context<'_>, site_url: Option<&str>) {
+    let id = "readme-badges";
+    let file = cx.params(id).str("file");
+    let Some(text) = cx.project.read(file) else {
+        return;
+    };
+    let found = badges::read(&text);
+    for w in wanted(cx, site_url) {
+        let linked: Vec<&Badge> = found
+            .list
+            .iter()
+            .filter(|b| targets(&b.link, &w.link))
+            .collect();
+        if linked.is_empty() {
+            let line = badges::Form::Markdown.badge(&w.alt, &w.image, &w.link);
+            let mut d = Diagnostic::new(
+                id,
+                &w.item,
+                format!("the README has no badge for {}", w.what),
+            )
+            .span(Span::new(
+                file,
+                found
+                    .insert
+                    .as_ref()
+                    .map_or(1, |i| line_of(&text, i.offset)),
+            ))
+            .help(format!("add `{line}` beside the other badges, at the top"));
+            if let Some(at) = &found.insert {
+                d = d.fix(Fix {
+                    description: format!("add a badge for {}", w.what),
+                    edits: vec![Edit {
+                        file: file.to_owned(),
+                        start: at.offset,
+                        end: at.offset,
+                        replacement: at.text(&w.alt, &w.image, &w.link),
+                    }],
+                });
+            }
+            cx.emit(d);
+            continue;
+        }
+        let Some(must) = &w.must_show else {
+            continue;
+        };
+        if linked.iter().any(|b| targets(&b.image, must)) {
+            continue;
+        }
+        let b = linked[0];
+        cx.emit(
+            Diagnostic::new(
+                id,
+                &w.item,
+                format!(
+                    "the badge for {} shows {}, not the workflow's status",
+                    w.what, b.image
+                ),
+            )
+            .span(Span::new(file, b.line))
+            .help(format!(
+                "show `{must}`: it is green while the workflow passes on the default branch"
+            )),
+        );
+    }
+}
+
+/// The 1-based line of a byte offset
+fn line_of(text: &str, offset: usize) -> u32 {
+    text[..offset].matches('\n').count() as u32 + 1
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -138,5 +318,18 @@ mod tests {
         assert!(!same_url("https://x.org/a", "https://x.org"));
         assert_eq!(next_line("a\nb", 0), (2, false));
         assert_eq!(next_line("a\nb", 2), (3, true));
+        assert!(targets(
+            "https://docs.rs/fx/latest/fx/",
+            "https://docs.rs/fx"
+        ));
+        assert!(!targets("https://docs.rs/fx_core", "https://docs.rs/fx"));
+        assert!(targets("https://x.org", "https://x.org/"));
+        assert_eq!(
+            github("https://github.com/o/r.git").as_deref(),
+            Some("https://github.com/o/r")
+        );
+        assert_eq!(github("https://github.com/o/r/tree/main"), None);
+        assert_eq!(github("https://gitlab.com/o/r"), None);
+        assert_eq!(shields("a-b_c.org"), "a--b__c.org");
     }
 }

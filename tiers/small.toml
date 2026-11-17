@@ -78,6 +78,10 @@ reason = "every repo answers to the same recipes: default, test, lint, install, 
 level = "warn"
 reason = "crates.io and docs.rs link to repository and homepage; when there is a book, it is the homepage a reader wants"
 
+[lints.readme-badges]
+level = "warn"
+reason = "the top of the README tells a visitor whether the project passes and where its book, crate and API docs are"
+
 [lints.function-lines]
 level = "warn"
 reason = "a function longer than a screen is changed without being read whole"
