@@ -1,0 +1,3 @@
+# Build the book strict into site/
+docs-build:
+    uv run zensical build --clean --strict

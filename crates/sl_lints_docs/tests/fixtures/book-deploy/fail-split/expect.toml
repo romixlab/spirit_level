@@ -1,0 +1,3 @@
+[[finding]]
+at = ".github/workflows/pages.yml:6"
+contains = "only an artifact of its own run"

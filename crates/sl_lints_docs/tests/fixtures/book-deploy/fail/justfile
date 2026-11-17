@@ -1,0 +1,3 @@
+# Serve the book, strict
+docs-build:
+    uv run zensical serve --strict

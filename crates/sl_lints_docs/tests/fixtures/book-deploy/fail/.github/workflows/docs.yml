@@ -1,0 +1,10 @@
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # zensical build --strict would fail on a broken link; this build does not
+      - run: uv run zensical build
+      - run: just docs-build
+      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/deploy-pages@v4

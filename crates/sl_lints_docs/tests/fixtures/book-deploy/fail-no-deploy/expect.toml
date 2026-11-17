@@ -1,0 +1,3 @@
+[[finding]]
+at = "zensical.toml:3"
+contains = "no workflow publishes it"

@@ -50,6 +50,7 @@ Use it with `extends = "small"` in `spirit_level.toml`.
 | [D0019](../lints/D0019.md) | theme-feature-conflicts | `deny` | Zensical does not support the conflicting features together, and builds neither error nor warn about it | small |
 | [D0020](../lints/D0020.md) | zensical-keys | `deny` | Zensical ignores a key it does not know, silently; a typo in zensical.toml never fails the build | small |
 | [D0021](../lints/D0021.md) | page-links | `deny` | a link to a page that moved or never existed, or to the built site, leads a reader nowhere | small |
+| [D0022](../lints/D0022.md) | book-deploy | `warn` | a book published by hand falls behind main, and a broken page goes live; one workflow builds it strict and deploys it | small |
 | [M0001](../lints/M0001.md) | default-features-off | `warn` | dependencies are added with default-features = false and only the features in use | small |
 | [M0003](../lints/M0003.md) | git-dependency-pins | `warn` | git dependencies follow a branch; Cargo.lock fixes the commit | small |
 | [M0004](../lints/M0004.md) | no-sys-crates | `deny` | pure-Rust crates only: no bundled C, no -sys bindings without a written reason | small |
@@ -427,6 +428,10 @@ reason = "Zensical does not support the conflicting features together, and build
 [lints.zensical-keys]
 level = "deny"
 reason = "Zensical ignores a key it does not know, silently; a typo in zensical.toml never fails the build"
+
+[lints.book-deploy]
+level = "warn"
+reason = "a book published by hand falls behind main, and a broken page goes live; one workflow builds it strict and deploys it"
 
 # Units in types (exact_units)
 

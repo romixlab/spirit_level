@@ -1,11 +1,13 @@
 //! The book lints: the navigation, pages nobody reaches, titles, admonitions, the footer's build stamp, a folder
-//! that holds both `README.md` and `index.md`.
+//! that holds both `README.md` and `index.md`, the workflow that builds and publishes it.
 
 use crate::members;
 use sl_analysis::Context;
 use sl_core::{Diagnostic, Span};
 use sl_docs::page::Page;
 use sl_docs::{Book, Kind, walk};
+use sl_model::workflow::{self, invokes};
+use sl_model::{Justfile, Workflow};
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 
@@ -22,6 +24,9 @@ pub(crate) fn run(cx: &Context<'_>, book: &Book) {
     }
     if cx.enabled("zensical-keys") {
         zensical_keys(cx, book);
+    }
+    if cx.enabled("book-deploy") {
+        deploy(cx, root, book);
     }
     let all = [format!("{}/**/*.md", book.docs_dir)];
     let pages: Vec<Page> = walk::files(root, &members(cx.project), &all, &[])
@@ -130,6 +135,78 @@ fn build_stamp(cx: &Context<'_>, root: &Path, book: &Book) {
             ),
         );
     }
+}
+
+/// Whether a command builds the book strict: `zensical build` or `mkdocs build` with `--strict`
+fn strict_build(command: &[String]) -> bool {
+    (invokes(command, "zensical", |s| s == "build") || invokes(command, "mkdocs", |s| s == "build"))
+        && command.iter().any(|w| w == "--strict")
+}
+
+/// A book with a `site_url` is built strict and published with `actions/deploy-pages` by one workflow
+fn deploy(cx: &Context<'_>, root: &Path, book: &Book) {
+    let id = "book-deploy";
+    let Some(site) = &book.site_url else {
+        return;
+    };
+    let mut flows = Vec::new();
+    for w in Workflow::all(root) {
+        match w {
+            Ok(w) => flows.push(w),
+            Err(e) => {
+                cx.not_run(
+                    id,
+                    format!("file:{}", workflow::DIR),
+                    format!("cannot read a workflow: {e}"),
+                );
+                return;
+            }
+        }
+    }
+    let just = Justfile::read(root);
+    // a just recipe whose body builds strict counts as the build it runs
+    let recipe_builds = |c: &[String]| {
+        just.as_ref().is_some_and(|j| {
+            invokes(c, "just", |r| {
+                j.recipe(r).is_some_and(|r| {
+                    r.body
+                        .iter()
+                        .flat_map(|l| workflow::commands(l))
+                        .any(|c| strict_build(&c))
+                })
+            })
+        })
+    };
+    let builds = |w: &Workflow| {
+        w.commands()
+            .any(|(_, c)| strict_build(&c) || recipe_builds(&c))
+    };
+    let deploys = |w: &Workflow| w.uses("actions/deploy-pages").is_some();
+    if flows.iter().any(|w| builds(w) && deploys(w)) {
+        return;
+    }
+    let at = Span::new(
+        book.file_rel.clone(),
+        book.keys
+            .iter()
+            .find(|k| k.path == "site_url")
+            .map_or(0, |k| k.line),
+    );
+    let d = match (flows.iter().find(|w| builds(w)), flows.iter().find(|w| deploys(w))) {
+        (None, _) => Diagnostic::new(id, "build", format!("no workflow under {} builds the book strict", workflow::DIR))
+            .span(at)
+            .help("add a step `- run: zensical build --strict` (or a just recipe that runs it): a broken page or link then fails the run instead of going live"),
+        (Some(b), None) => Diagnostic::new(id, "deploy", format!("{} builds the book, but no workflow publishes it to {site} with actions/deploy-pages", b.rel))
+            .span(at)
+            .help("upload the built site with actions/upload-pages-artifact after the build, and add a job that runs actions/deploy-pages on the default branch"),
+        (Some(b), Some(d)) => {
+            let line = d.uses("actions/deploy-pages").map_or(0, |s| s.line);
+            Diagnostic::new(id, "same-workflow", format!("{} builds the book and {} publishes it: actions/deploy-pages publishes only an artifact of its own run", b.rel, d.rel))
+                .span(Span::new(d.rel.clone(), line))
+                .help("build strict in the workflow that deploys, and upload the site with actions/upload-pages-artifact there")
+        }
+    };
+    cx.emit(d);
 }
 
 /// Theme features that Zensical does not support together, and features that need `project.site_url` set

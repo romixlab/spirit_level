@@ -1,0 +1,7 @@
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: uv run zensical build --strict
+      - run: uv run mkdocs gh-deploy

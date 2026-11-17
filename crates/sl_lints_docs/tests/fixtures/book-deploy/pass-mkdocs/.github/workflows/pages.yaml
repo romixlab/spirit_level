@@ -1,0 +1,12 @@
+on: push
+jobs:
+  pages:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          uv sync
+          uv run mkdocs build --strict --site-dir public
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: public/
+      - uses: actions/deploy-pages@v4

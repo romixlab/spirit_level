@@ -314,6 +314,10 @@ reason = "Zensical does not support the conflicting features together, and build
 level = "deny"
 reason = "Zensical ignores a key it does not know, silently; a typo in zensical.toml never fails the build"
 
+[lints.book-deploy]
+level = "warn"
+reason = "a book published by hand falls behind main, and a broken page goes live; one workflow builds it strict and deploys it"
+
 # Units in types (exact_units)
 
 [lints.exact-units-quantity]
