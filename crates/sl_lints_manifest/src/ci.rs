@@ -1,18 +1,20 @@
-//! The CI workflow and the checks it runs: the justfile's `lint` and `test` recipes when it has both, else Clippy
-//! and the tests through cargo.
+//! The CI workflow and the checks it runs: the justfile's `lint` and `test` recipes when it has both (through `just`
+//! or by running each command of the recipe), else Clippy and the tests through cargo.
 
 use sl_analysis::Context;
 use sl_core::{Diagnostic, Span};
-use sl_model::workflow::invokes;
+use sl_model::justfile::Recipe;
+use sl_model::workflow::{commands, invokes};
 use sl_model::{Justfile, Workflow};
 
-/// One check the workflow must run: its fingerprint, what it is called in a message, the step to add, and whether
-/// a command runs it
+/// One check the workflow must run: its fingerprint, what it is called in a message, the step to add, whether a
+/// command runs it, and the recipe whose own commands run it too
 struct Check {
     item: &'static str,
     name: &'static str,
     step: &'static str,
     runs: fn(&[String]) -> bool,
+    recipe: Option<&'static str>,
 }
 
 const JUST: [Check; 2] = [
@@ -21,12 +23,14 @@ const JUST: [Check; 2] = [
         name: "`just lint`",
         step: "just lint",
         runs: |c| invokes(c, "just", |r| r == "lint"),
+        recipe: Some("lint"),
     },
     Check {
         item: "ci:test",
         name: "`just test`",
         step: "just test",
         runs: |c| invokes(c, "just", is_test_recipe),
+        recipe: Some("test"),
     },
 ];
 
@@ -36,12 +40,14 @@ const CARGO: [Check; 2] = [
         name: "Clippy",
         step: "cargo clippy --workspace --all-targets -- -D warnings",
         runs: |c| invokes(c, "cargo", |s| s == "clippy"),
+        recipe: None,
     },
     Check {
         item: "ci:test",
         name: "the tests",
         step: "cargo test --workspace",
         runs: |c| invokes(c, "cargo", |s| s == "test" || s == "nextest"),
+        recipe: None,
     },
 ];
 
@@ -49,6 +55,18 @@ const CARGO: [Check; 2] = [
 fn is_test_recipe(r: &str) -> bool {
     r.strip_prefix("test")
         .is_some_and(|rest| rest.is_empty() || rest.starts_with(['-', '_']))
+}
+
+/// Whether the workflow runs every command of the recipe's body itself, as written there: a recipe that is only
+/// `spl check` is run by a step `spl check`. A shebang recipe or one with `{{...}}` in its body never is.
+fn runs_body(r: &Recipe, cmds: &[Vec<String>]) -> bool {
+    !r.shebang
+        && !r.body.is_empty()
+        && r.body.iter().all(|line| {
+            // `@` (quiet) and `-` (errors ignored) prefix a line for just, not for the shell
+            let line = line.trim_start_matches(['@', '-']);
+            !line.contains("{{") && commands(line).iter().all(|c| cmds.contains(c))
+        })
 }
 
 pub(crate) fn run(cx: &Context<'_>) {
@@ -74,10 +92,15 @@ pub(crate) fn run(cx: &Context<'_>) {
         Some(Ok(wf)) => wf,
     };
     let just = Justfile::read(&p.root)
-        .is_some_and(|j| j.recipe("lint").is_some() && j.recipe("test").is_some());
-    let checks = if just { &JUST } else { &CARGO };
+        .filter(|j| j.recipe("lint").is_some() && j.recipe("test").is_some());
+    let checks = if just.is_some() { &JUST } else { &CARGO };
+    let cmds: Vec<Vec<String>> = wf.commands().map(|(_, c)| c).collect();
     for c in checks {
-        if wf.commands().any(|(_, cmd)| (c.runs)(&cmd)) {
+        let by_body = c
+            .recipe
+            .and_then(|name| just.as_ref()?.recipe(name))
+            .is_some_and(|r| runs_body(r, &cmds));
+        if by_body || cmds.iter().any(|cmd| (c.runs)(cmd)) {
             continue;
         }
         cx.emit(
@@ -87,7 +110,13 @@ pub(crate) fn run(cx: &Context<'_>) {
                 format!("the CI workflow {path} does not run {}", c.name),
             )
             .span(Span::new(path, 1))
-            .help(format!("add a step `- run: {}` to one of its jobs", c.step)),
+            .help(match c.recipe {
+                Some(r) => format!(
+                    "add a step `- run: {}` to one of its jobs, or steps that run each command of the `{r}` recipe as written",
+                    c.step
+                ),
+                None => format!("add a step `- run: {}` to one of its jobs", c.step),
+            }),
         );
     }
 }

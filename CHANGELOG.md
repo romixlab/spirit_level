@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- `ci-workflow` also accepts steps that run each command of the `lint` or `test` recipe (MAN-10).
+
 ## [0.4.37] - 2026-11-17
 
 ### Added

@@ -1,0 +1,9 @@
+default:
+    @just --list
+
+test:
+    cargo nextest run
+
+lint:
+    cargo fmt --check
+    @spl check

@@ -6,7 +6,7 @@ The workflow is read from the repo's own files (the parameter `path`, `.github/w
 
 What counts as the repo's checks depends on the repo:
 
-- With a justfile that has `lint` and `test` recipes, a `run:` step calls `just lint` and one calls `just test` (or a variant such as `just test-all`). CI then runs exactly what a person runs.
+- With a justfile that has `lint` and `test` recipes, a `run:` step calls `just lint` and one calls `just test` (or a variant such as `just test-all`). CI then runs exactly what a person runs. Steps that run each command of a recipe as written count too: a `lint` recipe that is only `spl check` is run by a step `spl check`, with no `just` to install. A recipe with `{{...}}` in its body, or a shebang recipe, needs `just` itself.
 - Without them, a `run:` step calls `cargo clippy` and one calls `cargo test` or `cargo nextest`.
 
 ```yaml
