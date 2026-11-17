@@ -3,6 +3,7 @@
 # own metadata; `just lint` fails when they are stale.
 [project]
 site_name = "spirit_level"
+site_url = "https://spl.vhrd.tech/"
 site_description = "A linter for Rust projects of every size: tiers of lints in TOML, from one crate to a workspace of hundreds"
 site_author = "Roman Isaikin"
 copyright = "Copyright &copy; 2026 Roman Isaikin, MIT or Apache-2.0"

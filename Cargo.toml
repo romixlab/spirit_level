@@ -9,6 +9,7 @@ edition = "2024"
 rust-version = "1.91"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/romixlab/spirit_level"
+homepage = "https://spl.vhrd.tech/"
 
 [workspace.dependencies]
 # crates/core and model:
