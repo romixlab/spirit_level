@@ -45,3 +45,24 @@
 .md-header__button.md-logo img {
   height: 1.6rem;
 }
+
+/* The home page: the logo is the title, the h1 stays for screen readers and search */
+.md-typeset .visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.md-typeset .sl-hero {
+  margin: 0.5rem 0 1.5rem;
+  text-align: center;
+}
+.md-typeset .sl-hero img {
+  width: min(420px, 90%);
+}
+[data-md-color-scheme="default"] .md-typeset .sl-hero .sl-hero--dark,
+[data-md-color-scheme="slate"] .md-typeset .sl-hero .sl-hero--light {
+  display: none;
+}

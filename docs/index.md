@@ -1,4 +1,9 @@
-# spirit_level
+<div class="sl-hero" markdown>
+<img class="sl-hero--light" src="assets/logo/spirit_level-light.svg" alt="spirit_level">
+<img class="sl-hero--dark" src="assets/logo/spirit_level-dark.svg" alt="spirit_level">
+</div>
+
+# spirit_level { .visually-hidden }
 
 spirit_level is a linter for Rust projects of every size, from one crate to a workspace of hundreds. It checks what clippy does not: how a project is put together (manifests, workspace inheritance, the dependency graph, declared layers, crate sizes), how its code shares state, and the rules a team writes down and then forgets to check.
 

@@ -53,7 +53,7 @@ docs-build: book docs-assets
 # Copy the logo files the book uses into docs/assets/logo (not in git)
 docs-assets:
     mkdir -p docs/assets/logo
-    cp assets/logo/mark-light.svg assets/logo/mark-dark.svg assets/logo/icon-small.svg assets/logo/favicon.ico assets/logo/png/icon-180.png docs/assets/logo/
+    cp assets/logo/mark-light.svg assets/logo/mark-dark.svg assets/logo/spirit_level-light.svg assets/logo/spirit_level-dark.svg assets/logo/icon-small.svg assets/logo/favicon.ico assets/logo/png/icon-180.png docs/assets/logo/
 
 # Build with the deploy profile and put spl on PATH
 install:
