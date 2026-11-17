@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.4.37] - 2026-11-17
+
 ### Added
 
 - `ci-workflow`: the repo has a CI workflow that runs `just lint` and `just test`, or Clippy and tests (MAN-10).
