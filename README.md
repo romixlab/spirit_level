@@ -13,19 +13,7 @@ spirit_level is a linter for Rust projects of every size, from one crate to a wo
 
 Every project has rules like "no `unwrap` in library code", "every crate inherits the workspace lints" or "the UI never blocks". They live in a wiki page or in someone's head, and they drift. spirit_level turns them into over 300 lints with codes, documented pages and exact fixes, and runs them in one command, `spl check`.
 
-```text
-warn C0005 panic-in-library ×4: library code returns errors for what can fail and says why where it panics
-   --> src/lib.rs:3:34
-    |
-  3 | pub fn f(x: Option<u8>) -> u8 { x.unwrap() }
-    |                                  ^^^^^^^^^ .unwrap() in library code (4 in fx)
-    |
-  help: return an error for what can fail; where it cannot, say why: `.expect("why")`, `unreachable!("why")`, or a waiver
-
-deny M0012 readme-per-crate ×1: every crate has a README
-  help: write a short README: what the crate is, what it may depend on, how to use it
-  README.md  fx has no README.md
-```
+<p align="center"><img alt="spl check on a small library: a denied unwrap and a todo!() in library code, each with the source line, the reason and a help line" src="assets/check.svg"></p>
 
 ## Quick start
 
