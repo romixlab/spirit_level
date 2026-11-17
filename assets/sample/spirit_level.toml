@@ -1,0 +1,5 @@
+extends = "medium"
+
+[lints.panic-in-library]
+level = "deny"
+reason = "a library returns errors; the binary decides what is fatal"

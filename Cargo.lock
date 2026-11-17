@@ -1023,9 +1023,11 @@ version = "0.4.34"
 dependencies = [
  "sl_config",
  "sl_core",
+ "sl_report",
  "spirit_level",
  "toml",
  "vc_build",
+ "vc_ui",
 ]
 
 [[package]]

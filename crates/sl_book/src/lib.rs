@@ -1,9 +1,10 @@
-//! The generated pages of the book, and its footer build stamp ([`stamp`]).
+//! The generated pages of the book, its footer build stamp ([`stamp`]) and a README's picture of a check ([`sample`]).
 #![expect(
     clippy::let_underscore_must_use,
     reason = "fmt::Write into a String cannot fail; a test removes its scratch directory as far as it can"
 )]
 
+pub mod sample;
 pub mod stamp;
 
 use sl_config::{Config, Env};

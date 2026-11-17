@@ -1,6 +1,6 @@
 [package]
 name = "sl_book"
-description = "Generates spirit_level's book pages (one per lint, one per tier, the indexes and the nav) from the lints' own metadata and the shipped tiers, and a book's footer build stamp"
+description = "Generates spirit_level's book pages (one per lint, one per tier, the indexes and the nav) from the lints' own metadata and the shipped tiers, a book's footer build stamp, and a README's picture of a check"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -11,9 +11,11 @@ publish = false
 [dependencies]
 sl_config.workspace = true
 sl_core.workspace = true
+sl_report.workspace = true
 spirit_level.workspace = true
 toml.workspace = true
 vc_build.workspace = true
+vc_ui.workspace = true
 
 [lints]
 workspace = true

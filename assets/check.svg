@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1049" height="545" viewBox="0 0 1049 545">
+<rect width="100%" height="100%" rx="8" fill="#14171f"/>
+<g font-family="ui-monospace, SFMono-Regular, Menlo, Consolas, 'DejaVu Sans Mono', monospace" font-size="14" fill="#dddddd" xml:space="preserve">
+<text x="16" y="30"><tspan fill="#f87171" font-weight="bold">deny</tspan> <tspan fill="#22d3ee">C0005</tspan> panic-in-library <tspan opacity="0.6">×2</tspan>: library code returns errors for what can fail and says why where it panics</text>
+<text x="16" y="49">    <tspan fill="#93c5fd" font-weight="bold">--&gt; </tspan>src/lib.rs:13:58</text>
+<text x="16" y="68">     <tspan fill="#93c5fd" font-weight="bold">|</tspan></text>
+<text x="16" y="87">  <tspan fill="#93c5fd" font-weight="bold">11</tspan> <tspan fill="#93c5fd" font-weight="bold">|</tspan> /// Parses a frame of three bytes</text>
+<text x="16" y="106">  <tspan fill="#93c5fd" font-weight="bold">12</tspan> <tspan fill="#93c5fd" font-weight="bold">|</tspan> pub fn parse(bytes: &amp;[u8]) -&gt; Frame {</text>
+<text x="16" y="125">  <tspan fill="#93c5fd" font-weight="bold">13</tspan> <tspan fill="#93c5fd" font-weight="bold">|</tspan>     let value = u16::from_le_bytes(bytes[1..3].try_into().unwrap());</text>
+<text x="16" y="144">     <tspan fill="#93c5fd" font-weight="bold">|</tspan>                                                          <tspan fill="#fca5a5" font-weight="bold">^^^^^^^^^</tspan> <tspan fill="#fca5a5" font-weight="bold">.unwrap() in library code (2 in telemetry)</tspan></text>
+<text x="16" y="163">  <tspan fill="#93c5fd" font-weight="bold">14</tspan> <tspan fill="#93c5fd" font-weight="bold">|</tspan>     Frame { channel: bytes[0], value }</text>
+<text x="16" y="182">  <tspan fill="#93c5fd" font-weight="bold">15</tspan> <tspan fill="#93c5fd" font-weight="bold">|</tspan> }</text>
+<text x="16" y="201">     <tspan fill="#93c5fd" font-weight="bold">|</tspan></text>
+<text x="16" y="220">  <tspan fill="#e879f9" font-weight="bold">help:</tspan> return an error for what can fail; where it cannot, say why: `.expect("why")`, `unreachable!("why")`, or a waiver</text>
+<text x="16" y="239">  src/lib.rs:13:58  .unwrap() in library code (2 in telemetry) <tspan opacity="0.6">(panics 2, limit 0)</tspan></text>
+<text x="16" y="258">  src/lib.rs:19:5  todo! in library code (2 in telemetry) <tspan opacity="0.6">(panics 2, limit 0)</tspan></text>
+<text x="16" y="277"></text>
+<text x="16" y="296"><tspan fill="#facc15" font-weight="bold">warn</tspan> <tspan fill="#22d3ee">C0008</tspan> todo-macros <tspan opacity="0.6">×1</tspan>: no todo!() or unimplemented!() outside tests</text>
+<text x="16" y="315">    <tspan fill="#93c5fd" font-weight="bold">--&gt; </tspan>src/lib.rs:19:5</text>
+<text x="16" y="334">     <tspan fill="#93c5fd" font-weight="bold">|</tspan></text>
+<text x="16" y="353">  <tspan fill="#93c5fd" font-weight="bold">17</tspan> <tspan fill="#93c5fd" font-weight="bold">|</tspan> /// Checks a frame's checksum</text>
+<text x="16" y="372">  <tspan fill="#93c5fd" font-weight="bold">18</tspan> <tspan fill="#93c5fd" font-weight="bold">|</tspan> pub fn verify(_frame: &amp;Frame) -&gt; bool {</text>
+<text x="16" y="391">  <tspan fill="#93c5fd" font-weight="bold">19</tspan> <tspan fill="#93c5fd" font-weight="bold">|</tspan>     todo!()</text>
+<text x="16" y="410">     <tspan fill="#93c5fd" font-weight="bold">|</tspan>     <tspan fill="#facc15" font-weight="bold">^^^^^</tspan> <tspan fill="#facc15" font-weight="bold">todo!() defers the design: the code is not finished</tspan></text>
+<text x="16" y="429">  <tspan fill="#93c5fd" font-weight="bold">20</tspan> <tspan fill="#93c5fd" font-weight="bold">|</tspan> }</text>
+<text x="16" y="448">     <tspan fill="#93c5fd" font-weight="bold">|</tspan></text>
+<text x="16" y="467">  <tspan fill="#e879f9" font-weight="bold">help:</tspan> write the real implementation, or return an error that says what is not supported</text>
+<text x="16" y="486">  src/lib.rs:19:5  todo!() defers the design: the code is not finished</text>
+<text x="16" y="505"></text>
+<text x="16" y="524"><tspan fill="#f87171" font-weight="bold">failed</tspan>: 10 lints ran on assets/sample (medium): <tspan fill="#f87171" font-weight="bold">2 denied</tspan>, <tspan fill="#facc15" font-weight="bold">1 warning</tspan></text>
+</g>
+</svg>

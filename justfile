@@ -12,13 +12,14 @@ test-all:
     cargo nextest run --workspace --no-fail-fast
     cargo test --workspace --doc -q
 
-# Format, clippy, spl on itself at the big tier (`just tools` installs the tools it needs), the lint codes, book freshness
+# Format, clippy, spl on itself at the big tier (`just tools` installs the tools it needs), the lint codes, book and README picture freshness
 lint:
     cargo fmt --check
     cargo clippy --workspace --all-targets --all-features -- -D warnings
     cargo run -q -p spirit_level_cli -- check
     cargo run -q -p spirit_level_cli -- codes --check --base main
     cargo run -q -p spirit_level_cli -- book docs --check
+    cargo run -q -p spirit_level_cli -- book sample assets/sample assets/check.svg --only code --check
 
 # Rebuild the checked-in firmware ELF of the panic-site fixtures (needs the thumbv7em-none-eabihf target); the
 # checkout's path is remapped, so the DWARF does not depend on where it was built
@@ -33,9 +34,10 @@ tools:
     cargo run -q -p spirit_level_cli -- tools needed --all --spec --missing | xargs -r cargo binstall -y
     cargo run -q -p spirit_level_cli -- tools needed --all
 
-# Regenerate the book's generated pages (lints, tiers, nav)
+# Regenerate the book's generated pages (lints, tiers, nav) and the README's picture of a check
 book:
     cargo run -q -p spirit_level_cli -- book docs
+    cargo run -q -p spirit_level_cli -- book sample assets/sample assets/check.svg --only code
 
 # Serve the book at http://localhost:8000
 docs: book docs-assets

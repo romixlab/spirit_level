@@ -50,3 +50,7 @@ The small icon uses the light spirit alone: 3.1:1 on white, 5.8:1 on `#14171f`.
 - Put the light variant on a dark page or the reverse.
 - Set the wordmark in another font or redraw the underscore as a plain `_`.
 - Stretch, rotate or crop the mark.
+
+## The README's picture of a check
+
+`check.svg` is `spl check` on the small library in `sample/`, its coloured report drawn as SVG by `spl book sample`. `just book` writes it, and `just lint` fails while it is stale. To change the picture, change the sample's code or its `spirit_level.toml`.
