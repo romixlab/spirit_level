@@ -44,7 +44,12 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: actions-rust-lang/setup-rust-toolchain@v2
+        with:
+          # the cargo-no-std and cargo-wasm fixtures of sl_tool_cargo build for these
+          target: thumbv7em-none-eabihf, wasm32-unknown-unknown
       - run: rustup toolchain install nightly --profile minimal
+      # the cargo-msrv fixtures build at their rust-version, 1.88
+      - run: rustup toolchain install 1.88.0 --profile minimal
       - uses: taiki-e/install-action@v2
         with:
           tool: just,cargo-binstall,cargo-nextest
