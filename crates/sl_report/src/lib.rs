@@ -5,6 +5,7 @@
     reason = "fmt::Write into a String cannot fail"
 )]
 
+mod ansi;
 mod dependents;
 mod excerpt;
 mod svg;
