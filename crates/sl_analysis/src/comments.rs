@@ -161,7 +161,13 @@ fn prev_is_ident(b: &[u8], i: usize) -> bool {
 fn skip_string(b: &[u8], mut i: usize, line: &mut u32) -> usize {
     while i < b.len() {
         match b[i] {
-            b'\\' => i += 2,
+            b'\\' => {
+                // a `\` at the end of a line continues the string on the next one
+                if b.get(i + 1) == Some(&b'\n') {
+                    *line += 1;
+                }
+                i += 2;
+            }
             b'"' => return i + 1,
             b'\n' => {
                 *line += 1;
@@ -289,6 +295,14 @@ mod tests {
         let c = comments(src);
         let t: Vec<(&str, u32)> = c.iter().map(|c| (c.text.as_str(), c.line)).collect();
         assert_eq!(t, vec![("real", 3), ("two", 4), ("three", 6)]);
+    }
+
+    #[test]
+    fn a_continued_string_line_counts() {
+        let src = "let a = \"one \\\n    two \\\n    three\";\n// after\nlet b = b\"x \\\n y\"; // last\n";
+        let c = comments(src);
+        let t: Vec<(&str, u32)> = c.iter().map(|c| (c.text.as_str(), c.line)).collect();
+        assert_eq!(t, vec![("after", 4), ("last", 6)]);
     }
 
     #[test]

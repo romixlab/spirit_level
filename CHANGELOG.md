@@ -10,6 +10,10 @@
 
 - **Breaking:** `panic-in-library` has no `classes` parameter: delete it from a config. The `embedded` tier no longer narrows the lint (CODE-13).
 
+### Fixed
+
+- Comment lints report the right line after a string continued with `\` at a line end (AI-1).
+
 ## [0.4.39] - 2026-11-17
 
 ### Added
