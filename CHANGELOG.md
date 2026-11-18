@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.5.1] - 2026-11-18
+
 ### Added
 
 - `[docs.book]`: `page-links` resolves links of pages another repo's book takes from their place in that book (DOCS-10).
