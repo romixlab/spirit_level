@@ -69,7 +69,7 @@ reason = "the errata checks quote errata sheets, whose fix field is called worka
 # fragment the lint! macro embeds into its generated page: never a standalone page, and its relative links (to a
 # sibling lint by code, to a hand-written page with "../") resolve only once embedded.
 [docs]
-reference = ["docs/lints/**", "docs/tiers/**"]
+reference = ["docs/lints/**", "docs/tiers/**", "docs/clippy/**"]
 skip = ["CHANGELOG.md", "FEATURES.md", "AGENTS.md", "CLAUDE.md", "**/CHANGELOG.md", "**/tests/**", "crates/*/docs/**"]
 
 [map.layers.core]

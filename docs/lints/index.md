@@ -638,3 +638,74 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [M0024](M0024.md) | [workspace-lints](M0024.md) | the root declares [workspace.lints] and every member inherits them | off | deny | deny | deny | off | off | off | off | off | off |
 | [M0029](M0029.md) | [macro-compile-fail](M0029.md) | every proc-macro crate has compile-fail tests | off | off | warn | warn | off | off | off | off | off | off |
 | [M0030](M0030.md) | [contract-snapshot](M0030.md) | a contract crate exports its version and keeps every version's schema snapshot in git, unchanged once in the base | off | off | off | deny | off | off | off | off | off | off |
+
+## Clippy lints of the tiers
+
+The Clippy lints, groups and `clippy.toml` settings the tiers expect in a project's own Clippy configuration ([tier-clippy-set](M0025.md) checks them; `allow`: an accepted opt-out).
+
+| Name | Kind | small | small-workspace | medium | big | ai | embedded | ui | egui | units-strict | units-paranoid |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| [allow-print-in-tests](../clippy/allow-print-in-tests.md) | `clippy.toml` setting | - | - | true | true | - | - | - | - | - | - |
+| [allow-unwrap-in-tests](../clippy/allow-unwrap-in-tests.md) | `clippy.toml` setting | true | true | true | true | - | - | - | - | - | - |
+| [allow_attributes](../clippy/allow_attributes.md) | Clippy lint | - | - | warn | warn | warn | - | - | - | - | - |
+| [as_ptr_cast_mut](../clippy/as_ptr_cast_mut.md) | Clippy lint | warn | warn | warn | warn | - | deny | - | - | - | - |
+| [assigning_clones](../clippy/assigning_clones.md) | Clippy lint | - | - | allow | allow | - | - | - | - | - | - |
+| [cargo](../clippy/cargo.md) | Clippy group | - | - | warn | warn | - | - | - | - | - | - |
+| [cargo_common_metadata](../clippy/cargo_common_metadata.md) | Clippy lint | - | - | allow | allow | - | - | - | - | - | - |
+| [cast_lossless](../clippy/cast_lossless.md) | Clippy lint | - | - | allow | allow | - | - | - | - | - | - |
+| [cast_possible_truncation](../clippy/cast_possible_truncation.md) | Clippy lint | - | - | allow | allow | - | - | - | - | - | - |
+| [cast_precision_loss](../clippy/cast_precision_loss.md) | Clippy lint | - | - | allow | allow | - | - | - | - | - | - |
+| [cast_sign_loss](../clippy/cast_sign_loss.md) | Clippy lint | - | - | allow | allow | - | - | - | - | - | - |
+| [cognitive-complexity-threshold](../clippy/cognitive-complexity-threshold.md) | `clippy.toml` setting | - | - | 20 | 20 | 20 | - | - | - | - | - |
+| [cognitive_complexity](../clippy/cognitive_complexity.md) | Clippy lint | - | - | warn | warn | warn | - | - | - | - | - |
+| [dbg_macro](../clippy/dbg_macro.md) | Clippy lint | warn | warn | warn | warn | - | - | - | - | - | - |
+| [debug_assert_with_mut_call](../clippy/debug_assert_with_mut_call.md) | Clippy lint | warn | warn | warn | warn | - | - | - | - | - | - |
+| [default_trait_access](../clippy/default_trait_access.md) | Clippy lint | - | - | allow | allow | - | - | - | - | - | - |
+| [exit](../clippy/exit.md) | Clippy lint | warn | warn | warn | warn | - | - | - | - | - | - |
+| [fallible_impl_from](../clippy/fallible_impl_from.md) | Clippy lint | warn | warn | warn | warn | - | - | - | - | - | - |
+| [float_cmp](../clippy/float_cmp.md) | Clippy lint | - | - | allow | allow | - | - | - | - | - | - |
+| [float_cmp_const](../clippy/float_cmp_const.md) | Clippy lint | - | - | - | warn | - | - | - | - | - | - |
+| [get_unwrap](../clippy/get_unwrap.md) | Clippy lint | warn | warn | warn | warn | - | - | - | - | - | - |
+| [ignore_without_reason](../clippy/ignore_without_reason.md) | Clippy lint | warn | warn | warn | warn | - | - | - | - | - | - |
+| [implicit_hasher](../clippy/implicit_hasher.md) | Clippy lint | - | - | allow | allow | - | - | - | - | - | - |
+| [imprecise_flops](../clippy/imprecise_flops.md) | Clippy lint | - | - | - | warn | - | - | - | - | - | - |
+| [infinite_loop](../clippy/infinite_loop.md) | Clippy lint | - | - | - | - | - | warn | - | - | - | - |
+| [inline_always](../clippy/inline_always.md) | Clippy lint | - | - | allow | allow | - | - | - | - | - | - |
+| [items_after_statements](../clippy/items_after_statements.md) | Clippy lint | - | - | allow | allow | - | - | - | - | - | - |
+| [iter_over_hash_type](../clippy/iter_over_hash_type.md) | Clippy lint | - | - | - | warn | - | - | - | - | - | - |
+| [large_include_file](../clippy/large_include_file.md) | Clippy lint | - | - | - | - | - | warn | - | - | - | - |
+| [large_stack_frames](../clippy/large_stack_frames.md) | Clippy lint | - | - | - | - | - | warn | - | - | - | - |
+| [let_underscore_must_use](../clippy/let_underscore_must_use.md) | Clippy lint | warn | warn | warn | warn | - | - | - | - | - | - |
+| [lossy_float_literal](../clippy/lossy_float_literal.md) | Clippy lint | - | - | - | warn | - | - | - | - | - | - |
+| [many_single_char_names](../clippy/many_single_char_names.md) | Clippy lint | - | - | allow | allow | - | - | - | - | - | - |
+| [map_err_ignore](../clippy/map_err_ignore.md) | Clippy lint | warn | warn | warn | warn | - | - | - | - | - | - |
+| [map_unwrap_or](../clippy/map_unwrap_or.md) | Clippy lint | - | - | allow | allow | - | - | - | - | - | - |
+| [max-fn-params-bools](../clippy/max-fn-params-bools.md) | `clippy.toml` setting | - | - | 1 | 1 | - | - | - | - | - | - |
+| [mem_forget](../clippy/mem_forget.md) | Clippy lint | warn | warn | warn | warn | - | - | - | - | - | - |
+| [missing_errors_doc](../clippy/missing_errors_doc.md) | Clippy lint | - | - | allow | allow | - | - | - | - | - | - |
+| [missing_panics_doc](../clippy/missing_panics_doc.md) | Clippy lint | - | - | warn | warn | - | - | - | - | - | - |
+| [multiple_crate_versions](../clippy/multiple_crate_versions.md) | Clippy lint | - | - | allow | allow | - | - | - | - | - | - |
+| [must_use_candidate](../clippy/must_use_candidate.md) | Clippy lint | - | - | allow | allow | - | - | - | - | - | - |
+| [needless_raw_string_hashes](../clippy/needless_raw_string_hashes.md) | Clippy lint | - | - | allow | allow | - | - | - | - | - | - |
+| [pedantic](../clippy/pedantic.md) | Clippy group | - | - | warn | warn | - | - | - | - | - | - |
+| [print_stderr](../clippy/print_stderr.md) | Clippy lint | - | - | warn | warn | warn | - | - | - | - | - |
+| [print_stdout](../clippy/print_stdout.md) | Clippy lint | - | - | warn | warn | warn | - | - | - | - | - |
+| [redundant_closure_for_method_calls](../clippy/redundant_closure_for_method_calls.md) | Clippy lint | - | - | allow | allow | - | - | - | - | - | - |
+| [return_self_not_must_use](../clippy/return_self_not_must_use.md) | Clippy lint | - | - | allow | allow | - | - | - | - | - | - |
+| [self_named_module_files](../clippy/self_named_module_files.md) | Clippy lint | - | - | warn | warn | warn | - | - | - | - | - |
+| [similar_names](../clippy/similar_names.md) | Clippy lint | - | - | allow | allow | - | - | - | - | - | - |
+| [str_to_string](../clippy/str_to_string.md) | Clippy lint | - | - | warn | warn | warn | - | - | - | - | - |
+| [struct_excessive_bools](../clippy/struct_excessive_bools.md) | Clippy lint | - | - | allow | allow | - | - | - | - | - | - |
+| [struct_field_names](../clippy/struct_field_names.md) | Clippy lint | - | - | allow | allow | - | - | - | - | - | - |
+| [todo](../clippy/todo.md) | Clippy lint | warn | warn | warn | warn | - | - | - | - | - | - |
+| [too_long_first_doc_paragraph](../clippy/too_long_first_doc_paragraph.md) | Clippy lint | - | - | warn | warn | warn | - | - | - | - | - |
+| [too_many_lines](../clippy/too_many_lines.md) | Clippy lint | - | - | allow | allow | - | - | - | - | - | - |
+| [trivially_copy_pass_by_ref](../clippy/trivially_copy_pass_by_ref.md) | Clippy lint | - | - | allow | allow | - | - | - | - | - | - |
+| [undocumented_unsafe_blocks](../clippy/undocumented_unsafe_blocks.md) | Clippy lint | warn | warn | warn | warn | - | deny | - | - | - | - |
+| [unimplemented](../clippy/unimplemented.md) | Clippy lint | warn | warn | warn | warn | - | - | - | - | - | - |
+| [unnecessary_debug_formatting](../clippy/unnecessary_debug_formatting.md) | Clippy lint | - | - | allow | allow | - | - | - | - | - | - |
+| [unnecessary_safety_doc](../clippy/unnecessary_safety_doc.md) | Clippy lint | warn | warn | warn | warn | - | deny | - | - | - | - |
+| [unreadable_literal](../clippy/unreadable_literal.md) | Clippy lint | - | - | allow | allow | - | - | - | - | - | - |
+| [unwrap_used](../clippy/unwrap_used.md) | Clippy lint | warn | warn | warn | warn | - | - | - | - | - | - |
+| [use_self](../clippy/use_self.md) | Clippy lint | - | - | warn | warn | warn | - | - | - | - | - |
+| [used_underscore_binding](../clippy/used_underscore_binding.md) | Clippy lint | - | - | allow | allow | - | - | - | - | - | - |

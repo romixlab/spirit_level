@@ -127,12 +127,12 @@ The project turns these on in its own `[workspace.lints.clippy]` (`allow` rows a
 
 | Clippy lint | Level | Reason | Set in |
 |---|---|---|---|
-| `as_ptr_cast_mut` | `deny` | `as_ptr() as *mut` writes through a shared borrow: undefined behaviour | embedded |
-| `infinite_loop` | `warn` | a loop that never ends returns `!`, so the hang is a type, not a surprise | embedded |
-| `large_include_file` | `warn` | an include_bytes! of a large file fills the flash unseen | embedded |
-| `large_stack_frames` | `warn` | a large frame overflows a small stack with no guard page | embedded |
-| `undocumented_unsafe_blocks` | `deny` | firmware is full of unsafe; every block says in a SAFETY: comment why it is sound | embedded |
-| `unnecessary_safety_doc` | `deny` | a # Safety section on a safe function sends readers looking for a contract that is not there | embedded |
+| [`as_ptr_cast_mut`](../clippy/as_ptr_cast_mut.md) | `deny` | `as_ptr() as *mut` writes through a shared borrow: undefined behaviour | embedded |
+| [`infinite_loop`](../clippy/infinite_loop.md) | `warn` | a loop that never ends returns `!`, so the hang is a type, not a surprise | embedded |
+| [`large_include_file`](../clippy/large_include_file.md) | `warn` | an include_bytes! of a large file fills the flash unseen | embedded |
+| [`large_stack_frames`](../clippy/large_stack_frames.md) | `warn` | a large frame overflows a small stack with no guard page | embedded |
+| [`undocumented_unsafe_blocks`](../clippy/undocumented_unsafe_blocks.md) | `deny` | firmware is full of unsafe; every block says in a SAFETY: comment why it is sound | embedded |
+| [`unnecessary_safety_doc`](../clippy/unnecessary_safety_doc.md) | `deny` | a # Safety section on a safe function sends readers looking for a contract that is not there | embedded |
 
 ## The file
 

@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Added
+
+- Book: a page per Clippy lint, group and setting of the tiers; search finds it first by name (DOCS-11).
+- Book: a tool lint's page links the tool's own documentation of the check (DOCS-11).
+
 ## [0.5.1] - 2026-11-18
 
 ### Added

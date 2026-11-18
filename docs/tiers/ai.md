@@ -53,20 +53,20 @@ The project turns these on in its own `[workspace.lints.clippy]` (`allow` rows a
 
 | Clippy lint | Level | Reason | Set in |
 |---|---|---|---|
-| `allow_attributes` | `warn` | #[expect] fails once the lint stops firing, so an exception cannot outlive its cause | ai |
-| `cognitive_complexity` | `warn` | agents grow functions branch by branch; a tangled one is split | ai |
-| `print_stderr` | `warn` | agents leave debugging prints behind | ai |
-| `print_stdout` | `warn` | agents leave debugging prints behind | ai |
-| `self_named_module_files` | `warn` | one module layout, mod.rs, across the workspace | ai |
-| `str_to_string` | `warn` | to_owned says what happens: a copy of a borrowed str | ai |
-| `too_long_first_doc_paragraph` | `warn` | agents write long doc summaries; the first paragraph is one short sentence | ai |
-| `use_self` | `warn` | Self follows a rename | ai |
+| [`allow_attributes`](../clippy/allow_attributes.md) | `warn` | #[expect] fails once the lint stops firing, so an exception cannot outlive its cause | ai |
+| [`cognitive_complexity`](../clippy/cognitive_complexity.md) | `warn` | agents grow functions branch by branch; a tangled one is split | ai |
+| [`print_stderr`](../clippy/print_stderr.md) | `warn` | agents leave debugging prints behind | ai |
+| [`print_stdout`](../clippy/print_stdout.md) | `warn` | agents leave debugging prints behind | ai |
+| [`self_named_module_files`](../clippy/self_named_module_files.md) | `warn` | one module layout, mod.rs, across the workspace | ai |
+| [`str_to_string`](../clippy/str_to_string.md) | `warn` | to_owned says what happens: a copy of a borrowed str | ai |
+| [`too_long_first_doc_paragraph`](../clippy/too_long_first_doc_paragraph.md) | `warn` | agents write long doc summaries; the first paragraph is one short sentence | ai |
+| [`use_self`](../clippy/use_self.md) | `warn` | Self follows a rename | ai |
 
 `clippy.toml` (an integer is a limit the project may lower):
 
 | Setting | Value | Reason | Set in |
 |---|---|---|---|
-| `cognitive-complexity-threshold` | `20` | set on samples: 17 read fine, 21 and 25 were too long; spl's function-complexity (cyclomatic, 15) counts paths | ai |
+| [`cognitive-complexity-threshold`](../clippy/cognitive-complexity-threshold.md) | `20` | set on samples: 17 read fine, 21 and 25 were too long; spl's function-complexity (cyclomatic, 15) counts paths | ai |
 
 ## The file
 

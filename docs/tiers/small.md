@@ -88,27 +88,27 @@ The project turns these on in its own `[workspace.lints.clippy]` (`allow` rows a
 
 | Clippy lint | Level | Reason | Set in |
 |---|---|---|---|
-| `as_ptr_cast_mut` | `warn` | `as_ptr() as *mut` writes through a shared borrow: undefined behaviour | small |
-| `dbg_macro` | `warn` | debugging output left behind | small |
-| `debug_assert_with_mut_call` | `warn` | a debug_assert! that calls a &mut method makes debug and release builds behave differently | small |
-| `exit` | `warn` | process::exit skips every destructor; main returns instead | small |
-| `fallible_impl_from` | `warn` | a From that can panic is a TryFrom | small |
-| `get_unwrap` | `warn` | `.get(i).unwrap()` is indexing with a worse message: index, or handle the None | small |
-| `ignore_without_reason` | `warn` | an ignored test says why, or nobody knows when it may run again | small |
-| `let_underscore_must_use` | `warn` | `let _ =` on a must_use value drops an error unseen | small |
-| `map_err_ignore` | `warn` | `map_err(\|_\| ...)` throws the cause away; wrap it as the source | small |
-| `mem_forget` | `warn` | forget leaks the value and skips Drop; ManuallyDrop says it on purpose | small |
-| `todo` | `warn` | no stop-gaps: a todo!() is a panic waiting in shipped code | small |
-| `undocumented_unsafe_blocks` | `warn` | every unsafe block says in a SAFETY: comment why it is sound | small |
-| `unimplemented` | `warn` | no stop-gaps: an unimplemented!() is a panic waiting in shipped code | small |
-| `unnecessary_safety_doc` | `warn` | a # Safety section on a safe function sends readers looking for a contract that is not there | small |
-| `unwrap_used` | `warn` | a panic says what failed (expect with a message), or the error is returned | small |
+| [`as_ptr_cast_mut`](../clippy/as_ptr_cast_mut.md) | `warn` | `as_ptr() as *mut` writes through a shared borrow: undefined behaviour | small |
+| [`dbg_macro`](../clippy/dbg_macro.md) | `warn` | debugging output left behind | small |
+| [`debug_assert_with_mut_call`](../clippy/debug_assert_with_mut_call.md) | `warn` | a debug_assert! that calls a &mut method makes debug and release builds behave differently | small |
+| [`exit`](../clippy/exit.md) | `warn` | process::exit skips every destructor; main returns instead | small |
+| [`fallible_impl_from`](../clippy/fallible_impl_from.md) | `warn` | a From that can panic is a TryFrom | small |
+| [`get_unwrap`](../clippy/get_unwrap.md) | `warn` | `.get(i).unwrap()` is indexing with a worse message: index, or handle the None | small |
+| [`ignore_without_reason`](../clippy/ignore_without_reason.md) | `warn` | an ignored test says why, or nobody knows when it may run again | small |
+| [`let_underscore_must_use`](../clippy/let_underscore_must_use.md) | `warn` | `let _ =` on a must_use value drops an error unseen | small |
+| [`map_err_ignore`](../clippy/map_err_ignore.md) | `warn` | `map_err(\|_\| ...)` throws the cause away; wrap it as the source | small |
+| [`mem_forget`](../clippy/mem_forget.md) | `warn` | forget leaks the value and skips Drop; ManuallyDrop says it on purpose | small |
+| [`todo`](../clippy/todo.md) | `warn` | no stop-gaps: a todo!() is a panic waiting in shipped code | small |
+| [`undocumented_unsafe_blocks`](../clippy/undocumented_unsafe_blocks.md) | `warn` | every unsafe block says in a SAFETY: comment why it is sound | small |
+| [`unimplemented`](../clippy/unimplemented.md) | `warn` | no stop-gaps: an unimplemented!() is a panic waiting in shipped code | small |
+| [`unnecessary_safety_doc`](../clippy/unnecessary_safety_doc.md) | `warn` | a # Safety section on a safe function sends readers looking for a contract that is not there | small |
+| [`unwrap_used`](../clippy/unwrap_used.md) | `warn` | a panic says what failed (expect with a message), or the error is returned | small |
 
 `clippy.toml` (an integer is a limit the project may lower):
 
 | Setting | Value | Reason | Set in |
 |---|---|---|---|
-| `allow-unwrap-in-tests` | `true` | a test that unwraps fails at the unwrap, which is what a test should do | small |
+| [`allow-unwrap-in-tests`](../clippy/allow-unwrap-in-tests.md) | `true` | a test that unwraps fails at the unwrap, which is what a test should do | small |
 
 ## The file
 

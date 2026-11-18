@@ -1021,6 +1021,7 @@ dependencies = [
 name = "sl_book"
 version = "0.5.1"
 dependencies = [
+ "serde_json",
  "sl_config",
  "sl_core",
  "sl_report",

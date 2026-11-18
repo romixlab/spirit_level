@@ -1,9 +1,10 @@
-//! The generated pages of the book, its footer build stamp ([`stamp`]) and a README's picture of a check ([`sample`]).
+//! The generated pages of the book (one per lint, per tier and per Clippy name of the tiers, [`clippy`]), its footer build stamp ([`stamp`]) and a README's picture of a check ([`sample`]).
 #![expect(
     clippy::let_underscore_must_use,
     reason = "fmt::Write into a String cannot fail; a test removes its scratch directory as far as it can"
 )]
 
+pub mod clippy;
 pub mod sample;
 pub mod stamp;
 
@@ -69,9 +70,16 @@ pub fn pages() -> Result<BTreeMap<String, String>, String> {
     let tiers = tier_levels()?;
     let mut out = BTreeMap::new();
     for m in &lints {
-        out.insert(format!("lints/{}.md", m.code), lint_page(m, &tiers));
+        let mut page = lint_page(m, &tiers);
+        if m.code == "M0025" {
+            page.push_str(&clippy::m0025_section(&tiers));
+        }
+        out.insert(format!("lints/{}.md", m.code), page);
     }
     out.insert("lints/index.md".into(), lints_index(&lints, &tiers));
+    for (name, kind) in clippy::entries(&tiers) {
+        out.insert(clippy::path(&name), clippy::page(&name, kind, &tiers));
+    }
     for ((name, text), (_, c)) in spirit_level::TIERS.iter().zip(&tiers) {
         out.insert(format!("tiers/{name}.md"), tier_page(name, text, c, &lints));
     }
@@ -104,7 +112,7 @@ fn need(n: &Need) -> String {
     }
 }
 
-fn cell(s: &str) -> String {
+pub(crate) fn cell(s: &str) -> String {
     s.replace('|', "\\|").replace('\n', " ")
 }
 
@@ -196,7 +204,7 @@ pub fn lint_text(m: &LintMeta, tiers: &[(&str, Config)]) -> String {
         .replacen(&format!("<a id=\"{}\"></a>\n\n", m.id), "", 1)
 }
 
-fn capital(s: &str) -> String {
+pub(crate) fn capital(s: &str) -> String {
     let mut c = s.chars();
     c.next().map_or_else(String::new, |f| {
         f.to_uppercase().collect::<String>() + c.as_str()
@@ -240,6 +248,7 @@ fn lints_index(lints: &[&LintMeta], tiers: &[(&str, Config)]) -> String {
             let _ = writeln!(s, "{row}");
         }
     }
+    s.push_str(&clippy::index_section(tiers));
     s
 }
 
@@ -308,7 +317,8 @@ fn clippy_set(s: &mut String, c: &Config) {
     for (name, l) in rows {
         let _ = writeln!(
             s,
-            "| `{name}` | `{}` | {} | {} |",
+            "| [`{name}`](../{}) | `{}` | {} | {} |",
+            clippy::path(name),
             l.level,
             cell(&l.reason),
             set_in(&l.origin)
@@ -322,7 +332,8 @@ fn clippy_set(s: &mut String, c: &Config) {
         for (key, v) in &set.config {
             let _ = writeln!(
                 s,
-                "| `{key}` | `{}` | {} | {} |",
+                "| [`{key}`](../{}) | `{}` | {} | {} |",
+                clippy::path(key),
                 v.value,
                 cell(&v.reason),
                 set_in(&v.origin)
@@ -346,7 +357,7 @@ fn tiers_index() -> String {
 }
 
 /// The nav block for `zensical.toml`
-pub fn nav() -> String {
+pub fn nav() -> std::io::Result<String> {
     let mut s = format!("{NAV_BEGIN}\nnav = [\n");
     for (t, p) in HAND_PAGES {
         let _ = writeln!(s, "    {{ {t:?} = {p:?} }},");
@@ -364,8 +375,13 @@ pub fn nav() -> String {
     for code in codes {
         let _ = writeln!(s, "        \"lints/{code}.md\",");
     }
-    let _ = writeln!(s, "    ] }},\n]\n{NAV_END}");
-    s
+    let tiers = tier_levels().map_err(std::io::Error::other)?;
+    let _ = writeln!(s, "        {{ \"Clippy\" = [");
+    for name in clippy::entries(&tiers).keys() {
+        let _ = writeln!(s, "            {:?},", clippy::path(name));
+    }
+    let _ = writeln!(s, "        ] }},\n    ] }},\n]\n{NAV_END}");
+    Ok(s)
 }
 
 /// Writes (or with `check`, compares) the book's generated parts.
@@ -395,13 +411,13 @@ pub fn write(
             }
         }
     }
-    for dir in ["lints", "tiers"] {
+    for dir in ["lints", "tiers", "clippy"] {
         if let Ok(rd) = std::fs::read_dir(docs.join(dir)) {
             for e in rd.flatten() {
                 let rel = format!("{dir}/{}", e.file_name().to_string_lossy());
                 if e.path().extension().is_some_and(|x| x == "md") && !pages.contains_key(&rel) {
                     changed.push(format!(
-                        "{} (no such lint or tier any more)",
+                        "{} (no such lint, tier or Clippy name any more)",
                         e.path().display()
                     ));
                     if !check {
@@ -417,7 +433,7 @@ pub fn write(
             let rest = z[b + NAV_END.len()..]
                 .strip_prefix('\n')
                 .unwrap_or(&z[b + NAV_END.len()..]);
-            format!("{}{}{rest}", &z[..a], nav())
+            format!("{}{}{rest}", &z[..a], nav()?)
         }
         _ => {
             return Err(std::io::Error::other(format!(
@@ -463,6 +479,33 @@ mod tests {
         month: 11,
         day: 13,
     };
+
+    #[test]
+    fn every_clippy_name_of_a_tier_has_its_page_linked_from_the_tier_and_the_nav() {
+        let tiers = super::tier_levels().unwrap();
+        let pages = super::pages().unwrap();
+        let nav = super::nav().unwrap();
+        let mut missing = Vec::new();
+        for (tier, c) in &tiers {
+            let names = c.clippy.lints.keys().chain(c.clippy.config.keys());
+            for name in names {
+                let path = super::clippy::path(name);
+                let tier_page = &pages[&format!("tiers/{tier}.md")];
+                if !pages.contains_key(&path)
+                    || !tier_page.contains(&format!("(../{path})"))
+                    || !pages["lints/index.md"].contains(&format!("(../{path})"))
+                    || !pages["lints/M0025.md"].contains(&format!("(../{path})"))
+                    || !nav.contains(&format!("\"{path}\""))
+                {
+                    missing.push(format!("{tier}: {name}"));
+                }
+            }
+        }
+        assert!(
+            missing.is_empty(),
+            "Clippy names without a linked page: {missing:?}"
+        );
+    }
 
     #[test]
     fn writing_twice_changes_nothing() {
