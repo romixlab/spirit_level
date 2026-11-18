@@ -12,6 +12,7 @@ crate::declare_checks! {
     boot_10,
     cls_1,
     cls_2,
+    cls_3,
     cfg_1,
     cfg_2,
     cfg_4,

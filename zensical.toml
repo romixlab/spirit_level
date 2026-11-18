@@ -228,6 +228,7 @@ nav = [
         "lints/F0108.md",
         "lints/F0109.md",
         "lints/F0110.md",
+        "lints/F0111.md",
         "lints/G0001.md",
         "lints/G0002.md",
         "lints/G0003.md",

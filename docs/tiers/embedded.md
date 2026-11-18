@@ -8,7 +8,6 @@ Use it with `extends = "embedded"` in `spirit_level.toml`.
 
 | Code | Lint | Level | Reason | Set in |
 |---|---|---|---|---|
-| [C0005](../lints/C0005.md) | panic-in-library | `deny` | a service module (LED, log, telemetry) never reaches the panic handler in release: the whole MCU resets for it | embedded |
 | [C0030](../lints/C0030.md) | compound-assert | `warn` | assert!(a && b) is two assertions: a crash record from the field does not say which condition broke | embedded |
 | [C0031](../lints/C0031.md) | assert-message | `warn` | a failed assertion says in words what broke, which is what the crash record carries back; with defmt it costs no flash | embedded |
 | [F0001](../lints/F0001.md) | boot-1 | `deny` | bedrock error: Firmware entered by a jump (ROM DfuSe leave, bootloader) not detected: VTOR, PLL, SysTick, enabled IRQs of the ROM are still set; detect (RCC_CFGR SWS, VTOR, NVIC) and reset once | embedded |
@@ -120,6 +119,7 @@ Use it with `extends = "embedded"` in `spirit_level.toml`.
 | [F0107](../lints/F0107.md) | cls-2 | `deny` | a service module never reaches the panic handler in release; Clippy finds its panics at build time. Fires only where classes are declared | embedded |
 | [F0108](../lints/F0108.md) | flt-11 | `warn` | a panic in control code turns the outputs off before it records and resets; warn while no board generates safe_state() yet, then deny | embedded |
 | [F0109](../lints/F0109.md) | flt-12 | `warn` | a crash loop must not re-enable the outputs on every boot; an estimate by statement order, and no firmware reads boots_since at boot yet | embedded |
+| [F0111](../lints/F0111.md) | cls-3 | `deny` | a service module (LED, log, telemetry) never reaches the panic handler in release: the whole MCU resets for it. Reads assert! too, which Clippy does not | embedded |
 
 ## Clippy set (with what it extends)
 
@@ -580,6 +580,10 @@ reason = "every task file says what a panic in it may do; warn while no firmware
 level = "deny"
 reason = "a service module never reaches the panic handler in release; Clippy finds its panics at build time. Fires only where classes are declared"
 
+[lints.cls-3]
+level = "deny"
+reason = "a service module (LED, log, telemetry) never reaches the panic handler in release: the whole MCU resets for it. Reads assert! too, which Clippy does not"
+
 [lints.flt-11]
 level = "warn"
 reason = "a panic in control code turns the outputs off before it records and resets; warn while no board generates safe_state() yet, then deny"
@@ -591,14 +595,6 @@ reason = "a crash loop must not re-enable the outputs on every boot; an estimate
 [lints.pan-1]
 level = "allow"
 reason = "the strict level: every panic site of the release ELF acknowledged in panics.toml; a firmware turns it on for releases, with `spl panics --ack` to start the file"
-
-[lints.panic-in-library]
-level = "deny"
-reason = "a service module (LED, log, telemetry) never reaches the panic handler in release: the whole MCU resets for it"
-classes = ["service"]
-methods = ["unwrap", "expect"]
-macros = ["panic", "todo", "unimplemented", "unreachable", "assert", "assert_eq", "assert_ne"]
-bare-macros = []
 
 [lints.compound-assert]
 level = "warn"

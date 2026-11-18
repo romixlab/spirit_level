@@ -20,3 +20,7 @@ reason = "fixture"
 [lints.flt-12]
 level = "deny"
 reason = "fixture"
+
+[lints.cls-3]
+level = "deny"
+reason = "fixture"

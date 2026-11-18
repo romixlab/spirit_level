@@ -441,6 +441,10 @@ reason = "every task file says what a panic in it may do; warn while no firmware
 level = "deny"
 reason = "a service module never reaches the panic handler in release; Clippy finds its panics at build time. Fires only where classes are declared"
 
+[lints.cls-3]
+level = "deny"
+reason = "a service module (LED, log, telemetry) never reaches the panic handler in release: the whole MCU resets for it. Reads assert! too, which Clippy does not"
+
 [lints.flt-11]
 level = "warn"
 reason = "a panic in control code turns the outputs off before it records and resets; warn while no board generates safe_state() yet, then deny"
@@ -452,14 +456,6 @@ reason = "a crash loop must not re-enable the outputs on every boot; an estimate
 [lints.pan-1]
 level = "allow"
 reason = "the strict level: every panic site of the release ELF acknowledged in panics.toml; a firmware turns it on for releases, with `spl panics --ack` to start the file"
-
-[lints.panic-in-library]
-level = "deny"
-reason = "a service module (LED, log, telemetry) never reaches the panic handler in release: the whole MCU resets for it"
-classes = ["service"]
-methods = ["unwrap", "expect"]
-macros = ["panic", "todo", "unimplemented", "unreachable", "assert", "assert_eq", "assert_ne"]
-bare-macros = []
 
 [lints.compound-assert]
 level = "warn"

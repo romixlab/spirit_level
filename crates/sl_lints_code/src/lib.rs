@@ -20,7 +20,6 @@ lint!(PANIC_IN_LIBRARY, "C0005", "panic-in-library", "code", "library code retur
         ("macros", StrList, "[\"panic\", \"todo\", \"unimplemented\"]", "macros that panic"),
         ("bare-macros", StrList, "[\"unreachable\"]", "macros that count only without a message"),
         ("test-files", StrList, "[\"**/*_tests.rs\"]", "files of test code by name, relative to the crate, besides tests/, benches/, examples/ and #[cfg(test)] modules"),
-        ("classes", StrList, "[]", "task classes ([embedded.classes]) whose modules are checked in every crate, binaries included, instead of library code"),
         ("max", Int, "0", "panicking calls allowed per crate before each is reported"),
     ],
     needs: [], fix: None);
@@ -219,28 +218,13 @@ impl Analysis for Code {
     }
 }
 
-/// Whether panic-in-library looks at a file: library code that is not test code by name, or, where the lint names
-/// task classes, a module of one of them in any crate
+/// Whether panic-in-library looks at a file: library code that is not test code by name
 fn panics_checked(cx: &Context<'_>, pkg: &Package, f: &SourceFile, lib: bool) -> bool {
-    let params = cx.params_for("panic-in-library", pkg);
-    if params
+    lib && !cx
+        .params_for("panic-in-library", pkg)
         .list("test-files")
         .iter()
         .any(|g| sl_core::glob::matches(g, &f.in_package))
-    {
-        return false;
-    }
-    let classes = params.list("classes");
-    if classes.is_empty() {
-        return lib;
-    }
-    f.kind == FileKind::Src
-        && cx
-            .config
-            .embedded
-            .classes
-            .class_of(&f.in_package)
-            .is_some_and(|c| classes.iter().any(|n| n == c.name()))
 }
 
 /// Library code: under src/ of a crate with a library target, not a binary root or src/bin/

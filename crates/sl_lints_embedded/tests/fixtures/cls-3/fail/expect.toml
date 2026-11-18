@@ -1,0 +1,9 @@
+project = "../../../projects/classes_bad"
+
+[[finding]]
+at = "src/led.rs:5:5"
+contains = "assert!"
+
+[[finding]]
+at = "src/led.rs:6:43"
+contains = ".expect()"

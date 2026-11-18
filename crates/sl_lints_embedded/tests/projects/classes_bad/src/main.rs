@@ -18,7 +18,7 @@ async fn main(spawner: embassy_executor::Spawner) {
         return;
     }
     spawner.must_spawn(power::control(gate));
-    spawner.must_spawn(led::blink());
+    spawner.must_spawn(led::blink(500));
     spawner.must_spawn(usb::serve());
 }
 

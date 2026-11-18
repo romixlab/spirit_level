@@ -15,10 +15,9 @@ Binaries (`src/main.rs`, `src/bin/`) and test code are not checked: `tests/`, `b
 
 Without types, `.unwrap()` on anything counts, including types where it cannot panic in practice; the parameter `max` sets how many a crate may have before each is reported.
 
-In firmware the module's task class decides, not the crate kind. The `embedded` tier sets `classes = ["service"]`: every module that `[embedded.classes]` puts in `service` is checked, in binaries too, with `expect`, `unreachable!` and `assert!` counted as well, since a `service` module never reaches the panic handler in release.
+Firmware is checked the same way: its drivers and protocol crates are libraries. A `service` module of a firmware binary has a stricter rule beside this one, [cls-3](F0111.md): it never reaches the panic handler in release, so `expect`, `unreachable!` and `assert!` count there as well.
 
 ## How to fix
 
 - A value from outside or an operation that can fail: return an error the caller can handle.
 - A case that cannot happen: `.expect("why it cannot fail")` or `unreachable!("why")`; better, a type that makes it impossible (`NonZeroU8`, an enum, a checked constructor).
-- In a `service` module: `debug_assert!`, count the miss (`cnt!`) and fall back (skip the sample, clamp, reset the task's own state).

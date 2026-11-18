@@ -352,6 +352,29 @@ mod tests {
         }
     }
 
+    /// A firmware extends a size tier and `embedded`. Its drivers and protocol crates are libraries: the firmware
+    /// tier leaves what the size tier checks in them as it is.
+    #[test]
+    fn embedded_leaves_the_library_panic_check_alone() {
+        let all = lints();
+        let env = Env {
+            lints: &all,
+            tier: &tier,
+            today: Date::parse("2026-11-13").unwrap(),
+            version: None,
+        };
+        for size in ["small", "medium", "big"] {
+            let alone = Config::from_tiers(&[size], &env).unwrap();
+            let both = Config::from_tiers(&[size, "embedded"], &env).unwrap();
+            let (a, b) = (
+                alone.lint("panic-in-library"),
+                both.lint("panic-in-library"),
+            );
+            assert_eq!(a.level, b.level, "{size}");
+            assert_eq!(a.params, b.params, "{size}");
+        }
+    }
+
     #[test]
     fn every_tier_resolves() {
         let all = lints();

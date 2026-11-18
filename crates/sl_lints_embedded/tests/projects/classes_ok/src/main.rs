@@ -16,8 +16,8 @@ async fn main(spawner: embassy_executor::Spawner) {
         return;
     }
     let gate = Output::new(p.PA8, Level::Low, Speed::Low);
-    spawner.must_spawn(power::control(gate));
-    spawner.must_spawn(led::blink());
+    spawner.must_spawn(power::control(gate, 1));
+    spawner.must_spawn(led::blink(500));
 }
 
 #[panic_handler]

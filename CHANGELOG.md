@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Added
+
+- `cls-3` (F0111, deny in `embedded`): a `service` module holds no `unwrap`, `expect`, `panic!` or `assert!` (CODE-13).
+
+### Changed
+
+- **Breaking:** `panic-in-library` has no `classes` parameter: delete it from a config. The `embedded` tier no longer narrows the lint (CODE-13).
+
 ## [0.4.39] - 2026-11-17
 
 ### Added

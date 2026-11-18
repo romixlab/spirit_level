@@ -13,7 +13,7 @@ A `service` module (LED, logging, telemetry) must never reach the panic handler 
 )]
 ```
 
-Clippy has no lint for `assert!`; the embedded tier's [panic-in-library](C0005.md) checks the macros in `service` modules.
+Clippy has no lint for `assert!`; [cls-3](F0111.md) reads the `service` modules for it.
 
 ## Example
 
