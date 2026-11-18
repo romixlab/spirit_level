@@ -1,0 +1,10 @@
+[[finding]]
+at = "docs/wire.md:3"
+
+[[finding]]
+at = "docs/wire.md:5"
+confidence = "candidate"
+
+[[finding]]
+at = "docs/wire.md:7"
+confidence = "candidate"

@@ -1,0 +1,15 @@
+extends = []
+
+# `book/` stands for the checkout of the repo that builds the book
+[docs]
+skip = ["book/**"]
+
+[docs.book]
+dir = "docs"
+at = "docs/format"
+added = ["conformance.md"]
+repo = "book"
+
+[lints.page-links]
+level = "deny"
+reason = "fixture"

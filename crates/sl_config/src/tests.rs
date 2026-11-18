@@ -457,6 +457,40 @@ fn docs_site_table() {
 }
 
 #[test]
+fn docs_book_table() {
+    assert_eq!(load("extends = \"small\"\n").unwrap().docs.book, None);
+    let b = load(
+        "extends = \"small\"\n[docs.book]\ndir = \"docs/\"\nat = \"docs/format\"\nadded = [\"conformance.md\"]\nrepo = \"../book\"\n",
+    )
+    .unwrap()
+    .docs
+    .book
+    .expect("the book");
+    assert_eq!((b.dir.as_str(), b.at.as_str()), ("docs", "docs/format"));
+    assert_eq!(b.inside("docs/wire.md"), Some("wire.md"));
+    assert_eq!(b.inside("docs"), None);
+    assert_eq!(b.inside("docs_old/wire.md"), None);
+    assert_eq!(b.inside("README.md"), None);
+    assert_eq!(
+        b.local("docs/format/wire.md").as_deref(),
+        Some("docs/wire.md")
+    );
+    assert_eq!(b.local("docs/api/calls.md"), None);
+    assert_eq!(b.local("docs/format/conformance.md"), None);
+    assert!(b.checkout().is_some_and(|c| c.ends_with("../book")));
+    let m = messages(load(
+        "extends = \"small\"\n[docs.book]\ndir = \"../docs\"\nurl = 1\n",
+    ));
+    for want in [
+        "docs.book.dir is \"../docs\"",
+        "docs.book.at",
+        "unknown key docs.book.url",
+    ] {
+        assert!(m.iter().any(|s| s.contains(want)), "{want}: {m:?}");
+    }
+}
+
+#[test]
 fn board_table() {
     let b = load("extends = \"small\"\n").unwrap().board;
     assert_eq!(b, Board::default());

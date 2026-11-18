@@ -19,6 +19,12 @@
 //! skip-classes = ["v-label"]     # elements whose text is not prose: labels, badges, spec lists
 //! cta-classes = ["v-btn"]        # links and buttons that are calls to action: a visual break
 //! capture-classes = ["term-fig"] # figures that show a terminal capture: a break, not an image
+//!
+//! [docs.book]                    # the pages are part of a book another repo builds
+//! dir = "docs"                   # the folder of pages that book takes
+//! at = "docs/serdes"             # where they stand in the book's repo
+//! added = ["conformance.md"]     # pages the book's repo keeps in that folder itself, relative to `at`
+//! repo = "../wire_weaver"        # that repo's checkout, relative to this file: its other pages are looked up there
 //! ```
 //!
 //! Without `dir`, `content`, `sources` and `url`, the generator's own settings decide: zola reads `main` from
@@ -26,6 +32,7 @@
 
 use crate::error::ConfigError;
 use crate::reader::Reader;
+use std::path::{Path, PathBuf};
 
 /// The pages when the table names none
 const DEFAULT_FILES: &[&str] = &["**/*.md"];
@@ -189,6 +196,81 @@ fn valid_selector(s: &str) -> bool {
         && (s.contains('.') != class.is_empty())
 }
 
+/// Pages that are part of a book another repo builds: `dir` of this repo stands at `at` in that repo, so a link
+/// from them to another page of the book resolves there, not here
+#[derive(Clone, Debug, PartialEq, Eq, serde::Serialize)]
+pub struct Book {
+    /// The folder of pages the book takes, relative to the root
+    pub dir: String,
+    /// Where the folder stands in the book's repo, relative to that repo's root
+    pub at: String,
+    /// Globs of pages the book's repo keeps in the folder itself, relative to `at`: they are its pages, not `dir`'s
+    pub added: Vec<String>,
+    /// The book's repo checkout, as written; None: links to its other pages are not looked up
+    pub repo: Option<String>,
+    /// The directory a relative `repo` starts from: the directory of the file the table is in
+    pub base: PathBuf,
+}
+
+impl Book {
+    fn read(mut r: Reader<'_>, base: &Path, errs: &mut Vec<ConfigError>) -> Option<Self> {
+        let mut folder = |key: &str, errs: &mut Vec<ConfigError>| {
+            let v = r.str(key, errs)?;
+            let v = v.trim_matches('/').to_owned();
+            if v.is_empty() || v.split('/').any(|s| s == ".." || s == ".") {
+                errs.push(r.err(
+                    key,
+                    format!(
+                        "docs.book.{key} is \"{v}\": name a folder by its path from the repo's root"
+                    ),
+                ));
+                return None;
+            }
+            Some(v)
+        };
+        let dir = folder("dir", errs);
+        let at = folder("at", errs);
+        let added = r.opt_list("added", true, errs).unwrap_or_default();
+        let repo = r.opt_str("repo", errs);
+        r.finish(errs);
+        Some(Self {
+            dir: dir?,
+            at: at?,
+            added,
+            repo,
+            base: base.to_path_buf(),
+        })
+    }
+
+    /// The path of a page of `dir` inside it (`docs/derive.md` is `derive.md`); None for any other page
+    pub fn inside<'p>(&self, rel: &'p str) -> Option<&'p str> {
+        below(&self.dir, rel).filter(|r| !r.is_empty())
+    }
+
+    /// Where a path of the book's repo is in this repo: below `at` it is a page of `dir`; None for the book's
+    /// other pages, those it adds to the folder included
+    pub fn local(&self, in_book: &str) -> Option<String> {
+        below(&self.at, in_book)
+            .filter(|rest| !self.added.iter().any(|g| sl_core::glob::matches(g, rest)))
+            .map(|rest| format!("{}/{rest}", self.dir))
+    }
+
+    /// The book's repo checkout; None when the table names none
+    pub fn checkout(&self) -> Option<PathBuf> {
+        self.repo.as_ref().map(|r| self.base.join(r))
+    }
+}
+
+/// `path` relative to `folder` when it is the folder or lies below it
+fn below<'p>(folder: &str, path: &'p str) -> Option<&'p str> {
+    let rest = path.strip_prefix(folder)?;
+    if rest.is_empty() {
+        Some(rest)
+    } else {
+        rest.strip_prefix('/')
+    }
+}
+
 /// The project's pages
 #[derive(Clone, Debug, PartialEq, Eq, serde::Serialize)]
 pub struct Docs {
@@ -202,6 +284,8 @@ pub struct Docs {
     pub language: Option<String>,
     /// The built site read in place of its Markdown sources: the `[docs.site]` table
     pub site: Option<Site>,
+    /// The book of another repo these pages are part of: the `[docs.book]` table
+    pub book: Option<Book>,
 }
 
 impl Default for Docs {
@@ -212,18 +296,20 @@ impl Default for Docs {
             reference: Vec::new(),
             language: None,
             site: None,
+            book: None,
         }
     }
 }
 
 impl Docs {
-    pub(crate) fn read(mut r: Reader<'_>, errs: &mut Vec<ConfigError>) -> Self {
+    pub(crate) fn read(mut r: Reader<'_>, dir: &Path, errs: &mut Vec<ConfigError>) -> Self {
         let d = Self::default();
         let files = r.opt_list("files", true, errs).unwrap_or(d.files);
         let skip = r.opt_list("skip", true, errs).unwrap_or(d.skip);
         let reference = r.opt_list("reference", true, errs).unwrap_or_default();
         let language = r.opt_str("language", errs);
         let site = r.table("site", errs).map(|t| Site::read(t, errs));
+        let book = r.table("book", errs).and_then(|t| Book::read(t, dir, errs));
         if files.is_empty() {
             errs.push(r.err(
                 "files",
@@ -237,6 +323,7 @@ impl Docs {
             reference,
             language,
             site,
+            book,
         }
     }
 }

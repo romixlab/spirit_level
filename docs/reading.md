@@ -116,6 +116,29 @@ spirit_level does not build the site: build it first (`zola build`, `zensical bu
 
 The book lints still read the Markdown sources and `zensical.toml`.
 
+### Pages of another repo's book
+
+A library's pages can be a section of a book that another repo builds: that repo copies the folder into its own `docs`. A link from such a page to the rest of the book is right there and leads nowhere here. The `[docs.book]` table says where the pages stand:
+
+```toml
+[docs.book]
+dir = "docs"                # the folder of pages the book takes
+at = "docs/format"          # where the folder stands in the book's repo
+added = ["conformance.md"]  # optional: pages the book's repo keeps in that folder itself
+repo = "../the_book"        # optional: that repo's checkout, relative to this file
+```
+
+[page-links](lints/D0021.md) then resolves a link of a page under `dir` from the page's place in the book:
+
+| The link leads | Checked |
+|---|---|
+| into `at` | the file exists under `dir` in this repo |
+| to a page of `added` | as another page of the book |
+| to another page of the book | the file exists in `repo`; a miss is a candidate, since the book may take that page from a third repo |
+| to another page, and `repo` is not set or not checked out | not judged |
+
+Pages outside `dir`, such as the README, are judged as before. Read from this repo's source tree, a link to the rest of the book stays broken: the table records that the book is where these pages are read.
+
 ### Kinds of page
 
 A guide is read from front to back: an introduction, a tutorial, a concept page. A reference page is looked up: a lint's page, an API list, a table of options. A reader does not read a reference page whole, so its length is no burden, but a long stretch of prose without a heading is still hard to scan.

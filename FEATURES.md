@@ -120,6 +120,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `DOCS-6` page-links: a link between pages is a relative path to a Markdown file that exists, never `.html` or an absolute site path; checked on every page `[docs]` selects, book or not.
 - ✅ `DOCS-8` built-site-pages: `[docs.site]` reads a built site's HTML (zola, Zensical) in place of its Markdown sources for `spl pages` and the reading and word lints; content element, skipped classes, calls to action and terminal captures as keys.
 - ✅ `DOCS-9` `book-deploy` (D0022): a book with a `site_url` has one workflow that builds it strict (`zensical build --strict`, `mkdocs build --strict`, or a just recipe running it) and publishes it with `actions/deploy-pages`.
+- ✅ `DOCS-10` `[docs.book]`: pages another repo's book takes; `page-links` resolves their links from their place in that book and looks its other pages up in its checkout.
 
 ## AI - code written with agents
 

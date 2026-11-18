@@ -56,7 +56,7 @@ pub use board::Board;
 pub use cli::CliProbe;
 pub use clippy::{ClippyConfig, ClippyLint, ClippySet};
 pub use dependents::Dependents;
-pub use docs::{Docs, Generator, Site};
+pub use docs::{Book, Docs, Generator, Site};
 pub use embedded::Embedded;
 pub use error::ConfigError;
 pub use map::{External, Layer, Map, MapCrate};
@@ -590,7 +590,7 @@ impl<'a> Resolver<'a> {
             self.dependents = Some(Dependents::read(d, dir, errs));
         }
         if let Some(d) = r.table("docs", errs) {
-            self.docs = Docs::read(d, errs);
+            self.docs = Docs::read(d, dir, errs);
         }
         if let Some(c) = r.table("cli", errs) {
             self.cli = CliProbe::read(c, errs);
