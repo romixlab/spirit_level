@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-18
+
 ### Added
 
 - `cls-3` (F0111, deny in `embedded`): a `service` module holds no `unwrap`, `expect`, `panic!` or `assert!` (CODE-13).
