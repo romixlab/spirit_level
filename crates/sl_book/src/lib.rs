@@ -82,7 +82,7 @@ pub fn pages() -> Result<BTreeMap<String, String>, String> {
 fn source(m: &LintMeta) -> String {
     match m.source {
         Source::Native => "spirit_level".into(),
-        Source::Tool { name, r#use } => format!(
+        Source::Tool { name, r#use, .. } => format!(
             "{name} ({})",
             match r#use {
                 ToolUse::Library => "linked as a library",
@@ -119,6 +119,14 @@ pub fn lint_page(m: &LintMeta, tiers: &[(&str, Config)]) -> String {
     let _ = writeln!(s, "| Id | `{}` |", m.id);
     let _ = writeln!(s, "| Category | [{0}](index.md#{0}) |", m.category);
     let _ = writeln!(s, "| Source | {} |", source(m));
+    if let Source::Tool {
+        name,
+        docs: Some(url),
+        ..
+    } = m.source
+    {
+        let _ = writeln!(s, "| {name}'s docs | [the page of this check]({url}) |");
+    }
     let _ = writeln!(
         s,
         "| Fix | {} |",

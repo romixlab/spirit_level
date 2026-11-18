@@ -10,27 +10,27 @@ use sl_tools::cargo_json::{self, Message};
 use std::collections::BTreeMap;
 
 lint!(CLIPPY_BUILD, "X0009", "clippy-build", "clippy", "the workspace builds under clippy without compiler errors or warnings",
-    tool: ("clippy", Executable),
+    tool: ("clippy", Executable, docs: "https://doc.rust-lang.org/clippy/usage.html"),
     params: [("args", StrList, "[\"--workspace\", \"--all-targets\"]", "arguments to `cargo clippy` (packages, targets, features); every clippy lint reads them")],
     needs: [Need::Tool("clippy")], fix: None);
 lint!(CLIPPY_CORRECTNESS, "X0012", "clippy-correctness", "clippy", "no finding of clippy's correctness group: code that is outright wrong",
-    tool: ("clippy", Executable), params: [], needs: [Need::Tool("clippy")], fix: None);
+    tool: ("clippy", Executable, docs: "https://doc.rust-lang.org/clippy/lints.html#correctness"), params: [], needs: [Need::Tool("clippy")], fix: None);
 lint!(CLIPPY_SUSPICIOUS, "X0018", "clippy-suspicious", "clippy", "no finding of clippy's suspicious group: code that is most likely wrong",
-    tool: ("clippy", Executable), params: [], needs: [Need::Tool("clippy")], fix: None);
+    tool: ("clippy", Executable, docs: "https://doc.rust-lang.org/clippy/lints.html#suspicious"), params: [], needs: [Need::Tool("clippy")], fix: None);
 lint!(CLIPPY_STYLE, "X0017", "clippy-style", "clippy", "no finding of clippy's style group: code written the idiomatic way",
-    tool: ("clippy", Executable), params: [], needs: [Need::Tool("clippy")], fix: None);
+    tool: ("clippy", Executable, docs: "https://doc.rust-lang.org/clippy/lints.html#style"), params: [], needs: [Need::Tool("clippy")], fix: None);
 lint!(CLIPPY_COMPLEXITY, "X0011", "clippy-complexity", "clippy", "no finding of clippy's complexity group: simple things done simply",
-    tool: ("clippy", Executable), params: [], needs: [Need::Tool("clippy")], fix: None);
+    tool: ("clippy", Executable, docs: "https://doc.rust-lang.org/clippy/lints.html#complexity"), params: [], needs: [Need::Tool("clippy")], fix: None);
 lint!(CLIPPY_PERF, "X0015", "clippy-perf", "clippy", "no finding of clippy's perf group: no needlessly slow code",
-    tool: ("clippy", Executable), params: [], needs: [Need::Tool("clippy")], fix: None);
+    tool: ("clippy", Executable, docs: "https://doc.rust-lang.org/clippy/lints.html#perf"), params: [], needs: [Need::Tool("clippy")], fix: None);
 lint!(CLIPPY_PEDANTIC, "X0014", "clippy-pedantic", "clippy", "no finding of the pedantic clippy lints the project turned on",
-    tool: ("clippy", Executable), params: [], needs: [Need::Tool("clippy")], fix: None);
+    tool: ("clippy", Executable, docs: "https://doc.rust-lang.org/clippy/lints.html#pedantic"), params: [], needs: [Need::Tool("clippy")], fix: None);
 lint!(CLIPPY_NURSERY, "X0013", "clippy-nursery", "clippy", "no finding of the nursery clippy lints the project turned on",
-    tool: ("clippy", Executable), params: [], needs: [Need::Tool("clippy")], fix: None);
+    tool: ("clippy", Executable, docs: "https://doc.rust-lang.org/clippy/lints.html#nursery"), params: [], needs: [Need::Tool("clippy")], fix: None);
 lint!(CLIPPY_CARGO, "X0010", "clippy-cargo", "clippy", "no finding of the cargo-group clippy lints the project turned on",
-    tool: ("clippy", Executable), params: [], needs: [Need::Tool("clippy")], fix: None);
+    tool: ("clippy", Executable, docs: "https://doc.rust-lang.org/clippy/lints.html#cargo"), params: [], needs: [Need::Tool("clippy")], fix: None);
 lint!(CLIPPY_RESTRICTION, "X0016", "clippy-restriction", "clippy", "no finding of the restriction clippy lints the project turned on",
-    tool: ("clippy", Executable), params: [], needs: [Need::Tool("clippy")], fix: None);
+    tool: ("clippy", Executable, docs: "https://doc.rust-lang.org/clippy/lints.html#restriction"), params: [], needs: [Need::Tool("clippy")], fix: None);
 
 /// The clippy analysis
 pub struct Clippy;

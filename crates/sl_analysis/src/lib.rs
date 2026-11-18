@@ -202,15 +202,17 @@ impl<'a> Context<'a> {
 /// A parameter that takes one of a fixed set of strings lists them after `Choice`:
 /// `("policy", Choice["branch", "tag"], "\"branch\"", "what a git dependency may name")`.
 ///
-/// An adapter of an external tool names the tool and how it is used after the summary:
+/// An adapter of an external tool names the tool, how it is used and, where the tool has one, the URL of its own
+/// documentation of the check (the lint's page links it):
 ///
 /// ```ignore
 /// sl_analysis::lint!(DENY_BANS, "X0020", "deny-bans", "tools", "no banned crate, no duplicate version deny.toml refuses",
-///     tool: ("cargo-deny", Executable), params: [], needs: [Need::Tool("cargo-deny")], fix: None);
+///     tool: ("cargo-deny", Executable, docs: "https://embarkstudios.github.io/cargo-deny/checks/bans/index.html"),
+///     params: [], needs: [Need::Tool("cargo-deny")], fix: None);
 /// ```
 #[macro_export]
 macro_rules! lint {
-    ($name:ident, $code:literal, $id:literal, $cat:literal, $summary:literal, tool: ($tool:literal, $use:ident),
+    ($name:ident, $code:literal, $id:literal, $cat:literal, $summary:literal, tool: ($tool:literal, $use:ident $(, docs: $docs:literal)?),
      params: [$(($p:literal, $k:ident $([$($c:literal),+ $(,)?])?, $d:literal, $doc:literal)),* $(,)?],
      needs: [$($need:expr),* $(,)?], fix: $fix:ident) => {
         #[doc = concat!("`", $code, "` `", $id, "`: ", $summary)]
@@ -231,6 +233,7 @@ macro_rules! lint {
             source: $crate::reexport::Source::Tool {
                 name: $tool,
                 r#use: $crate::reexport::ToolUse::$use,
+                docs: $crate::tool_docs!($($docs)?),
             },
         };
     };
@@ -254,6 +257,18 @@ macro_rules! lint {
             fix: $crate::reexport::FixKind::$fix,
             source: $crate::reexport::Source::Native,
         };
+    };
+}
+
+/// The optional `docs:` URL of a tool lint, for [`lint!`]
+#[doc(hidden)]
+#[macro_export]
+macro_rules! tool_docs {
+    () => {
+        None
+    };
+    ($docs:literal) => {
+        Some($docs)
     };
 }
 

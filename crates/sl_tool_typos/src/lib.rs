@@ -9,7 +9,7 @@ use sl_analysis::{Analysis, Context, lint};
 use sl_core::{Diagnostic, Edit, Fix, LintMeta, Need, Span};
 
 lint!(TYPOS_MISSPELLING, "X0032", "typos-misspelling", "typos", "no misspelled word in code, comments, docs or file names",
-    tool: ("typos", Executable), params: [], needs: [Need::Tool("typos")], fix: Exact);
+    tool: ("typos", Executable, docs: "https://github.com/crate-ci/typos"), params: [], needs: [Need::Tool("typos")], fix: Exact);
 
 /// The typos analysis
 pub struct Typos;

@@ -12,9 +12,9 @@ use sl_analysis::{Analysis, Context, lint};
 use sl_core::{Diagnostic, Edit, Fix, LintMeta, Need, Span};
 
 lint!(HAKARI_GENERATE, "X0024", "hakari-generate", "hakari", "the workspace-hack package's dependencies are the ones hakari computes",
-    tool: ("hakari", Library), params: [], needs: [Need::Resolve], fix: Exact);
+    tool: ("hakari", Library, docs: "https://docs.rs/cargo-hakari/latest/cargo_hakari/"), params: [], needs: [Need::Resolve], fix: Exact);
 lint!(HAKARI_MANAGE_DEPS, "X0025", "hakari-manage-deps", "hakari", "every member hakari manages depends on the workspace-hack package, and no other",
-    tool: ("hakari", Library), params: [], needs: [Need::Resolve], fix: None);
+    tool: ("hakari", Library, docs: "https://docs.rs/cargo-hakari/latest/cargo_hakari/"), params: [], needs: [Need::Resolve], fix: None);
 
 /// The hakari analysis
 pub struct Hakari;

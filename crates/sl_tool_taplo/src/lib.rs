@@ -14,7 +14,7 @@ use sl_core::{Diagnostic, Edit, Fix, LintMeta, Need, Span};
 use std::path::Path;
 
 lint!(TAPLO_FMT, "X0031", "taplo-fmt", "taplo", "every TOML file parses and is formatted as taplo writes it",
-    tool: ("taplo", Executable), params: [], needs: [Need::Tool("taplo")], fix: Exact);
+    tool: ("taplo", Executable, docs: "https://taplo.tamasfe.dev/cli/usage/formatting.html"), params: [], needs: [Need::Tool("taplo")], fix: Exact);
 
 /// The taplo analysis
 pub struct Taplo;

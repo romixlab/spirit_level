@@ -9,7 +9,7 @@ use sl_analysis::{Analysis, Context, lint};
 use sl_core::{Diagnostic, LintMeta, Need, Span};
 
 lint!(UDEPS_UNUSED_DEPS, "X0033", "udeps-unused-deps", "udeps", "no crate declares a dependency the compiler never loads",
-    tool: ("cargo-udeps", Executable), params: [], needs: [Need::Tool("cargo-udeps"), Need::Nightly], fix: None);
+    tool: ("cargo-udeps", Executable, docs: "https://github.com/est31/cargo-udeps"), params: [], needs: [Need::Tool("cargo-udeps"), Need::Nightly], fix: None);
 
 /// The cargo-udeps analysis
 pub struct Udeps;

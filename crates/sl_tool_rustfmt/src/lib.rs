@@ -8,7 +8,7 @@ use sl_core::{Diagnostic, LintMeta, Need, Span};
 use std::path::Path;
 
 lint!(RUSTFMT_UNFORMATTED, "X0027", "rustfmt-unformatted", "rustfmt", "every Rust file is formatted the way cargo fmt writes it",
-    tool: ("rustfmt", Executable), params: [], needs: [Need::Tool("rustfmt")], fix: None);
+    tool: ("rustfmt", Executable, docs: "https://rust-lang.github.io/rustfmt/"), params: [], needs: [Need::Tool("rustfmt")], fix: None);
 
 /// The rustfmt analysis
 pub struct Rustfmt;

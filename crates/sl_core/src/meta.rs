@@ -74,6 +74,9 @@ pub enum Source {
         name: &'static str,
         /// Linked or run
         r#use: ToolUse,
+        /// The tool's own documentation of the check, where it has one
+        #[serde(skip_serializing_if = "Option::is_none")]
+        docs: Option<&'static str>,
     },
 }
 
