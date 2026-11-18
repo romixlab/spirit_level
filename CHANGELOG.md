@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.5.2] - 2026-11-18
+
 ### Added
 
 - Book: a page per Clippy lint, group and setting of the tiers; search finds it first by name (DOCS-11).
