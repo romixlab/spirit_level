@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.5.3] - 2026-11-18
+
 ### Added
 
 - Progress on stderr at a terminal for `check`, `pages`, `dependents`, cleared at the end; `--progress auto|always|never` (CLI-8).
