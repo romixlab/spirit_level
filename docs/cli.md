@@ -16,7 +16,7 @@ For each CLI binary, spl runs `cargo build --message-format json -p CRATE --bins
 | `BIN --spirit-level-unknown-flag` | the answer to a usage error |
 | `COMPLETE=bash BIN --help` (and zsh, fish) | the completion registration; a CLI without completion prints its help instead |
 
-Each probe runs with a clean environment: only `PATH`, `TERM=dumb`, and a `HOME` and XDG directories inside an empty scratch directory, which is also the working directory. Standard input is closed and both outputs are pipes. A probe that does not exit within `timeout-secs` is killed and reported. Help, version and a usage error never reach the tool's own code in a clap CLI, so the probes change nothing outside the scratch directory.
+Each probe runs with a clean environment: only `PATH`, `TERM=dumb`, and a `HOME` and XDG directories inside an empty scratch directory, which is also the working directory. Standard input is closed and both outputs are pipes. A tool that draws progress only at a terminal therefore draws none for the probes; spl's own progress display follows the same rule ([progress](output.md#progress)). A probe that does not exit within `timeout-secs` is killed and reported. Help, version and a usage error never reach the tool's own code in a clap CLI, so the probes change nothing outside the scratch directory.
 
 The probe reads clap's help layout: a `Usage:` line, then sections such as `Commands:`, `Arguments:` and `Options:` with one indented entry per item. A binary whose help has no `Usage:` line is not a clap CLI, and its help lints are reported as not run.
 

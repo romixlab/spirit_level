@@ -26,6 +26,25 @@ For people, findings are grouped by lint, denied groups first, then warnings, ea
 
 Colour is off when the output is not a terminal, with `NO_COLOR`, or with `--color never`. `--show-allowed` also lists findings allowed by waivers and exceptions; `--timings` shows the time of each analysis.
 
+## Progress
+
+While `spl check` runs, a line on stderr says what runs now and how far the run is: the analyses done of those that run, then one line under it per analysis running, with the tools it starts and its time. The tool adapters (Clippy, cargo-deny, cargo-machete, typos and the others) take most of a run, so their lines stay longest:
+
+```text
+⠙ spl check: [================>       ] 14/20 analyses 8s
+  ⠂ cargo-deny 1s
+```
+
+Before the analyses it names the step (loading the project, finding the tools), after them the waivers. When the run ends, spl erases the lines, and the report follows as it would without them: stdout never carries progress. `spl check --fix` shows the run after the fixes the same way; `spl pages` and `spl dependents` name their steps.
+
+`--progress` decides when, for every command:
+
+| Value | Progress |
+|---|---|
+| `auto` (default) | drawn when stderr is a terminal, except under `--format json`, in CI (`CI` set), with `NO_COLOR` set or with `TERM=dumb` |
+| `always` | drawn at a terminal; elsewhere one line per step, `spl check: [3/20] clippy (cargo-clippy)` |
+| `never` | none |
+
 ## JSON
 
 `spl check --format json` prints one document:
