@@ -14,7 +14,8 @@ const BLOCK_END: &str = "<!-- /spirit-level:check -->";
 /// The coloured text report of `spl check` on `project`. The summary names the project `shown`, so the output does
 /// not depend on where the repo is checked out.
 pub fn text(project: &Path, shown: &str, opts: &spirit_level::Options) -> Result<String, String> {
-    let (_, report) = spirit_level::check(project, opts).map_err(|e| e.to_string())?;
+    let (_, report) =
+        spirit_level::check(project, opts, &spirit_level::Silent).map_err(|e| e.to_string())?;
     let text = sl_report::text(
         &report,
         &spirit_level::lints(),

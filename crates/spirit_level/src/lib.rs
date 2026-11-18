@@ -2,7 +2,7 @@
 //!
 //! ```no_run
 //! let opts = spirit_level::Options::new(sl_core::Date::today_utc());
-//! match spirit_level::check(std::path::Path::new("."), &opts) {
+//! match spirit_level::check(std::path::Path::new("."), &opts, &spirit_level::Silent) {
 //!     Ok((_project, report)) => println!("{} findings", report.diagnostics.len()),
 //!     Err(e) => eprintln!("{e}"),
 //! }
@@ -13,6 +13,7 @@ pub mod codes;
 use sl_analysis::Analysis;
 use sl_config::{Config, ConfigError, Env};
 use sl_core::{Date, LintMeta, Need};
+pub use sl_engine::{Event, Progress, Silent};
 use sl_engine::{Report, RunOptions};
 use sl_model::Project;
 use std::collections::{BTreeMap, BTreeSet};
@@ -253,8 +254,14 @@ pub fn tool_needs(project: &Project, config: &Config) -> ToolNeeds {
     n
 }
 
-/// Loads the project at `dir` and its configuration, and runs every enabled lint
-pub fn check(dir: &Path, opts: &Options) -> Result<(Project, Report), CheckError> {
+/// Loads the project at `dir` and its configuration, and runs every enabled lint, reporting each step to
+/// `progress`
+pub fn check(
+    dir: &Path,
+    opts: &Options,
+    progress: &dyn Progress,
+) -> Result<(Project, Report), CheckError> {
+    progress.event(Event::Loading);
     let project = Project::load(dir).map_err(CheckError::Load)?;
     let config = config(&project, opts)?;
     let all = lints();
@@ -274,6 +281,7 @@ pub fn check(dir: &Path, opts: &Options) -> Result<(Project, Report), CheckError
             elf: opts.elf.clone(),
             landing: opts.landing,
         },
+        progress,
     );
     Ok((project, report))
 }

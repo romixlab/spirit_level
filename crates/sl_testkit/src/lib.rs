@@ -320,6 +320,7 @@ fn run_project(analysis: &dyn Analysis, c: &Case<'_>) -> Result<Option<String>, 
             elf: c.elf.clone(),
             landing: expect.get("landing").and_then(toml_edit::Item::as_bool) == Some(true),
         },
+        &sl_engine::Silent,
     );
     let not_run = report.not_run.iter().find(|n| n.lint == id);
     // `not-run = "..."`: the case expects the lint not to run, with a reason that contains the text

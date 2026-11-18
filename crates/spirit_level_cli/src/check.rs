@@ -1,5 +1,6 @@
 //! `spl check`: run every lint the configuration enables, report the findings, apply the exact fixes
 
+use crate::progress::Display;
 use crate::registry::{Registered, Run};
 use crate::{DENIED, Format, NOT_RUN, lint_candidates, tier_candidates, today};
 use clap::ValueEnum;
@@ -111,7 +112,9 @@ fn check(a: Check) -> Result<Exit, String> {
         opts.elf
             .push(std::path::absolute(e).map_err(|err| format!("--elf {}: {err}", e.display()))?);
     }
-    let (project, mut report) = match spirit_level::check(&path, &opts) {
+    let json = matches!(format, Format::Json);
+    let run = |title: &str| spirit_level::check(&path, &opts, &Display::new(title, json));
+    let (project, mut report) = match run("spl check") {
         Ok(r) => r,
         Err(spirit_level::CheckError::Config(errs)) => {
             match format {
@@ -132,7 +135,7 @@ fn check(a: Check) -> Result<Exit, String> {
             eprintln!("not fixed (overlaps another fix, run again) {file}: {what}");
         }
         if !applied.applied.is_empty() {
-            report = spirit_level::check(&path, &opts)
+            report = run("spl check after the fixes")
                 .map_err(|e| e.to_string())?
                 .1;
         }

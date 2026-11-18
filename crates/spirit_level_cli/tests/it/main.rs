@@ -2,6 +2,8 @@
 
 mod cli;
 mod elf;
+#[cfg(unix)]
+mod progress;
 mod projects;
 mod tools;
 mod usage;

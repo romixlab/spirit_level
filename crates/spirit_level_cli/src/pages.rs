@@ -4,6 +4,7 @@
     reason = "fmt::Write into a String cannot fail"
 )]
 
+use crate::progress::Display;
 use crate::registry::{Registered, Run};
 use crate::{Format, today};
 use sl_lints_docs::PageReport;
@@ -51,6 +52,8 @@ impl Run for Pages {
 }
 
 fn run(a: Pages) -> Result<Exit, String> {
+    let progress = Display::new("spl pages", matches!(a.format, Format::Json));
+    progress.step("loading the project");
     let project = sl_model::Project::load(&a.path).map_err(|e| e.to_string())?;
     let mut opts = spirit_level::Options::new(today(a.today)?);
     opts.config = a.config;
@@ -58,6 +61,7 @@ fn run(a: Pages) -> Result<Exit, String> {
     let config = match spirit_level::config(&project, &opts) {
         Ok(c) => c,
         Err(spirit_level::CheckError::Config(errs)) => {
+            drop(progress);
             match a.format {
                 Format::Text => eprint!("{}", sl_report::config_errors(&errs, Paint::stderr())),
                 Format::Json => println!("{}", sl_report::config_errors_json(&errs)),
@@ -66,8 +70,10 @@ fn run(a: Pages) -> Result<Exit, String> {
         }
         Err(e) => return Err(e.to_string()),
     };
+    progress.step("measuring the pages");
     let mut pages =
         sl_lints_docs::report(&project, &config).map_err(|e| format!("[docs.site]: {e}"))?;
+    drop(progress);
     if let Some(want) = &a.page {
         let want = want.trim_start_matches("./");
         pages.retain(|p| p.page == want);

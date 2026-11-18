@@ -16,6 +16,7 @@ path = "src/main.rs"
 [dependencies]
 clap.workspace = true
 clap_complete.workspace = true
+indicatif.workspace = true
 inventory.workspace = true
 serde_json.workspace = true
 sl_book.workspace = true
@@ -41,6 +42,9 @@ vc_build.workspace = true
 [dev-dependencies]
 serde_json.workspace = true
 sl_firmware = { workspace = true, features = ["synth"] }
+
+[target.'cfg(unix)'.dev-dependencies]
+rustix.workspace = true
 
 [lints]
 workspace = true

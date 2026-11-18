@@ -2,7 +2,10 @@
 //! [`fix::apply`] applies the exact fixes of a report.
 
 pub mod fix;
+pub mod progress;
 pub mod waiver;
+
+pub use progress::{Event, Progress, Silent};
 
 use serde::Serialize;
 use sl_analysis::{Analysis, Context};
@@ -278,6 +281,35 @@ struct Needs<'r> {
 }
 
 impl Needs<'_> {
+    /// Each analysis of `analyses` with the enabled and selected lints whose needs are met, in order; the others go
+    /// to `skipped` and `not_run`
+    fn plan<'a>(
+        &self,
+        analyses: &[&'a dyn Analysis],
+        selected: &dyn Fn(&LintMeta) -> bool,
+        skipped: &mut Vec<Skipped>,
+        not_run: &mut Vec<NotRun>,
+    ) -> Vec<(&'a dyn Analysis, Vec<&'static str>)> {
+        let mut plan = Vec::new();
+        for a in analyses {
+            let mut runnable = Vec::new();
+            for m in a.lints() {
+                if !self.config.enabled(m.id) || !selected(m) {
+                    continue;
+                }
+                match self.check(m) {
+                    Verdict::Run => runnable.push(m.id),
+                    Verdict::Skip(s) => skipped.push(s),
+                    Verdict::NotRun(n) => not_run.push(n),
+                }
+            }
+            if !runnable.is_empty() {
+                plan.push((*a, runnable));
+            }
+        }
+        plan
+    }
+
     fn check(&self, m: &LintMeta) -> Verdict {
         let firmware = || -> &[String] {
             self.firmware.get_or_init(|| {
@@ -387,12 +419,46 @@ fn apply_levels(diagnostics: &mut [Diagnostic], config: &Config) {
     }
 }
 
-/// Runs every enabled lint of `analyses` on the project
+/// Allows each finding a waiver covers, with the waiver's reason; which waivers allowed something
+fn apply_waivers(diagnostics: &mut [Diagnostic], waivers: &[waiver::Waiver]) -> Vec<bool> {
+    let mut used = vec![false; waivers.len()];
+    for d in diagnostics.iter_mut().filter(|d| d.allowed.is_none()) {
+        let Some(p) = d.primary() else { continue };
+        if let Some(i) = waivers.iter().position(|w| {
+            w.file == p.file
+                && p.line >= w.covers.0
+                && p.line <= w.covers.1
+                && w.lints.contains(&d.lint)
+        }) {
+            used[i] = true;
+            d.allowed = Some(waivers[i].reason.clone());
+        }
+    }
+    used
+}
+
+/// The tools the lints of `runnable` run, each once
+fn tools_of(lints: &[&LintMeta], runnable: &[&'static str]) -> Vec<&'static str> {
+    let mut tools = Vec::new();
+    for m in lints.iter().filter(|m| runnable.contains(&m.id)) {
+        for need in m.needs {
+            if let Need::Tool(t) = need
+                && !tools.contains(t)
+            {
+                tools.push(*t);
+            }
+        }
+    }
+    tools
+}
+
+/// Runs every enabled lint of `analyses` on the project, reporting each step to `progress`
 pub fn run(
     project: &Project,
     config: &Config,
     analyses: &[&dyn Analysis],
     opts: &RunOptions,
+    progress: &dyn Progress,
 ) -> Report {
     let lints = all_lints(analyses);
     let code_of = |id: &str| {
@@ -408,6 +474,7 @@ pub fn run(
     let mut skipped = Vec::new();
     let mut ran = Vec::new();
     let mut timings = Vec::new();
+    progress.event(Event::FindingTools);
     let tools = detect_tools(
         lints
             .iter()
@@ -423,21 +490,17 @@ pub fn run(
         tools: &tools,
         firmware: std::cell::OnceCell::new(),
     };
-    for a in analyses {
-        let mut runnable = Vec::new();
-        for m in a.lints() {
-            if !config.enabled(m.id) || !selected(m) {
-                continue;
-            }
-            match needs.check(m) {
-                Verdict::Run => runnable.push(m.id),
-                Verdict::Skip(s) => skipped.push(s),
-                Verdict::NotRun(n) => not_run.push(n),
-            }
-        }
-        if runnable.is_empty() {
-            continue;
-        }
+    // each analysis with the lints it runs, known before the first one starts
+    let plan = needs.plan(analyses, &selected, &mut skipped, &mut not_run);
+    progress.event(Event::Planned {
+        analyses: plan.len(),
+    });
+    for (a, runnable) in plan {
+        let analysis_tools = tools_of(a.lints(), &runnable);
+        progress.event(Event::Started {
+            analysis: a.name(),
+            tools: &analysis_tools,
+        });
         let start = Instant::now();
         let cx = Context::new(project, config, opts.today, runnable.clone())
             .with_elf(&opts.elf)
@@ -462,30 +525,20 @@ pub fn run(
             analysis: a.name().to_owned(),
             ms: start.elapsed().as_millis(),
         });
+        progress.event(Event::Finished { analysis: a.name() });
     }
 
     apply_levels(&mut diagnostics, config);
 
     // waivers in sources, manifests and the messages of the commits read
+    progress.event(Event::Waivers);
     let resolve = |name: &str| lints.iter().find(|m| m.is(name)).map(|m| m.id);
     let (mut waivers, mut problems) =
         waiver::collect(project, &resolve, opts.today, project.version);
     let (cw, cp) = waiver::collect_commits(project, &resolve, opts.today, project.version);
     waivers.extend(cw);
     problems.extend(cp);
-    let mut used = vec![false; waivers.len()];
-    for d in diagnostics.iter_mut().filter(|d| d.allowed.is_none()) {
-        let Some(p) = d.primary() else { continue };
-        if let Some(i) = waivers.iter().position(|w| {
-            w.file == p.file
-                && p.line >= w.covers.0
-                && p.line <= w.covers.1
-                && w.lints.contains(&d.lint)
-        }) {
-            used[i] = true;
-            d.allowed = Some(waivers[i].reason.clone());
-        }
-    }
+    let used = apply_waivers(&mut diagnostics, &waivers);
     let ran_set: BTreeSet<String> = ran.iter().cloned().collect();
     let mut engine = Vec::new();
     if config.enabled("waiver-invalid") && selected(&WAIVER_INVALID) {

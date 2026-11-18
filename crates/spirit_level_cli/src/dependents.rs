@@ -1,5 +1,6 @@
 //! `spl dependents`: the repos that build on this library and the crates in them to retest
 
+use crate::progress::Display;
 use crate::registry::{Registered, Run};
 use crate::{Format, today};
 use clap_complete::engine::{ArgValueCandidates, CompletionCandidate};
@@ -64,12 +65,15 @@ impl Run for Dependents {
 }
 
 fn run(a: Dependents) -> Result<Exit, String> {
+    let progress = Display::new("spl dependents", matches!(a.format, Format::Json));
+    progress.step("loading the project");
     let project = sl_model::Project::load(&a.path).map_err(|e| e.to_string())?;
     let mut opts = spirit_level::Options::new(today(a.today)?);
     opts.config = a.config;
     let config = match spirit_level::config(&project, &opts) {
         Ok(c) => c,
         Err(spirit_level::CheckError::Config(errs)) => {
+            drop(progress);
             match a.format {
                 Format::Text => eprint!("{}", sl_report::config_errors(&errs, Paint::stderr())),
                 Format::Json => println!("{}", sl_report::config_errors_json(&errs)),
@@ -79,6 +83,7 @@ fn run(a: Dependents) -> Result<Exit, String> {
         Err(e) => return Err(e.to_string()),
     };
     let Some(table) = config.dependents else {
+        drop(progress);
         match a.format {
             Format::Text => println!(
                 "dependents are off: name the checkouts in spirit_level.toml, [dependents] scan = [\"~/git\"] (`spl dependents --help`)"
@@ -96,8 +101,10 @@ fn run(a: Dependents) -> Result<Exit, String> {
         all: a.all,
         home: home.clone(),
     };
+    progress.step("reading the dependents");
     let report = sl_dependents::find(&project, &table, &find)
         .map_err(|e| format!("{e} (--all counts every crate as changed without git)"))?;
+    drop(progress);
     match a.format {
         Format::Text => print!(
             "{}",

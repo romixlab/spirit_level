@@ -35,6 +35,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `CLI-5` Usage records are opt-in, off by default (`vc_usage` USAGE-2): `SPL_USAGE_DIR=DIR` or `SPL_USAGE=on` enables them; `spl usage` says so when off ([usage records](docs/usage.md)).
 - ✅ `CLI-6` `cli-secret-flags`: an option whose long name looks like it holds a secret (token, password, secret, api-key) and takes a value is a candidate finding, unless it points at the secret (`--*-file`, `--*-env`).
 - ✅ `CLI-7` spl's commands register themselves per module (inventory); the root command, completion and usage signals come from the registry.
+- ✅ `CLI-8` `progress-display`: `spl check`, `pages` and `dependents` draw progress on stderr at a terminal (analyses done of planned, each running analysis with its tools and time) and clear it; `--progress auto|always|never`; the engine reports typed `sl_engine::Event`s ([output](docs/output.md#progress)).
 
 ## DEP - dependents (crater-lite)
 

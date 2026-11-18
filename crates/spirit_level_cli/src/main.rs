@@ -20,6 +20,7 @@ mod explain;
 mod lints;
 mod pages;
 mod panics;
+mod progress;
 mod registry;
 mod tools;
 mod usage;
@@ -39,6 +40,8 @@ const NOT_RUN: Exit = Exit::category(3, "not_run");
 struct Cli {
     #[command(flatten)]
     color: vc_ui::ColorFlag,
+    #[command(flatten)]
+    progress: progress::ProgressFlag,
 }
 
 /// The root command with every registered command under it
@@ -93,6 +96,7 @@ fn main() -> ExitCode {
     vc_usage::record(&cli(), &matches, day);
     let cli = Cli::from_arg_matches(&matches).unwrap_or_else(|e| e.exit());
     cli.color.apply();
+    cli.progress.apply();
     // every error that ends a run is a configuration or usage error (exit 2)
     vc_ui::finish(TOOL, registry::run(&matches), |_| Some(Exit::BAD_ARGS)).into()
 }

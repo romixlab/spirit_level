@@ -32,6 +32,10 @@ vc_build = { git = "https://github.com/vhrdtech/vhrd_cli", default-features = fa
 vc_complete = { git = "https://github.com/vhrdtech/vhrd_cli", default-features = false }
 vc_ui = { git = "https://github.com/vhrdtech/vhrd_cli", default-features = false }
 vc_usage = { git = "https://github.com/vhrdtech/vhrd_cli", default-features = false }
+# spl's progress display on stderr (console, portable-atomic, unit-prefix; no C)
+indicatif = { version = "0.18", default-features = false, features = ["unicode-width"] }
+# spl's tests: a pseudo-terminal to see the progress display as a person does
+rustix = { version = "1", default-features = false, features = ["std", "pty", "termios"] }
 # spl's commands register themselves (pure Rust, no proc macro)
 inventory = { version = "0.3", default-features = false }
 # linked tool libraries (always built into spirit_level):

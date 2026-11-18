@@ -45,6 +45,7 @@ fn missing_chip_data_and_pcb_are_not_run() {
             elf: Vec::new(),
             landing: false,
         },
+        &sl_engine::Silent,
     );
     let not_run: Vec<(&str, &str)> = report
         .not_run
