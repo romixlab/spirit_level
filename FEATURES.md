@@ -147,6 +147,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `TOOL-3` `deny-licenses` without `deny.toml`: one finding asking for the file, not one per crate (cargo-deny's own default policy allows no licence).
 - ✅ `TOOL-4` full-by-default: hakari and geiger are always linked into `spl`, no cargo feature to build them in ([tools](docs/tools.md)).
 - ✅ `TOOL-5` `tool-shadowed`: an out-of-range tool with an in-range one further down PATH is named by both path and version, in the table's `shadowed by` column, the JSON `shadow` field and the lint's help; `--spec`/`--components` skip it ([tools](docs/tools.md#a-tool-shadowed-on-path)).
+- ✅ `TOOL-6` tested ranges widened for cargo-deny 0.21 and cargo-machete 0.10: both parse unchanged, so only `tools.toml` and its tests move.
 
 ## BOOK - the book
 

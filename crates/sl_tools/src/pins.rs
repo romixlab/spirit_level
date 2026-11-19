@@ -200,8 +200,8 @@ mod tests {
         );
         let deny = pin("cargo-deny").unwrap();
         assert_eq!(deny.exe, "cargo-deny");
-        assert_eq!(deny.spec().as_deref(), Some("cargo-deny@0.20.2"));
-        assert_eq!(deny.tested_text(), ">=0.20, <0.21");
+        assert_eq!(deny.spec().as_deref(), Some("cargo-deny@0.21.0"));
+        assert_eq!(deny.tested_text(), ">=0.20, <0.22");
         assert_eq!(deny.version_args, ["--version"]);
         let clippy = pin("clippy").unwrap();
         assert_eq!(clippy.kind, PinKind::Component("clippy".into()));
@@ -237,8 +237,9 @@ mod tests {
         let deny = pin("cargo-deny").unwrap();
         assert!(deny.tested_at(&Version::new(0, 20, 0)));
         assert!(deny.tested_at(&Version::new(0, 20, 9)));
+        assert!(deny.tested_at(&Version::new(0, 21, 0)));
         assert!(!deny.tested_at(&Version::new(0, 19, 4)));
-        assert!(!deny.tested_at(&Version::new(0, 21, 0)));
+        assert!(!deny.tested_at(&Version::new(0, 22, 0)));
         assert!(pin("rustfmt").unwrap().tested_at(&Version::new(0, 0, 1)));
     }
 

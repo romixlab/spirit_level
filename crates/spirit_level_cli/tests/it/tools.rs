@@ -149,13 +149,13 @@ fn table_lists_each_tool_and_exits_1_when_one_is_missing() {
     assert_eq!(
         line("cargo-deny"),
         format!(
-            "cargo-deny >=0.20, <0.21 0.20.9 in range {} - deny-bans",
+            "cargo-deny >=0.20, <0.22 0.20.9 in range {} - deny-bans",
             s.bin("cargo-deny")
         )
     );
     assert_eq!(
         line("cargo-machete"),
-        "cargo-machete >=0.9, <0.10 - missing - - machete-unused-deps"
+        "cargo-machete >=0.9, <0.11 - missing - - machete-unused-deps"
     );
     assert_eq!(
         line("typos"),
@@ -176,11 +176,11 @@ fn spec_prints_crate_at_version_and_missing_filters() {
     let o = s.spl(&["tools", "needed", "--spec"]);
     assert_eq!(
         stdout(&o),
-        "cargo-deny@0.20.2\ncargo-machete@0.9.2\ntypos-cli@1.52.2\n"
+        "cargo-deny@0.21.0\ncargo-machete@0.10.1\ntypos-cli@1.52.2\n"
     );
     assert_eq!(o.status.code(), Some(1));
     let o = s.spl(&["tools", "needed", "--spec", "--missing"]);
-    assert_eq!(stdout(&o), "cargo-machete@0.9.2\ntypos-cli@1.52.2\n");
+    assert_eq!(stdout(&o), "cargo-machete@0.10.1\ntypos-cli@1.52.2\n");
     let o = s.spl(&["tools", "needed", "--missing"]);
     assert!(!stdout(&o).contains("cargo-deny"), "{}", stdout(&o));
 }
@@ -215,7 +215,7 @@ fn json_has_full_records() {
         machete["reason"]
             .as_str()
             .unwrap()
-            .contains("cargo binstall cargo-machete@0.9.2"),
+            .contains("cargo binstall cargo-machete@0.10.1"),
         "{machete}"
     );
 }
@@ -331,7 +331,7 @@ fn check_reports_an_untested_tool_and_names_the_install_of_a_missing_one() {
         .expect("machete-unused-deps not run");
     assert_eq!(
         machete["reason"],
-        "cargo-machete is not installed: install cargo-machete@0.9.2: `cargo binstall cargo-machete@0.9.2` or `cargo install --locked cargo-machete@0.9.2`"
+        "cargo-machete is not installed: install cargo-machete@0.10.1: `cargo binstall cargo-machete@0.10.1` or `cargo install --locked cargo-machete@0.10.1`"
     );
 }
 
@@ -367,7 +367,7 @@ fn a_warn_level_lint_that_cannot_run_fails_the_run() {
     let t = all(&o);
     assert_eq!(o.status.code(), Some(3), "{t}");
     assert!(
-        t.contains("warn X0026 machete-unused-deps needs tool:cargo-machete: cargo-machete is not installed: install cargo-machete@0.9.2"),
+        t.contains("warn X0026 machete-unused-deps needs tool:cargo-machete: cargo-machete is not installed: install cargo-machete@0.10.1"),
         "{t}"
     );
     assert!(
@@ -384,7 +384,7 @@ fn allow_warn_not_run_lets_a_warn_level_lint_through() {
     let t = all(&o);
     assert_eq!(o.status.code(), Some(0), "{t}");
     assert!(
-        t.contains("cargo-machete is not installed: install cargo-machete@0.9.2"),
+        t.contains("cargo-machete is not installed: install cargo-machete@0.10.1"),
         "{t}"
     );
     assert!(

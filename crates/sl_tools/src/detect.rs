@@ -255,7 +255,7 @@ mod tests {
         assert_eq!(machete.state(), State::Missing);
         assert_eq!(
             machete.missing_reason().unwrap(),
-            "cargo-machete is not installed: install cargo-machete@0.9.2: `cargo binstall cargo-machete@0.9.2` or `cargo install --locked cargo-machete@0.9.2`"
+            "cargo-machete is not installed: install cargo-machete@0.10.1: `cargo binstall cargo-machete@0.10.1` or `cargo install --locked cargo-machete@0.10.1`"
         );
         assert_eq!(
             d("clippy").missing_reason().unwrap(),
