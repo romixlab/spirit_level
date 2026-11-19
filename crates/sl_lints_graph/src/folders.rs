@@ -13,9 +13,11 @@ pub(crate) fn crate_folder_layer(cx: &Context<'_>, p: &Project, map: &Map) {
     let params = cx.params("crate-folder-layer");
     let root = params.str("root");
     let prefix = format!("{}/", root.trim_end_matches('/'));
+    // the layout is judged on the crates that are checked: an excluded crate's folders say nothing of it
     let placed: Vec<_> = p
         .packages
         .iter()
+        .filter(|pkg| !cx.excluded(&pkg.name))
         .filter_map(|pkg| {
             let rest = pkg.dir.strip_prefix(&prefix)?;
             let mut folders: Vec<&str> = rest.split('/').collect();

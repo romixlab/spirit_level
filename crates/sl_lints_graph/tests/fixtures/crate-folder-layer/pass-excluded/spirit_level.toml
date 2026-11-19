@@ -1,0 +1,18 @@
+[lints.crate-folder-layer]
+level = "deny"
+reason = "fixture"
+
+[map.layers.utils]
+allow = ["utils"]
+
+[map.layers.engines]
+allow = ["utils", "engines"]
+
+[map.crates]
+a = { layer = "utils" }
+b = { layer = "engines" }
+
+[[exclude]]
+crates = ["old", "x"]
+reason = "fixture: frozen, nested as in its old repo"
+expires = "2027-06-30"
