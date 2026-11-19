@@ -27,6 +27,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `ENG-10` Commit checks: the branch's commits read once per base (`sl_model::git`), `Spirit-Level: allow(...)` trailers as commit waivers, `--landing` runs ([commits](docs/commits.md)).
 - ✅ `ENG-11` `skip-without-firmware`: lints that read the linked ELF are skipped, never failed, when no firmware binary they are enabled on exists ([output](docs/output.md#skipped-lints)).
 - ✅ `ENG-12` `commits-after`: a commit lint's `after` names a commit or tag; only the commits after it are checked ([commits](docs/commits.md#which-commits)).
+- ✅ `ENG-13` A waiver on its own line covers the next item from its first doc comment or attribute, where findings are reported ([waivers](docs/waivers.md)).
 
 ## CLI - the command
 

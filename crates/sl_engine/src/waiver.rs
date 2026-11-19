@@ -5,9 +5,9 @@
 //! - a commit message: a `Spirit-Level: allow(lint) the reason` trailer, covering that commit
 //! - optionally an expiry right after the list: `allow(lint) expires=2027-01-31 the reason` (or `expires=v0.5.0`)
 //!
-//! At the end of a line a waiver covers that line. On a line of its own it covers the next item: the first line
-//! after it that is not blank, a comment or an attribute, and in Rust the whole item, field or statement that
-//! starts there; in TOML a table header covers its table.
+//! At the end of a line a waiver covers that line. On a line of its own it covers the next item: in Rust the whole
+//! item, field or statement that follows, from its first doc comment or attribute (where findings are reported,
+//! above or below the waiver) to its end; in TOML a table header covers its table.
 
 use sl_core::{Date, Expiry, Version};
 use sl_model::Project;
@@ -282,22 +282,24 @@ fn coverage(
                 })
                 .last()
                 .map_or(line, |k| k as u32 + 1);
-            let end = if rust {
-                extents
-                    .iter()
-                    .filter(|(s, _)| *s >= top && *s <= n)
-                    .map(|(_, e)| *e)
-                    .max()
-                    .unwrap_or(n)
-                    .max(n)
+            // an item is reported at its first doc comment or attribute, so the cover starts there
+            let (start, end) = if rust {
+                let inside = || extents.iter().filter(|(s, _)| *s >= top && *s <= n);
+                (
+                    inside().map(|(s, _)| *s).min().unwrap_or(n).min(n),
+                    inside().map(|(_, e)| *e).max().unwrap_or(n).max(n),
+                )
             } else if lines[j].trim().starts_with('[') {
-                (j + 1..lines.len())
-                    .find(|&k| lines[k].trim().starts_with('['))
-                    .map_or(lines.len() as u32, |k| k as u32)
+                (
+                    n,
+                    (j + 1..lines.len())
+                        .find(|&k| lines[k].trim().starts_with('['))
+                        .map_or(lines.len() as u32, |k| k as u32),
+                )
             } else {
-                n
+                (n, n)
             };
-            (n, end)
+            (start, end)
         }
     }
 }
@@ -402,7 +404,7 @@ mod tests {
             "// spirit-level: allow(god-function) parser state machine, split tracked\n#[inline]\nfn f() {\n    let x = 1;\n}\nstatic A: u8 = 0; // spirit-level: allow(x-y) set once\n",
         );
         assert!(p.is_empty(), "{p:?}");
-        assert_eq!(w[0].covers, (3, 5));
+        assert_eq!(w[0].covers, (2, 5));
         assert_eq!(w[0].lints, vec!["god-function"]);
         assert_eq!(w[1].covers, (6, 6));
         assert_eq!(w[1].reason, "set once");
@@ -414,7 +416,25 @@ mod tests {
             "a.rs",
             "/// Doc\n// spirit-level: allow(x) because\nfn f() {\n    g();\n}\n",
         );
-        assert_eq!(w[0].covers, (3, 5));
+        assert_eq!(w[0].covers, (1, 5));
+    }
+
+    /// A waiver above an item's docs, attributes, both or neither covers the item from its first line to its end
+    #[test]
+    fn waiver_above_docs_and_attributes_covers_the_item() {
+        let w = "// spirit-level: allow(x) because\n";
+        let items = [
+            "/// Doc\nfn f() {\n    g();\n}\n",
+            "#[inline]\nfn f() {\n    g();\n}\n",
+            "/// Doc\n#[inline]\nfn f() {\n    g();\n}\n",
+            "fn f() {\n    g();\n}\n",
+        ];
+        for item in items {
+            let (found, p) = run("a.rs", &format!("{w}{item}"));
+            assert!(p.is_empty(), "{p:?}");
+            let last = item.lines().count() as u32 + 1;
+            assert_eq!(found[0].covers, (2, last), "{item}");
+        }
     }
 
     #[test]
