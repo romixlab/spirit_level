@@ -20,7 +20,7 @@ confidence = "estimate"      # optional: estimate or candidate; absent means cer
 
 ## Cases with a history
 
-A case with a `git.toml` runs on a temporary copy made into a git repository: every file but those in `untracked` is committed on `main`, then each `[[commit]]` is a commit on a branch `work` with its `message` (`{sha:N}` is the 12-hex hash of commit N, 0 the initial one) and the files of its `files` table (path and text) written and its `remove` list deleted (neither: an empty commit). Lints that read the history or the tracked files test this way.
+A case with a `git.toml` runs on a temporary copy made into a git repository: every file but those in `untracked` is committed on `main`, then each `[[commit]]` is a commit on a branch `work` with its `message` (`{sha:N}` is the 12-hex hash of commit N, 0 the initial one) and the files of its `files` table (path and text) written and its `remove` list deleted (neither: an empty commit); its `tag`, when given, tags it. Lints that read the history or the tracked files test this way.
 
 ```toml
 untracked = ["scratch.txt"]
