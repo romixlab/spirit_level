@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.5.5] - 2026-11-19
+
 ### Added
 
 - `[[exclude]]` leaves crates or paths out of every lint, with a reason and a required expiry (CFG-8).
