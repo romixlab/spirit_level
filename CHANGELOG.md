@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.5.8] - 2026-11-19
+
 ### Fixed
 
 - A waiver above an item's docs or attributes covers the item (ENG-13).
