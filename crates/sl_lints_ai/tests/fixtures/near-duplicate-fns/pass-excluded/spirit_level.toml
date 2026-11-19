@@ -1,0 +1,8 @@
+[lints.near-duplicate-fns]
+level = "deny"
+reason = "fixture"
+
+[[exclude]]
+crates = ["a_old"]
+reason = "fixture: the old copy, deleted next"
+expires = "2027-06-30"

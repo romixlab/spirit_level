@@ -101,7 +101,8 @@ pub(crate) fn run(cx: &Context<'_>) {
     let (min_sim, min_tokens) = (pf.float("min-similarity"), pf.int("min-tokens") as usize);
     let mut fns: Vec<Func> = Vec::new();
     let p = cx.project;
-    for pkg in &p.packages {
+    // excluded crates take no part: a pair with an excluded copy would land on the checked one
+    for pkg in p.packages.iter().filter(|k| !cx.excluded(&k.name)) {
         for src in p.sources(pkg) {
             if src.kind.is_test_like() || p.is_test_file(pkg, src) {
                 continue;

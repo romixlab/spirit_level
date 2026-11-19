@@ -1,0 +1,21 @@
+[lints.workspace-inheritance]
+level = "deny"
+reason = "fixture"
+
+[map.layers.utils]
+allow = ["utils"]
+licence = "MIT OR Apache-2.0"
+
+[map.layers.app]
+allow = ["utils", "app"]
+licence = "AGPL-3.0-only"
+
+[map.crates]
+fx_ids = { layer = "utils" }
+fx_cli = { layer = "app" }
+fx_fonts = { layer = "app", licence = "MIT OR Apache-2.0" }
+
+[[exclude]]
+crates = ["fx_old"]
+reason = "fixture: frozen, outside the map"
+expires = "2027-06-30"

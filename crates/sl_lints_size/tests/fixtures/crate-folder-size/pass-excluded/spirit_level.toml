@@ -1,0 +1,9 @@
+[lints.crate-folder-size]
+level = "deny"
+reason = "fixture"
+max-flat = 3
+
+[[exclude]]
+crates = ["d"]
+reason = "fixture: frozen"
+expires = "2027-06-30"

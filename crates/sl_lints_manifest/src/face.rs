@@ -213,7 +213,11 @@ fn wanted(cx: &Context<'_>, site_url: Option<&str>) -> Vec<Want> {
             must_show: Some(image),
         });
     }
-    for pkg in p.packages.iter().filter(|pkg| pkg.publish) {
+    for pkg in p
+        .packages
+        .iter()
+        .filter(|pkg| pkg.publish && !cx.excluded(&pkg.name))
+    {
         let n = &pkg.name;
         out.push(Want {
             item: format!("badge:crates.io:{n}"),

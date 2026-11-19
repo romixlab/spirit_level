@@ -27,7 +27,13 @@ pub(crate) fn run(cx: &Context<'_>) {
     for key in keys {
         let by_map = |pkg: &Package| key == "license" && map_licence(pkg).is_some();
         if root.get(&["workspace", "package", key]).is_none() {
-            if !p.packages.is_empty() && p.packages.iter().all(by_map) {
+            // the members that are checked decide whether the root needs the key
+            let mut checked = p
+                .packages
+                .iter()
+                .filter(|k| !cx.excluded(&k.name))
+                .peekable();
+            if checked.peek().is_some() && checked.all(by_map) {
                 continue;
             }
             cx.emit(

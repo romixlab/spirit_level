@@ -163,7 +163,11 @@ impl Analysis for Size {
 fn folder_size(cx: &Context<'_>) {
     let p = cx.project;
     let mut folders: BTreeMap<&str, u32> = BTreeMap::new();
-    for pkg in p.packages.iter().filter(|pkg| !pkg.dir.is_empty()) {
+    for pkg in p
+        .packages
+        .iter()
+        .filter(|pkg| !pkg.dir.is_empty() && !cx.excluded(&pkg.name))
+    {
         let parent = pkg.dir.rsplit_once('/').map_or("", |(parent, _)| parent);
         *folders.entry(parent).or_default() += 1;
     }
