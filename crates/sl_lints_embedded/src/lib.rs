@@ -87,7 +87,11 @@ impl Analysis for Embedded {
 
     fn run(&self, cx: &Context<'_>) {
         let mut seen = std::collections::BTreeSet::new();
+        // an excluded firmware is not read: a finding it shares with a checked one would be kept under its name
         for mut fw in Firmware::load_all(cx.project, cx.elf()) {
+            if cx.excluded(&fw.name) {
+                continue;
+            }
             fw.classes = cx.config.embedded.classes.clone();
             for n in &fw.notes {
                 cx.emit(

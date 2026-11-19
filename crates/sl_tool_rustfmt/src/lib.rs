@@ -33,7 +33,17 @@ impl Analysis for Rustfmt {
             cx.not_run_all("tool:rustfmt", &sl_tools::missing_reason("rustfmt"));
             return;
         };
-        let args = ["fmt", "--all", "--check", "--message-format", "short"];
+        // with members excluded, the checked ones by name: code that does not parse in an excluded crate stops
+        // the run otherwise
+        let mut args = vec!["fmt"];
+        if cx.excluded_members().is_empty() {
+            args.push("--all");
+        } else {
+            for pkg in cx.project.packages.iter().filter(|k| !cx.excluded(&k.name)) {
+                args.extend(["-p", pkg.name.as_str()]);
+            }
+        }
+        args.extend(["--check", "--message-format", "short"]);
         let out = match sl_tools::run_subcommand(&exe, &args, root, &[]) {
             Ok(o) => o,
             Err(e) => {

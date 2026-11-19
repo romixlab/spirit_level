@@ -167,6 +167,26 @@ impl<'a> Context<'a> {
             .collect()
     }
 
+    /// The packages (name, version) the checked members reach through normal and build edges and their own dev
+    /// edges, when an `[[exclude]]` entry leaves a member out: a finding about a dependency outside it is about
+    /// excluded code only. None when nothing is excluded, or the graph does not resolve
+    pub fn checked_packages(&self) -> Option<std::collections::BTreeSet<(&'a str, &'a str)>> {
+        if self.excluded_members().is_empty() {
+            return None;
+        }
+        let res = self.project.resolve().ok()?;
+        let mut out = std::collections::BTreeSet::new();
+        for (i, rp) in res.packages.iter().enumerate() {
+            if rp.member && !self.excluded(&rp.name) {
+                for j in res.closure(i, true) {
+                    let q = &res.packages[j];
+                    out.insert((q.name.as_str(), q.version.as_str()));
+                }
+            }
+        }
+        Some(out)
+    }
+
     /// `--exclude NAME` for each excluded member when the cargo arguments `args` run over the whole workspace
     /// (`--workspace`, `--all`); none otherwise, as cargo refuses `--exclude` without them
     pub fn cargo_excludes(&self, args: &[String]) -> Vec<String> {

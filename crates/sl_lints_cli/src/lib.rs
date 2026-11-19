@@ -107,7 +107,7 @@ impl Analysis for Cli {
             .project
             .packages
             .iter()
-            .filter(|p| is_cli(cx, p))
+            .filter(|p| is_cli(cx, p) && !cx.excluded(&p.name))
             .collect();
         if clis.is_empty() {
             return;

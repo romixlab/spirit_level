@@ -78,14 +78,20 @@ expires = "v0.6.0"
 - **The report** has a line per entry, before the summary: what it leaves out, its expiry with the days left, the reason and how many findings it left out. The summary counts the excluded crates and path patterns; the JSON report lists the entries under `excluded`. `spl config` lists them too.
 - Only a project file or a shared file sets them, never a tier.
 
-The excluded code stays in the workspace: it builds with it, and other crates may still use it. The lints that look at the whole workspace treat an excluded crate this way:
+The excluded code stays in the workspace: it builds with it, and other crates may still use it. A lint that looks at the whole workspace computes on the crates that are checked: an excluded crate changes no count, no decision about the workspace and no line of a root file. In detail:
 
 | Lint | An excluded crate |
 |---|---|
-| [duplicate-versions](lints/M0002.md), [no-sys-crates](lints/M0004.md), [geiger-unsafe-deps](lints/X0023.md) | its dependencies count only where a checked crate reaches them too |
+| [duplicate-versions](lints/M0002.md), [no-sys-crates](lints/M0004.md), [geiger-unsafe-deps](lints/X0023.md), `audit-*` (cargo-audit) | its dependencies count only where a checked crate reaches them too |
 | `deny-*` (cargo-deny) | left out of the graph with `--exclude`, with what only it pulls in; a deny.toml entry only it uses (a `skip`, a wrapper, an allowed source) is not reported unused |
+| [default-features-off](lints/M0001.md), [git-dependency-pins](lints/M0003.md), [path-outside-workspace](lints/M0005.md) | a `[workspace.dependencies]` line counts only through the checked crates that inherit it |
+| [workspace-inheritance](lints/M0023.md), [readme-badges](lints/M0034.md) | not asked for: the root needs a key only for the checked crates, the README a badge only for a checked published crate |
+| [crate-folder-layer](lints/G0011.md), [crate-folder-size](lints/S0006.md) | its folder neither makes the workspace layered nor counts toward a folder's crates |
+| [near-duplicate-fns](lints/A0008.md), [near-duplicate-modules](lints/A0009.md) | not compared: a copy of its code in a checked crate is not a finding |
 | `clippy-*`, [cargo-doc](lints/X0005.md), `udeps-*` | not built: `--exclude` beside `--workspace` (a project's `args` without `--workspace` name their packages themselves) |
-| [cargo-msrv](lints/X0006.md), [cargo-no-std](lints/X0007.md), [cargo-wasm](lints/X0008.md) | not built |
+| [cargo-msrv](lints/X0006.md), [cargo-no-std](lints/X0007.md), [cargo-wasm](lints/X0008.md), `cli-*`, [semver-checks-breaking](lints/X0028.md) | not built or run |
+| [rustfmt-unformatted](lints/X0027.md) | not formatted: the checked crates are named with `-p` |
+| the embedded lints | its firmware is not read |
 | [map-complete](lints/G0008.md) | needs no map entry; one it has stays valid |
 | [layer-edges](lints/G0007.md), [forbidden-closure](lints/G0006.md) and the other map lints | an edge from a checked crate to it is checked; an edge from it is not |
 | [crate-cycles](lints/G0003.md) | a cycle through a checked crate is reported, at that crate |

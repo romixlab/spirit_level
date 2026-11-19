@@ -62,7 +62,15 @@ impl Analysis for Audit {
             cx.not_run_all("run:cargo-audit", &format!("cargo audit {}", out.failure()));
             return;
         };
+        // a crate only excluded members reach is not reported
+        let checked = cx.checked_packages();
         for f in found {
+            if checked
+                .as_ref()
+                .is_some_and(|c| !c.contains(&(f.package.as_str(), f.version.as_str())))
+            {
+                continue;
+            }
             let help = if f.patched.is_empty() {
                 "no patched version: replace the crate, or ignore the advisory in .cargo/audit.toml with a reason".to_owned()
             } else {

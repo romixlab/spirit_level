@@ -1,0 +1,8 @@
+[lints.rustfmt-unformatted]
+level = "deny"
+reason = "fixture"
+
+[[exclude]]
+crates = ["old"]
+reason = "fixture: does not parse"
+expires = "2027-06-30"

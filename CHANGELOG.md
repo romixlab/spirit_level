@@ -11,6 +11,7 @@
 - `deny-*`: a deny.toml entry only excluded crates use no longer fails as not encountered (CFG-8).
 - `default-features-off`: a member's `default-features = true` is reported at its line; excluded members' uses count nowhere (CFG-8).
 - `crate-folder-layer`: excluded crates in nested folders no longer make a flat workspace count as layered (CFG-8).
+- Workspace-level lints compute on checked crates: inheritance, badges, folder sizes, near-duplicates, audit, CLI, semver, firmware, rustfmt (CFG-8).
 - The resolved graph leaves out optional dependencies that only a weak feature (`dep?/feat`) names (MAN-14).
 
 ### Removed

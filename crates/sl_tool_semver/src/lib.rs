@@ -68,7 +68,7 @@ impl Analysis for Semver {
         let base_root =
             (!base_root.is_empty()).then(|| p.root.join(&base_root).display().to_string());
         for krate in crates {
-            let Some(pkg) = p.package(&krate) else {
+            let Some(pkg) = p.package(&krate).filter(|_| !cx.excluded(&krate)) else {
                 continue;
             };
             let mut args = vec!["semver-checks", "-p", krate.as_str(), "--color", "never"];
