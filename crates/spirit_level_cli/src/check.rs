@@ -2,7 +2,7 @@
 
 use crate::progress::Display;
 use crate::registry::{Registered, Run};
-use crate::{DENIED, Format, NOT_RUN, lint_candidates, tier_candidates, today};
+use crate::{DENIED, Format, NOT_RUN, ladder_candidates, lint_candidates, tier_candidates, today};
 use clap::ValueEnum;
 use clap_complete::engine::ArgValueCandidates;
 use std::path::PathBuf;
@@ -23,7 +23,7 @@ enum GroupByArg {
 #[command(
     name = "check",
     display_order = 0,
-    after_help = "Examples:\n  spl check\n  spl check --all --group-by crate\n  spl check --tier small --only cli ../other_repo\n  spl check --format json --fix\n  spl check --allow-warn-not-run\n\nExit codes: 0 clean, 1 a denied finding, 2 a configuration or usage error, 3 an enabled lint could not run (a warn-level one not with --allow-warn-not-run)"
+    after_help = "Examples:\n  spl check\n  spl check --all --group-by crate\n  spl check --tier small --only cli ../other_repo\n  spl check --next\n  spl check --at big --only toolchain-pinned\n  spl check --format json --fix\n  spl check --allow-warn-not-run\n\nExit codes: 0 clean, 1 a denied finding, 2 a configuration or usage error, 3 an enabled lint could not run (a warn-level one not with --allow-warn-not-run)"
 )]
 pub(crate) struct Check {
     /// The project directory (cargo's search for the workspace root starts here)
@@ -35,6 +35,13 @@ pub(crate) struct Check {
     /// Use shipped tiers instead of a configuration file (repeat to combine)
     #[arg(long, add = ArgValueCandidates::new(tier_candidates))]
     tier: Vec<String>,
+    /// Check at this ladder tier instead of the project's own, keeping its overrides and exceptions; a summary
+    /// per lint comes first, and nothing is written to `spirit_level.toml`
+    #[arg(long, value_name = "TIER", conflicts_with_all = ["tier", "next"], add = ArgValueCandidates::new(ladder_candidates))]
+    at: Option<String>,
+    /// Check at the ladder tier after the project's own (`--at` the next one)
+    #[arg(long, conflicts_with = "tier")]
+    next: bool,
     /// Only this lint or category (repeat for more)
     #[arg(long, add = ArgValueCandidates::new(lint_candidates))]
     only: Vec<String>,
@@ -87,6 +94,8 @@ fn check(a: Check) -> Result<Exit, String> {
         path,
         config,
         tier,
+        at,
+        next,
         only,
         elf,
         format,
@@ -104,6 +113,14 @@ fn check(a: Check) -> Result<Exit, String> {
     opts.landing = landing;
     opts.config = config;
     opts.tiers = tier;
+    opts.at = at
+        .map(spirit_level::At::Tier)
+        .or_else(|| next.then_some(spirit_level::At::Next));
+    let shift = opts
+        .at
+        .as_ref()
+        .map(|at| own_levels(&path, &opts, at))
+        .transpose()?;
     opts.only = only;
     for e in &elf {
         if !e.is_file() {
@@ -140,6 +157,18 @@ fn check(a: Check) -> Result<Exit, String> {
                 .1;
         }
     }
+    if let (Some((s, own)), Format::Text) = (&shift, format) {
+        print!(
+            "{}",
+            sl_report::shift_summary(
+                &report,
+                s.from,
+                s.to,
+                &|id| own.lint(id).level,
+                Paint::stdout()
+            )
+        );
+    }
     match format {
         Format::Text => print!(
             "{}",
@@ -171,4 +200,20 @@ fn check(a: Check) -> Result<Exit, String> {
     } else {
         Exit::SUCCESS
     })
+}
+
+/// Where `--at` moves the project, and its configuration at its own tier
+fn own_levels(
+    path: &std::path::Path,
+    opts: &spirit_level::Options,
+    at: &spirit_level::At,
+) -> Result<(spirit_level::Shift, sl_config::Config), String> {
+    let project = sl_model::Project::load(path).map_err(|e| e.to_string())?;
+    let own_opts = spirit_level::Options {
+        at: None,
+        ..opts.clone()
+    };
+    let own = spirit_level::config(&project, &own_opts).map_err(|e| e.to_string())?;
+    let shift = spirit_level::shift(&own.extends, at).map_err(|e| e.to_string())?;
+    Ok((shift, own))
 }

@@ -39,6 +39,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `CLI-6` `cli-secret-flags`: an option whose long name looks like it holds a secret (token, password, secret, api-key) and takes a value is a candidate finding, unless it points at the secret (`--*-file`, `--*-env`).
 - ✅ `CLI-7` spl's commands register themselves per module (inventory); the root command, completion and usage signals come from the registry.
 - ✅ `CLI-8` `progress-display`: `spl check`, `pages` and `dependents` draw progress on stderr at a terminal (analyses done of planned, each running analysis with its tools and time) and clear it; `--progress auto|always|never`; the engine reports typed `sl_engine::Event`s ([output](docs/output.md#progress)).
+- ✅ `CLI-9` Tier ladder: `spl tiers` marks the tiers a project extends; `spl check --next` and `--at TIER` check one rung away with the project's overrides, a per-lint summary first.
 
 ## DEP - dependents (crater-lite)
 

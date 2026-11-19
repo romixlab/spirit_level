@@ -78,6 +78,13 @@ fn tier_candidates() -> Vec<CompletionCandidate> {
         .collect()
 }
 
+fn ladder_candidates() -> Vec<CompletionCandidate> {
+    tier_candidates()
+        .into_iter()
+        .filter(|c| spirit_level::LADDER.iter().any(|l| c.get_value() == *l))
+        .collect()
+}
+
 fn today(s: Option<String>) -> Result<Date, String> {
     match s {
         None => Ok(Date::today_utc()),

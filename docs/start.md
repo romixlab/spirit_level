@@ -20,8 +20,13 @@ It installs the `spl` command. Shell completion: `source <(COMPLETE=bash spl)` i
 ```sh
 spl init --tier small-workspace   # writes spirit_level.toml
 spl check                         # runs it
-spl check --tier big              # tries another tier without editing the file
+spl tiers                         # the ladder and add-ons, this project's marked
+spl check --next                  # a look at the next tier up, with this project's overrides
+spl check --at big                # the same at any ladder tier; nothing is written
+spl check --tier big              # the shipped tier alone, without the project's file
 ```
+
+`--next` and `--at` start with one line per lint that has findings: how many, its level there, and its level at the project's own tier (`off, new` or `warn, raised`). The findings follow.
 
 ## Read a finding
 

@@ -5,10 +5,12 @@
 ### Added
 
 - `toolchain-overrides-pinned` (M0036): justfiles and CI name the pinned toolchain, never `+nightly` or `+stable` (MAN-13).
+- `spl check --next` and `--at TIER`: check one ladder tier away, keeping the project's overrides; summary per lint first (CLI-9).
 
 ### Changed
 
 - `toolchain-pinned` (M0019) on in every tier: every toolchain file pins 1.100.0 or nightly-2026-11-19; `--fix` (MAN-13).
+- `spl tiers` shows the ladder, then the add-ons, marking the tiers the project extends (CLI-9).
 
 ## [0.5.9] - 2026-11-20
 

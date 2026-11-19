@@ -344,7 +344,7 @@ fn clippy_set(s: &mut String, c: &Config) {
 
 fn tiers_index() -> String {
     let mut s = String::from(
-        "# Tiers\n\nA tier is a TOML file of lints shipped with spirit_level. Each size tier extends the one before it; a project picks one with `extends` and adds its own settings on top. Tiers that stand beside the size tiers (like `embedded` and `ai`) are combined with one: `extends = [\"small\", \"embedded\"]`.\n\n| Tier | What it is for |\n|---|---|\n",
+        "# Tiers\n\nA tier is a TOML file of lints shipped with spirit_level. Each size tier extends the one before it; a project picks one with `extends` and adds its own settings on top. Tiers that stand beside the size tiers (like `embedded` and `ai`) are combined with one: `extends = [\"small\", \"embedded\"]`.\n\n`spl tiers` shows the ladder and marks the tiers a project extends. `spl check --next` checks a project at the next size tier, `spl check --at TIER` at any, both with the project's own overrides and exceptions and without writing anything.\n\n| Tier | What it is for |\n|---|---|\n",
     );
     for (n, t) in spirit_level::TIERS {
         let _ = writeln!(

@@ -10,11 +10,13 @@ mod ansi;
 mod dependents;
 mod excerpt;
 mod html;
+mod shift;
 mod svg;
 mod text;
 
 pub use dependents::{dependents, dependents_json};
 pub use html::html;
+pub use shift::shift_summary;
 pub use svg::svg;
 
 pub use text::{GroupBy, TextOptions, text};

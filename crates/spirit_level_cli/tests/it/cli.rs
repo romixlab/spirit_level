@@ -250,6 +250,42 @@ fn tiers_without_a_file_and_only() {
 }
 
 #[test]
+fn next_and_at_keep_the_overrides_and_write_nothing() {
+    let config = "extends = [\"small-workspace\", \"ai\"]\n\n[lints.publish-false]\nlevel = \"allow\"\nreason = \"published later\"\n";
+    let p = workspace(config);
+    let o = run(
+        &p.0,
+        &[
+            "check",
+            "--next",
+            "--only",
+            "rust-version-set",
+            "--only",
+            "publish-false",
+        ],
+    );
+    let t = text(&o);
+    assert!(t.starts_with("at small-workspace -> medium"), "{t}");
+    assert!(t.contains("rust-version-set  off, new"), "{t}");
+    assert!(!t.contains("publish-false"), "the override holds: {t}");
+    assert_eq!(p.read("spirit_level.toml"), config);
+    let o = run(
+        &p.0,
+        &["check", "--at", "small", "--only", "rust-version-set"],
+    );
+    assert!(text(&o).contains("no finding at small"), "{}", text(&o));
+    let o = run(&p.0, &["check", "--at", "ai"]);
+    assert_eq!(o.status.code(), Some(2), "{}", text(&o));
+    assert!(text(&o).contains("not a ladder tier"), "{}", text(&o));
+    let o = run(&p.0, &["tiers"]);
+    let t = text(&o);
+    assert!(t.lines().any(|l| l.starts_with("* small-workspace")), "{t}");
+    assert!(t.lines().any(|l| l.starts_with("* ai")), "{t}");
+    assert!(t.lines().any(|l| l.starts_with("  medium")), "{t}");
+    assert!(t.contains("checks it at medium"), "{t}");
+}
+
+#[test]
 fn explain_lints_tiers_init() {
     let p = Scratch::new(
         "init",

@@ -46,6 +46,72 @@ pub static TIERS: &[(&str, &str)] = &[
     ),
 ];
 
+/// The size tiers, small to big, each extending the one before; the other shipped tiers stand beside one of them
+pub static LADDER: &[&str] = &["small", "small-workspace", "medium", "big"];
+
+/// The ladder tier a list of extended names holds (the last one named), if any
+pub fn ladder_tier(extends: &[String]) -> Option<&'static str> {
+    extends
+        .iter()
+        .rev()
+        .find_map(|e| LADDER.iter().find(|l| **l == e.as_str()).copied())
+}
+
+/// A ladder tier to check at instead of the project's own
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum At {
+    /// This tier
+    Tier(String),
+    /// The ladder tier after the project's own
+    Next,
+}
+
+/// Where `--at` moves a project: its ladder tier, the tier it checks at, and its `extends` with the one replaced
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Shift {
+    /// The ladder tier the project extends
+    pub from: &'static str,
+    /// The ladder tier the check runs at
+    pub to: &'static str,
+    /// The project's `extends`, the ladder tier replaced
+    pub extends: Vec<String>,
+}
+
+/// Moves a project's top-level `extends` to `at`; an error when it names no ladder tier, `at` is not one, or
+/// there is no tier after the last
+pub fn shift(extends: &[String], at: &At) -> Result<Shift, CheckError> {
+    let from = ladder_tier(extends).ok_or_else(|| {
+        CheckError::At(format!(
+            "the configuration extends no ladder tier ({}) directly: `extends` names one of {}",
+            extends.join(", "),
+            LADDER.join(", ")
+        ))
+    })?;
+    let to = match at {
+        At::Tier(t) => LADDER
+            .iter()
+            .find(|l| **l == t.as_str())
+            .copied()
+            .ok_or_else(|| {
+                CheckError::At(format!(
+                    "--at {t}: not a ladder tier (one of {})",
+                    LADDER.join(", ")
+                ))
+            })?,
+        At::Next => LADDER
+            .iter()
+            .skip_while(|l| **l != from)
+            .nth(1)
+            .copied()
+            .ok_or_else(|| CheckError::At(format!("--next: {from} is the top of the ladder")))?,
+    };
+    let extends = extends
+        .iter()
+        .map(|e| if e == from { to.to_owned() } else { e.clone() })
+        .collect();
+    Ok(Shift { from, to, extends })
+}
+
 /// The text of a shipped tier
 pub fn tier(name: &str) -> Option<&'static str> {
     TIERS.iter().find(|(n, _)| *n == name).map(|(_, t)| *t)
@@ -121,6 +187,8 @@ pub struct Options {
     pub elf: Vec<PathBuf>,
     /// Whether this run lands a branch
     pub landing: bool,
+    /// A ladder tier to check at instead of the project's own, keeping its overrides and exceptions
+    pub at: Option<At>,
 }
 
 impl Options {
@@ -133,6 +201,7 @@ impl Options {
             only: Vec::new(),
             elf: Vec::new(),
             landing: false,
+            at: None,
         }
     }
 }
@@ -146,6 +215,8 @@ pub enum CheckError {
     Config(Vec<ConfigError>),
     /// `--only` names no lint or category
     UnknownOnly(String),
+    /// `--at` or `--next` cannot move the project (the message says why)
+    At(String),
 }
 
 impl fmt::Display for CheckError {
@@ -159,6 +230,7 @@ impl fmt::Display for CheckError {
                 Ok(())
             }
             Self::UnknownOnly(o) => write!(f, "--only {o}: no lint or category of that name"),
+            Self::At(m) => f.write_str(m),
         }
     }
 }
@@ -174,7 +246,17 @@ pub fn config(project: &Project, opts: &Options) -> Result<Config, CheckError> {
         today: opts.today,
         version: project.version,
     };
-    let config = if opts.tiers.is_empty() {
+    let config = if let Some(at) = &opts.at {
+        let own = Config::load(&project.root, opts.config.as_deref(), &env)
+            .map_err(CheckError::Config)?;
+        let s = shift(&own.extends, at)?;
+        Config::load_extending(
+            &project.root,
+            opts.config.as_deref(),
+            Some(&s.extends),
+            &env,
+        )
+    } else if opts.tiers.is_empty() {
         Config::load(&project.root, opts.config.as_deref(), &env)
     } else {
         let t: Vec<&str> = opts.tiers.iter().map(String::as_str).collect();
@@ -324,6 +406,47 @@ pub fn check(
 )]
 mod tests {
     use super::*;
+
+    #[test]
+    fn each_ladder_tier_extends_the_one_before() {
+        for w in LADDER.windows(2) {
+            let text = tier(w[1]).expect("a ladder tier is shipped");
+            assert!(
+                text.lines()
+                    .any(|l| l.trim() == format!("extends = {:?}", w[0])),
+                "{} extends {}",
+                w[1],
+                w[0]
+            );
+        }
+        assert_eq!(
+            &TIERS.iter().map(|(n, _)| *n).collect::<Vec<_>>()[..LADDER.len()],
+            LADDER
+        );
+    }
+
+    #[test]
+    fn shift_replaces_the_ladder_tier_only() {
+        let ext = |v: &[&str]| v.iter().map(|s| (*s).to_owned()).collect::<Vec<_>>();
+        let s = shift(&ext(&["medium", "ai", "egui"]), &At::Next).expect("medium has a next");
+        assert_eq!((s.from, s.to), ("medium", "big"));
+        assert_eq!(s.extends, ext(&["big", "ai", "egui"]));
+        let s = shift(&ext(&["big", "ai"]), &At::Tier("small".to_owned()))
+            .expect("small is a ladder tier");
+        assert_eq!(s.extends, ext(&["small", "ai"]));
+        for (extends, at, err) in [
+            (ext(&["big"]), At::Next, "top of the ladder"),
+            (ext(&["ai"]), At::Next, "extends no ladder tier"),
+            (
+                ext(&["small"]),
+                At::Tier("ai".to_owned()),
+                "not a ladder tier",
+            ),
+        ] {
+            let e = shift(&extends, &at).expect_err("cannot shift").to_string();
+            assert!(e.contains(err), "{e}");
+        }
+    }
 
     #[test]
     fn tool_needs_follow_the_config() {

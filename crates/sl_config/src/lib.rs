@@ -197,6 +197,17 @@ pub struct Env<'a> {
 impl Config {
     /// Reads `spirit_level.toml` at `root` (or `file` when given) and everything it extends
     pub fn load(root: &Path, file: Option<&Path>, env: &Env<'_>) -> Result<Self, Vec<ConfigError>> {
+        Self::load_extending(root, file, None, env)
+    }
+
+    /// Reads `spirit_level.toml` as [`Config::load`] does, with its own `extends` replaced by `extends` when
+    /// given: its overrides, exceptions and tables stay (`spl check --at big`)
+    pub fn load_extending(
+        root: &Path,
+        file: Option<&Path>,
+        extends: Option<&[String]>,
+        env: &Env<'_>,
+    ) -> Result<Self, Vec<ConfigError>> {
         let path = file.map_or_else(|| root.join(FILE), Path::to_path_buf);
         let rel = path
             .strip_prefix(root)
@@ -210,10 +221,18 @@ impl Config {
         })?;
         let source = Source::File(path, rel.clone());
         let mut r = Resolver::new(env, root);
+        r.project_extends = extends.map(<[String]>::to_vec);
         r.layer(&source, text.clone(), true);
         let entries = std::mem::take(&mut r.tier_entries);
         let mut c = r.finish(Some(rel))?;
-        c.crate_tiers = crate_tiers(c.map.as_ref(), &entries, env, root, &source, &text)?;
+        c.crate_tiers = crate_tiers(
+            c.map.as_ref(),
+            &entries,
+            env,
+            root,
+            (&source, &text),
+            extends,
+        )?;
         Ok(c)
     }
 
@@ -347,8 +366,8 @@ fn crate_tiers(
     entries: &[TierEntry],
     env: &Env<'_>,
     root: &Path,
-    source: &Source,
-    text: &str,
+    (source, text): (&Source, &str),
+    extends: Option<&[String]>,
 ) -> Result<Vec<CrateTiers>, Vec<ConfigError>> {
     let mut errs = Vec::new();
     let mut per: BTreeMap<String, (Vec<String>, ConfigError)> = BTreeMap::new();
@@ -392,6 +411,7 @@ fn crate_tiers(
     for (tiers, (crates, at)) in groups {
         let mut r = Resolver::new(env, root);
         r.extra = tiers.iter().map(|t| (t.clone(), at.clone())).collect();
+        r.project_extends = extends.map(<[String]>::to_vec);
         r.layer(source, text.to_owned(), true);
         for e in r.errs.drain(..) {
             if !errs.contains(&e) {
@@ -430,6 +450,8 @@ struct Resolver<'a> {
     board: Board,
     embedded: Embedded,
     extends: Vec<String>,
+    /// What the project file extends instead of its own `extends`, when set
+    project_extends: Option<Vec<String>>,
     stack: Vec<String>,
     /// The depth at which an extended name is a top-level one (1 under a project file, 0 for bare tiers)
     record_at: usize,
@@ -470,6 +492,7 @@ impl<'a> Resolver<'a> {
             board: Board::default(),
             embedded: Embedded::default(),
             extends: Vec::new(),
+            project_extends: None,
             stack: Vec::new(),
             record_at: 1,
             errs: Vec::new(),
@@ -571,7 +594,10 @@ impl<'a> Resolver<'a> {
         let mut errs = Vec::new();
         let mut r = Reader::new(&file, Vec::new(), file.root());
 
-        let extends = r.opt_list("extends", true, &mut errs).unwrap_or_default();
+        let mut extends = r.opt_list("extends", true, &mut errs).unwrap_or_default();
+        if project && let Some(e) = &self.project_extends {
+            extends.clone_from(e);
+        }
         let at = r.err("extends", "");
         for name in &extends {
             self.extend(name, &at, &dir);

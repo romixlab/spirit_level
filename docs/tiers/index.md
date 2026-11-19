@@ -2,6 +2,8 @@
 
 A tier is a TOML file of lints shipped with spirit_level. Each size tier extends the one before it; a project picks one with `extends` and adds its own settings on top. Tiers that stand beside the size tiers (like `embedded` and `ai`) are combined with one: `extends = ["small", "embedded"]`.
 
+`spl tiers` shows the ladder and marks the tiers a project extends. `spl check --next` checks a project at the next size tier, `spl check --at TIER` at any, both with the project's own overrides and exceptions and without writing anything.
+
 | Tier | What it is for |
 |---|---|
 | [small](small.md) | One crate: metadata, docs, pure-Rust dependencies, build profiles, the pinned toolchain, the repo's rule files, valid waivers |
