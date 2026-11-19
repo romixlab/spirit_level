@@ -83,7 +83,7 @@ The excluded code stays in the workspace: it builds with it, and other crates ma
 | Lint | An excluded crate |
 |---|---|
 | [duplicate-versions](lints/M0002.md), [no-sys-crates](lints/M0004.md), [geiger-unsafe-deps](lints/X0023.md) | its dependencies count only where a checked crate reaches them too |
-| `deny-*` (cargo-deny) | left out of the graph with `--exclude`, with what only it pulls in |
+| `deny-*` (cargo-deny) | left out of the graph with `--exclude`, with what only it pulls in; a deny.toml entry only it uses (a `skip`, a wrapper, an allowed source) is not reported unused |
 | `clippy-*`, [cargo-doc](lints/X0005.md), `udeps-*` | not built: `--exclude` beside `--workspace` (a project's `args` without `--workspace` name their packages themselves) |
 | [cargo-msrv](lints/X0006.md), [cargo-no-std](lints/X0007.md), [cargo-wasm](lints/X0008.md) | not built |
 | [map-complete](lints/G0008.md) | needs no map entry; one it has stays valid |

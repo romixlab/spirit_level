@@ -1,0 +1,2 @@
+[bans]
+deny = [{ crate = "itoa", wrappers = ["old"], reason = "fixture: only old may use itoa" }]

@@ -1,0 +1,3 @@
+[bans]
+deny = [{ crate = "itoa", wrappers = ["old"], reason = "fixture: only old may use itoa" }]
+skip = [{ crate = "itoa@0.4.8", reason = "fixture: a version no crate uses" }]

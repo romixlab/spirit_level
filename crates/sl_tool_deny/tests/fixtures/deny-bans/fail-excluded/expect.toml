@@ -1,0 +1,3 @@
+[[finding]]
+at = "deny.toml:3"
+contains = "itoa = =0.4.8"

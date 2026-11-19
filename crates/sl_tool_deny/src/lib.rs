@@ -51,6 +51,7 @@ impl Analysis for Deny {
             cx.not_run_all("tool:cargo-deny", &sl_tools::missing_reason("cargo-deny"));
             return;
         };
+        let excluded = cx.excluded_members();
         for (check, lint) in CHECKS {
             if !cx.enabled(lint) {
                 continue;
@@ -59,41 +60,64 @@ impl Analysis for Deny {
                 cx.emit(no_config(lint));
                 continue;
             }
-            let mut args = vec!["deny", "--format", "json", "--color", "never"];
+            let fetch = *check == "advisories" && cx.params(lint).bool("fetch");
             // excluded members leave the graph, with what only they pull in
-            for name in cx.excluded_members() {
-                args.extend(["--exclude", name]);
-            }
-            if *check == "advisories" && !cx.params(lint).bool("fetch") {
-                args.push("--offline");
-            }
-            args.extend(["check", check]);
-            let out = match sl_tools::run_subcommand(&exe, &args, &cx.project.root, &[]) {
-                Ok(o) => o,
-                Err(e) => {
-                    cx.not_run(
-                        lint,
-                        "run:cargo-deny",
-                        format!("cannot run cargo-deny: {e}"),
-                    );
+            let mut found = match run_check(&exe, cx, check, &excluded, fetch) {
+                Ok(f) => f,
+                Err(reason) => {
+                    cx.not_run(lint, "run:cargo-deny", reason);
                     continue;
                 }
             };
-            let found = parse(&out.stderr);
-            if out.code != Some(0) && found.is_empty() {
-                let reason = errors(&out.stderr).unwrap_or_else(|| out.failure());
-                cx.not_run(
-                    lint,
-                    "run:cargo-deny",
-                    format!("cargo deny check {check}: {reason}"),
-                );
-                continue;
+            // an entry of deny.toml that only excluded members use is not encountered in the smaller graph; it
+            // stays a finding only when the whole workspace does not use it either
+            if !excluded.is_empty() && found.iter().any(|f| f.entry.is_some()) {
+                match run_check(&exe, cx, check, &[], false) {
+                    Ok(whole) => keep_unused_in(&mut found, &whole),
+                    Err(reason) => {
+                        cx.not_run(lint, "run:cargo-deny", reason);
+                        continue;
+                    }
+                }
             }
             for f in found {
                 cx.emit(f.diagnostic(lint, cx));
             }
         }
     }
+}
+
+/// Runs `cargo deny check <check>` with `--exclude` for each of `excluded`; `fetch` updates the advisory database
+/// first. A failure without diagnostics is the reason it could not run
+fn run_check(
+    exe: &std::path::Path,
+    cx: &Context<'_>,
+    check: &str,
+    excluded: &[&str],
+    fetch: bool,
+) -> Result<Vec<Finding>, String> {
+    let mut args = vec!["deny", "--format", "json", "--color", "never"];
+    for name in excluded {
+        args.extend(["--exclude", name]);
+    }
+    if check == "advisories" && !fetch {
+        args.push("--offline");
+    }
+    args.extend(["check", check]);
+    let out = sl_tools::run_subcommand(exe, &args, &cx.project.root, &[])
+        .map_err(|e| format!("cannot run cargo-deny: {e}"))?;
+    let found = parse(&out.stderr);
+    if out.code != Some(0) && found.is_empty() {
+        let reason = errors(&out.stderr).unwrap_or_else(|| out.failure());
+        return Err(format!("cargo deny check {check}: {reason}"));
+    }
+    Ok(found)
+}
+
+/// Drops the findings about a deny.toml entry (an unmatched skip, an unused wrapper, an allowed source not
+/// encountered) that the run over the whole workspace, `whole`, does not report: the entry is in use there
+fn keep_unused_in(found: &mut Vec<Finding>, whole: &[Finding]) {
+    found.retain(|f| f.entry.is_none() || whole.iter().any(|w| w.item() == f.item()));
 }
 
 /// One cargo-deny diagnostic
@@ -113,6 +137,9 @@ pub struct Finding {
     pub labels: Vec<String>,
     /// The advisory id, for advisories
     pub advisory: Option<String>,
+    /// The deny.toml entry a finding about the configuration is about (`aes@0.9.3`,
+    /// `https://github.com/org/repo`) and its line: a finding with no crate whose first label points into deny.toml
+    pub entry: Option<(String, u32)>,
 }
 
 /// The errors and warnings of cargo-deny's JSON lines (notes and helps are left out)
@@ -154,6 +181,7 @@ pub fn parse(stderr: &str) -> Vec<Finding> {
             }
             g.get("Krate").map(|k| s(k, "name")).unwrap_or_default()
         });
+        let entry = if krate.is_none() { entry(f) } else { None };
         out.push(Finding {
             code: s(f, "code"),
             severity,
@@ -171,9 +199,18 @@ pub fn parse(stderr: &str) -> Vec<Finding> {
                 })
                 .unwrap_or_default(),
             advisory: f.get("advisory").map(|a| s(a, "id")),
+            entry,
         });
     }
     out
+}
+
+/// The span text and line of a diagnostic's first label: for a diagnostic with no crate, a place in deny.toml
+fn entry(fields: &Value) -> Option<(String, u32)> {
+    let label = fields.get("labels")?.as_array()?.first()?;
+    let span = label.get("span")?.as_str()?;
+    let line = label.get("line")?.as_u64()?;
+    Some((span.to_owned(), u32::try_from(line).ok()?))
 }
 
 /// The ERROR lines of cargo-deny's log, for the reason of a failed run
@@ -202,11 +239,13 @@ fn no_config(lint: &str) -> Diagnostic {
 }
 
 impl Finding {
-    /// The fingerprint: code and crate (`banned:itoa@1.0.19`, `vulnerability:RUSTSEC-2021-0003:smallvec@1.6.0`)
+    /// The fingerprint: code and crate (`banned:itoa@1.0.19`, `vulnerability:RUSTSEC-2021-0003:smallvec@1.6.0`),
+    /// or code and deny.toml entry (`unmatched-skip:aes@0.9.3`)
     pub fn item(&self) -> String {
-        let what = match &self.krate {
-            Some((n, v)) => format!("{n}@{v}"),
-            None => self.message.clone(),
+        let what = match (&self.krate, &self.entry) {
+            (Some((n, v)), _) => format!("{n}@{v}"),
+            (None, Some((e, _))) => e.clone(),
+            (None, None) => self.message.clone(),
         };
         match &self.advisory {
             Some(id) => format!("{}:{id}:{what}", self.code),
@@ -216,10 +255,11 @@ impl Finding {
 
     fn diagnostic(&self, lint: &str, cx: &Context<'_>) -> Diagnostic {
         let p = cx.project;
-        let span = match &self.krate {
-            Some((n, v)) => Span::new("Cargo.lock", sl_tools::lock_line(p, n, v)),
-            None if p.exists("deny.toml") => Span::new("deny.toml", 0),
-            None => Span::new("Cargo.toml", 0),
+        let span = match (&self.krate, &self.entry) {
+            (Some((n, v)), _) => Span::new("Cargo.lock", sl_tools::lock_line(p, n, v)),
+            (None, Some((_, line))) if p.exists("deny.toml") => Span::new("deny.toml", *line),
+            (None, _) if p.exists("deny.toml") => Span::new("deny.toml", 0),
+            (None, _) => Span::new("Cargo.toml", 0),
         };
         let mut msg = match &self.krate {
             Some((n, v)) if !self.message.contains(n.as_str()) => {
@@ -231,6 +271,7 @@ impl Finding {
             msg = format!("{msg} ({id})");
         }
         let help = match (lint, &self.advisory) {
+            _ if self.entry.is_some() => "the deny.toml entry is not needed by this workspace's graph: remove it".into(),
             (_, Some(id)) => format!(
                 "update or replace the crate; https://rustsec.org/advisories/{id} says which versions are fixed, and deny.toml's [advisories] ignore takes an advisory with a reason"
             ),
@@ -280,6 +321,36 @@ mod tests {
         let s = parse(include_str!("../tests/samples/deny-sources.jsonl"));
         assert_eq!(s.len(), 2);
         assert!(s.iter().all(|f| f.code == "source-not-allowed"));
+    }
+
+    #[test]
+    fn config_entries() {
+        let line = |code: &str, span: &str, at: u32| {
+            format!(
+                r#"{{"fields":{{"code":"{code}","graphs":[],"labels":[{{"column":4,"line":{at},"message":"m","span":"{span}"}}],"message":"was not encountered","severity":"warning"}},"type":"diagnostic"}}"#
+            )
+        };
+        let mut found = parse(&format!(
+            "{}\n{}\n{}",
+            line("unmatched-skip", "aes@0.9.3", 7),
+            line("unused-wrapper", "old", 9),
+            line("unmatched-source", "https://github.com/o/r", 12),
+        ));
+        assert_eq!(found[0].entry, Some(("aes@0.9.3".to_owned(), 7)));
+        assert_eq!(found[2].item(), "unmatched-source:https://github.com/o/r");
+        // over the whole workspace only the wrapper is unused: the other two serve excluded members
+        let whole = parse(&line("unused-wrapper", "old", 9));
+        keep_unused_in(&mut found, &whole);
+        assert_eq!(found.len(), 1);
+        assert_eq!(found[0].code, "unused-wrapper");
+    }
+
+    #[test]
+    fn crate_findings_are_not_entries() {
+        let b = parse(include_str!("../tests/samples/deny-bans.jsonl"));
+        let mut kept = b.clone();
+        keep_unused_in(&mut kept, &[]);
+        assert_eq!(kept, b);
     }
 
     #[test]
