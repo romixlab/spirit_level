@@ -2,9 +2,15 @@
 
 ## [Unreleased]
 
+## [0.5.6] - 2026-11-19
+
 ### Changed
 
 - `duplicate-versions` judges cargo-deny's graph: deny.toml's `[graph] targets`, `skip` and `skip-tree` (MAN-14).
+
+### Removed
+
+- `duplicate-versions`'s `allow` parameter: accepted duplicates go in deny.toml's `[bans] skip` (MAN-14).
 
 ### Fixed
 
@@ -13,10 +19,6 @@
 - `crate-folder-layer`: excluded crates in nested folders no longer make a flat workspace count as layered (CFG-8).
 - Workspace-level lints compute on checked crates: inheritance, badges, folder sizes, near-duplicates, audit, CLI, semver, firmware, rustfmt (CFG-8).
 - The resolved graph leaves out optional dependencies that only a weak feature (`dep?/feat`) names (MAN-14).
-
-### Removed
-
-- `duplicate-versions`'s `allow` parameter: accepted duplicates go in deny.toml's `[bans] skip` (MAN-14).
 
 ## [0.5.5] - 2026-11-19
 
