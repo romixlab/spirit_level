@@ -619,3 +619,44 @@ fn crate_tiers_are_checked() {
         ]
     );
 }
+
+#[test]
+fn excludes_name_crates_or_paths_with_reason_and_expiry() {
+    let c = load(
+        "extends = \"big\"\n[[exclude]]\ncrates = [\"old_a\", \"old_b\"]\nreason = \"frozen\"\nexpires = \"2026-12-01\"\n[[exclude]]\npaths = \"legacy/**\"\nreason = \"frozen too\"\nexpires = \"v0.4.0\"\n",
+    )
+    .unwrap();
+    assert_eq!(c.excludes.len(), 2);
+    assert_eq!(c.excludes[0].origin.line, 3);
+    assert!(c.excludes_crate("old_b"));
+    assert!(!c.excludes_crate("legacy"));
+    assert_eq!(
+        c.excluded(Some("old_a"), None).map(|e| e.reason.as_str()),
+        Some("frozen")
+    );
+    assert!(c.excluded(None, Some("legacy/src/lib.rs")).is_some());
+    assert!(c.excluded(Some("new"), Some("src/lib.rs")).is_none());
+    let today = Date::parse("2026-11-13").unwrap();
+    assert_eq!(c.excludes[0].days_left(today), Some(18));
+    assert_eq!(c.excludes[1].days_left(today), None);
+}
+
+#[test]
+fn excludes_need_scope_reason_and_expiry() {
+    let m = messages(load("extends = \"big\"\n[[exclude]]\ncrates = []\n"));
+    assert!(m.iter().any(|s| s.contains("names its crates")), "{m:?}");
+    assert!(m.iter().any(|s| s.contains("needs a reason")), "{m:?}");
+    assert!(m.iter().any(|s| s.contains("needs expires")), "{m:?}");
+    let m = messages(load(
+        "extends = \"big\"\n[[exclude]]\ncrates = [\"a\"]\nreason = \"r\"\nexpires = \"2026-11-13\"\n",
+    ));
+    assert!(
+        m.iter()
+            .any(|s| s.contains("spirit_level.toml:5: the exclusion expired (2026-11-13)")),
+        "{m:?}"
+    );
+    let m = messages(load(
+        "extends = \"big\"\n[[exclude]]\ncrates = [\"a\"]\nlint = \"crate-lines\"\nreason = \"r\"\nexpires = \"2027-01-01\"\n",
+    ));
+    assert!(m.iter().any(|s| s.contains("unknown key")), "{m:?}");
+}

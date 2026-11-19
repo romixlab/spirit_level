@@ -47,6 +47,17 @@ impl Date {
         Self { year, month, day }
     }
 
+    /// The count of days since 1970-01-01, the inverse of [`Self::from_days`] (Howard Hinnant's days-from-civil)
+    pub fn days(self) -> i64 {
+        let y = i64::from(self.year) - i64::from(self.month <= 2);
+        let era = y.div_euclid(400);
+        let yoe = y - era * 400;
+        let m = i64::from(self.month);
+        let doy = (153 * (if m > 2 { m - 3 } else { m + 9 }) + 2) / 5 + i64::from(self.day) - 1;
+        let doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
+        era * 146_097 + doe - 719_468
+    }
+
     /// Today in UTC from the system clock. Callers that must be deterministic (tests, the engine) take the date
     /// as a parameter instead and call this only at the edge (the CLI)
     pub fn today_utc() -> Self {
@@ -153,6 +164,9 @@ mod tests {
     fn days() {
         assert_eq!(Date::from_days(0).to_string(), "1970-01-01");
         assert_eq!(Date::from_days(20_405).to_string(), "2025-11-13");
+        for d in [-800_000, -1, 0, 59, 60, 20_405, 21_000, 3_000_000] {
+            assert_eq!(Date::from_days(d).days(), d, "{d}");
+        }
     }
 
     #[test]

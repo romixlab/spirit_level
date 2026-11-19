@@ -26,6 +26,11 @@
 //! reason = "generated protocol types"
 //! expires = "v0.4.0"
 //!
+//! [[exclude]]                         # crates and/or paths no lint reports about (see [`exclude`])
+//! crates = ["old_ui"]
+//! reason = "frozen; deleted with the rewrite"
+//! expires = "2027-03-31"              # required
+//!
 //! [dependents]                        # the repos that build on this one (see [`dependents`])
 //! scan = ["~/git"]
 //!
@@ -49,6 +54,7 @@ pub mod dependents;
 pub mod docs;
 pub mod embedded;
 mod error;
+pub mod exclude;
 pub mod map;
 mod reader;
 
@@ -59,6 +65,7 @@ pub use dependents::Dependents;
 pub use docs::{Book, Docs, Generator, Site};
 pub use embedded::Embedded;
 pub use error::ConfigError;
+pub use exclude::Exclude;
 pub use map::{External, Layer, Map, MapCrate};
 
 use reader::Reader;
@@ -154,6 +161,8 @@ pub struct Config {
     pub lints: BTreeMap<String, LintSetting>,
     /// Scoped exceptions in file order
     pub exceptions: Vec<Exception>,
+    /// Crates and paths left out of the check, in file order
+    pub excludes: Vec<Exclude>,
     /// Crates held to more tiers than the project's own, one entry per distinct list of tiers
     pub crate_tiers: Vec<CrateTiers>,
     /// The crate map
@@ -292,6 +301,18 @@ impl Config {
         p
     }
 
+    /// The exclusion that leaves out a finding about `krate` at `path`, if one does
+    pub fn excluded(&self, krate: Option<&str>, path: Option<&str>) -> Option<&Exclude> {
+        self.excludes.iter().find(|e| e.covers(krate, path))
+    }
+
+    /// Whether an exclusion leaves out the crate `name`
+    pub fn excludes_crate(&self, name: &str) -> bool {
+        self.excludes
+            .iter()
+            .any(|e| e.crates.iter().any(|c| c == name))
+    }
+
     /// The exceptions of a lint that change its parameters
     pub fn param_exceptions(&self, id: &str) -> impl Iterator<Item = &Exception> {
         self.exceptions
@@ -397,6 +418,7 @@ struct Resolver<'a> {
     root: PathBuf,
     lints: BTreeMap<String, LintSetting>,
     exceptions: Vec<Exception>,
+    excludes: Vec<Exclude>,
     tier_entries: Vec<TierEntry>,
     /// Tiers applied after the project file's own extends: a crate's tiers
     extra: Vec<(String, ConfigError)>,
@@ -437,6 +459,7 @@ impl<'a> Resolver<'a> {
             root: root.to_path_buf(),
             lints,
             exceptions: Vec::new(),
+            excludes: Vec::new(),
             tier_entries: Vec::new(),
             extra: Vec::new(),
             map: None,
@@ -462,6 +485,7 @@ impl<'a> Resolver<'a> {
             extends: self.extends,
             lints: self.lints,
             exceptions: self.exceptions,
+            excludes: self.excludes,
             crate_tiers: Vec::new(),
             map: self.map,
             clippy: self.clippy,
@@ -579,6 +603,9 @@ impl<'a> Resolver<'a> {
     fn project_tables(&mut self, r: &mut Reader<'_>, dir: &Path, errs: &mut Vec<ConfigError>) {
         for t in tables(r, "exceptions", errs) {
             self.exception(t, errs);
+        }
+        for t in tables(r, "exclude", errs) {
+            self.exclude(t, errs);
         }
         for t in tables(r, "crate-tiers", errs) {
             self.tier_entry(t, dir, errs);
@@ -802,6 +829,44 @@ impl<'a> Resolver<'a> {
             params,
             origin,
         });
+    }
+
+    /// An `[[exclude]]` entry: crates and/or paths, reason, expiry
+    fn exclude(&mut self, mut t: Reader<'_>, errs: &mut Vec<ConfigError>) {
+        let line = t.line("").max(t.line("crates")).max(t.line("paths"));
+        let origin = Origin {
+            file: t.file.rel.clone(),
+            line,
+        };
+        let crates = t.opt_list("crates", true, errs).unwrap_or_default();
+        let paths = t.opt_list("paths", true, errs).unwrap_or_default();
+        let reason = t.opt_str("reason", errs).unwrap_or_default();
+        let expires = self.expiry(&mut t, true, "the exclusion", errs);
+        let has_expires = t.table.get("expires").is_some();
+        t.finish(errs);
+        let at = |msg: &str| ConfigError::new(&origin.file, origin.line, msg);
+        if crates.is_empty() && paths.is_empty() {
+            errs.push(at("an exclude entry names its crates and/or paths"));
+        }
+        if reason.trim().is_empty() {
+            errs.push(at(
+                "an exclude entry needs a reason: say why this code is not checked",
+            ));
+        }
+        if !has_expires {
+            errs.push(at(
+                "an exclude entry needs expires: the date or release (\"2027-03-31\", \"v0.6.0\") by which the code is gone or checked again",
+            ));
+        }
+        if let Some(expires) = expires {
+            self.excludes.push(Exclude {
+                crates,
+                paths,
+                reason,
+                expires,
+                origin,
+            });
+        }
     }
 
     fn expiry(
