@@ -490,7 +490,12 @@ fn cycles(cx: &Context<'_>, p: &Project) {
         }
         let mut members: Vec<&str> = comp.iter().map(|&i| names[i]).collect();
         members.sort_unstable();
-        let Some(first) = p.package(members[0]) else {
+        // placed at a checked member's manifest, so excluding one crate of a cycle leaves the cycle reported
+        let Some(first) = members
+            .iter()
+            .filter_map(|m| p.package(m))
+            .find(|k| !cx.excluded(&k.name))
+        else {
             continue;
         };
         cx.emit(

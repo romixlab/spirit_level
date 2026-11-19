@@ -1,6 +1,6 @@
 //! The geiger adapter: `unsafe` in the dependencies, counted with the geiger library.
 //!
-//! Every package the workspace members reach through normal and build edges is scanned: each `.rs` file under
+//! Every package the workspace members (excluded ones left out) reach through normal and build edges is scanned: each `.rs` file under
 //! its directory (tests left out), parsed with syn by geiger. A package whose library root declares
 //! `#![forbid(unsafe_code)]` and counts nothing is skipped.
 
@@ -46,7 +46,7 @@ fn run(cx: &Context<'_>) {
     let max = params.int("max-uses").max(0) as u64;
     let mut reached = BTreeSet::new();
     for (i, pkg) in resolve.packages.iter().enumerate() {
-        if pkg.member {
+        if pkg.member && !cx.excluded(&pkg.name) {
             reached.extend(resolve.closure(i, false));
         }
     }

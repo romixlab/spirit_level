@@ -60,6 +60,10 @@ impl Analysis for Deny {
                 continue;
             }
             let mut args = vec!["deny", "--format", "json", "--color", "never"];
+            // excluded members leave the graph, with what only they pull in
+            for name in cx.excluded_members() {
+                args.extend(["--exclude", name]);
+            }
             if *check == "advisories" && !cx.params(lint).bool("fetch") {
                 args.push("--offline");
             }

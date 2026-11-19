@@ -35,7 +35,11 @@ impl Analysis for Udeps {
             cx.not_run_all("tool:cargo-udeps", &sl_tools::missing_reason("cargo-udeps"));
             return;
         };
-        let args = ["udeps", "--output", "json", "--workspace", "--all-targets"];
+        let mut args: Vec<String> = ["udeps", "--output", "json", "--workspace", "--all-targets"]
+            .map(str::to_owned)
+            .to_vec();
+        args.extend(cx.cargo_excludes(&args));
+        let args: Vec<&str> = args.iter().map(String::as_str).collect();
         let channel = sl_tools::rustup::nightly_channel(&p.root);
         let out =
             match sl_tools::run_subcommand(&exe, &args, &p.root, &[("RUSTUP_TOOLCHAIN", &channel)])

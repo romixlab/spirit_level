@@ -181,7 +181,7 @@ impl Runner<'_, '_> {
     fn msrv(&self) {
         let p = self.cx.project;
         let mut by_version: BTreeMap<&str, Vec<&Package>> = BTreeMap::new();
-        for pkg in &p.packages {
+        for pkg in p.packages.iter().filter(|k| !self.cx.excluded(&k.name)) {
             if let Some(v) = pkg.rust_version.as_deref() {
                 by_version.entry(v).or_default().push(pkg);
             }
@@ -241,7 +241,7 @@ impl Runner<'_, '_> {
             .project
             .packages
             .iter()
-            .filter(|k| map.crates.get(&k.name).is_some_and(pick))
+            .filter(|k| !self.cx.excluded(&k.name) && map.crates.get(&k.name).is_some_and(pick))
             .collect()
     }
 
@@ -321,7 +321,9 @@ impl Runner<'_, '_> {
     fn doc(&self) {
         let p = self.cx.project;
         let mut args: Vec<String> = vec!["doc".into(), "--message-format".into(), "json".into()];
-        args.extend(self.cx.params("cargo-doc").list("args").iter().cloned());
+        let extra = self.cx.params("cargo-doc").list("args");
+        args.extend(extra.iter().cloned());
+        args.extend(self.cx.cargo_excludes(extra));
         let run = self.cargo(&args, None);
         let anchor = Span::new(p.root_manifest.rel.clone(), 0);
         self.report(

@@ -151,6 +151,34 @@ impl<'a> Context<'a> {
         self.config.map.as_ref()
     }
 
+    /// Whether an `[[exclude]]` entry leaves out the member `name`. Its findings are dropped by the engine; an
+    /// analysis asks only to spare the work, a tool run or a build of frozen code
+    pub fn excluded(&self, name: &str) -> bool {
+        self.config.excludes_crate(name)
+    }
+
+    /// The members an `[[exclude]]` entry leaves out, in the project's order
+    pub fn excluded_members(&self) -> Vec<&'a str> {
+        self.project
+            .packages
+            .iter()
+            .filter(|p| self.config.excludes_crate(&p.name))
+            .map(|p| p.name.as_str())
+            .collect()
+    }
+
+    /// `--exclude NAME` for each excluded member when the cargo arguments `args` run over the whole workspace
+    /// (`--workspace`, `--all`); none otherwise, as cargo refuses `--exclude` without them
+    pub fn cargo_excludes(&self, args: &[String]) -> Vec<String> {
+        if !args.iter().any(|a| a == "--workspace" || a == "--all") {
+            return Vec::new();
+        }
+        self.excluded_members()
+            .into_iter()
+            .flat_map(|n| ["--exclude".to_owned(), n.to_owned()])
+            .collect()
+    }
+
     /// Reports a finding; one of a lint that is not running is dropped, so an analysis may compute everything
     /// and emit freely
     pub fn emit(&self, d: Diagnostic) {

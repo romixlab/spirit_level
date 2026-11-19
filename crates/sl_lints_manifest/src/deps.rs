@@ -163,10 +163,11 @@ fn resolved(cx: &Context<'_>) {
     } else {
         "Cargo.toml"
     };
-    // what each member reaches through normal and build edges (and its own dev edges)
+    // what each member reaches through normal and build edges (and its own dev edges); an excluded member's
+    // dependencies count only where a checked member reaches them too
     let mut reached: BTreeMap<usize, BTreeSet<String>> = BTreeMap::new();
     for (i, rp) in res.packages.iter().enumerate() {
-        if rp.member {
+        if rp.member && !cx.excluded(&rp.name) {
             for j in res.closure(i, true) {
                 reached.entry(j).or_default().insert(rp.name.clone());
             }

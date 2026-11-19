@@ -95,8 +95,9 @@ impl Analysis for Clippy {
             }
         };
         let args = cx.params("clippy-build").list("args");
+        let excludes = cx.cargo_excludes(args);
         let mut argv = vec!["clippy", "--message-format", "json"];
-        argv.extend(args.iter().map(String::as_str));
+        argv.extend(args.iter().chain(&excludes).map(String::as_str));
         let out = match sl_tools::run_subcommand(&exe, &argv, root, &[]) {
             Ok(o) => o,
             Err(e) => {
