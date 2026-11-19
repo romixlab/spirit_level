@@ -1,0 +1,7 @@
+[[finding]]
+at = "crates/fx_a/src/bin/bad-name.rs:1"
+contains = "bad-name"
+
+[[finding]]
+at = "crates/fx_a/src/bin/bad_folder/main.rs:1"
+contains = "bad_folder"

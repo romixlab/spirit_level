@@ -1,6 +1,7 @@
 //! Manifest and repo-file lints. One analysis, [`MANIFEST`], reports them all: they share nothing heavier than
 //! the manifests cargo metadata already read.
 
+mod bins;
 mod ci;
 mod clippy;
 mod contract;
@@ -104,6 +105,9 @@ lint!(README_BADGES, "M0034", "readme-badges", "repo", "the README carries a bad
     params: [("file", Str, "\"README.md\"", "the README, relative to the root"),
              ("workflow", Str, "\".github/workflows/ci.yml\"", "the CI workflow whose status badge the README shows")],
     needs: [], fix: Exact);
+lint!(BINARY_NAME_CHARS, "M0035", "binary-name-chars", "manifest", "every binary's name, explicit or implicit, uses only an allowed set of characters",
+    params: [("chars", Str, "\"a-z0-9\"", "characters a binary name may use: literals and a-z-style ranges")],
+    needs: [], fix: None);
 
 /// The manifest analysis
 pub struct Manifest;
@@ -146,6 +150,7 @@ static LINTS: &[&LintMeta] = &[
     &CI_WORKFLOW,
     &MANIFEST_HOMEPAGE,
     &README_BADGES,
+    &BINARY_NAME_CHARS,
 ];
 
 impl Analysis for Manifest {
@@ -159,6 +164,7 @@ impl Analysis for Manifest {
 
     fn run(&self, cx: &Context<'_>) {
         package::run(cx);
+        bins::run(cx);
         workspace::run(cx);
         deps::run(cx);
         repo::run(cx);

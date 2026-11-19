@@ -1,0 +1,3 @@
+[[finding]]
+at = "crates/fx_a/src/bin/main.rs:1"
+contains = "cs-noded"

@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `binary-name-chars`: every explicit and implicit binary name uses only an allowed character set, off by default (MAN-17).
+
 ## [0.5.8] - 2026-11-19
 
 ### Fixed
