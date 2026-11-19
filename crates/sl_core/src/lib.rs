@@ -18,5 +18,8 @@ pub mod params;
 pub use class::{Classes, TaskClass};
 pub use date::{Date, Expiry, Version};
 pub use diagnostic::{Confidence, Diagnostic, Edit, Fix, Metric, Span};
-pub use meta::{CODE_GROUPS, FixKind, Level, LintMeta, Need, Source, ToolUse, valid_code};
+pub use meta::{
+    CODE_GROUPS, FixKind, Level, LintMeta, Need, PINNED_NIGHTLY, PINNED_TOOLCHAIN, Source, ToolUse,
+    valid_code,
+};
 pub use params::{ParamKind, ParamSpec, ParamValue, Params};

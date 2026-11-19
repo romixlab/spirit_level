@@ -12,6 +12,10 @@
 - `toolchain-pinned` (M0019) on in every tier: every toolchain file pins 1.100.0 or nightly-2026-11-19; `--fix` (MAN-13).
 - `spl tiers` shows the ladder, then the add-ons, marking the tiers the project extends (CLI-9).
 
+### Removed
+
+- **Breaking:** `rust-toolchain-nightly.toml` is no longer read; udeps runs on `toolchain-pinned`'s `nightly`, no plain-`nightly` fallback (TOOL-7).
+
 ## [0.5.9] - 2026-11-20
 
 ### Added

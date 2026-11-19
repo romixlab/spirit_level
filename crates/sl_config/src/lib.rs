@@ -286,6 +286,14 @@ impl Config {
             .fold(self.lint(id).level, Level::max)
     }
 
+    /// The pinned nightly toolchain (`toolchain-pinned`'s `nightly`), or the release's default where that lint is
+    /// not registered
+    pub fn pinned_nightly(&self) -> &str {
+        self.lints
+            .get(sl_core::PINNED_TOOLCHAIN)
+            .map_or(sl_core::PINNED_NIGHTLY, |l| l.params.str("nightly"))
+    }
+
     /// Whether a lint runs at all: its level, a crate's tiers', or an exception's is above allow
     pub fn enabled(&self, id: &str) -> bool {
         self.highest_level(id) > Level::Allow

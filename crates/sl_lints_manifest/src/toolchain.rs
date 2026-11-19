@@ -8,7 +8,7 @@ use sl_model::{TomlFile, justfile};
 use std::collections::BTreeMap;
 use std::path::Path;
 
-const PINNED: &str = "toolchain-pinned";
+const PINNED: &str = sl_core::PINNED_TOOLCHAIN;
 const OVERRIDES: &str = "toolchain-overrides-pinned";
 const TOOLCHAIN_FILES: [&str; 2] = ["rust-toolchain.toml", "rust-toolchain"];
 
@@ -524,6 +524,14 @@ mod tests {
             fixed("rust-toolchain", "1.99\n").as_deref(),
             Some("1.100.0\n")
         );
+    }
+
+    #[test]
+    fn the_default_nightly_is_the_core_constant() {
+        let p = sl_config::default_params(&crate::TOOLCHAIN_PINNED);
+        assert_eq!(p.str("nightly"), sl_core::PINNED_NIGHTLY);
+        assert_eq!(PAIR.nightly, sl_core::PINNED_NIGHTLY);
+        assert_eq!(p.str("stable"), PAIR.stable);
     }
 
     #[test]

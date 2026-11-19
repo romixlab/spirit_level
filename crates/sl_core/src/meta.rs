@@ -80,6 +80,13 @@ pub enum Source {
     },
 }
 
+/// The lint whose `nightly` parameter names the nightly toolchain [`Need::Nightly`] means
+pub const PINNED_TOOLCHAIN: &str = "toolchain-pinned";
+
+/// The nightly this release pins: the default of [`PINNED_TOOLCHAIN`]'s `nightly`, used where that lint is not
+/// registered (an analysis's own fixtures)
+pub const PINNED_NIGHTLY: &str = "nightly-2026-11-19";
+
 /// Something a lint needs from the project; without it the lint is reported as not run, with the reason
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize)]
 #[serde(rename_all = "kebab-case", tag = "kind", content = "name")]
@@ -90,7 +97,7 @@ pub enum Need {
     Map,
     /// An executable on PATH
     Tool(&'static str),
-    /// A nightly toolchain (`cargo +nightly`)
+    /// The pinned nightly toolchain: the `nightly` parameter of [`PINNED_TOOLCHAIN`] (`cargo +nightly-2026-11-19`)
     Nightly,
     /// A linked ELF of the project's firmware, given with `--elf`; a lint that needs it is skipped where no firmware
     /// binary has it enabled

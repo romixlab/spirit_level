@@ -105,10 +105,10 @@ struct Target {
 /// Everything `needed` lists
 struct Needed {
     tools: Vec<Tool>,
-    /// A listed tool runs on nightly, and no nightly toolchain is installed
+    /// The pinned nightly toolchain (`toolchain-pinned`'s `nightly`)
+    nightly: String,
+    /// A listed tool runs on nightly, and the pinned nightly is not installed
     nightly_missing: bool,
-    /// The project's pinned nightly channel ([`sl_tools::rustup::nightly_channel`]), for the install hint
-    nightly_channel: String,
     toolchains: Vec<Toolchain>,
     targets: Vec<Target>,
 }
@@ -133,13 +133,17 @@ impl Needed {
     fn load(a: &NeededArgs) -> Result<Self, String> {
         if a.all {
             let dir = std::env::current_dir().map_err(|e| e.to_string())?;
-            return Ok(Self::tools(spirit_level::tool_lints(), &dir));
+            return Ok(Self::tools(
+                spirit_level::tool_lints(),
+                &dir,
+                sl_core::PINNED_NIGHTLY,
+            ));
         }
         let project = sl_model::Project::load(&a.path).map_err(|e| e.to_string())?;
         let opts = spirit_level::Options::new(crate::today(a.today.clone())?);
         let config = spirit_level::config(&project, &opts).map_err(|e| e.to_string())?;
         let needs = spirit_level::tool_needs(&project, &config);
-        let mut n = Self::tools(needs.tools, &project.root);
+        let mut n = Self::tools(needs.tools, &project.root, config.pinned_nightly());
         n.toolchains = needs
             .toolchains
             .into_iter()
@@ -164,6 +168,7 @@ impl Needed {
     fn tools(
         mut by_tool: std::collections::BTreeMap<&'static str, Vec<&'static str>>,
         dir: &std::path::Path,
+        nightly: &str,
     ) -> Self {
         let tools: Vec<Tool> = sl_tools::pins()
             .iter()
@@ -175,11 +180,11 @@ impl Needed {
             })
             .collect();
         let nightly_missing = tools.iter().any(|t: &Tool| t.found.pin.nightly)
-            && !sl_tools::rustup::nightly_installed(dir);
+            && !sl_tools::rustup::nightly_installed(nightly, dir);
         Self {
             tools,
+            nightly: nightly.to_owned(),
             nightly_missing,
-            nightly_channel: sl_tools::rustup::nightly_channel(dir),
             toolchains: Vec::new(),
             targets: Vec::new(),
         }
@@ -312,6 +317,7 @@ fn to_json(n: &Needed) -> Value {
         "tools": tools,
         "toolchains": toolchains,
         "targets": targets,
+        "nightly": n.nightly,
         "nightly_missing": n.nightly_missing,
         "missing": n.missing(),
         "untested": n.untested(),
@@ -482,7 +488,7 @@ fn next_hints(n: &Needed, p: Paint) -> String {
     if n.nightly_missing {
         hints.push(format!(
             "rustup toolchain install {} --profile minimal",
-            n.nightly_channel
+            n.nightly
         ));
     }
     let mut s = String::new();

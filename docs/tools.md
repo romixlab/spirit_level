@@ -103,10 +103,10 @@ In both cases the item (the fingerprint waivers and baselines use) carries the t
 
 ## cargo-udeps
 
-- **Command:** `cargo +nightly udeps --output json --workspace --all-targets`.
+- **Command:** `cargo +<pinned nightly> udeps --output json --workspace --all-targets`; the nightly is `toolchain-pinned`'s `nightly` parameter.
 - **Output:** one JSON document: `success` and `unused_deps`, a map from package id to its `manifest_path` and unused `normal`, `development` and `build` dependencies.
 - **Exit codes:** 0 none, 1 found some or a failed build (stderr).
-- **Lints:** `udeps-unused-deps`. It needs a nightly toolchain; without one the lint is not run.
+- **Lints:** `udeps-unused-deps`. It needs the pinned nightly installed; without it the lint is not run.
 
 ## hakari (linked)
 
@@ -148,7 +148,7 @@ spl tools needed --components --missing | xargs -r rustup component add
 spl check
 ```
 
-The version in `--spec` is the one the parser is tested at. A tool's version is the first word shaped like one in the output of its `version-args` (default `--version`); `cargo-udeps` runs on a nightly toolchain, the project's `rust-toolchain-nightly.toml` pin or plain `nightly` without one, which `rustup toolchain install <channel> --profile minimal` adds.
+The version in `--spec` is the one the parser is tested at. A tool's version is the first word shaped like one in the output of its `version-args` (default `--version`); `cargo-udeps` runs on the pinned nightly, which `rustup toolchain install nightly-2026-11-19 --profile minimal` adds (`spl tools needed` names the one a project pins).
 
 ### A tool shadowed on PATH
 

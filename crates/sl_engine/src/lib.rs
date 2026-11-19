@@ -243,12 +243,12 @@ fn missing(
                 .is_none()
                 .then(|| sl_tools::missing_reason(t)),
         },
-        Need::Nightly => (!sl_tools::rustup::nightly_installed(&project.root)).then(|| {
-            let channel = sl_tools::rustup::nightly_channel(&project.root);
-            format!(
-                "no {channel} toolchain: `rustup toolchain install {channel} --profile minimal`"
-            )
-        }),
+        Need::Nightly => {
+            let n = config.pinned_nightly();
+            (!sl_tools::rustup::nightly_installed(n, &project.root)).then(|| {
+                format!("the pinned nightly {n} is not installed: `rustup toolchain install {n} --profile minimal`")
+            })
+        }
         Need::Elf => opts.elf.is_empty().then(|| {
             "no ELF given: build the firmware and pass --elf target/<triple>/release/<name>"
                 .to_owned()

@@ -6,7 +6,7 @@
 
 use sl_analysis::Analysis;
 use sl_config::{Config, Env};
-use sl_core::{Confidence, Date, Need};
+use sl_core::{Confidence, Date};
 use sl_engine::{RunOptions, all_lints};
 use sl_model::Project;
 use std::fmt::Write;
@@ -68,23 +68,6 @@ fn vendor_config(case: &Path) -> std::io::Result<()> {
         "\n[source.crates-io]\nreplace-with = \"sl-testkit-vendor\"\n\n[source.sl-testkit-vendor]\ndirectory = {VENDOR:?}\n\n[net]\noffline = true\n"
     );
     std::fs::write(dir.join("config.toml"), text)
-}
-
-/// This repo's own nightly pin, copied into a tool case whose lint needs [`Need::Nightly`]: a real project pins its
-/// own, and every box the gate runs on carries this repo's
-const NIGHTLY_PIN: &str = concat!(
-    env!("CARGO_MANIFEST_DIR"),
-    "/../../rust-toolchain-nightly.toml"
-);
-
-/// Copies [`NIGHTLY_PIN`] into a copied case that has none of its own
-fn nightly_pin_config(case: &Path) -> std::io::Result<()> {
-    let dest = case.join("rust-toolchain-nightly.toml");
-    if dest.exists() {
-        return Ok(());
-    }
-    std::fs::copy(NIGHTLY_PIN, dest)?;
-    Ok(())
 }
 
 fn check_impl(analysis: &dyn Analysis, dir: &Path, hooks: &Hooks<'_>, tools: bool) {
@@ -256,13 +239,6 @@ fn run_case(
         let dest = copy_case(analysis.name(), id, shared.as_deref().unwrap_or(case))?;
         if !network {
             vendor_config(&dest).map_err(|e| format!("vendor config: {e}"))?;
-        }
-        if analysis
-            .lints()
-            .iter()
-            .any(|m| m.id == id && m.needs.contains(&Need::Nightly))
-        {
-            nightly_pin_config(&dest).map_err(|e| format!("nightly pin: {e}"))?;
         }
         Some(dest)
     } else {
