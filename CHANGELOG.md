@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.5.7] - 2026-11-19
+
 ### Fixed
 
 - `no-sys-crates`, `duplicate-versions`, `forbidden-closure`, `geiger-unsafe-deps` resolve features per checked crate, not workspace-unified (MAN-16).
