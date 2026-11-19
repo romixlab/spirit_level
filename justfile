@@ -60,6 +60,11 @@ install:
     cargo build --profile deploy --locked -p spirit_level_cli
     if command -v tpm >/dev/null; then tpm install target/deploy/spl; else cargo install --locked --path crates/spirit_level_cli; fi
 
+# For `tpm dist build` on a build node: spl, static musl (no glibc skew between the build node and a target)
+dist out:
+    cargo build --profile deploy --locked --target x86_64-unknown-linux-musl -p spirit_level_cli
+    install -D -m 755 -t {{out}}/bin target/x86_64-unknown-linux-musl/deploy/spl
+
 # Bring this PC up to main: refuse on local changes, pull, install
 deploy:
     git diff --quiet && git diff --cached --quiet
