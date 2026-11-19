@@ -24,6 +24,11 @@ max-lines = 120000
 reason = "generated protocol types"
 expires = "v0.4.0"
 
+[[exclude]]                          # crates and/or paths no lint reports about
+crates = ["foo_old_ui"]              # and/or paths = ["legacy/**"]
+reason = "frozen; deleted with the rewrite"
+expires = "2027-03-31"               # required: a date or a release
+
 [clippy.lints]                       # the Clippy set expected in [workspace.lints.clippy]
 print_stdout = { level = "allow", reason = "a CLI-only workspace" }
 
@@ -50,6 +55,41 @@ timeout-secs = 20
 - **Exceptions** apply to findings about the listed crates or whose file matches a path pattern (`*` within a segment, `**` across segments). They change the level, parameters, or both. Their parameters apply to the crates they name.
 - **Unknown keys fail.** A typo in a key, a lint id or a tier name stops the run with the file and line, before any lint runs. Map keys another tool owns: [map-file foreign](map.md#a-map-another-tool-owns).
 - **Codes or ids.** A lint is named by its id or its code: `[lints.S0001]` is `[lints.crate-lines]`, in exceptions (`lint = "S0001"`), waivers and `--only` too.
+
+## Leaving code out
+
+A workspace that carries code it is about to delete (frozen crates kept until a rewrite replaces them, a vendored copy) leaves it out of the check instead of excepting it lint by lint:
+
+```toml
+[[exclude]]
+crates = ["foo_old_ui", "foo_old_net"]
+reason = "frozen; the rewrite deletes them"
+expires = "2027-03-31"
+
+[[exclude]]
+paths = ["crates/foo/src/legacy/**"]
+reason = "the old parser, replaced next release"
+expires = "v0.6.0"
+```
+
+- **Every lint** drops its findings about an excluded crate, at a file in its directory, or at a file a pattern matches, lints added later and tool adapters included. Waivers in that code are not checked either.
+- **`reason` and `expires` are required.** An expired entry stops the run, as an expired exception does: delete the code, or renew the entry with a new reason and expiry.
+- **A crate an entry names** must be a member of the workspace, or a crate the map places in a nested one; a typo is an error. A path pattern that matches nothing leaves nothing out.
+- **The report** has a line per entry, before the summary: what it leaves out, its expiry with the days left, the reason and how many findings it left out. The summary counts the excluded crates and path patterns; the JSON report lists the entries under `excluded`. `spl config` lists them too.
+- Only a project file or a shared file sets them, never a tier.
+
+The excluded code stays in the workspace: it builds with it, and other crates may still use it. The lints that look at the whole workspace treat an excluded crate this way:
+
+| Lint | An excluded crate |
+|---|---|
+| [duplicate-versions](lints/M0002.md), [no-sys-crates](lints/M0004.md), [geiger-unsafe-deps](lints/X0023.md) | its dependencies count only where a checked crate reaches them too |
+| `deny-*` (cargo-deny) | left out of the graph with `--exclude`, with what only it pulls in |
+| `clippy-*`, [cargo-doc](lints/X0005.md), `udeps-*` | not built: `--exclude` beside `--workspace` (a project's `args` without `--workspace` name their packages themselves) |
+| [cargo-msrv](lints/X0006.md), [cargo-no-std](lints/X0007.md), [cargo-wasm](lints/X0008.md) | not built |
+| [map-complete](lints/G0008.md) | needs no map entry; one it has stays valid |
+| [layer-edges](lints/G0007.md), [forbidden-closure](lints/G0006.md) and the other map lints | an edge from a checked crate to it is checked; an edge from it is not |
+| [crate-cycles](lints/G0003.md) | a cycle through a checked crate is reported, at that crate |
+| [dead-pub](lints/C0009.md) and the other lints that look for uses | its uses still count: an item only excluded code uses is not dead |
 
 ## Tiers for some crates
 

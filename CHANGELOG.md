@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Added
+
+- `[[exclude]]` leaves crates or paths out of every lint, with a reason and a required expiry (CFG-8).
+- Commit lints take `after`, a commit or tag: only later commits are checked (ENG-12).
+
 ## [0.5.4] - 2026-11-19
 
 ### Changed

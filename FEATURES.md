@@ -11,6 +11,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `CFG-5` The crate map: layers with allow lists, crates with layer and flags, forbid, external, third-party.
 - ✅ `CFG-6` `foreign-map-keys`: `[map-file] foreign` names the key paths the map's owner checks; spl leaves them unread, and a typo in an spl key stays an error.
 - ✅ `CFG-7` `per-crate-tiers`: `[[crate-tiers]]` and the map key `tiers` hold chosen crates to more tiers; their levels and parameters resolve per crate.
+- ✅ `CFG-8` `exclude-code`: `[[exclude]]` leaves crates or paths out of every lint until a required expiry; the report counts what it left out ([configuration](docs/configuration.md#leaving-code-out)).
 
 ## ENG - engine and output
 
@@ -25,6 +26,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `ENG-9` Stable lint codes (group letter and four digits) in `LintMeta`, the registry `crates/spirit_level/codes.toml`, `spl codes --check`; codes work wherever ids do; adapter findings carry the tool's rule (`X-clippy:needless_return`).
 - ✅ `ENG-10` Commit checks: the branch's commits read once per base (`sl_model::git`), `Spirit-Level: allow(...)` trailers as commit waivers, `--landing` runs ([commits](docs/commits.md)).
 - ✅ `ENG-11` `skip-without-firmware`: lints that read the linked ELF are skipped, never failed, when no firmware binary they are enabled on exists ([output](docs/output.md#skipped-lints)).
+- ✅ `ENG-12` `commits-after`: a commit lint's `after` names a commit or tag; only the commits after it are checked ([commits](docs/commits.md#which-commits)).
 
 ## CLI - the command
 

@@ -22,7 +22,8 @@ For people, findings are grouped by lint, denied groups first, then warnings, ea
 - **Excerpt:** the source of the first place that points at a line, with 2 lines of context and its exact range marked with the finding's message. `--excerpts N` shows N per group; `0` turns them off.
 - **Places:** up to 5, then how many more and the command that lists them. `--all` lists every place. An exact fix is named once per group, with how many places it fixes.
 - **`--group-by crate|file`** groups by crate or file instead of lint.
-- **Summary** last: the result, how many lints ran, and the counts.
+- **Excluded code:** a line per [`[[exclude]]` entry](configuration.md#leaving-code-out) before the summary: `excluded until 2027-03-31 (132 days): 2 crates (foo_old_ui, foo_old_net): frozen (40 findings left out)`.
+- **Summary** last: the result, how many lints ran, and the counts, with the excluded crates and path patterns.
 
 Colour is off when the output is not a terminal, with `NO_COLOR`, or with `--color never`. `--show-allowed` also lists findings allowed by waivers and exceptions; `--timings` shows the time of each analysis.
 
@@ -71,11 +72,12 @@ Before the analyses it names the step (loading the project, finding the tools), 
   "ran": ["crate-lines", "..."],
   "not_run": [{ "lint": "deny-licenses", "code": "X0021", "level": "deny", "need": "tool:cargo-deny", "reason": "..." }],
   "skipped": [{ "lint": "stk-3", "code": "F0093", "level": "deny", "need": "elf", "reason": "no firmware binary" }],
+  "excluded": [{ "crates": ["foo_old_ui"], "paths": [], "reason": "frozen", "expires": "2027-03-31", "days_left": 132, "origin": "spirit_level.toml:12", "findings": 40 }],
   "timings": [{ "analysis": "size", "ms": 41 }]
 }
 ```
 
-JSON is complete and ungrouped: every finding, whatever `--all` and `--group-by` say. A span may carry `end_line` and `end_column` (the column after its last character); the text view reads the file for its excerpt, JSON carries no source. `rule` names an adapter's tool rule (`"clippy:needless_return"`). `allowed` (the reason) and `fix` (the edits) appear on a finding when they apply. Configuration errors print `{"schema": "spirit_level.config-errors/1", "errors": [{"file", "line", "message"}]}`.
+JSON is complete and ungrouped: every finding, whatever `--all` and `--group-by` say. A span may carry `end_line` and `end_column` (the column after its last character); the text view reads the file for its excerpt, JSON carries no source. `rule` names an adapter's tool rule (`"clippy:needless_return"`). `allowed` (the reason) and `fix` (the edits) appear on a finding when they apply. `days_left` is null for an entry that expires at a release. Configuration errors print `{"schema": "spirit_level.config-errors/1", "errors": [{"file", "line", "message"}]}`.
 
 ## Confidence
 
