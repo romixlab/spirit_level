@@ -1,0 +1,11 @@
+[[finding]]
+at = "examples_mcu/rust-toolchain.toml:2"
+
+[[finding]]
+at = "firmware/rust-toolchain.toml:2"
+
+[[finding]]
+at = "old/rust-toolchain:1"
+
+[[finding]]
+at = "rust-toolchain.toml:2"

@@ -1,0 +1,17 @@
+[[finding]]
+at = ".github/workflows/ci.yml:8"
+
+[[finding]]
+at = ".github/workflows/ci.yml:11"
+
+[[finding]]
+at = "justfile:1"
+
+[[finding]]
+at = "justfile:7"
+
+[[finding]]
+at = "justfile:10"
+
+[[finding]]
+at = "justfile:16"

@@ -13,6 +13,7 @@ mod package;
 mod patch;
 mod repo;
 mod speed;
+mod toolchain;
 mod workspace;
 
 use sl_analysis::{Analysis, Context, lint};
@@ -59,8 +60,16 @@ lint!(PATH_OUTSIDE_WORKSPACE, "M0005", "path-outside-workspace", "dependencies",
     params: [], needs: [], fix: None);
 lint!(PROFILE_DEFAULTS, "M0017", "profile-defaults", "repo", "the dev profile splits debug info and a deploy profile builds incrementally",
     params: [("deploy-profile", Str, "\"deploy\"", "the profile `just install` builds with")], needs: [], fix: None);
-lint!(TOOLCHAIN_PINNED, "M0019", "toolchain-pinned", "repo", "the repo pins its toolchain in rust-toolchain.toml",
-    params: [], needs: [], fix: None);
+lint!(TOOLCHAIN_PINNED, "M0019", "toolchain-pinned", "repo", "every rust-toolchain.toml pins the expected toolchain exactly: the stable release or the dated nightly",
+    params: [
+        ("stable", Str, "\"1.100.0\"", "the stable release every toolchain file pins (`X.Y.Z`); each spl release ships the current one"),
+        ("nightly", Str, "\"nightly-2026-11-19\"", "the nightly a toolchain file pins where it needs one (`nightly-YYYY-MM-DD`)"),
+        ("skip", StrList, "[\"**/tests/fixtures/**\", \"**/tests/projects/**\"]", "globs of toolchain files not checked: test projects"),
+    ],
+    needs: [], fix: Exact);
+lint!(TOOLCHAIN_OVERRIDES_PINNED, "M0036", "toolchain-overrides-pinned", "repo", "justfiles and CI workflows choose the pinned toolchain: `cargo +nightly-2026-11-19`, never `+nightly` or `+stable`",
+    params: [("skip", StrList, "[\"**/tests/fixtures/**\", \"**/tests/projects/**\"]", "globs of justfiles and workflows not checked: test projects")],
+    needs: [], fix: Exact);
 lint!(REPO_FILES, "M0018", "repo-files", "repo", "the repo carries its rule files",
     params: [("files", StrList, "[\"README.md\", \"AGENTS.md\", \"CLAUDE.md\", \"FEATURES.md\", \"CHANGELOG.md\"]", "files that must exist at the root")],
     needs: [], fix: None);
@@ -133,6 +142,7 @@ static LINTS: &[&LintMeta] = &[
     &PATH_OUTSIDE_WORKSPACE,
     &PROFILE_DEFAULTS,
     &TOOLCHAIN_PINNED,
+    &TOOLCHAIN_OVERRIDES_PINNED,
     &REPO_FILES,
     &CHANGELOG_UNRELEASED,
     &JUSTFILE_RECIPES,
@@ -168,6 +178,7 @@ impl Analysis for Manifest {
         workspace::run(cx);
         deps::run(cx);
         repo::run(cx);
+        toolchain::run(cx);
         clippy::run(cx);
         speed::run(cx);
         patch::run(cx);

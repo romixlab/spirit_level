@@ -116,6 +116,7 @@ Use it with `extends = "big"` in `spirit_level.toml`.
 | [M0032](../lints/M0032.md) | ci-workflow | `warn` | checks that only run on one PC get skipped; CI runs the repo's own checks on every push and pull request | small-workspace |
 | [M0033](../lints/M0033.md) | manifest-homepage | `warn` | crates.io and docs.rs link to repository and homepage; when there is a book, it is the homepage a reader wants | small |
 | [M0034](../lints/M0034.md) | readme-badges | `warn` | the top of the README tells a visitor whether the project passes and where its book, crate and API docs are | small |
+| [M0036](../lints/M0036.md) | toolchain-overrides-pinned | `deny` | a `cargo +nightly` in a recipe or CI bypasses the pinned toolchain | big |
 | [P0001](../lints/P0001.md) | agent-file-lines | `warn` | agents read AGENTS.md whole every session; a long one is skimmed, not followed | small |
 | [P0003](../lints/P0003.md) | agent-rules-match-lints | `warn` | limits AGENTS.md states are the limits the lints check | big |
 | [P0007](../lints/P0007.md) | commit-subject-length | `warn` | the subject is what one-line logs and reviews show | medium |
@@ -259,6 +260,10 @@ reason = "the MSRV is declared so it can be checked"
 [lints.toolchain-pinned]
 level = "deny"
 reason = "every PC and the gate build with the same compiler"
+
+[lints.toolchain-overrides-pinned]
+level = "deny"
+reason = "a `cargo +nightly` in a recipe or CI bypasses the pinned toolchain"
 
 [lints.feature-docs]
 level = "warn"

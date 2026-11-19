@@ -1,6 +1,6 @@
 # medium
 
-A medium workspace: internal crates unpublished, MSRV declared, toolchain pinned, dependency rules strict.
+A medium workspace: internal crates unpublished, MSRV declared, dependency rules strict.
 
 Extends [small-workspace](small-workspace.md): everything below is on top of it.
 
@@ -79,7 +79,7 @@ Use it with `extends = "medium"` in `spirit_level.toml`.
 | [M0015](../lints/M0015.md) | justfile-recipes | `warn` | every repo answers to the same recipes: default, test, lint, install, deploy | small |
 | [M0017](../lints/M0017.md) | profile-defaults | `warn` | split debug info and an incremental deploy profile: measured large build-time wins | small |
 | [M0018](../lints/M0018.md) | repo-files | `warn` | every work repo carries README, AGENTS, CLAUDE, FEATURES and CHANGELOG | small |
-| [M0019](../lints/M0019.md) | toolchain-pinned | `warn` | every PC and the gate build with the same compiler | medium |
+| [M0019](../lints/M0019.md) | toolchain-pinned | `warn` | every PC and the gate build with the same compiler: one exact release or dated nightly, the pair spl ships | small |
 | [M0020](../lints/M0020.md) | crate-dir-name | `warn` | flat crates/<name>: the folder is the crate | small-workspace |
 | [M0021](../lints/M0021.md) | macro-crate-suffix | `warn` | _macros and _derive mean proc macros and nothing else | small-workspace |
 | [M0022](../lints/M0022.md) | workspace-dependencies | `deny` | one version per dependency per workspace, written once in [workspace.dependencies] | medium |
@@ -94,6 +94,7 @@ Use it with `extends = "medium"` in `spirit_level.toml`.
 | [M0032](../lints/M0032.md) | ci-workflow | `warn` | checks that only run on one PC get skipped; CI runs the repo's own checks on every push and pull request | small-workspace |
 | [M0033](../lints/M0033.md) | manifest-homepage | `warn` | crates.io and docs.rs link to repository and homepage; when there is a book, it is the homepage a reader wants | small |
 | [M0034](../lints/M0034.md) | readme-badges | `warn` | the top of the README tells a visitor whether the project passes and where its book, crate and API docs are | small |
+| [M0036](../lints/M0036.md) | toolchain-overrides-pinned | `warn` | a `cargo +nightly` in a recipe or CI bypasses the pinned toolchain | small |
 | [P0001](../lints/P0001.md) | agent-file-lines | `warn` | agents read AGENTS.md whole every session; a long one is skimmed, not followed | small |
 | [P0007](../lints/P0007.md) | commit-subject-length | `warn` | the subject is what one-line logs and reviews show | medium |
 | [P0009](../lints/P0009.md) | changelog-entry-length | `warn` | a CHANGELOG is a list: one short line per change | small |
@@ -190,11 +191,11 @@ The project turns these on in its own `[workspace.lints.clippy]` (`allow` rows a
 ## The file
 
 ```toml
-# Tier 3: a medium workspace (wire_weaver's size): internal crates, MSRV, pinned toolchain.
+# Tier 3: a medium workspace (wire_weaver's size): internal crates, MSRV, strict dependency rules.
 extends = "small-workspace"
 
 [tier]
-description = "A medium workspace: internal crates unpublished, MSRV declared, toolchain pinned, dependency rules strict"
+description = "A medium workspace: internal crates unpublished, MSRV declared, dependency rules strict"
 
 [lints.rust-version-set]
 level = "warn"
@@ -203,10 +204,6 @@ reason = "the MSRV is declared so it can be checked"
 [lints.publish-false]
 level = "warn"
 reason = "internal crates are a build unit, not an API; only listed crates are published"
-
-[lints.toolchain-pinned]
-level = "warn"
-reason = "every PC and the gate build with the same compiler"
 
 [lints.workspace-dependencies]
 level = "deny"

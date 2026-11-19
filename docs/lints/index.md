@@ -465,12 +465,13 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [M0016](M0016.md) | [justfile-simple](M0016.md) | justfile recipes only call programs: a few lines, no inline scripts | off | off | off | warn | off | off | off | off | off | off |
 | [M0017](M0017.md) | [profile-defaults](M0017.md) | the dev profile splits debug info and a deploy profile builds incrementally | warn | warn | warn | warn | off | off | off | off | off | off |
 | [M0018](M0018.md) | [repo-files](M0018.md) | the repo carries its rule files | warn | warn | warn | warn | deny | off | off | off | off | off |
-| [M0019](M0019.md) | [toolchain-pinned](M0019.md) | the repo pins its toolchain in rust-toolchain.toml | off | off | warn | deny | off | off | off | off | off | off |
+| [M0019](M0019.md) | [toolchain-pinned](M0019.md) | every rust-toolchain.toml pins the expected toolchain exactly: the stable release or the dated nightly | warn | warn | warn | deny | off | off | off | off | off | off |
 | [M0026](M0026.md) | [profile-no-lto](M0026.md) | the profiles of the edit-build-test loop and the deploy profile build without LTO | warn | warn | warn | warn | off | off | off | off | off | off |
 | [M0028](M0028.md) | [test-binaries](M0028.md) | a crate builds its integration tests as one binary | off | off | warn | warn | off | off | off | off | off | off |
 | [M0031](M0031.md) | [fuzz-corpus-test](M0031.md) | every fuzz target has a corpus tracked in git and a test that replays it | off | off | warn | warn | off | off | off | off | off | off |
 | [M0032](M0032.md) | [ci-workflow](M0032.md) | the repo has a CI workflow and it runs the repo's checks | off | warn | warn | warn | off | off | off | off | off | off |
 | [M0034](M0034.md) | [readme-badges](M0034.md) | the README carries a badge for the book, CI and every published crate, each linking to its target | warn | warn | warn | warn | off | off | off | off | off | off |
+| [M0036](M0036.md) | [toolchain-overrides-pinned](M0036.md) | justfiles and CI workflows choose the pinned toolchain: `cargo +nightly-2026-11-19`, never `+nightly` or `+stable` | warn | warn | warn | deny | off | off | off | off | off | off |
 
 ## rustfmt
 

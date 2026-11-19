@@ -1,3 +1,2 @@
 [[finding]]
-at = "rust-toolchain.toml"
-
+at = "rust-toolchain.toml:1:2"

@@ -73,6 +73,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `MAN-15` `per-target-features`: with deny.toml's `[graph] targets`, a dependency declared for another target turns no feature on; cargo metadata unifies them across targets.
 - ✅ `MAN-16` `per-member-graph`: the graph lints walk each checked crate's own feature resolution (default features, every target), not cargo metadata's workspace-unified features ([what each crate builds](docs/configuration.md#what-each-crate-builds)).
 - ✅ `MAN-17` `binary-name-chars`: every explicit `[[bin]]` and implicit binary (`src/main.rs`, `src/bin/*.rs`, `src/bin/*/main.rs`) checked against a configurable character set, lowercase ASCII letters and digits by default; in no tier by default.
+- ✅ `MAN-13` Pinned toolchain at the base tier: `toolchain-pinned` (M0019) holds every toolchain file to the shipped stable or nightly; `toolchain-overrides-pinned` (M0036) checks `cargo +X` and CI; `--fix` writes them.
 
 ## GRAPH - crate graph and map
 

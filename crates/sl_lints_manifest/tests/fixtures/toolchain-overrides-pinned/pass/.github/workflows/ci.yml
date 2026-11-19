@@ -1,0 +1,13 @@
+name: ci
+on: push
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.100.0
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: nightly-2026-11-19
+      - run: cargo +nightly-2026-11-19 fmt --check
+      - run: cargo test --workspace

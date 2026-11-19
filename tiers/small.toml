@@ -1,6 +1,6 @@
 # Tier 1: one crate. The house basics every Rust repo meets from its first commit.
 [tier]
-description = "One crate: metadata, docs, pure-Rust dependencies, build profiles, the repo's rule files, valid waivers"
+description = "One crate: metadata, docs, pure-Rust dependencies, build profiles, the pinned toolchain, the repo's rule files, valid waivers"
 
 [lints.waiver-invalid]
 level = "deny"
@@ -37,6 +37,14 @@ reason = "rustdoc's front page of the crate is its crate-level docs"
 [lints.default-features-off]
 level = "warn"
 reason = "dependencies are added with default-features = false and only the features in use"
+
+[lints.toolchain-pinned]
+level = "warn"
+reason = "every PC and the gate build with the same compiler: one exact release or dated nightly, the pair spl ships"
+
+[lints.toolchain-overrides-pinned]
+level = "warn"
+reason = "a `cargo +nightly` in a recipe or CI bypasses the pinned toolchain"
 
 [lints.no-sys-crates]
 level = "deny"

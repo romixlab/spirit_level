@@ -40,6 +40,7 @@ M0032 = { id = "ci-workflow", group = "manifest", status = "active" }
 M0033 = { id = "manifest-homepage", group = "manifest", status = "active" }
 M0034 = { id = "readme-badges", group = "manifest", status = "active" }
 M0035 = { id = "binary-name-chars", group = "manifest", status = "active" }
+M0036 = { id = "toolchain-overrides-pinned", group = "manifest", status = "active" }
 S0001 = { id = "crate-lines", group = "size", status = "active" }
 S0002 = { id = "function-complexity", group = "size", status = "active" }
 S0003 = { id = "function-lines", group = "size", status = "active" }

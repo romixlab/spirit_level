@@ -1,0 +1,16 @@
+old := "nightly-2026-01-05"
+
+default:
+    @just --list
+
+fmt:
+    cargo +nightly fmt --all
+
+build:
+    cargo +stable build --release
+
+fuzz:
+    cargo +{{ old }} fuzz run parse
+
+beta:
+    rustup run beta cargo test

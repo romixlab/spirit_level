@@ -1,6 +1,6 @@
 # small
 
-One crate: metadata, docs, pure-Rust dependencies, build profiles, the repo's rule files, valid waivers.
+One crate: metadata, docs, pure-Rust dependencies, build profiles, the pinned toolchain, the repo's rule files, valid waivers.
 
 Use it with `extends = "small"` in `spirit_level.toml`.
 
@@ -64,11 +64,13 @@ Use it with `extends = "small"` in `spirit_level.toml`.
 | [M0015](../lints/M0015.md) | justfile-recipes | `warn` | every repo answers to the same recipes: default, test, lint, install, deploy | small |
 | [M0017](../lints/M0017.md) | profile-defaults | `warn` | split debug info and an incremental deploy profile: measured large build-time wins | small |
 | [M0018](../lints/M0018.md) | repo-files | `warn` | every work repo carries README, AGENTS, CLAUDE, FEATURES and CHANGELOG | small |
+| [M0019](../lints/M0019.md) | toolchain-pinned | `warn` | every PC and the gate build with the same compiler: one exact release or dated nightly, the pair spl ships | small |
 | [M0025](../lints/M0025.md) | tier-clippy-set | `warn` | Clippy runs in the editor and CI from the project's own lint table; the tier says what belongs in it | small |
 | [M0026](../lints/M0026.md) | profile-no-lto | `warn` | LTO in the loop's profiles turns a link of a second into minutes; it belongs in a release profile | small |
 | [M0027](../lints/M0027.md) | patch-outside-workspace | `deny` | a committed patch into a sibling checkout builds differently on every machine; it lives in an ignored .cargo/config.toml | small |
 | [M0033](../lints/M0033.md) | manifest-homepage | `warn` | crates.io and docs.rs link to repository and homepage; when there is a book, it is the homepage a reader wants | small |
 | [M0034](../lints/M0034.md) | readme-badges | `warn` | the top of the README tells a visitor whether the project passes and where its book, crate and API docs are | small |
+| [M0036](../lints/M0036.md) | toolchain-overrides-pinned | `warn` | a `cargo +nightly` in a recipe or CI bypasses the pinned toolchain | small |
 | [P0001](../lints/P0001.md) | agent-file-lines | `warn` | agents read AGENTS.md whole every session; a long one is skimmed, not followed | small |
 | [P0009](../lints/P0009.md) | changelog-entry-length | `warn` | a CHANGELOG is a list: one short line per change | small |
 | [S0002](../lints/S0002.md) | function-complexity | `warn` | more paths than can be tested or held in one's head | small |
@@ -115,7 +117,7 @@ The project turns these on in its own `[workspace.lints.clippy]` (`allow` rows a
 ```toml
 # Tier 1: one crate. The house basics every Rust repo meets from its first commit.
 [tier]
-description = "One crate: metadata, docs, pure-Rust dependencies, build profiles, the repo's rule files, valid waivers"
+description = "One crate: metadata, docs, pure-Rust dependencies, build profiles, the pinned toolchain, the repo's rule files, valid waivers"
 
 [lints.waiver-invalid]
 level = "deny"
@@ -152,6 +154,14 @@ reason = "rustdoc's front page of the crate is its crate-level docs"
 [lints.default-features-off]
 level = "warn"
 reason = "dependencies are added with default-features = false and only the features in use"
+
+[lints.toolchain-pinned]
+level = "warn"
+reason = "every PC and the gate build with the same compiler: one exact release or dated nightly, the pair spl ships"
+
+[lints.toolchain-overrides-pinned]
+level = "warn"
+reason = "a `cargo +nightly` in a recipe or CI bypasses the pinned toolchain"
 
 [lints.no-sys-crates]
 level = "deny"

@@ -1,4 +1,4 @@
-//! Repo-level files: profiles, toolchain, rule files, changelog, justfile, feature comments.
+//! Repo-level files: profiles, rule files, changelog, justfile, feature comments.
 
 use sl_analysis::Context;
 use sl_core::{Diagnostic, Span};
@@ -30,28 +30,6 @@ pub(crate) fn run(cx: &Context<'_>) {
             Diagnostic::new("profile-defaults", format!("profile.{deploy}"), format!("there is no [profile.{deploy}] with incremental = true"))
                 .span(root.span(&["profile", deploy]))
                 .help(format!("add `[profile.{deploy}]` with `inherits = \"release\"` and `incremental = true`, and build installs with it")),
-        );
-    }
-
-    // toolchain-pinned
-    let tc = p
-        .read("rust-toolchain.toml")
-        .or_else(|| p.read("rust-toolchain"));
-    let pinned = tc.as_deref().is_some_and(|t| {
-        t.lines().any(|l| {
-            let l = l.trim();
-            l.starts_with("channel") || (!l.is_empty() && !l.starts_with('[') && !l.contains('='))
-        })
-    });
-    if !pinned {
-        cx.emit(
-            Diagnostic::new(
-                "toolchain-pinned",
-                "rust-toolchain.toml",
-                "the toolchain is not pinned",
-            )
-            .span(Span::new("rust-toolchain.toml", 0))
-            .help("add rust-toolchain.toml with `[toolchain] channel = \"1.xx.y\"`"),
         );
     }
 

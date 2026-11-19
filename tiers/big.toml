@@ -32,6 +32,10 @@ reason = "the MSRV is declared so it can be checked"
 level = "deny"
 reason = "every PC and the gate build with the same compiler"
 
+[lints.toolchain-overrides-pinned]
+level = "deny"
+reason = "a `cargo +nightly` in a recipe or CI bypasses the pinned toolchain"
+
 [lints.feature-docs]
 level = "warn"
 reason = "a feature without a comment cannot be chosen by a reader"
