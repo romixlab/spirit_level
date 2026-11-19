@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- `no-sys-crates`, `duplicate-versions`, `forbidden-closure`, `geiger-unsafe-deps` resolve features per checked crate, not workspace-unified (MAN-16).
+- `duplicate-versions` with deny.toml targets: declarations for other targets turn no feature on (MAN-15).
+
 ## [0.5.6] - 2026-11-19
 
 ### Changed

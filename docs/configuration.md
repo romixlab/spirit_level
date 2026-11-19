@@ -97,6 +97,20 @@ The excluded code stays in the workspace: it builds with it, and other crates ma
 | [crate-cycles](lints/G0003.md) | a cycle through a checked crate is reported, at that crate |
 | [dead-pub](lints/C0009.md) and the other lints that look for uses | its uses still count: an item only excluded code uses is not dead |
 
+## What each crate builds
+
+`cargo metadata` turns features on once for the whole workspace: when one crate asks a shared crate for a feature that pulls an optional dependency, every crate that uses the shared crate seems to pull it too. The lints that walk the dependency graph resolve the features again for each checked crate alone, from its default features and with every target's dependencies, as `cargo tree -p CRATE --target all` shows them:
+
+| Lint | Walks |
+|---|---|
+| [no-sys-crates](lints/M0004.md) | each checked crate's graph, with its own dev-dependencies; the finding names the crates that reach it |
+| [duplicate-versions](lints/M0002.md) | the same graphs; with deny.toml's `[graph] targets`, a declaration for another target turns no feature on |
+| [forbidden-closure](lints/G0006.md) | the graph of the crate the map names, with its own dev-dependencies |
+| [geiger-unsafe-deps](lints/X0023.md) | each checked crate's graph, without dev-dependencies |
+| `audit-*` (cargo-audit), with an `[[exclude]]` | the checked crates' graphs decide which advisories count |
+
+So a dependency that only an excluded crate, or only one crate, turns on is reported for that crate alone, or not at all. A build dependency and the same package built for the target share their features, so a crate reached both ways counts once. The `hakari-*` lints keep the unified graph: the workspace-hack exists to settle exactly that unification.
+
 ## Tiers for some crates
 
 `extends` holds every crate. A workspace that mixes kinds of crates (firmware beside host tools, an egui app beside its CLI) puts the tiers of one kind on those crates only, so the others are not judged by rules that are not theirs:

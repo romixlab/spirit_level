@@ -69,7 +69,8 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `MAN-11` `manifest-homepage` (M0033): `[workspace.package]` (or `[package]`) sets `repository`, and `homepage` equals the book's `site_url`, with an exact fix.
 - ✅ `MAN-12` `readme-badges` (M0034): the README carries a badge for the book (`site_url`), the CI workflow (its `badge.svg`), and crates.io and docs.rs per published crate; `--fix` inserts them.
 - ✅ `MAN-14` `duplicates-from-deny`: `duplicate-versions` judges cargo-deny's graph (`[graph] targets`) and reads deny.toml's `skip` and `skip-tree`, the one list of accepted duplicates.
-- 📋 `MAN-15` `per-target-features`: the resolved graph turns features on per target, as cargo's resolver 2 does; cargo metadata unifies them across targets, so a target can show a dependency it never builds.
+- ✅ `MAN-15` `per-target-features`: with deny.toml's `[graph] targets`, a dependency declared for another target turns no feature on; cargo metadata unifies them across targets.
+- ✅ `MAN-16` `per-member-graph`: the graph lints walk each checked crate's own feature resolution (default features, every target), not cargo metadata's workspace-unified features ([what each crate builds](docs/configuration.md#what-each-crate-builds)).
 
 ## GRAPH - crate graph and map
 
