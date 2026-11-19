@@ -11,7 +11,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `CFG-5` The crate map: layers with allow lists, crates with layer and flags, forbid, external, third-party.
 - ✅ `CFG-6` `foreign-map-keys`: `[map-file] foreign` names the key paths the map's owner checks; spl leaves them unread, and a typo in an spl key stays an error.
 - ✅ `CFG-7` `per-crate-tiers`: `[[crate-tiers]]` and the map key `tiers` hold chosen crates to more tiers; their levels and parameters resolve per crate.
-- ✅ `CFG-8` `exclude-code`: `[[exclude]]` leaves crates or paths out of every lint until a required expiry; the report counts what it left out ([configuration](docs/configuration.md#leaving-code-out)).
+- ✅ `CFG-8` `exclude-code`: `[[exclude]]` leaves crates or paths out of every lint until a required expiry; the report counts what it left out; workspace-level lints compute on the crates that are checked ([configuration](docs/configuration.md#leaving-code-out)).
 
 ## ENG - engine and output
 
@@ -68,6 +68,8 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `MAN-10` `ci-workflow` (M0032): `.github/workflows/ci.yml` runs `just lint` and `just test`, or without those recipes Clippy and the tests.
 - ✅ `MAN-11` `manifest-homepage` (M0033): `[workspace.package]` (or `[package]`) sets `repository`, and `homepage` equals the book's `site_url`, with an exact fix.
 - ✅ `MAN-12` `readme-badges` (M0034): the README carries a badge for the book (`site_url`), the CI workflow (its `badge.svg`), and crates.io and docs.rs per published crate; `--fix` inserts them.
+- ✅ `MAN-14` `duplicates-from-deny`: `duplicate-versions` judges cargo-deny's graph (`[graph] targets`) and reads deny.toml's `skip` and `skip-tree`, the one list of accepted duplicates.
+- 📋 `MAN-15` `per-target-features`: the resolved graph turns features on per target, as cargo's resolver 2 does; cargo metadata unifies them across targets, so a target can show a dependency it never builds.
 
 ## GRAPH - crate graph and map
 
