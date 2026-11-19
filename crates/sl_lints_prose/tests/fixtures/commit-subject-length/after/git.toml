@@ -1,0 +1,8 @@
+# The first commit was pushed before the limit was adopted: `after` names it, so only the second is checked.
+
+[[commit]]
+message = "wip: core types, config, model, engine, report, manifest lints, CLI, book"
+tag = "adopted"
+
+[[commit]]
+message = "wip: the rest of the lints, the book pages, the tiers and the CLI commands"

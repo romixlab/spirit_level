@@ -12,23 +12,43 @@ fn span(c: &Commit, line: u32) -> Span {
     Span::new(c.file(), line)
 }
 
-/// The commits of the branch for lint `id` (its `base` parameter), or None after reporting why they could not be read
+/// The commits of the branch for lint `id`: those in `base..HEAD`, and after its `after` commit when it names one;
+/// None after reporting why they could not be read
 pub(crate) fn branch(cx: &Context<'_>, id: &str) -> Option<Arc<[Commit]>> {
-    let base = cx.params(id).str("base");
-    match cx.project.commits(base) {
+    let params = cx.params(id);
+    let (base, after) = (params.str("base"), params.str("after"));
+    let list = read(cx, id, "base", base)?;
+    if after.is_empty() {
+        return Some(list);
+    }
+    let later = read(cx, id, "after", after)?;
+    Some(
+        list.iter()
+            .filter(|c| later.iter().any(|l| l.hash == c.hash))
+            .cloned()
+            .collect(),
+    )
+}
+
+/// The commits in `rev..HEAD`, `rev` being the lint's parameter `param`; None after reporting why they could not
+/// be read
+fn read(cx: &Context<'_>, id: &str, param: &str, rev: &str) -> Option<Arc<[Commit]>> {
+    match cx.project.commits(rev) {
         Ok(l) => Some(l),
         Err(e) => {
             cx.emit(
                 Diagnostic::new(
                     id,
-                    format!("base:{base}"),
-                    format!("commits not checked: {e}"),
+                    format!("{param}:{rev}"),
+                    format!("commits not checked: the {param} {e}"),
                 )
                 .span(Span::new(".git", 0))
                 .confidence(Confidence::Candidate)
-                .help(
-                    "set the lint's `base` to the branch work merges into (`main`, `origin/main`)",
-                ),
+                .help(if param == "base" {
+                    "set the lint's `base` to the branch work merges into (`main`, `origin/main`)"
+                } else {
+                    "set the lint's `after` to a commit or tag of this repository, or remove it"
+                }),
             );
             None
         }

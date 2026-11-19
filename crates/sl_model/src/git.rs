@@ -113,7 +113,7 @@ fn read(root: &Path, base: &str) -> Result<Vec<Commit>, String> {
             &format!("{base}^{{commit}}"),
         ],
     )
-    .map_err(|e| format!("the base `{base}` is not a commit here: {e}"))?;
+    .map_err(|e| format!("`{base}` is not a commit here: {e}"))?;
     let log = git(
         root,
         &[

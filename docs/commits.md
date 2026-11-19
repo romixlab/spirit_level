@@ -11,7 +11,14 @@ A commit lint checks the commits in `base..HEAD`, merges left out: the work of t
 base = "origin/main"
 ```
 
-On the base branch itself the range is empty and the commit lints find nothing. When `base` is not a commit in the repository, the lint reports one candidate finding that names the base and fails nothing.
+History that cannot be rewritten stays out with `after`, a commit or tag: only the commits after it are checked. A repo that adopts a commit lint, or tightens its limit, on a branch whose earlier commits are already pushed names the last of them:
+
+```toml
+[lints.commit-subject-length]
+after = "v0.5.0"
+```
+
+On the base branch itself the range is empty and the commit lints find nothing. When `base` or `after` is not a commit in the repository, the lint reports one candidate finding that names it and fails nothing.
 
 A finding about a commit is placed at `commit:<12 hex>`, with the line of its message: the subject is line 1.
 

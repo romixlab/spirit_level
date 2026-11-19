@@ -554,7 +554,7 @@ impl GitCase {
     /// Copies `project` into a fresh directory, commits every file but the `untracked` ones on `main`, then
     /// adds each `[[commit]]` on a branch `work`: its `message`, where `{sha:N}` is the 12-hex hash of commit N (0 is
     /// the initial one), writing its `files` table of path and text and deleting its `remove` list (none: an empty
-    /// commit)
+    /// commit), and tagging it with its `tag` when it has one
     fn make(case_dir: &Path, project: &Path, id: &str) -> Result<Self, String> {
         let spec: toml_edit::DocumentMut = std::fs::read_to_string(case_dir.join("git.toml"))
             .map_err(|e| format!("git.toml: {e}"))?
@@ -617,6 +617,9 @@ impl GitCase {
                 }
                 repo.git(&["add", "-A"])?;
                 repo.git(&["commit", "-q", "--allow-empty", "-m", &msg])?;
+                if let Some(tag) = c.get("tag").and_then(|t| t.as_str()) {
+                    repo.git(&["tag", tag])?;
+                }
                 hashes.push(repo.git(&["rev-parse", "HEAD"])?);
             }
         }

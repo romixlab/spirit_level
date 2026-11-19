@@ -1,0 +1,4 @@
+[lints.commit-subject-length]
+level = "deny"
+reason = "fixture"
+after = "adopted"
