@@ -43,13 +43,74 @@ pub fn installed_targets(dir: &Path) -> Option<Vec<String>> {
     (out.code == Some(0)).then(|| out.stdout.lines().map(|l| l.trim().to_owned()).collect())
 }
 
-/// Whether a nightly toolchain is installed
+/// The nightly channel the project pins (`rust-toolchain-nightly.toml`'s `[toolchain] channel`, a dated nightly so
+/// every box builds the same one), the plain `nightly` channel where it has none
+pub fn nightly_channel(root: &Path) -> String {
+    std::fs::read_to_string(root.join("rust-toolchain-nightly.toml"))
+        .ok()
+        .and_then(|s| s.parse::<toml_edit::DocumentMut>().ok())
+        .and_then(|doc| {
+            doc.get("toolchain")?
+                .get("channel")?
+                .as_str()
+                .map(str::to_owned)
+        })
+        .unwrap_or_else(|| "nightly".to_owned())
+}
+
+/// Whether the project's nightly channel ([`nightly_channel`]) is installed
 pub fn nightly_installed(dir: &Path) -> bool {
     crate::run(
         Path::new("rustup"),
-        &["run", "nightly", "rustc", "-V"],
+        &["run", &nightly_channel(dir), "rustc", "-V"],
         dir,
         &[],
     )
     .is_ok_and(|o| o.code == Some(0))
+}
+
+#[cfg(test)]
+#[expect(
+    clippy::let_underscore_must_use,
+    reason = "a test removes its scratch directory as far as it can"
+)]
+mod tests {
+    use super::*;
+    use std::path::PathBuf;
+
+    /// A scratch project root, removed on drop
+    struct ScratchRoot(PathBuf);
+
+    impl ScratchRoot {
+        fn new(name: &str) -> Self {
+            let dir =
+                std::env::temp_dir().join(format!("sl_tools_rustup_{name}_{}", std::process::id()));
+            let _ = std::fs::remove_dir_all(&dir);
+            std::fs::create_dir_all(&dir).expect("create the scratch root");
+            Self(dir)
+        }
+    }
+
+    impl Drop for ScratchRoot {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.0);
+        }
+    }
+
+    #[test]
+    fn nightly_channel_defaults_without_a_pin() {
+        let root = ScratchRoot::new("default");
+        assert_eq!(nightly_channel(&root.0), "nightly");
+    }
+
+    #[test]
+    fn nightly_channel_reads_the_pin() {
+        let root = ScratchRoot::new("pinned");
+        std::fs::write(
+            root.0.join("rust-toolchain-nightly.toml"),
+            "[toolchain]\nchannel = \"nightly-2026-11-19\"\n",
+        )
+        .expect("write the pin file");
+        assert_eq!(nightly_channel(&root.0), "nightly-2026-11-19");
+    }
 }

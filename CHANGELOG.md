@@ -5,6 +5,7 @@
 ### Changed
 
 - X0034 tested ranges widened to cargo-deny `>=0.20, <0.22` and cargo-machete `>=0.9, <0.11` (TOOL-6).
+- cargo-udeps's nightly channel comes from `rust-toolchain-nightly.toml`, not the plain `nightly` alias (TOOL-7).
 
 ## [0.5.3] - 2026-11-18
 

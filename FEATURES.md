@@ -148,6 +148,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `TOOL-4` full-by-default: hakari and geiger are always linked into `spl`, no cargo feature to build them in ([tools](docs/tools.md)).
 - ✅ `TOOL-5` `tool-shadowed`: an out-of-range tool with an in-range one further down PATH is named by both path and version, in the table's `shadowed by` column, the JSON `shadow` field and the lint's help; `--spec`/`--components` skip it ([tools](docs/tools.md#a-tool-shadowed-on-path)).
 - ✅ `TOOL-6` tested ranges widened for cargo-deny 0.21 and cargo-machete 0.10: both parse unchanged, so only `tools.toml` and its tests move.
+- ✅ `TOOL-7` cargo-udeps's nightly comes from `rust-toolchain-nightly.toml` (`sl_tools::rustup::nightly_channel`), the plain `nightly` alias without one: a box with only a dated nightly installed still runs it.
 
 ## BOOK - the book
 

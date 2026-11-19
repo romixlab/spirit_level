@@ -1,4 +1,5 @@
-//! The cargo-udeps adapter: `cargo +nightly udeps --output json --workspace --all-targets`.
+//! The cargo-udeps adapter: `cargo +<nightly channel> udeps --output json --workspace --all-targets`, the project's
+//! pinned nightly channel ([`sl_tools::rustup::nightly_channel`]) or plain `nightly` without one.
 //!
 //! cargo-udeps prints one JSON document: `success`, and `unused_deps`, a map from package id to the package's
 //! `manifest_path` and its unused `normal`, `development` and `build` dependencies. It exits 1 when it found
@@ -35,18 +36,16 @@ impl Analysis for Udeps {
             return;
         };
         let args = ["udeps", "--output", "json", "--workspace", "--all-targets"];
-        let out = match sl_tools::run_subcommand(
-            &exe,
-            &args,
-            &p.root,
-            &[("RUSTUP_TOOLCHAIN", "nightly")],
-        ) {
-            Ok(o) => o,
-            Err(e) => {
-                cx.not_run_all("run:cargo-udeps", &format!("cannot run cargo-udeps: {e}"));
-                return;
-            }
-        };
+        let channel = sl_tools::rustup::nightly_channel(&p.root);
+        let out =
+            match sl_tools::run_subcommand(&exe, &args, &p.root, &[("RUSTUP_TOOLCHAIN", &channel)])
+            {
+                Ok(o) => o,
+                Err(e) => {
+                    cx.not_run_all("run:cargo-udeps", &format!("cannot run cargo-udeps: {e}"));
+                    return;
+                }
+            };
         let Some(found) = parse(&out.stdout) else {
             cx.not_run_all("run:cargo-udeps", &format!("cargo udeps {}", out.failure()));
             return;

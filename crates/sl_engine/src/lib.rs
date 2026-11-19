@@ -222,8 +222,12 @@ fn missing(
                 .is_none()
                 .then(|| sl_tools::missing_reason(t)),
         },
-        Need::Nightly => (!sl_tools::rustup::nightly_installed(&project.root))
-            .then(|| "no nightly toolchain: `rustup toolchain install nightly`".to_owned()),
+        Need::Nightly => (!sl_tools::rustup::nightly_installed(&project.root)).then(|| {
+            let channel = sl_tools::rustup::nightly_channel(&project.root);
+            format!(
+                "no {channel} toolchain: `rustup toolchain install {channel} --profile minimal`"
+            )
+        }),
         Need::Elf => opts.elf.is_empty().then(|| {
             "no ELF given: build the firmware and pass --elf target/<triple>/release/<name>"
                 .to_owned()

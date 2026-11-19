@@ -107,6 +107,8 @@ struct Needed {
     tools: Vec<Tool>,
     /// A listed tool runs on nightly, and no nightly toolchain is installed
     nightly_missing: bool,
+    /// The project's pinned nightly channel ([`sl_tools::rustup::nightly_channel`]), for the install hint
+    nightly_channel: String,
     toolchains: Vec<Toolchain>,
     targets: Vec<Target>,
 }
@@ -177,6 +179,7 @@ impl Needed {
         Self {
             tools,
             nightly_missing,
+            nightly_channel: sl_tools::rustup::nightly_channel(dir),
             toolchains: Vec::new(),
             targets: Vec::new(),
         }
@@ -477,7 +480,10 @@ fn next_hints(n: &Needed, p: Paint) -> String {
         hints.push(format!("rustup target add {}", targets.join(" ")));
     }
     if n.nightly_missing {
-        hints.push("rustup toolchain install nightly --profile minimal".to_owned());
+        hints.push(format!(
+            "rustup toolchain install {} --profile minimal",
+            n.nightly_channel
+        ));
     }
     let mut s = String::new();
     if !hints.is_empty() {

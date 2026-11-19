@@ -148,7 +148,7 @@ spl tools needed --components --missing | xargs -r rustup component add
 spl check
 ```
 
-The version in `--spec` is the one the parser is tested at. A tool's version is the first word shaped like one in the output of its `version-args` (default `--version`); `cargo-udeps` runs on a nightly toolchain, which `rustup toolchain install nightly --profile minimal` adds.
+The version in `--spec` is the one the parser is tested at. A tool's version is the first word shaped like one in the output of its `version-args` (default `--version`); `cargo-udeps` runs on a nightly toolchain, the project's `rust-toolchain-nightly.toml` pin or plain `nightly` without one, which `rustup toolchain install <channel> --profile minimal` adds.
 
 ### A tool shadowed on PATH
 

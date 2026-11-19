@@ -1,0 +1,4 @@
+# The nightly cargo-udeps (X0033) runs on, read by sl_tools::rustup::nightly_channel; not an override rustup
+# itself picks up, so the main toolchain stays rust-toolchain.toml's stable pin.
+[toolchain]
+channel = "nightly-2026-11-19"
