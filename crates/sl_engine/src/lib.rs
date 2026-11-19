@@ -103,6 +103,25 @@ pub struct Skipped {
     pub reason: String,
 }
 
+/// An `[[exclude]]` entry as a run applied it
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
+pub struct Excluded {
+    /// The crates it leaves out
+    pub crates: Vec<String>,
+    /// The path patterns it leaves out
+    pub paths: Vec<String>,
+    /// Why
+    pub reason: String,
+    /// When it stops holding: a date or a release
+    pub expires: String,
+    /// Days until a date expiry; None for a release
+    pub days_left: Option<i64>,
+    /// Where it is written
+    pub origin: String,
+    /// The findings it left out of this run
+    pub findings: usize,
+}
+
 /// How long one analysis took
 #[derive(Clone, Debug, PartialEq, Serialize)]
 pub struct Timing {
@@ -129,6 +148,8 @@ pub struct Report {
     pub not_run: Vec<NotRun>,
     /// Lints enabled but skipped: the project has nothing they apply to
     pub skipped: Vec<Skipped>,
+    /// The `[[exclude]]` entries and what each left out
+    pub excluded: Vec<Excluded>,
     /// Time per analysis
     pub timings: Vec<Timing>,
 }
@@ -423,6 +444,51 @@ fn apply_levels(diagnostics: &mut [Diagnostic], config: &Config) {
     }
 }
 
+/// Drops each finding an `[[exclude]]` entry covers: one about an excluded crate, or at a file an entry's patterns
+/// match or that lies in an excluded crate's directory; each entry with the count it dropped
+fn apply_excludes(
+    diagnostics: &mut Vec<Diagnostic>,
+    project: &Project,
+    config: &Config,
+    today: Date,
+) -> Vec<Excluded> {
+    let mut counts = vec![0; config.excludes.len()];
+    // the deepest member directory holding a file names the crate a finding without one is about
+    let crate_at = |path: &str| {
+        project
+            .packages
+            .iter()
+            .filter(|p| !p.dir.is_empty() && path.starts_with(&format!("{}/", p.dir)))
+            .max_by_key(|p| p.dir.len())
+            .map(|p| p.name.as_str())
+    };
+    diagnostics.retain(|d| {
+        let path = d.primary().map(|s| s.file.as_str());
+        let krate = d.krate.as_deref().or_else(|| path.and_then(crate_at));
+        match config.excludes.iter().position(|e| e.covers(krate, path)) {
+            Some(i) => {
+                counts[i] += 1;
+                false
+            }
+            None => true,
+        }
+    });
+    config
+        .excludes
+        .iter()
+        .zip(counts)
+        .map(|(e, findings)| Excluded {
+            crates: e.crates.clone(),
+            paths: e.paths.clone(),
+            reason: e.reason.clone(),
+            expires: e.expires.to_string(),
+            days_left: e.days_left(today),
+            origin: e.origin.to_string(),
+            findings,
+        })
+        .collect()
+}
+
 /// Allows each finding a waiver covers, with the waiver's reason; which waivers allowed something
 fn apply_waivers(diagnostics: &mut [Diagnostic], waivers: &[waiver::Waiver]) -> Vec<bool> {
     let mut used = vec![false; waivers.len()];
@@ -572,6 +638,7 @@ pub fn run(
         diagnostics.push(d);
     }
 
+    let excluded = apply_excludes(&mut diagnostics, project, config, opts.today);
     for d in &mut diagnostics {
         d.code = code_of(&d.lint);
     }
@@ -589,6 +656,7 @@ pub fn run(
         ran,
         not_run,
         skipped,
+        excluded,
         timings,
     }
 }

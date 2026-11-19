@@ -282,3 +282,68 @@ fn elf_lints_hold_only_the_firmware_binaries_their_tier_is_on() {
     assert_eq!(report["not_run"], serde_json::json!([]), "{report}");
     assert_eq!(code, 0, "{err}{report}");
 }
+
+#[test]
+fn excluded_crates_and_paths_report_nothing() {
+    let p = copy("exclude", "exclude");
+    let (code, report, err) = spl(&p, &["check", "--format", "json"]);
+    assert_eq!(code, 1, "{err}{report}");
+    assert_eq!(denied(&report), ["readme-per-crate kept"], "{report}");
+    let ex = &report["excluded"];
+    assert_eq!(ex[0]["crates"], serde_json::json!(["old_a", "old_b"]));
+    assert_eq!(ex[0]["days_left"], 18);
+    // two READMEs and a panic in old_a
+    assert_eq!(ex[0]["findings"], 3);
+    assert_eq!(ex[1]["findings"], 1);
+
+    let out = crate::spl()
+        .arg("check")
+        .current_dir(&*p)
+        .env("SPIRIT_LEVEL_TODAY", "2026-11-13")
+        .env("NO_COLOR", "1")
+        .output()
+        .expect("spl starts");
+    let text = String::from_utf8_lossy(&out.stdout);
+    assert!(
+        text.contains("excluded until 2026-12-01 (18 days): 2 crates (old_a, old_b): frozen until the rewrite deletes them (3 findings left out)"),
+        "{text}"
+    );
+    assert!(
+        text.contains(": 1 denied, 2 crates excluded, 1 path pattern excluded\n"),
+        "{text}"
+    );
+    let out = crate::spl()
+        .arg("config")
+        .current_dir(&*p)
+        .env("SPIRIT_LEVEL_TODAY", "2026-11-13")
+        .output()
+        .expect("spl starts");
+    let text = String::from_utf8_lossy(&out.stdout);
+    assert!(
+        text.contains("excluded old_a, old_b — frozen until the rewrite deletes them [spirit_level.toml:12] (expires 2026-12-01)"),
+        "{text}"
+    );
+}
+
+#[test]
+fn an_expired_or_unknown_exclusion_stops_the_run() {
+    let p = copy("exclude", "exclude_expired");
+    let (code, _, err) = spl(&p, &["check", "--today", "2026-12-01"]);
+    assert_eq!(code, 2, "{err}");
+    assert!(
+        err.contains("spirit_level.toml:14: the exclusion expired (2026-12-01)"),
+        "{err}"
+    );
+
+    let cfg = p.join("spirit_level.toml");
+    let text = std::fs::read_to_string(&cfg).expect("read the config");
+    std::fs::write(&cfg, text.replace("\"old_b\"]", "\"old_c\"]")).expect("write the config");
+    let (code, _, err) = spl(&p, &["check"]);
+    assert_eq!(code, 2, "{err}");
+    assert!(
+        err.contains(
+            "spirit_level.toml:12: exclude names old_c, which is not a crate of the workspace"
+        ),
+        "{err}"
+    );
+}

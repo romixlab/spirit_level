@@ -1,0 +1,19 @@
+# old_a and old_b are frozen and left out; kept is checked.
+
+[lints.readme-per-crate]
+level = "deny"
+reason = "fixture: every crate has a README"
+
+[lints.panic-in-library]
+level = "deny"
+reason = "fixture: library code returns errors"
+
+[[exclude]]
+crates = ["old_a", "old_b"]
+reason = "frozen until the rewrite deletes them"
+expires = "2026-12-01"
+
+[[exclude]]
+paths = ["crates/kept/src/old.rs"]
+reason = "the old parser, replaced next release"
+expires = "2027-02-01"

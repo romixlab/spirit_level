@@ -7,8 +7,8 @@ use sl_core::Level;
 use std::path::{Path, PathBuf};
 use vc_ui::{Exit, Paint};
 
-/// Show the project's resolved configuration: levels with where they were set, overrides and exceptions with
-/// their reasons and expiries
+/// Show the project's resolved configuration: levels with where they were set, overrides, exceptions and
+/// exclusions with their reasons and expiries
 #[derive(clap::Parser)]
 #[command(
     name = "config",
@@ -107,6 +107,16 @@ fn show_config(a: Config) -> Result<Exit, String> {
             e.origin,
             e.expires
                 .map_or(String::new(), |x| format!(" (expires {x})"))
+        );
+    }
+    for e in &c.excludes {
+        let scope: Vec<String> = e.crates.iter().chain(&e.paths).cloned().collect();
+        println!(
+            "excluded {} — {} [{}] (expires {})",
+            scope.join(", "),
+            e.reason,
+            e.origin,
+            e.expires
         );
     }
     for t in &c.crate_tiers {

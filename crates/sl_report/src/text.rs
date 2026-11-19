@@ -1,6 +1,6 @@
 //! The report for people: findings grouped by lint (or crate, or file), denied groups first, each with up to a
 //! few places, a source excerpt and the command that lists the rest; then the lints that did not run, the lints
-//! skipped, and the summary line last.
+//! skipped, the code left out by `[[exclude]]`, and the summary line last.
 #![expect(
     clippy::let_underscore_must_use,
     reason = "fmt::Write into a String cannot fail"
@@ -8,7 +8,7 @@
 
 use crate::excerpt;
 use sl_core::{Confidence, Diagnostic, Level, LintMeta};
-use sl_engine::{NotRun, Report, Skipped};
+use sl_engine::{Excluded, NotRun, Report, Skipped};
 use std::collections::BTreeMap;
 use std::fmt::Write;
 use std::path::Path;
@@ -106,6 +106,7 @@ pub fn text(r: &Report, lints: &[&LintMeta], o: TextOptions) -> String {
     }
     not_run(&mut s, r, o);
     skipped(&mut s, &r.skipped, o);
+    excluded(&mut s, &r.excluded, o);
     if o.timings {
         for t in &r.timings {
             let line = format!("  {:>6} ms  {}", t.ms, t.analysis);
@@ -328,6 +329,47 @@ fn skipped(s: &mut String, skipped: &[Skipped], o: TextOptions) {
     }
 }
 
+/// One line per `[[exclude]]` entry: `excluded until 2027-03-31 (132 days): 2 crates (a, b): frozen (40 findings left out)`
+fn excluded(s: &mut String, excluded: &[Excluded], o: TextOptions) {
+    for e in excluded {
+        let mut what = Vec::new();
+        if !e.crates.is_empty() {
+            what.push(format!(
+                "{} ({})",
+                count(e.crates.len(), "crate"),
+                e.crates.join(", ")
+            ));
+        }
+        if !e.paths.is_empty() {
+            what.push(format!(
+                "{} ({})",
+                count(e.paths.len(), "path pattern"),
+                e.paths.join(", ")
+            ));
+        }
+        let left = e.days_left.map_or_else(String::new, |d| {
+            format!(" ({d} day{})", if d == 1 { "" } else { "s" })
+        });
+        let _ = writeln!(
+            s,
+            "{} until {}{left}: {}: {} ({} left out)",
+            o.paint.paint(HEADING, "excluded"),
+            e.expires,
+            what.join(", "),
+            e.reason,
+            count(e.findings, "finding"),
+        );
+    }
+    if !excluded.is_empty() {
+        s.push('\n');
+    }
+}
+
+/// `1 crate`, `2 crates`
+fn count(n: usize, what: &str) -> String {
+    format!("{n} {what}{}", if n == 1 { "" } else { "s" })
+}
+
 fn summary(s: &mut String, r: &Report, o: TextOptions) {
     let p = o.paint;
     let (deny, warn, allowed) = r.counts();
@@ -367,6 +409,14 @@ fn summary(s: &mut String, r: &Report, o: TextOptions) {
     }
     if !r.skipped.is_empty() {
         parts.push(format!("{} skipped", r.skipped.len()));
+    }
+    let crates: usize = r.excluded.iter().map(|e| e.crates.len()).sum();
+    let paths: usize = r.excluded.iter().map(|e| e.paths.len()).sum();
+    if crates > 0 {
+        parts.push(format!("{} excluded", count(crates, "crate")));
+    }
+    if paths > 0 {
+        parts.push(format!("{} excluded", count(paths, "path pattern")));
     }
     let head = if r.failing() == 0 && !r.incomplete(o.allow_warn_not_run) {
         p.paint(OK, "ok")
@@ -413,6 +463,7 @@ mod tests {
             ran: vec!["a".into(), "b".into()],
             not_run: Vec::new(),
             skipped: Vec::new(),
+            excluded: Vec::new(),
             timings: Vec::new(),
         }
     }
@@ -453,6 +504,46 @@ mod tests {
             "{t}"
         );
         assert!(!t.contains("not run"), "{t}");
+    }
+
+    #[test]
+    fn exclusions_are_one_line_each_and_counted_in_the_summary() {
+        let mut r = report(Vec::new());
+        r.excluded = vec![
+            Excluded {
+                crates: vec!["old_a".into(), "old_b".into()],
+                paths: Vec::new(),
+                reason: "frozen".into(),
+                expires: "2027-03-31".into(),
+                days_left: Some(138),
+                origin: "spirit_level.toml:3".into(),
+                findings: 40,
+            },
+            Excluded {
+                crates: Vec::new(),
+                paths: vec!["legacy/**".into()],
+                reason: "vendored".into(),
+                expires: "v0.6.0".into(),
+                days_left: None,
+                origin: "spirit_level.toml:8".into(),
+                findings: 1,
+            },
+        ];
+        let t = plain(&text(&r, &[], TextOptions::default()));
+        assert!(
+            t.contains("excluded until 2027-03-31 (138 days): 2 crates (old_a, old_b): frozen (40 findings left out)\n"),
+            "{t}"
+        );
+        assert!(
+            t.contains(
+                "excluded until v0.6.0: 1 path pattern (legacy/**): vendored (1 finding left out)\n"
+            ),
+            "{t}"
+        );
+        assert!(
+            t.contains("ok: 2 lints ran on /nonexistent (small): 2 crates excluded, 1 path pattern excluded\n"),
+            "{t}"
+        );
     }
 
     #[test]

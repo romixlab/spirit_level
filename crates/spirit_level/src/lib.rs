@@ -174,13 +174,44 @@ pub fn config(project: &Project, opts: &Options) -> Result<Config, CheckError> {
         today: opts.today,
         version: project.version,
     };
-    if opts.tiers.is_empty() {
+    let config = if opts.tiers.is_empty() {
         Config::load(&project.root, opts.config.as_deref(), &env)
     } else {
         let t: Vec<&str> = opts.tiers.iter().map(String::as_str).collect();
         Config::from_tiers(&t, &env)
     }
-    .map_err(CheckError::Config)
+    .map_err(CheckError::Config)?;
+    let errs = unknown_excluded(project, &config);
+    if errs.is_empty() {
+        Ok(config)
+    } else {
+        Err(CheckError::Config(errs))
+    }
+}
+
+/// An error for each crate an `[[exclude]]` entry names that is neither a member nor a crate the map places in a
+/// nested workspace: a typo would leave out nothing and check what was meant to be left out
+fn unknown_excluded(project: &Project, config: &Config) -> Vec<ConfigError> {
+    let nested = |name: &str| {
+        config
+            .map
+            .as_ref()
+            .and_then(|m| m.crates.get(name))
+            .is_some_and(|c| c.workspace.is_some())
+    };
+    let mut errs = Vec::new();
+    for e in &config.excludes {
+        for c in &e.crates {
+            if project.package(c).is_none() && !nested(c) {
+                errs.push(ConfigError::new(
+                    &e.origin.file,
+                    e.origin.line,
+                    format!("exclude names {c}, which is not a crate of the workspace"),
+                ));
+            }
+        }
+    }
+    errs
 }
 
 /// What the lints a configuration enables need installed
