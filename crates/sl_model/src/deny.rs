@@ -4,7 +4,8 @@
 //! cargo-deny and `spirit_level`'s `duplicate-versions` judge the same graph by the same lists, so a duplicate the
 //! project accepts is named once, in deny.toml.
 
-use crate::project::{DepKind, Resolve};
+use crate::graph::Resolve;
+use crate::project::DepKind;
 use cargo_metadata::semver::{Version, VersionReq};
 use std::collections::BTreeSet;
 use toml_edit::{DocumentMut, Item, Value};
@@ -201,7 +202,7 @@ fn entry(v: &Value, key: &str) -> Result<(PackageSpec, Option<u32>), String> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::project::ResolvedPackage;
+    use crate::graph::ResolvedPackage;
 
     fn pkg(name: &str, version: &str, deps: &[usize]) -> ResolvedPackage {
         ResolvedPackage {

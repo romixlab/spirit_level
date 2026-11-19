@@ -10,6 +10,7 @@
 pub mod config_tree;
 pub mod deny;
 pub mod git;
+pub mod graph;
 pub mod justfile;
 pub mod lines;
 pub mod project;
@@ -20,11 +21,12 @@ pub mod yaml_file;
 
 pub use config_tree::{ConfigNode, ConfigValue};
 pub use deny::{DenyConfig, PackageSpec};
+pub use graph::{Resolve, ResolvedPackage};
 pub use justfile::Justfile;
 pub use lines::{LineCount, count_lines};
 pub use project::{
-    Dep, DepKind, HAKARI_CONFIG_PATHS, LoadError, Package, Project, Resolve, ResolvedPackage,
-    TargetKind, command, git_url_key,
+    Dep, DepKind, HAKARI_CONFIG_PATHS, LoadError, Package, Project, TargetKind, command,
+    git_url_key,
 };
 pub use source::{FileKind, SourceFile};
 pub use toml_edit;
