@@ -182,7 +182,7 @@ used_underscore_binding = { level = "allow", reason = "an underscore binding use
 too_many_lines = { level = "allow", reason = "spl's function-lines measures function length, with a limit per crate and expiring exceptions" }
 # opt-outs of cargo
 cargo_common_metadata = { level = "allow", reason = "keywords and categories matter only for published crates; package-description covers the rest" }
-multiple_crate_versions = { level = "allow", reason = "spl's duplicate-versions checks this, with a reasoned allow list" }
+multiple_crate_versions = { level = "allow", reason = "spl's duplicate-versions checks this, with deny.toml's skip list" }
 
 [clippy.config]
 cognitive-complexity-threshold = { value = 20, reason = "set on samples: 17 read fine, 21 and 25 were too long; spl's function-complexity (cyclomatic, 15) counts paths" }

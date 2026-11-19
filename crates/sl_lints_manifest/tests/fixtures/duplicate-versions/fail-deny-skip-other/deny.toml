@@ -1,0 +1,2 @@
+[bans]
+skip = [{ crate = "bar@3.0.0", reason = "fixture: a version not in the graph" }]

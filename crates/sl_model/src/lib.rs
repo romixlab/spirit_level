@@ -8,6 +8,7 @@
 //! ```
 
 pub mod config_tree;
+pub mod deny;
 pub mod git;
 pub mod justfile;
 pub mod lines;
@@ -18,6 +19,7 @@ pub mod workflow;
 pub mod yaml_file;
 
 pub use config_tree::{ConfigNode, ConfigValue};
+pub use deny::{DenyConfig, PackageSpec};
 pub use justfile::Justfile;
 pub use lines::{LineCount, count_lines};
 pub use project::{

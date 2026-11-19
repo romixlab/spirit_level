@@ -1,6 +1,6 @@
 # multiple_crate_versions
 
-**Clippy lint:** Spl's duplicate-versions checks this, with a reasoned allow list.
+**Clippy lint:** Spl's duplicate-versions checks this, with deny.toml's skip list.
 
 | | |
 |---|---|
@@ -14,8 +14,8 @@
 |---|---|---|---|
 | [small](../tiers/small.md) | not in the set |  |  |
 | [small-workspace](../tiers/small-workspace.md) | not in the set |  |  |
-| [medium](../tiers/medium.md) | `allow` | spl's duplicate-versions checks this, with a reasoned allow list | medium |
-| [big](../tiers/big.md) | `allow` | spl's duplicate-versions checks this, with a reasoned allow list | medium |
+| [medium](../tiers/medium.md) | `allow` | spl's duplicate-versions checks this, with deny.toml's skip list | medium |
+| [big](../tiers/big.md) | `allow` | spl's duplicate-versions checks this, with deny.toml's skip list | medium |
 | [ai](../tiers/ai.md) | not in the set |  |  |
 | [embedded](../tiers/embedded.md) | not in the set |  |  |
 | [ui](../tiers/ui.md) | not in the set |  |  |
@@ -27,5 +27,5 @@
 
 ```toml
 [workspace.lints.clippy]
-multiple_crate_versions = "allow" # spl's duplicate-versions checks this, with a reasoned allow list
+multiple_crate_versions = "allow" # spl's duplicate-versions checks this, with deny.toml's skip list
 ```

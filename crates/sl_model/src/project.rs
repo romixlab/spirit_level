@@ -293,6 +293,46 @@ impl Resolve {
     }
 }
 
+/// Whether the edge from `from` (its enabled features `enabled`) to the package `to`, known in `from`'s code as
+/// `extern_name`, is built. cargo metadata lists an optional dependency that only a weak feature (`dep?/feat`)
+/// names as a dependency, although nothing turns it on: it is built only when a declaration of it is not
+/// optional, or an enabled feature names it (its implicit feature, `dep:NAME`, `NAME/feat`)
+fn activated(
+    from: &cargo_metadata::Package,
+    enabled: &[cargo_metadata::FeatureName],
+    to: &str,
+    extern_name: &str,
+) -> bool {
+    let decls: Vec<&cargo_metadata::Dependency> = from
+        .dependencies
+        .iter()
+        .filter(|dep| {
+            dep.name == to
+                && dep
+                    .rename
+                    .as_deref()
+                    .is_none_or(|r| r.replace('-', "_") == extern_name)
+        })
+        .collect();
+    // a declaration cargo metadata gives no trace of is taken as built, as cargo listed it
+    if decls.is_empty() || decls.iter().any(|dep| !dep.optional) {
+        return true;
+    }
+    decls.iter().any(|dep| {
+        let key = dep.rename.as_deref().unwrap_or(&dep.name);
+        let strong = format!("{key}/");
+        let explicit = format!("dep:{key}");
+        enabled.iter().any(|f| {
+            f.as_str() == key
+                || from.features.get(f.as_str()).is_some_and(|items| {
+                    items
+                        .iter()
+                        .any(|it| *it == explicit || it.starts_with(&strong))
+                })
+        })
+    })
+}
+
 /// Where cargo-hakari looks for its configuration, in order
 pub const HAKARI_CONFIG_PATHS: &[&str] = &[".config/hakari.toml", ".guppy/hakari.toml"];
 
@@ -529,15 +569,27 @@ impl Project {
     /// with a Cargo.lock it runs `--locked`, so the lock is never rewritten)
     pub fn resolve(&self) -> Result<&Resolve, &str> {
         self.resolve
-            .get_or_init(|| self.load_resolve())
+            .get_or_init(|| self.load_resolve(&[]))
             .as_ref()
             .map_err(String::as_str)
     }
 
-    fn load_resolve(&self) -> Result<Resolve, String> {
+    /// The resolved graph of the dependencies built for the target triples `targets` (`--filter-platform`); every
+    /// call runs cargo, so a caller keeps the result. No targets is the whole graph, as [`Self::resolve`] has it
+    ///
+    /// # Errors
+    /// cargo cannot run or resolve the workspace, or knows no such target
+    pub fn resolve_for(&self, targets: &[String]) -> Result<Resolve, String> {
+        self.load_resolve(targets)
+    }
+
+    fn load_resolve(&self, targets: &[String]) -> Result<Resolve, String> {
         let ws = self.root.join(&self.workspace);
         let mut cmd = cargo(&ws);
         cmd.args(["metadata", "--format-version", "1"]);
+        for t in targets {
+            cmd.args(["--filter-platform", t]);
+        }
         if ws.join("Cargo.lock").exists() {
             cmd.arg("--locked");
         }
@@ -571,10 +623,14 @@ impl Project {
             let Some(&i) = index.get(&node.id) else {
                 continue;
             };
+            let from = &meta.packages[i];
             for d in &node.deps {
                 let Some(&j) = index.get(&d.pkg) else {
                     continue;
                 };
+                if !activated(from, &node.features, &meta.packages[j].name, &d.name) {
+                    continue;
+                }
                 let mut kinds: Vec<DepKind> = d
                     .dep_kinds
                     .iter()
@@ -600,6 +656,17 @@ impl Project {
     /// Whether a file exists relative to the root
     pub fn exists(&self, rel: &str) -> bool {
         self.root.join(rel).exists()
+    }
+
+    /// The graph and duplicate lists of `deny.toml`; empty without the file
+    ///
+    /// # Errors
+    /// deny.toml is not TOML, or an entry is not one cargo-deny takes
+    pub fn deny_config(&self) -> Result<crate::DenyConfig, String> {
+        self.read("deny.toml").map_or_else(
+            || Ok(crate::DenyConfig::default()),
+            |t| crate::DenyConfig::parse(&t),
+        )
     }
 
     /// The workspace-hack package hakari's configuration names (`hakari-package` in the first of

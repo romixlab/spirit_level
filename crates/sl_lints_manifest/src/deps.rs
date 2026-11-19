@@ -2,7 +2,8 @@
 
 use sl_analysis::Context;
 use sl_core::{Diagnostic, Span};
-use sl_model::{Dep, Package, Project};
+use sl_model::{Dep, Package, Project, Resolve};
+use std::borrow::Cow;
 use std::collections::{BTreeMap, BTreeSet};
 
 /// Where a dependency's form is written: the member's line, or the root's `[workspace.dependencies]` line when
@@ -188,6 +189,20 @@ fn pin_policy(cx: &Context<'_>, d: &Dep) -> Option<PinBreak> {
     })
 }
 
+/// What each checked member reaches through normal and build edges (and its own dev edges), by package index: an
+/// excluded member's dependencies count only where a checked member reaches them too
+fn checked_reach(cx: &Context<'_>, res: &Resolve) -> BTreeMap<usize, BTreeSet<String>> {
+    let mut reached: BTreeMap<usize, BTreeSet<String>> = BTreeMap::new();
+    for (i, rp) in res.packages.iter().enumerate() {
+        if rp.member && !cx.excluded(&rp.name) {
+            for j in res.closure(i, true) {
+                reached.entry(j).or_default().insert(rp.name.clone());
+            }
+        }
+    }
+    reached
+}
+
 /// The lints on the resolved graph: -sys crates and C build steps, duplicate versions
 fn resolved(cx: &Context<'_>) {
     let p = cx.project;
@@ -200,16 +215,7 @@ fn resolved(cx: &Context<'_>) {
     } else {
         "Cargo.toml"
     };
-    // what each member reaches through normal and build edges (and its own dev edges); an excluded member's
-    // dependencies count only where a checked member reaches them too
-    let mut reached: BTreeMap<usize, BTreeSet<String>> = BTreeMap::new();
-    for (i, rp) in res.packages.iter().enumerate() {
-        if rp.member && !cx.excluded(&rp.name) {
-            for j in res.closure(i, true) {
-                reached.entry(j).or_default().insert(rp.name.clone());
-            }
-        }
-    }
+    let reached = checked_reach(cx, res);
     let allow_sys = cx.params("no-sys-crates").list("allow");
     const C_BUILD: &[&str] = &["cc", "bindgen", "cmake", "pkg-config", "vcpkg", "autotools"];
     for (&j, by) in &reached {
@@ -240,22 +246,43 @@ fn resolved(cx: &Context<'_>) {
     duplicates(cx, res, &reached, lock);
 }
 
+/// `duplicate-versions` on the graph cargo-deny judges: deny.toml's `[graph] targets` narrow it, and its `skip` and
+/// `skip-tree` are the project's one list of accepted duplicates
 fn duplicates(
     cx: &Context<'_>,
-    res: &sl_model::Resolve,
-    reached: &BTreeMap<usize, BTreeSet<String>>,
+    whole: &Resolve,
+    whole_reached: &BTreeMap<usize, BTreeSet<String>>,
     lock: &str,
 ) {
-    let allow_dup = cx.params("duplicate-versions").list("allow");
+    if !cx.enabled("duplicate-versions") {
+        return;
+    }
+    let not_run = |e: String| cx.not_run("duplicate-versions", "config:deny.toml", e);
+    let deny = match cx.project.deny_config() {
+        Ok(d) => d,
+        Err(e) => return not_run(e),
+    };
+    let narrowed;
+    let (res, reached) = if deny.targets.is_empty() {
+        (whole, Cow::Borrowed(whole_reached))
+    } else {
+        narrowed = match cx.project.resolve_for(&deny.targets) {
+            Ok(r) => r,
+            Err(e) => return not_run(format!("the graph for deny.toml's targets: {e}")),
+        };
+        let r = checked_reach(cx, &narrowed);
+        (&narrowed, Cow::Owned(r))
+    };
+    let skipped = deny.skipped(res);
     let mut versions: BTreeMap<&str, BTreeSet<&str>> = BTreeMap::new();
     for &j in reached.keys() {
         let rp = &res.packages[j];
-        if !rp.member {
+        if !rp.member && !skipped.contains(&j) {
             versions.entry(&rp.name).or_default().insert(&rp.version);
         }
     }
     for (name, vs) in versions {
-        if vs.len() > 1 && !allow_dup.iter().any(|a| a == name) {
+        if vs.len() > 1 {
             let list: Vec<&str> = vs.into_iter().collect();
             cx.emit(
                 Diagnostic::new(
@@ -264,7 +291,7 @@ fn duplicates(
                     format!("{name} is in the graph in {} versions: {}", list.len(), list.join(", ")),
                 )
                 .span(Span::new(lock, 0))
-                .help(format!("`cargo tree -d -i {name}` shows who pulls each; align the requirements or `cargo update`")),
+                .help(format!("`cargo tree -d -i {name}` shows who pulls each; align the requirements or `cargo update`; a duplicate that must stay goes in deny.toml's [bans] skip with a reason")),
             );
         }
     }

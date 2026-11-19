@@ -164,7 +164,7 @@ The project turns these on in its own `[workspace.lints.clippy]` (`allow` rows a
 | [`many_single_char_names`](../clippy/many_single_char_names.md) | `allow` | r, g, b and x, y, z are fine | medium |
 | [`map_unwrap_or`](../clippy/map_unwrap_or.md) | `allow` | `.map(f).unwrap_or(x)` often reads better than map_or | medium |
 | [`missing_errors_doc`](../clippy/missing_errors_doc.md) | `allow` | the error type documents its cases | medium |
-| [`multiple_crate_versions`](../clippy/multiple_crate_versions.md) | `allow` | spl's duplicate-versions checks this, with a reasoned allow list | medium |
+| [`multiple_crate_versions`](../clippy/multiple_crate_versions.md) | `allow` | spl's duplicate-versions checks this, with deny.toml's skip list | medium |
 | [`must_use_candidate`](../clippy/must_use_candidate.md) | `allow` | thousands of hits; must_use goes where ignoring the value is a bug | medium |
 | [`needless_raw_string_hashes`](../clippy/needless_raw_string_hashes.md) | `allow` | r#"..."# keeps a string editable when a quote is added | medium |
 | [`redundant_closure_for_method_calls`](../clippy/redundant_closure_for_method_calls.md) | `allow` | a closure is often clearer than a path to a method | medium |
@@ -374,7 +374,7 @@ used_underscore_binding = { level = "allow", reason = "an underscore binding use
 too_many_lines = { level = "allow", reason = "spl's function-lines measures function length, with a limit per crate and expiring exceptions" }
 # opt-outs of cargo
 cargo_common_metadata = { level = "allow", reason = "keywords and categories matter only for published crates; package-description covers the rest" }
-multiple_crate_versions = { level = "allow", reason = "spl's duplicate-versions checks this, with a reasoned allow list" }
+multiple_crate_versions = { level = "allow", reason = "spl's duplicate-versions checks this, with deny.toml's skip list" }
 
 [clippy.config]
 cognitive-complexity-threshold = { value = 20, reason = "set on samples: 17 read fine, 21 and 25 were too long; spl's function-complexity (cyclomatic, 15) counts paths" }

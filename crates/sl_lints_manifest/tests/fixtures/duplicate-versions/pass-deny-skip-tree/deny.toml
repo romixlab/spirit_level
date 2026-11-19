@@ -1,0 +1,2 @@
+[bans]
+skip-tree = [{ crate = "baz", reason = "fixture" }]

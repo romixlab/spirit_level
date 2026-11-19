@@ -4,4 +4,14 @@ Two versions of one crate compile twice and give two incompatible copies of its 
 
 ## How to fix
 
-`cargo tree -d -i NAME` shows who pulls each version. Align the version requirements, move a dependency to the version its siblings use, or `cargo update`. When two versions cannot be avoided yet, list the crate in the parameter `allow` with an override reason (and an expiry).
+`cargo tree -d -i NAME` shows who pulls each version. Align the version requirements, move a dependency to the version its siblings use, or `cargo update`. The graph is the one cargo-deny judges: with a `deny.toml` that names `[graph] targets`, only what is built for those targets; an optional dependency only a weak feature (`dep?/feat`) names is not in it.
+
+When two versions cannot be avoided yet, name them in `deny.toml`'s `[bans]`, the one list cargo-deny reads too: `skip` for a version, `skip-tree` for a crate and what it pulls in.
+
+```toml
+[bans]
+skip = [{ crate = "syn@1.0.109", reason = "via geiger" }]
+skip-tree = [{ crate = "hakari", reason = "its graph libraries pin older versions" }]
+```
+
+A crate left out by [`[[exclude]]`](../configuration.md#leaving-code-out) counts only through what the checked crates reach too.

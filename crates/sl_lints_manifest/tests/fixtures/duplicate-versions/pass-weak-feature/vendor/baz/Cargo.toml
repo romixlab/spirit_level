@@ -1,0 +1,12 @@
+[package]
+name = "baz"
+version = "1.0.0"
+edition = "2024"
+[workspace]
+exclude = ["vendor"]
+
+[dependencies]
+bar = { path = "../bar2", optional = true }
+
+[features]
+std = ["bar?/std"]

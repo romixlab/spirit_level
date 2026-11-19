@@ -1,0 +1,11 @@
+[package]
+name = "fx"
+version = "0.1.0"
+edition = "2024"
+
+[workspace]
+exclude = ["vendor"]
+
+[dependencies]
+bar = { path = "vendor/bar1" }
+baz = { path = "vendor/baz" }

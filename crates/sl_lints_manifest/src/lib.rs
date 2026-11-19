@@ -45,7 +45,7 @@ lint!(NO_SYS_CRATES, "M0004", "no-sys-crates", "dependencies", "the dependency g
     params: [("allow", StrList, "[]", "crates allowed anyway, each named with its reason in AGENTS.md")],
     needs: [Need::Resolve], fix: None);
 lint!(DUPLICATE_VERSIONS, "M0002", "duplicate-versions", "dependencies", "no crate is in the dependency graph in two versions",
-    params: [("allow", StrList, "[]", "crates allowed in several versions")], needs: [Need::Resolve], fix: None);
+    params: [], needs: [Need::Resolve], fix: None);
 lint!(GIT_DEPENDENCY_PINS, "M0003", "git-dependency-pins", "dependencies", "git dependencies are pinned the way the project's policy says: a branch by default",
     params: [
         ("policy", Choice["branch", "default-branch", "dev-branch", "tag", "release", "any"], "\"branch\"", "how a git dependency on another project's repo is pinned"),
