@@ -29,31 +29,19 @@ pub(crate) fn run(cx: &Context<'_>) {
                 continue;
             }
             let (span, at_root) = decl(p, pkg, d);
+            // a root line counts only through the members that are checked: the engine drops what is said about an
+            // excluded member, never a line of the root manifest
+            if at_root && cx.excluded(&pkg.name) {
+                continue;
+            }
             let item = if at_root {
                 format!("workspace:{}", d.key())
             } else {
                 format!("{}:{}:{}", pkg.name, d.kind.table(), d.key())
             };
             let krate = (!at_root).then(|| pkg.name.clone());
-            if d.default_features
-                && d.path.is_none()
-                && !allow_default.contains(&d.name)
-                && seen.insert(("df", item.clone()))
-            {
-                let mut diag = Diagnostic::new(
-                    "default-features-off",
-                    &item,
-                    format!("{} is taken with its default features", d.name),
-                )
-                .span(span.clone())
-                .help(format!(
-                    "write `default-features = false` and list only the features in use for {}",
-                    d.name
-                ));
-                if let Some(k) = &krate {
-                    diag = diag.krate(k);
-                }
-                cx.emit(diag);
+            if d.default_features && d.path.is_none() && !allow_default.contains(&d.name) {
+                default_features(cx, pkg, d, (&span, at_root), &item, &mut seen);
             }
             if let Some(why) = pin_policy(cx, d)
                 && seen.insert(("pin", item.clone()))
@@ -90,6 +78,55 @@ pub(crate) fn run(cx: &Context<'_>) {
     }
 
     resolved(cx);
+}
+
+/// The finding of a dependency taken with its default features, at the line that turns them on: the member's own
+/// `default-features = true` beside `workspace = true`, else where the dependency's form is written (`decl`)
+fn default_features(
+    cx: &Context<'_>,
+    pkg: &Package,
+    d: &Dep,
+    (span, at_root): (&Span, bool),
+    item: &str,
+    seen: &mut BTreeSet<(&'static str, String)>,
+) {
+    let mut own = d.manifest_path();
+    own.push("default-features");
+    let by_member = at_root && pkg.manifest.get(&own).and_then(|v| v.as_bool()) == Some(true);
+    let (span, item, help) = if by_member {
+        own.pop();
+        (
+            pkg.manifest.span(&own),
+            format!("{}:{}:{}", pkg.name, d.kind.table(), d.key()),
+            format!(
+                "drop `default-features = true` and list only the features in use for {}",
+                d.name
+            ),
+        )
+    } else {
+        (
+            span.clone(),
+            item.to_owned(),
+            format!(
+                "write `default-features = false` and list only the features in use for {}",
+                d.name
+            ),
+        )
+    };
+    if !seen.insert(("df", item.clone())) {
+        return;
+    }
+    let mut diag = Diagnostic::new(
+        "default-features-off",
+        &item,
+        format!("{} is taken with its default features", d.name),
+    )
+    .span(span)
+    .help(help);
+    if by_member || !at_root {
+        diag = diag.krate(&pkg.name);
+    }
+    cx.emit(diag);
 }
 
 /// A git dependency that breaks the pin policy: what it names and what the policy asks for
