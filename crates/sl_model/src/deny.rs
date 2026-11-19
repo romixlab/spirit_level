@@ -213,6 +213,8 @@ mod tests {
             links: None,
             manifest_path: std::path::PathBuf::new(),
             deps: deps.iter().map(|&j| (j, vec![DepKind::Normal])).collect(),
+            features: std::collections::BTreeMap::new(),
+            edges: Vec::new(),
         }
     }
 

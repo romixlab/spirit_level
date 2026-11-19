@@ -398,14 +398,14 @@ fn forbidden(cx: &Context<'_>, p: &Project, map: &Map) {
         else {
             continue;
         };
-        // breadth first, remembering the parent for the path
+        // breadth first over what the crate builds, remembering the parent for the path
+        let graph = res.member_graph(start, true);
         let mut parent: BTreeMap<usize, usize> = BTreeMap::new();
         let mut queue = std::collections::VecDeque::from([start]);
         let mut seen = BTreeSet::from([start]);
         while let Some(i) = queue.pop_front() {
-            for (j, kinds) in &res.packages[i].deps {
-                let ok = kinds.iter().any(|k| *k != DepKind::Dev) || i == start;
-                if ok && seen.insert(*j) {
+            for (j, _) in &graph.deps[i] {
+                if seen.insert(*j) {
                     parent.insert(*j, i);
                     queue.push_back(*j);
                 }

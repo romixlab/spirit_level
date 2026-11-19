@@ -1,0 +1,8 @@
+[lints.duplicate-versions]
+level = "deny"
+reason = "fixture"
+
+[[exclude]]
+crates = ["old"]
+reason = "fixture: frozen"
+expires = "2027-06-30"

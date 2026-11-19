@@ -1,0 +1,10 @@
+[package]
+name = "mid"
+version = "1.0.0"
+edition = "2024"
+
+[dependencies]
+bar = { path = "../bar2", optional = true }
+
+[features]
+v2 = ["dep:bar"]

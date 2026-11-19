@@ -21,7 +21,7 @@ pub mod yaml_file;
 
 pub use config_tree::{ConfigNode, ConfigValue};
 pub use deny::{DenyConfig, PackageSpec};
-pub use graph::{Resolve, ResolvedPackage};
+pub use graph::{MemberGraph, Resolve, ResolvedPackage};
 pub use justfile::Justfile;
 pub use lines::{LineCount, count_lines};
 pub use project::{

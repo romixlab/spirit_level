@@ -1,0 +1,11 @@
+[package]
+name = "b"
+version = "0.1.0"
+edition = "2024"
+description = "the b crate"
+
+[dependencies]
+c = { path = "../c", optional = true }
+
+[features]
+heavy = ["dep:c"]

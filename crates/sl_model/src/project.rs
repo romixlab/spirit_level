@@ -1,6 +1,6 @@
 //! The workspace as cargo sees it, read through `cargo metadata`, plus the manifests' text.
 
-use crate::graph::{Resolve, ResolvedPackage, activated};
+use crate::graph::Resolve;
 use crate::source::SourceFile;
 use crate::toml_file::TomlFile;
 use cargo_metadata::{DependencyKind, Metadata, TargetKind as CmTargetKind};
@@ -506,53 +506,11 @@ impl Project {
         }
         let meta = cargo_metadata::MetadataCommand::parse(String::from_utf8_lossy(&out.stdout))
             .map_err(|e| e.to_string())?;
-        let resolve = meta.resolve.ok_or("cargo metadata gave no resolve")?;
-        let index: BTreeMap<_, usize> = meta
-            .packages
+        let platforms = targets
             .iter()
-            .enumerate()
-            .map(|(i, p)| (p.id.clone(), i))
-            .collect();
-        let mut packages: Vec<ResolvedPackage> = meta
-            .packages
-            .iter()
-            .map(|p| ResolvedPackage {
-                name: p.name.to_string(),
-                version: p.version.to_string(),
-                source: p.source.as_ref().map(|s| s.to_string()),
-                member: meta.workspace_members.contains(&p.id),
-                links: p.links.clone(),
-                manifest_path: p.manifest_path.clone().into_std_path_buf(),
-                deps: Vec::new(),
-            })
-            .collect();
-        for node in &resolve.nodes {
-            let Some(&i) = index.get(&node.id) else {
-                continue;
-            };
-            let from = &meta.packages[i];
-            for d in &node.deps {
-                let Some(&j) = index.get(&d.pkg) else {
-                    continue;
-                };
-                if !activated(from, &node.features, &meta.packages[j].name, &d.name) {
-                    continue;
-                }
-                let mut kinds: Vec<DepKind> = d
-                    .dep_kinds
-                    .iter()
-                    .map(|k| match k.kind {
-                        DependencyKind::Development => DepKind::Dev,
-                        DependencyKind::Build => DepKind::Build,
-                        _ => DepKind::Normal,
-                    })
-                    .collect();
-                kinds.sort();
-                kinds.dedup();
-                packages[i].deps.push((j, kinds));
-            }
-        }
-        Ok(Resolve { packages })
+            .map(|t| Ok((t.clone(), target_cfg(&ws, t)?)))
+            .collect::<Result<Vec<_>, String>>()?;
+        Resolve::from_metadata(&meta, &platforms)
     }
 
     /// A file's text relative to the root, if it exists
@@ -642,6 +600,27 @@ fn cargo(dir: &Path) -> Command {
         std::env::var_os("SPIRIT_LEVEL_CARGO").unwrap_or_else(|| "cargo".into()),
         dir,
     )
+}
+
+/// The cfg values of the target triple `target` (`rustc --print cfg`), run in `dir` so its toolchain answers
+fn target_cfg(
+    dir: &Path,
+    target: &str,
+) -> Result<Vec<cargo_metadata::cargo_platform::Cfg>, String> {
+    let out = command("rustc", dir)
+        .args(["--print", "cfg", "--target", target])
+        .output()
+        .map_err(|e| format!("cannot run rustc: {e}"))?;
+    if !out.status.success() {
+        return Err(String::from_utf8_lossy(&out.stderr).trim().to_owned());
+    }
+    String::from_utf8_lossy(&out.stdout)
+        .lines()
+        .map(|l| {
+            l.parse()
+                .map_err(|e| format!("rustc --print cfg --target {target}: {e}"))
+        })
+        .collect()
 }
 
 /// A program started in `dir` with the environment of an outer cargo removed.
