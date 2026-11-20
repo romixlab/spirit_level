@@ -55,7 +55,7 @@ extra_javascript = ["javascripts/spl-refs.js"]
 Then build the book through a recipe that runs `spl book refs` first and adds the package to Zensical's environment. The package is pinned to the release tag of the `spl` in use, since both read and write the same code index:
 
 ```just
-spl := "0.8.0"
+spl := "X.Y.Z"  # the version `spl --version` prints
 
 book:
     spl book refs
@@ -65,7 +65,7 @@ book:
 To move to a newer release:
 
 1. Install that release of `spl`.
-2. Set `spl` in the recipe to its version.
+2. Set `spl` in the recipe to the version it prints.
 3. Build the book. A package and an `spl` of different releases may disagree on the index; the build then fails and says to update both.
 
 `spl book refs` writes the stylesheet and the script into the docs folder, so list both in `.gitignore`. The code index goes to `target/spl-book/code_index.json`, which a Rust repository already ignores.
@@ -174,7 +174,7 @@ Each entry has the item's path through the modules it is defined in, its `#[cfg]
 
 ## File links
 
-``[`resume.rs`]`` names a text file of the project by the end of its path; ``[`writer/resume.rs`]`` names more of it when two files share a name. ``[`crashes.rs:resume`]`` names a section marked in the file as the snippet includes mark it:
+``[`resume.rs`]`` names a text file git tracks by the end of its path; ``[`writer/resume.rs`]`` names more of it when two files share a name. ``[`crashes.rs:resume`]`` names a section marked in the file as the snippet includes mark it:
 
 ```rust
 // --8<-- [start:resume]
@@ -182,7 +182,7 @@ let w = writer.resume_on(cut)?;
 // --8<-- [end:resume]
 ```
 
-The card shows the code, at most `card_lines_max` lines, with the path and line range. The link opens those lines at the build's commit. A file that is gone, a section no longer marked, or markers that do not pair up fail the build.
+The card shows the code, at most `card_lines_max` lines, with the path and line range. The link opens those lines at the build's commit. A file that is gone or a section no longer marked fails the build. Markers that do not pair up fail only a page that references their file, and the error names the marker's file and line. A file git does not track cannot be named, since its link would lead nowhere.
 
 ## The lint
 

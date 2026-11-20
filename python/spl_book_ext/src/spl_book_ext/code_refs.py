@@ -7,7 +7,7 @@ that starts with a crate's name matches only in that crate. A trailing `()` asks
 Two items with one path, a type and a function or two `#[cfg]` arms, are told apart as rustdoc does, by a kind
 before the name (`` [`fn@level`] ``, `` [`type@level`] ``), and by the arm's predicate (`` [`cfg(unix)@platform`] ``,
 `` [`fn@cfg(unix)@platform`] ``). A re-exported item is one item under all its paths. A file name
-matches a file whose path ends with it, and a section is one marked `--8<-- [start:NAME]` ... `--8<-- [end:NAME]`, as
+matches a file git tracks whose path ends with it, and a section is one marked `--8<-- [start:NAME]` ... `--8<-- [end:NAME]`, as
 the snippet includes mark them. A name that matches nothing, or several things, raises `CodeRefError`, which fails the
 build: a renamed or removed item, file or section cannot leave a stale reference behind.
 
@@ -129,7 +129,8 @@ class Index:
         want = name.split("/")
         found = [f for f in self.files if f["path"].split("/")[-len(want) :] == want]
         if not found:
-            raise CodeRefError(f"[`{name}`]: no file of the project has this name")
+            hint = "" if self.files else " (the index lists no files: spl book refs ran outside a git checkout)"
+            raise CodeRefError(f"[`{name}`]: no file git tracks has this name{hint}")
         if len(found) > 1:
             paths = ", ".join(f["path"] for f in found)
             raise CodeRefError(f"[`{name}`]: several files have this name ({paths}); name more of the path")
@@ -334,6 +335,8 @@ class FilePattern(_Refs):
     def handleMatch(self, m, data):
         name, section = m.group(1), m.group(2)
         f = self.index.file(name)
+        if f.get("problem"):
+            raise CodeRefError(f"[`{m.group(0)[2:-2]}`]: {f['problem']}")
         if section is None:
             first, last = 1, f["lines"]
             href = self.index.blob + f["path"]

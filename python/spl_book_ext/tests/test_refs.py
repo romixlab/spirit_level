@@ -84,6 +84,7 @@ def book(tmp_path, monkeypatch):
         "files": [
             {"path": "tests/resume.rs", "lines": 4, "sections": {"call": [3, 3]}},
             {"path": "src/lib.rs", "lines": 40},
+            {"path": "src/broken.rs", "lines": 3, "problem": "src/broken.rs:2: section `x` starts and never ends"},
         ],
     }
     (tmp_path / "index.json").write_text(json.dumps(index))
@@ -309,10 +310,16 @@ def test_a_file_card_is_bounded(book):
 
 
 def test_a_stale_file_or_section_fails(book):
-    with pytest.raises(CodeRefError, match="no file of the project"):
+    with pytest.raises(CodeRefError, match="no file git tracks"):
         render(book, "[`gone.rs`]")
     with pytest.raises(CodeRefError, match="marks no section `cut` \\(it marks: call\\)"):
         render(book, "[`resume.rs:cut`]")
+
+
+def test_a_file_with_unpaired_markers_fails_only_where_referenced(book):
+    assert "spl-card" in render(book, "[`resume.rs:call`]")
+    with pytest.raises(CodeRefError, match=r"^the page:1: \[`broken.rs`\]: src/broken.rs:2: section `x` starts"):
+        render(book, "[`broken.rs`]")
 
 
 def test_a_missing_index_names_the_command(book):

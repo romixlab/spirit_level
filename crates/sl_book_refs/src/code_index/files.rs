@@ -1,17 +1,16 @@
 //! The project's text files that file references name (`` [`resume.rs`] ``, `` [`crashes.rs:resume`] ``), with the
 //! sections marked in them.
 //!
+//! The files are those git tracks, so a link opens a file that is there at the build's commit; outside a git
+//! checkout the list is empty. Files that are not UTF-8 text and the directories the caller names are left out.
+//!
 //! A section is marked as the snippet includes mark it: a line holding `--8<-- [start:NAME]` opens it, a line holding
-//! `--8<-- [end:NAME]` closes it, and the section is the lines between. Hidden directories, `target/` and the
-//! directories the caller names are left out, and so is every file that is not UTF-8 text or is over 1 MiB.
+//! `--8<-- [end:NAME]` closes it, and the section is the lines between. Markers that do not pair up are kept as the
+//! file's problem, which fails only a page that references the file.
 
 use serde::{Deserialize, Serialize};
+use sl_model::Project;
 use std::collections::BTreeMap;
-use std::io::Read;
-use std::path::Path;
-
-/// The biggest file listed; a bigger one is no source a reader looks at
-const FILE_BYTES_MAX: u64 = 1024 * 1024;
 
 /// What opens and closes a marked section
 const MARKER: &str = "--8<-- [";
@@ -26,17 +25,17 @@ pub struct FileEntry {
     /// Its marked sections: the first and last line between the markers, from 1
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub sections: BTreeMap<String, [usize; 2]>,
+    /// Markers that do not pair up, as `file:line: what is wrong`; its sections are then left out
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub problem: Option<String>,
 }
 
 /// A marked section that does not pair up
 #[derive(Clone, Debug, PartialEq, Eq)]
-pub struct SectionError {
-    /// The file, relative to the project root
-    pub file: String,
-    /// The marker's line, from 1
-    pub line: usize,
-    /// What is wrong
-    pub problem: String,
+struct SectionError {
+    file: String,
+    line: usize,
+    problem: String,
 }
 
 impl std::fmt::Display for SectionError {
@@ -45,56 +44,43 @@ impl std::fmt::Display for SectionError {
     }
 }
 
-impl std::error::Error for SectionError {}
-
-/// Every text file under `root`, sorted by path, leaving out the directories `skip` (relative to the root)
-pub(crate) fn files(root: &Path, skip: &[&str]) -> Result<Vec<FileEntry>, SectionError> {
-    let mut paths = Vec::new();
-    walk(root, "", skip, &mut paths);
-    paths.sort();
-    let mut out = Vec::new();
-    for path in paths {
-        let Some(text) = read(&root.join(&path)) else {
-            continue;
-        };
-        let sections = sections(&path, &text)?;
-        out.push(FileEntry {
-            lines: text.lines().count(),
-            path,
-            sections,
-        });
-    }
-    Ok(out)
-}
-
-fn walk(root: &Path, rel: &str, skip: &[&str], out: &mut Vec<String>) {
-    let Ok(dir) = std::fs::read_dir(root.join(rel)) else {
-        return;
+/// Every text file git tracks under the project's root, sorted by path, leaving out the directories `skip`
+/// (relative to the root)
+pub(crate) fn files(project: &Project, skip: &[&str]) -> Vec<FileEntry> {
+    let Ok(tracked) = project.tracked() else {
+        return Vec::new();
     };
-    for e in dir.flatten() {
-        let name = e.file_name().to_string_lossy().into_owned();
-        let path = if rel.is_empty() {
-            name.clone()
-        } else {
-            format!("{rel}/{name}")
-        };
-        let Ok(kind) = e.file_type() else { continue };
-        if kind.is_dir() {
-            if !(name.starts_with('.') || name == "target" || skip.contains(&path.as_str())) {
-                walk(root, &path, skip, out);
-            }
-        } else if kind.is_file() {
-            out.push(path);
-        }
-    }
+    let mut paths: Vec<&String> = tracked
+        .iter()
+        .filter(|p| {
+            !skip
+                .iter()
+                .any(|d| p.strip_prefix(d).is_some_and(|r| r.starts_with('/')))
+        })
+        .collect();
+    paths.sort();
+    paths
+        .into_iter()
+        .filter_map(|path| {
+            let text = read(&project.root.join(path))?;
+            let (sections, problem) = match sections(path, &text) {
+                Ok(s) => (s, None),
+                Err(e) => (BTreeMap::new(), Some(e.to_string())),
+            };
+            Some(FileEntry {
+                path: path.clone(),
+                lines: text.lines().count(),
+                sections,
+                problem,
+            })
+        })
+        .collect()
 }
 
-/// A file's text: None when it is over the limit or not UTF-8
-fn read(path: &Path) -> Option<String> {
-    let f = std::fs::File::open(path).ok()?;
-    let mut bytes = Vec::new();
-    f.take(FILE_BYTES_MAX + 1).read_to_end(&mut bytes).ok()?;
-    if bytes.len() as u64 > FILE_BYTES_MAX || bytes.contains(&0) {
+/// A file's text: None when it cannot be read or is not UTF-8 text
+fn read(path: &std::path::Path) -> Option<String> {
+    let bytes = std::fs::read(path).ok()?;
+    if bytes.contains(&0) {
         return None;
     }
     String::from_utf8(bytes).ok()

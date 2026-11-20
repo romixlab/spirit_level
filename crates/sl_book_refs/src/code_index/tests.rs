@@ -191,5 +191,15 @@ fn lists_the_text_files_with_their_sections() {
         .find(|f| f.path == "src/writer/resume.rs")
         .unwrap();
     assert_eq!(resume.sections.get("call"), Some(&[11, 12]));
+    let broken = index
+        .files
+        .iter()
+        .find(|f| f.path == "src/broken_marker.txt")
+        .unwrap();
+    assert_eq!(
+        broken.problem.as_deref(),
+        Some("src/broken_marker.txt:2: section `open` starts and never ends")
+    );
+    assert!(broken.sections.is_empty());
     assert_eq!(index.blob, "https://github.com/o/r/blob/abc123/");
 }

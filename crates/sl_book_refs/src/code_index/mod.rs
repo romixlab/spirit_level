@@ -12,7 +12,7 @@
 
 mod files;
 
-pub use files::{FileEntry, SectionError};
+pub use files::FileEntry;
 
 use serde::{Deserialize, Serialize};
 use sl_model::{Package, Project, SourceFile, TargetKind};
@@ -130,8 +130,6 @@ pub enum IndexError {
     },
     /// A source file does not parse (`file:line:column: message`)
     Parse(String),
-    /// A marked section that does not pair up
-    Section(SectionError),
     /// A `mod x;` whose file is not there
     MissingModule {
         /// The declaring file
@@ -150,7 +148,6 @@ impl std::fmt::Display for IndexError {
                 known.join(", ")
             ),
             Self::Parse(e) => write!(f, "{e}"),
-            Self::Section(e) => write!(f, "{e}"),
             Self::MissingModule { file, name } => {
                 write!(f, "{file}: `mod {name};` has no file")
             }
@@ -160,13 +157,12 @@ impl std::fmt::Display for IndexError {
 
 impl std::error::Error for IndexError {}
 
-/// The index of `crates` (library target names; empty: every library of the workspace) and of the project's text
-/// files, leaving out the directories `skip` (relative to the root, such as the built site)
+/// The index of `crates` (library target names; empty: every library of the workspace) and of the text files git
+/// tracks, leaving out the directories `skip` (relative to the root, such as the built site)
 ///
 /// # Errors
 ///
-/// A crate is no library of the workspace, a file does not parse, a declared module has no file, or a file's
-/// marked sections do not pair up.
+/// A crate is no library of the workspace, a file does not parse, or a declared module has no file.
 pub fn index(
     project: &Project,
     crates: &[String],
@@ -216,7 +212,7 @@ pub fn index(
         commit: forge.commit.to_owned(),
         blob: forge.blob(),
         items,
-        files: files::files(&project.root, skip).map_err(IndexError::Section)?,
+        files: files::files(project, skip),
     })
 }
 
