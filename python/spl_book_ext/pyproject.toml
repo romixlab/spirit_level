@@ -1,5 +1,6 @@
 # spl_book_ext: the Markdown extensions of a book's references in prose, loaded by Zensical from zensical.toml.
-# A book adds it to its build with `uv run --with "spl-book-ext @ git+https://github.com/romixlab/spirit_level#subdirectory=python/spl_book_ext"`.
+# A book adds it to its build pinned to the release of its spl:
+# `uv run --with "spl-book-ext @ git+https://github.com/romixlab/spirit_level@vX.Y.Z#subdirectory=python/spl_book_ext"`.
 [project]
 name = "spl-book-ext"
 version = "0.1.0"

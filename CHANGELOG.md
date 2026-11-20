@@ -6,6 +6,7 @@
 
 - `spl book refs`: a book's code index of public items, its glossary checked, and the cards' stylesheet and script (BOOK-7).
 - `spl_book_ext`: Markdown extensions for `[[term]]` glossary cards and `` [`Item`] `` code cards in any Zensical book (BOOK-7).
+- `spl_book_ext`: file and section references `` [`file.rs:section`] `` with code cards; `fn@` and `cfg(...)@` pick an item (BOOK-7).
 - `glossary-terms`: a book's glossary term is marked once in every section that uses it, warn from `small` (DOCS-14).
 
 ## [0.7.4] - 2026-11-21
