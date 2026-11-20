@@ -2,7 +2,7 @@
 
 A reader takes in a page in stretches. A heading, a figure, a table or a code block gives the eye a place to rest and to find its way back. A long run of prose with none of them is a wall: the reader skims it, and the point in the middle of it is lost.
 
-A run is the prose between two visual breaks: headings, code blocks, tables, figures, admonitions, content tabs, and HTML figures, videos, tables and `<details>` blocks. Paragraphs and list items both count as prose. The budget is in words, so it means the same on any page.
+A run is the prose between two visual breaks: headings, code blocks, tables, figures, admonitions, content tabs, and HTML figures, videos, tables and `<details>` blocks. Paragraphs and list items both count as prose. The budget is in words, so it means the same on any page. The default, 400 words, is under two minutes of reading: room for a reasoned argument of a few paragraphs, not for a chapter.
 
 ## How to fix
 

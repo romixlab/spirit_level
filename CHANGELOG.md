@@ -11,6 +11,7 @@
 
 ### Changed
 
+- `prose-run-words` allows 400 words by default, up from 250 (DOCS-1).
 - `paragraph-sentences` allows 5 sentences by default, up from 2 (PROSE-2).
 - Breaking: `[docs]` stops skipping changelogs, feature trackers and agent files; they are records now (DOCS-13).
 - `emoji` allows four more tracker status marks by default: idea, blocked, to verify, in test (PROSE-2).

@@ -20,7 +20,7 @@ use sl_docs::{Book, Kind, Page, ReadingSpeed, Selection, Site, SiteError, Source
 use sl_model::Project;
 
 lint!(PROSE_RUN_WORDS, "D0001", "prose-run-words", "reading", "prose between two visual breaks stays short",
-    params: [("max-words", Int, "250", "words of prose a reader meets between two headings, figures, tables or code blocks"),
+    params: [("max-words", Int, "400", "words of prose a reader meets between two headings, figures, tables or code blocks"),
              ("pages", Choice["all", "guide", "reference"], "\"all\"", "the kinds of page judged")],
     needs: [], fix: None);
 lint!(PAGE_READING_TIME, "D0002", "page-reading-time", "reading", "a guide reads in a bounded time",
