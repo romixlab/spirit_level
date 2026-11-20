@@ -37,7 +37,7 @@ Use it with `extends = "ai"` in `spirit_level.toml`.
 | [P0010](../lints/P0010.md) | emoji | `warn` | emoji do not grep, diff or render the same everywhere | ai |
 | [P0011](../lints/P0011.md) | filler-phrases | `deny` | filler adds words and no meaning | ai |
 | [P0012](../lints/P0012.md) | narration | `deny` | docs and comments state facts, not the conversation that produced them | ai |
-| [P0013](../lints/P0013.md) | paragraph-sentences | `warn` | result first, then what the reader must do; more facts are a list | ai |
+| [P0013](../lints/P0013.md) | paragraph-sentences | `warn` | a paragraph holds one thought in up to five sentences; more facts are a list | ai |
 | [P0014](../lints/P0014.md) | restating-comments | `warn` | a comment says what the code cannot | ai |
 | [P0015](../lints/P0015.md) | sentence-words | `warn` | short sentences are read once and understood | ai |
 | [P0016](../lints/P0016.md) | thinking-comments | `deny` | a comment holds the conclusion, not the reasoning that led to it | ai |
@@ -141,7 +141,7 @@ reason = "short sentences are read once and understood"
 
 [lints.paragraph-sentences]
 level = "warn"
-reason = "result first, then what the reader must do; more facts are a list"
+reason = "a paragraph holds one thought in up to five sentences; more facts are a list"
 
 # AI-isms
 

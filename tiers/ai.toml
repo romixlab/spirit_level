@@ -68,7 +68,7 @@ reason = "short sentences are read once and understood"
 
 [lints.paragraph-sentences]
 level = "warn"
-reason = "result first, then what the reader must do; more facts are a list"
+reason = "a paragraph holds one thought in up to five sentences; more facts are a list"
 
 # AI-isms
 

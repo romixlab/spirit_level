@@ -77,7 +77,7 @@ lint!(SENTENCE_WORDS, "P0015", "sentence-words", "prose", "sentences in docs sta
              ("skip", StrList, "[]", "globs of Markdown files left out")],
     needs: [], fix: None);
 lint!(PARAGRAPH_SENTENCES, "P0013", "paragraph-sentences", "prose", "paragraphs in docs stay short",
-    params: [("max-sentences", Int, "2", "sentences a paragraph or list item may have"),
+    params: [("max-sentences", Int, "5", "sentences a paragraph or list item may have"),
              ("files", StrList, "[\"**/*.md\"]", "globs of the Markdown files checked, relative to the root"),
              ("skip", StrList, "[]", "globs of Markdown files left out")],
     needs: [], fix: None);
