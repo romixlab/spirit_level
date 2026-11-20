@@ -3,7 +3,10 @@ file or a marked section of one. A plain code span stays plain.
 
 The names come from the code index (setting `index`, default `target/spl-book/code_index.json`), which
 `spl book refs` writes from the code before each build. An item name matches an item whose path ends with it; a name
-that starts with a crate's name matches only in that crate. A trailing `()` or `!` is shown and ignored. A file name
+that starts with a crate's name matches only in that crate. A trailing `()` asks for a function and `!` for a macro.
+Two items with one path, a type and a function or two `#[cfg]` arms, are told apart as rustdoc does, by a kind
+before the name (`` [`fn@level`] ``, `` [`type@level`] ``), and by the arm's predicate (`` [`cfg(unix)@platform`] ``,
+`` [`fn@cfg(unix)@platform`] ``). A re-exported item is one item under all its paths. A file name
 matches a file whose path ends with it, and a section is one marked `--8<-- [start:NAME]` ... `--8<-- [end:NAME]`, as
 the snippet includes mark them. A name that matches nothing, or several things, raises `CodeRefError`, which fails the
 build: a renamed or removed item, file or section cannot leave a stale reference behind.
@@ -28,8 +31,19 @@ from markdown.inlinepatterns import InlineProcessor
 
 from spl_book_ext import card
 
-# [`Name`], [`a::b::Name`], [`f()`], [`m!`]: rustdoc's shortcut form, not followed by a link target
-ITEM = r"\[`((?:[A-Za-z_][A-Za-z0-9_]*::)*[A-Za-z_][A-Za-z0-9_]*)(\(\)|!)?`\](?![\[(])"
+# [`Name`], [`a::b::Name`], [`f()`], [`m!`], [`fn@Name`], [`cfg(unix)@Name`]: rustdoc's shortcut form, not followed
+# by a link target
+ITEM = (
+    r"\[`(?:([a-z]+)@)?(?:(cfg\([^`]*\))@)?((?:[A-Za-z_][A-Za-z0-9_]*::)*[A-Za-z_][A-Za-z0-9_]*)(\(\)|!)?`\]"
+    r"(?![\[(])"
+)
+# a kind rustdoc writes before a name, and the kinds of the index it stands for
+KINDS = {
+    "fn": {"fn"}, "method": {"fn"}, "struct": {"struct"}, "enum": {"enum"}, "union": {"union"},
+    "trait": {"trait"}, "type": {"struct", "enum", "union", "trait", "type"}, "tyalias": {"type"},
+    "const": {"const"}, "constant": {"const"}, "static": {"static"}, "value": {"fn", "const", "static"},
+    "macro": {"macro"}, "field": {"field"}, "variant": {"variant"},
+}
 # [`file.rs`], [`dir/file.rs`], [`file.rs:section`]
 FILE = r"\[`((?:[\w.-]+/)*[\w-][\w.-]*\.[A-Za-z0-9]+)(?::([^`\s]+))?`\](?![\[(])"
 FORMAT = 2
@@ -58,24 +72,45 @@ class Index:
         self.files: list[dict] = data["files"]
         self.blob: str = data["blob"]
         self.crates = {i["path"].split("::")[0] for i in self.items}
+        # each definition by the path a card shows: the shortest that keeps the item's own name
+        defined = {_site(i): i["path"].split("::")[-1] for i in self.items if "reexports" not in i}
+        self.sites: dict[tuple, dict] = {}
+        for i in sorted(
+            self.items,
+            key=lambda i: (i["path"].split("::")[-1] != defined.get(_site(i)), i["path"].count("::"), i["path"]),
+        ):
+            self.sites.setdefault(_site(i), i)
 
-    def matches(self, name: str) -> list[dict]:
+    def matches(self, name: str, kinds: set[str] | None = None, cfg: str | None = None) -> list[dict]:
+        """The items `name` names, of `kinds` and in the arm `cfg` when given: one per definition, by its shortest path"""
         want = name.split("::")
         if want[0] in self.crates and len(want) > 1:
-            return [
+            found = [
                 i
                 for i in self.items
                 if i["path"].split("::")[0] == want[0] and i["path"].split("::")[-(len(want) - 1) :] == want[1:]
             ]
-        return [i for i in self.items if i["path"].split("::")[-len(want) :] == want]
+        else:
+            found = [i for i in self.items if i["path"].split("::")[-len(want) :] == want]
+        if kinds is not None:
+            found = [i for i in found if i["kind"] in kinds]
+        if cfg is not None:
+            found = [i for i in found if _bare(f"cfg({i.get('cfg', '')})") == _bare(cfg)]
+        # a re-export lists the item again under its own path: one item all the same
+        first = {_site(i): self.sites[_site(i)] for i in found}
+        return sorted(first.values(), key=lambda i: (i["path"], i["lines"]))
 
-    def find(self, name: str) -> dict:
-        found = self.matches(name)
+    def find(self, name: str, kind: str | None = None, cfg: str | None = None, suffix: str = "") -> dict:
+        written = f"[`{kind + '@' if kind else ''}{cfg + '@' if cfg else ''}{name}{suffix}`]"
+        if kind is not None and kind not in KINDS:
+            raise CodeRefError(f"{written}: `{kind}@` is no kind; the kinds are {', '.join(sorted(KINDS))}")
+        kinds = KINDS[kind] if kind else {"()": {"fn"}, "!": {"macro"}}.get(suffix)
+        found = self.matches(name, kinds, cfg)
         if not found:
-            raise CodeRefError(f"[`{name}`]: no public item of the book's crates has this name")
+            raise CodeRefError(f"{written}: no public item of the book's crates has this name")
         if len(found) > 1:
-            paths = ", ".join(i["path"] for i in found)
-            raise CodeRefError(f"[`{name}`]: several items have this name ({paths}); name more of the path")
+            forms = ", ".join(f"[`{_form(i, found)}`]" for i in found)
+            raise CodeRefError(f"{written}: several items have this name; write one of {forms}")
         return found[0]
 
     def near(self, name: str, at: dict) -> dict | None:
@@ -95,6 +130,22 @@ class Index:
             paths = ", ".join(f["path"] for f in found)
             raise CodeRefError(f"[`{name}`]: several files have this name ({paths}); name more of the path")
         return found[0]
+
+
+def _site(item: dict) -> tuple:
+    return item["file"], tuple(item["lines"])
+
+
+def _bare(cfg: str) -> str:
+    return re.sub(r"\s+", "", cfg)
+
+
+def _form(item: dict, among: list[dict]) -> str:
+    """How a reference names `item` alone among `among`: its path, with its kind and arm where others share it"""
+    same = [i for i in among if i["path"] == item["path"]]
+    kind = f"{item['kind']}@" if len({i["kind"] for i in same}) > 1 else ""
+    cfg = f"cfg({item['cfg']})@" if item.get("cfg") and len({i.get("cfg") for i in same}) > 1 else ""
+    return f"{kind}{cfg}{item['path']}"
 
 
 @functools.cache
@@ -235,16 +286,18 @@ class _Refs(InlineProcessor):
 
 class ItemPattern(_Refs):
     def handleMatch(self, m, data):
-        name, suffix = m.group(1), m.group(2) or ""
-        item = self.index.find(name)
-        card_id = card.page_cards(self.md).add(f"item {item['path']}", lambda i: self.build(i, item))
+        kind, cfg, name, suffix = m.group(1), m.group(2), m.group(3), m.group(4) or ""
+        item = self.index.find(name, kind, cfg, suffix)
+        key = f"item {item['path']} {item['file']}:{item['lines'][0]}"
+        card_id = card.page_cards(self.md).add(key, lambda i: self.build(i, item))
         code_el = etree.Element("code")
         code_el.text = name + suffix
         return card.reference(code_el, item["url"], "code", card_id), m.start(0), m.end(0)
 
     def build(self, card_id: str, item: dict) -> str:
         src, left = _lines(item["source"], self.ext.lines_max)
-        body = card.part("spl-card-head", card.escape(f"{item['kind']} {item['path']}"))
+        arm = f", cfg({item['cfg']})" if item.get("cfg") else ""
+        body = card.part("spl-card-head", card.escape(f"{item['kind']} {item['path']}{arm}"))
         body += card.part("spl-card-src", card.code(src, "rust")) + _more(left)
         if item["doc"]:
             doc, cut = bounded(doc_links(item["doc"], item, self.index), self.ext.doc_chars_max)

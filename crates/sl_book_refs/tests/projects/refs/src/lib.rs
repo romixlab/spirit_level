@@ -23,3 +23,29 @@ pub mod inline {
     /// Inside an inline module.
     pub fn deep() {}
 }
+
+pub use writer::TapeWriter as Writer;
+pub use self::writer::*;
+
+/// A word or its bytes.
+pub union Bits {
+    /// The word.
+    pub word: u32,
+    bytes: [u8; 4],
+}
+
+/// The platform, on unix.
+#[cfg(unix)]
+pub fn platform() {}
+
+/// The platform, elsewhere.
+#[cfg(not(unix))]
+pub fn platform() {}
+
+/// A level, as a type.
+pub struct level {}
+
+/// A level, as a function.
+pub fn level() {}
+
+#[inline] pub fn quick() {}

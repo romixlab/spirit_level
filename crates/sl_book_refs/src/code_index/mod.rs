@@ -3,8 +3,9 @@
 //! Every public item of the book's library crates, found by walking each library's module tree from its root as
 //! the compiler does (`mod x;` to `x.rs` or `x/mod.rs`, `#[path]` honoured, `#[cfg(test)]` modules left out). Each
 //! entry has its path through the modules it is defined in (`ww_tape::writer::resume::TapeWriter::resume_on`), its
-//! kind, file and lines, its signature (its whole source when short), its first doc paragraph, and the address of
-//! its lines on the forge at one commit.
+//! kind, its `#[cfg]` when it has one, file and lines, its signature (its whole source when short), its docs, and the
+//! address of its lines on the forge at one commit. A `pub use` adds the items it re-exports a second time, under
+//! the path it gives them, with the same file and lines.
 //!
 //! The index is written at every book build and never kept in git, so it always matches the code: a link to a
 //! renamed or removed item fails the build in the change that renames it.
@@ -32,7 +33,9 @@ pub enum Kind {
     Fn,
     /// A struct
     Struct,
-    /// A named field of a struct
+    /// A union
+    Union,
+    /// A named field of a struct or a union
     Field,
     /// An enum
     Enum,
@@ -40,7 +43,7 @@ pub enum Kind {
     Variant,
     /// A trait
     Trait,
-    /// A type alias
+    /// A type alias, associated types of a trait included
     Type,
     /// A constant, associated ones included
     Const,
@@ -57,6 +60,9 @@ pub struct Entry {
     pub path: String,
     /// What it is
     pub kind: Kind,
+    /// Its `#[cfg(...)]` predicate as written, several joined in `all(...)`; two arms of one item differ in it
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cfg: Option<String>,
     /// The file it is defined in, relative to the project root
     pub file: String,
     /// Its first and last line in the file, from 1: from its visibility to its end, docs and attributes left out
@@ -67,6 +73,9 @@ pub struct Entry {
     pub doc: String,
     /// Its lines on the forge at the index's commit
     pub url: String,
+    /// For a re-export, the path the item is defined at
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub reexports: Option<String>,
 }
 
 /// The index file
@@ -186,6 +195,7 @@ pub fn index(
         }
     }
     let mut items = Vec::new();
+    let mut uses = Vec::new();
     for (pkg, name, root) in libs {
         if !crates.is_empty() && !crates.iter().any(|c| c == name) {
             continue;
@@ -195,9 +205,11 @@ pub fn index(
             files,
             forge,
             out: &mut items,
+            uses: &mut uses,
         };
         walk.file(root, &[name.to_owned()])?;
     }
+    reexport(&mut items, &uses);
     items.sort_by(|a, b| a.path.cmp(&b.path).then(a.lines.cmp(&b.lines)));
     Ok(Index {
         format: FORMAT,
@@ -254,6 +266,148 @@ fn is_cfg_test(attrs: &[Attribute]) -> bool {
     })
 }
 
+/// The `#[cfg(...)]` predicates in `attrs` as written, several joined in `all(...)`
+fn cfg(attrs: &[Attribute]) -> Option<String> {
+    let preds: Vec<String> = attrs
+        .iter()
+        .filter(|a| a.path().is_ident("cfg"))
+        .filter_map(|a| match &a.meta {
+            syn::Meta::List(l) => Some(predicate(&l.tokens)),
+            _ => None,
+        })
+        .collect();
+    match preds.len() {
+        0 => None,
+        1 => preds.into_iter().next(),
+        _ => Some(format!("all({})", preds.join(", "))),
+    }
+}
+
+/// A cfg predicate's tokens as a reader writes them: `not(unix)`, `feature = "std"`, `any(a, b)`
+fn predicate(tokens: &proc_macro2::TokenStream) -> String {
+    let mut out = String::new();
+    for t in tokens.clone() {
+        match t {
+            proc_macro2::TokenTree::Group(g) => {
+                out.push('(');
+                out.push_str(&predicate(&g.stream()));
+                out.push(')');
+            }
+            proc_macro2::TokenTree::Punct(p) if p.as_char() == ',' => out.push_str(", "),
+            proc_macro2::TokenTree::Punct(p) if p.as_char() == '=' => out.push_str(" = "),
+            other => out.push_str(&other.to_string()),
+        }
+    }
+    out
+}
+
+/// The names a `pub use` tree in `module` gives, `prefix` being the path written before this part of the tree
+fn uses(module: &[String], prefix: &mut Vec<String>, tree: &syn::UseTree, out: &mut Vec<Use>) {
+    match tree {
+        syn::UseTree::Path(p) => {
+            prefix.push(p.ident.to_string());
+            uses(module, prefix, &p.tree, out);
+            prefix.pop();
+        }
+        syn::UseTree::Name(n) => out.push(Use {
+            module: module.to_vec(),
+            target: [prefix.as_slice(), &[n.ident.to_string()]].concat(),
+            name: Some(n.ident.to_string()),
+        }),
+        syn::UseTree::Rename(r) => out.push(Use {
+            module: module.to_vec(),
+            target: [prefix.as_slice(), &[r.ident.to_string()]].concat(),
+            name: Some(r.rename.to_string()),
+        }),
+        syn::UseTree::Glob(_) => out.push(Use {
+            module: module.to_vec(),
+            target: prefix.clone(),
+            name: None,
+        }),
+        syn::UseTree::Group(g) => {
+            for t in &g.items {
+                uses(module, prefix, t, out);
+            }
+        }
+    }
+}
+
+/// The absolute paths a use path written in `module` can mean: from `crate`, `self` or `super`, else relative to
+/// the module and then from a crate's name
+fn absolute(module: &[String], target: &[String]) -> Vec<String> {
+    let mut base: Vec<String> = module.to_vec();
+    let mut rest = target;
+    match rest.first().map(String::as_str) {
+        Some("crate") => {
+            base.truncate(1);
+            rest = &rest[1..];
+        }
+        Some("self" | "super") => {
+            while let Some(first) = rest.first() {
+                match first.as_str() {
+                    "self" => {}
+                    "super" => {
+                        base.pop();
+                    }
+                    _ => break,
+                }
+                rest = &rest[1..];
+            }
+        }
+        _ => {
+            let relative = [base.as_slice(), rest].concat().join("::");
+            return vec![relative, rest.join("::")];
+        }
+    }
+    vec![[base.as_slice(), rest].concat().join("::")]
+}
+
+/// Adds the items each `pub use` re-exports under the path it gives them, re-exports of re-exports included
+fn reexport(items: &mut Vec<Entry>, uses: &[Use]) {
+    let mut known: std::collections::BTreeSet<(String, String, [usize; 2])> = items
+        .iter()
+        .map(|e| (e.path.clone(), e.file.clone(), e.lines))
+        .collect();
+    // each round follows one more step of a chain of re-exports; a chain is short, a cycle adds nothing
+    for _ in 0..8 {
+        let mut added = Vec::new();
+        for u in uses {
+            let under = |e: &Entry, target: &str| -> Option<String> {
+                let rest = e.path.strip_prefix(target)?;
+                match &u.name {
+                    Some(name) if rest.is_empty() || rest.starts_with("::") => {
+                        Some(format!("{}::{name}{rest}", u.module.join("::")))
+                    }
+                    None if rest.starts_with("::") => {
+                        Some(format!("{}{rest}", u.module.join("::")))
+                    }
+                    _ => None,
+                }
+            };
+            let found = absolute(&u.module, &u.target).into_iter().find_map(|t| {
+                let found: Vec<(String, &Entry)> = items
+                    .iter()
+                    .filter_map(|e| Some((under(e, &t)?, e)))
+                    .collect();
+                (!found.is_empty()).then_some(found)
+            });
+            for (path, e) in found.unwrap_or_default() {
+                if known.insert((path.clone(), e.file.clone(), e.lines)) {
+                    added.push(Entry {
+                        path,
+                        reexports: Some(e.reexports.clone().unwrap_or_else(|| e.path.clone())),
+                        ..e.clone()
+                    });
+                }
+            }
+        }
+        if added.is_empty() {
+            break;
+        }
+        items.extend(added);
+    }
+}
+
 /// `#[path = "..."]` on a module
 fn path_attr(attrs: &[Attribute]) -> Option<String> {
     attrs.iter().find_map(|a| {
@@ -283,6 +437,16 @@ struct Walk<'a> {
     files: &'a [SourceFile],
     forge: Forge<'a>,
     out: &'a mut Vec<Entry>,
+    uses: &'a mut Vec<Use>,
+}
+
+/// One name a `pub use` gives: in `module`, `name` for the item at `target` (relative as written), or every item
+/// under `target` for a glob
+#[derive(Debug)]
+struct Use {
+    module: Vec<String>,
+    target: Vec<String>,
+    name: Option<String>,
 }
 
 /// One file being walked: its lines and where its child modules' files are
@@ -330,11 +494,9 @@ impl Walk<'_> {
                     self.push(at, join(&f.sig.ident), Kind::Fn, &f.attrs, item, Some(open));
                 }
                 Item::Struct(s) if is_pub(&s.vis) => self.structure(at, join(&s.ident), s),
+                Item::Union(u) if is_pub(&u.vis) => self.union(at, join(&u.ident), u),
                 Item::Enum(e) if is_pub(&e.vis) => self.enumeration(at, join(&e.ident), e),
-                Item::Trait(t) if is_pub(&t.vis) => {
-                    let open = t.brace_token.span.open().start().line;
-                    self.push(at, join(&t.ident), Kind::Trait, &t.attrs, item, Some(open));
-                }
+                Item::Trait(t) if is_pub(&t.vis) => self.tr(at, join(&t.ident), t),
                 Item::Type(t) if is_pub(&t.vis) => {
                     self.push(at, join(&t.ident), Kind::Type, &t.attrs, item, None);
                 }
@@ -346,6 +508,7 @@ impl Walk<'_> {
                 }
                 Item::Macro(m) => self.exported_macro(at, module, m),
                 Item::Mod(m) if !is_cfg_test(&m.attrs) => self.module(at, module, children, m)?,
+                Item::Use(u) if is_pub(&u.vis) => uses(module, &mut Vec::new(), &u.tree, self.uses),
                 Item::Impl(i) if i.trait_.is_none() => {
                     if let syn::Type::Path(p) = &*i.self_ty
                         && let Some(ty) = p.path.segments.last()
@@ -392,6 +555,51 @@ impl Walk<'_> {
             }
         }
         self.push(at, name, Kind::Struct, &s.attrs, s, open);
+    }
+
+    /// A public union and its public fields
+    fn union(&mut self, at: &At<'_>, name: String, u: &syn::ItemUnion) {
+        for f in u.fields.named.iter().filter(|f| is_pub(&f.vis)) {
+            if let Some(ident) = &f.ident {
+                self.push(
+                    at,
+                    format!("{name}::{ident}"),
+                    Kind::Field,
+                    &f.attrs,
+                    f,
+                    None,
+                );
+            }
+        }
+        let open = u.fields.brace_token.span.open().start().line;
+        self.push(at, name, Kind::Union, &u.attrs, u, Some(open));
+    }
+
+    /// A public trait and its functions, constants and types, all public with it
+    fn tr(&mut self, at: &At<'_>, name: String, t: &syn::ItemTrait) {
+        for it in &t.items {
+            match it {
+                syn::TraitItem::Fn(f) => {
+                    let open = f
+                        .default
+                        .as_ref()
+                        .map(|b| b.brace_token.span.open().start().line);
+                    let path = format!("{name}::{}", f.sig.ident);
+                    self.push(at, path, Kind::Fn, &f.attrs, it, open);
+                }
+                syn::TraitItem::Const(c) => {
+                    let path = format!("{name}::{}", c.ident);
+                    self.push(at, path, Kind::Const, &c.attrs, it, None);
+                }
+                syn::TraitItem::Type(ty) => {
+                    let path = format!("{name}::{}", ty.ident);
+                    self.push(at, path, Kind::Type, &ty.attrs, it, None);
+                }
+                _ => {}
+            }
+        }
+        let open = t.brace_token.span.open().start().line;
+        self.push(at, name, Kind::Trait, &t.attrs, t, Some(open));
     }
 
     /// A public enum and its variants
@@ -476,10 +684,23 @@ impl Walk<'_> {
         open: Option<usize>,
     ) {
         let span = node.span();
-        // the item's span starts at its first attribute; the reader wants it from the line after them
+        // the item's span starts at its first attribute; the reader wants it from the line after them, or from
+        // the attribute's own line when the item goes on after it there (`#[inline] pub fn f() {}`)
         let start = attrs
             .iter()
-            .map(|a| a.span().end().line + 1)
+            .map(|a| {
+                let end = a.span().end();
+                let rest = at.lines.get(end.line.wrapping_sub(1)).map_or("", |l| {
+                    l.char_indices()
+                        .nth(end.column)
+                        .map_or("", |(i, _)| &l[i..])
+                });
+                if rest.trim().is_empty() {
+                    end.line + 1
+                } else {
+                    end.line
+                }
+            })
             .max()
             .unwrap_or(span.start().line)
             .max(span.start().line);
@@ -488,11 +709,13 @@ impl Walk<'_> {
         self.out.push(Entry {
             path,
             kind,
+            cfg: cfg(attrs),
             file: at.file.rel.clone(),
             lines,
             source: source(&at.lines, start, end, open),
             doc: doc(attrs),
             url: self.forge.url(&at.file.rel, lines),
+            reexports: None,
         });
     }
 }

@@ -1074,6 +1074,7 @@ dependencies = [
 name = "sl_book_refs"
 version = "0.7.0"
 dependencies = [
+ "proc-macro2",
  "serde",
  "sl_model",
  "syn 3.0.10",

@@ -1,4 +1,5 @@
 import html as html_lib
+import itertools
 import json
 import re
 
@@ -26,10 +27,20 @@ BLOB = "https://github.com/o/r/blob/abc/"
 RESUME_RS = "fn x() {}\n// --8<-- [start:call]\nlet w = writer.resume_on(cut)?;\n// --8<-- [end:call]\n"
 
 
-def item(path, kind="fn", doc="Does it.", lines=(3, 9)):
+_LINE = itertools.count(100, 10)
+
+
+def item(path, kind="fn", doc="Does it.", lines=None, cfg=None, at=None):
+    """An index entry; each at its own lines unless `at` gives another entry's (a re-export)"""
+    if at is not None:
+        return {**at, "path": path, "reexports": at["path"]}
+    if lines is None:
+        first = next(_LINE)
+        lines = (first, first + 6)
     return {
         "path": path,
         "kind": kind,
+        **({"cfg": cfg} if cfg else {}),
         "file": "src/lib.rs",
         "lines": list(lines),
         "source": f"pub {kind} {path.split('::')[-1]}()",
@@ -49,17 +60,25 @@ def book(tmp_path, monkeypatch):
     (tmp_path / "glossary.toml").write_text(GLOSSARY)
     (tmp_path / "tests").mkdir()
     (tmp_path / "tests" / "resume.rs").write_text(RESUME_RS)
+    writer = item("tape::writer::TapeWriter", "struct")
     index = {
         "format": 2,
         "commit": "abc",
         "blob": BLOB,
         "items": [
-            item("tape::writer::TapeWriter::resume_on", doc=LONG_DOC),
+            item("tape::writer::TapeWriter::resume_on", doc=LONG_DOC, lines=(3, 9)),
+            writer,
+            item("tape::Writer", at=writer),
+            item("tape::TapeWriter", at=writer),
             item("tape::chain::resume"),
             item("tape::writer::resume"),
             item("tape_fs::writer::resume"),
             item("tape::hello", "macro"),
             item("tape::Recovery", "enum", lines=(20, 30)),
+            item("tape::level", "struct"),
+            item("tape::level", "fn"),
+            item("tape::platform", cfg="unix"),
+            item("tape::platform", cfg='not(feature = "std")'),
             item("tape::Evil", "struct", doc="Bad <script>alert(1)</script> and <img src=x onerror=alert(2)>.\n\n[click](javascript:alert(3))"),
         ],
         "files": [
@@ -170,9 +189,30 @@ def test_a_crate_prefix_narrows_the_match(book):
     assert "<code>hello!</code>" in render(book, "[`hello!`]")
 
 
-def test_an_ambiguous_name_lists_the_candidates(book):
-    with pytest.raises(CodeRefError, match=r"several items .*tape::chain::resume, tape::writer::resume"):
+def test_an_ambiguous_name_says_how_to_write_each(book):
+    with pytest.raises(CodeRefError, match=r"write one of \[`tape::chain::resume`\], \[`tape::writer::resume`\]"):
         render(book, "[`resume`]")
+    with pytest.raises(CodeRefError, match=r"\[`struct@tape::level`\], \[`fn@tape::level`\]"):
+        render(book, "[`level`]")
+    with pytest.raises(CodeRefError, match=r'\[`cfg\(unix\)@tape::platform`\], \[`cfg\(not\(feature = "std"\)\)@tape::platform`\]'):
+        render(book, "[`platform`]")
+
+
+def test_a_kind_or_an_arm_picks_one_item(book):
+    assert 'struct tape::level' in render(book, "[`type@level`]")
+    assert 'fn tape::level' in render(book, "[`level()`]")
+    html = render(book, '[`cfg(not(feature="std"))@platform`] and [`fn@cfg(unix)@platform`]')
+    assert "<code>platform</code>" in html and "@" not in re.sub(r"<div class=\"spl-cards\">.*", "", html, flags=re.S)
+    assert len(cards(html)) == 2
+    assert html_lib.escape('fn tape::platform, cfg(not(feature = "std"))') in html
+    with pytest.raises(CodeRefError, match="`thing@` is no kind"):
+        render(book, "[`thing@level`]")
+
+
+def test_a_reexport_is_the_same_item(book):
+    html = render(book, "[`TapeWriter`], [`Writer`] and [`writer::TapeWriter`].")
+    assert len(cards(html)) == 1
+    assert "struct tape::TapeWriter" in html
 
 
 def test_an_unknown_item_fails(book):

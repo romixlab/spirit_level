@@ -10,6 +10,7 @@ homepage.workspace = true
 publish = false
 
 [dependencies]
+proc-macro2.workspace = true
 serde.workspace = true
 sl_model.workspace = true
 syn.workspace = true
