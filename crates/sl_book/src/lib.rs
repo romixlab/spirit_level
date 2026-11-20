@@ -37,6 +37,7 @@ pub const HAND_PAGES: &[(&str, &str)] = &[
     ("Dependents", "dependents.md"),
     ("Usage records", "usage.md"),
     ("Docs as the reader meets them", "reading.md"),
+    ("References in prose", "refs.md"),
     ("Migrating from bedrock-lint", "embedded-migration.md"),
     ("Writing a lint", "writing-lints.md"),
 ];
