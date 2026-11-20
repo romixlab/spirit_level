@@ -60,6 +60,9 @@ lint!(PATH_OUTSIDE_WORKSPACE, "M0005", "path-outside-workspace", "dependencies",
     params: [], needs: [], fix: None);
 lint!(PROFILE_DEFAULTS, "M0017", "profile-defaults", "repo", "the dev profile splits debug info and a deploy profile builds incrementally",
     params: [("deploy-profile", Str, "\"deploy\"", "the profile `just install` builds with")], needs: [], fix: None);
+lint!(DEV_DEBUG_OFF, "M0037", "dev-debug-off", "repo", "the dev profile builds with debug info off; a run turns it on with CARGO_PROFILE_DEV_DEBUG",
+    params: [("allow", StrList, "[]", "other `profile.dev.debug` values accepted besides false/0/\"none\", each with its reason on the line above in spirit_level.toml")],
+    needs: [], fix: Exact);
 lint!(TOOLCHAIN_PINNED, "M0019", "toolchain-pinned", "repo", "every rust-toolchain.toml pins the expected toolchain exactly: the stable release or the dated nightly",
     params: [
         ("stable", Str, "\"1.100.0\"", "the stable release every toolchain file pins (`X.Y.Z`); each spl release ships the current one"),
@@ -141,6 +144,7 @@ static LINTS: &[&LintMeta] = &[
     &GIT_DEPENDENCY_PINS,
     &PATH_OUTSIDE_WORKSPACE,
     &PROFILE_DEFAULTS,
+    &DEV_DEBUG_OFF,
     &TOOLCHAIN_PINNED,
     &TOOLCHAIN_OVERRIDES_PINNED,
     &REPO_FILES,

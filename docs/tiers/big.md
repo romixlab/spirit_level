@@ -120,6 +120,7 @@ Use it with `extends = "big"` in `spirit_level.toml`.
 | [M0033](../lints/M0033.md) | manifest-homepage | `warn` | crates.io and docs.rs link to repository and homepage; when there is a book, it is the homepage a reader wants | small |
 | [M0034](../lints/M0034.md) | readme-badges | `warn` | the top of the README tells a visitor whether the project passes and where its book, crate and API docs are | small |
 | [M0036](../lints/M0036.md) | toolchain-overrides-pinned | `deny` | a `cargo +nightly` in a recipe or CI bypasses the pinned toolchain | big |
+| [M0037](../lints/M0037.md) | dev-debug-off | `warn` | full debug info on every dev build is cargo's default; CARGO_PROFILE_DEV_DEBUG turns it on for the one run that needs it | small |
 | [P0001](../lints/P0001.md) | agent-file-lines | `warn` | agents read AGENTS.md whole every session; a long one is skimmed, not followed | small |
 | [P0003](../lints/P0003.md) | agent-rules-match-lints | `warn` | limits AGENTS.md states are the limits the lints check | big |
 | [P0007](../lints/P0007.md) | commit-subject-length | `warn` | the subject is what one-line logs and reviews show | medium |

@@ -1,18 +1,22 @@
 //! Repo-level files: profiles, rule files, changelog, justfile, feature comments.
 
 use sl_analysis::Context;
-use sl_core::{Diagnostic, Span};
-use sl_model::Justfile;
+use sl_core::{Diagnostic, Edit, Fix, Span};
+use sl_model::{Justfile, TomlFile, toml_edit};
 
 pub(crate) fn run(cx: &Context<'_>) {
     let p = cx.project;
     let root = &p.root_manifest;
 
+    // dev-debug-off; profile-defaults' split-debuginfo check skips while debug is off: nothing to split
+    let debug_off = dev_debug_off(cx, root);
+
     // profile-defaults
-    if root
-        .get(&["profile", "dev", "split-debuginfo"])
-        .and_then(|v| v.as_str())
-        != Some("unpacked")
+    if !debug_off
+        && root
+            .get(&["profile", "dev", "split-debuginfo"])
+            .and_then(|v| v.as_str())
+            != Some("unpacked")
     {
         cx.emit(
             Diagnostic::new("profile-defaults", "profile.dev.split-debuginfo", "the dev profile does not split debug info")
@@ -125,5 +129,94 @@ pub(crate) fn run(cx: &Context<'_>) {
                 );
             }
         }
+    }
+}
+
+/// `dev-debug-off`: whether `profile.dev.debug` is off (`false`, `0`, `"none"`), emitting a finding when it is
+/// not and the value is not in the lint's `allow`
+fn dev_debug_off(cx: &Context<'_>, root: &TomlFile) -> bool {
+    let debug_item = root.get(&["profile", "dev", "debug"]);
+    let debug_str = debug_item.and_then(debug_value_str);
+    let debug_off = matches!(debug_str.as_deref(), Some("false" | "0" | "none"));
+    if debug_off {
+        return true;
+    }
+    let allow = cx.params("dev-debug-off").list("allow");
+    let allowed = debug_str
+        .as_deref()
+        .is_some_and(|v| allow.iter().any(|a| a == v));
+    if !allowed {
+        let message = match &debug_str {
+            Some(v) => format!("profile.dev.debug is {v}, not off and not in `allow`"),
+            None if debug_item.is_some() => {
+                "profile.dev.debug is set to a value this lint cannot read".to_owned()
+            }
+            None => "profile.dev does not set debug: cargo's default is full debug info".to_owned(),
+        };
+        cx.emit(
+            Diagnostic::new("dev-debug-off", "profile.dev.debug", message)
+                .span(root.span(&["profile", "dev"]))
+                .help("add `[profile.dev] debug = false`: CARGO_PROFILE_DEV_DEBUG turns it on for one run when needed")
+                .fix(dev_debug_off_fix(root)),
+        );
+    }
+    false
+}
+
+/// A scalar `profile.dev.debug` value, as `cargo` would accept it, rendered for comparison (`"false"`, `"0"`,
+/// `"none"`, `"line-tables-only"`); `None` for a missing key or a non-scalar one
+fn debug_value_str(item: &toml_edit::Item) -> Option<String> {
+    Some(match item.as_value()? {
+        toml_edit::Value::Boolean(b) => b.value().to_string(),
+        toml_edit::Value::Integer(n) => n.value().to_string(),
+        toml_edit::Value::String(s) => s.value().to_owned(),
+        _ => return None,
+    })
+}
+
+/// The exact edit that sets `[profile.dev] debug = false`: in place when the key exists, right after the table
+/// header when the table exists without it, appended as a new table otherwise
+fn dev_debug_off_fix(root: &TomlFile) -> Fix {
+    let edit = if let Some(span) = root.item_span(&["profile", "dev", "debug"]) {
+        Edit {
+            file: root.rel.clone(),
+            start: span.start,
+            end: span.end,
+            replacement: "false".to_owned(),
+        }
+    } else if let Some(table) = root.item_span(&["profile", "dev"]) {
+        let at = root.text[table.start..]
+            .find('\n')
+            .map_or(root.text.len(), |i| table.start + i + 1);
+        let nl = if at == root.text.len() && !root.text.ends_with('\n') {
+            "\n"
+        } else {
+            ""
+        };
+        Edit {
+            file: root.rel.clone(),
+            start: at,
+            end: at,
+            replacement: format!("{nl}debug = false\n"),
+        }
+    } else {
+        let text = &root.text;
+        let sep = if text.ends_with("\n\n") || text.is_empty() {
+            ""
+        } else if text.ends_with('\n') {
+            "\n"
+        } else {
+            "\n\n"
+        };
+        Edit {
+            file: root.rel.clone(),
+            start: text.len(),
+            end: text.len(),
+            replacement: format!("{sep}[profile.dev]\ndebug = false\n"),
+        }
+    };
+    Fix {
+        description: "add [profile.dev] debug = false".into(),
+        edits: vec![edit],
     }
 }

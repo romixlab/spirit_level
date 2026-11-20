@@ -187,6 +187,7 @@ missing_crate_level_docs = "warn"
 broken_intra_doc_links = "deny"
 
 [profile.dev]
+debug = false
 split-debuginfo = "unpacked"
 
 [profile.test]

@@ -74,6 +74,7 @@ Use it with `extends = "small"` in `spirit_level.toml`.
 | [M0033](../lints/M0033.md) | manifest-homepage | `warn` | crates.io and docs.rs link to repository and homepage; when there is a book, it is the homepage a reader wants | small |
 | [M0034](../lints/M0034.md) | readme-badges | `warn` | the top of the README tells a visitor whether the project passes and where its book, crate and API docs are | small |
 | [M0036](../lints/M0036.md) | toolchain-overrides-pinned | `warn` | a `cargo +nightly` in a recipe or CI bypasses the pinned toolchain | small |
+| [M0037](../lints/M0037.md) | dev-debug-off | `warn` | full debug info on every dev build is cargo's default; CARGO_PROFILE_DEV_DEBUG turns it on for the one run that needs it | small |
 | [P0001](../lints/P0001.md) | agent-file-lines | `warn` | agents read AGENTS.md whole every session; a long one is skimmed, not followed | small |
 | [P0009](../lints/P0009.md) | changelog-entry-length | `warn` | a CHANGELOG is a list: one short line per change | small |
 | [S0002](../lints/S0002.md) | function-complexity | `warn` | more paths than can be tested or held in one's head | small |
@@ -181,6 +182,10 @@ reason = "a path into a sibling checkout builds differently on every PC"
 [lints.profile-defaults]
 level = "warn"
 reason = "split debug info and an incremental deploy profile: measured large build-time wins"
+
+[lints.dev-debug-off]
+level = "warn"
+reason = "full debug info on every dev build is cargo's default; CARGO_PROFILE_DEV_DEBUG turns it on for the one run that needs it"
 
 [lints.profile-no-lto]
 level = "warn"

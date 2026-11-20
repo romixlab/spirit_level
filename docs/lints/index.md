@@ -475,6 +475,7 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [M0032](M0032.md) | [ci-workflow](M0032.md) | the repo has a CI workflow and it runs the repo's checks | off | warn | warn | warn | off | off | off | off | off | off |
 | [M0034](M0034.md) | [readme-badges](M0034.md) | the README carries a badge for the book, CI and every published crate, each linking to its target | warn | warn | warn | warn | off | off | off | off | off | off |
 | [M0036](M0036.md) | [toolchain-overrides-pinned](M0036.md) | justfiles and CI workflows choose the pinned toolchain: `cargo +nightly-2026-11-19`, never `+nightly` or `+stable` | warn | warn | warn | deny | off | off | off | off | off | off |
+| [M0037](M0037.md) | [dev-debug-off](M0037.md) | the dev profile builds with debug info off; a run turns it on with CARGO_PROFILE_DEV_DEBUG | warn | warn | warn | warn | off | off | off | off | off | off |
 
 ## rustfmt
 

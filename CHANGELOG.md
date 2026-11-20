@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Added
+
+- `dev-debug-off`: `[profile.dev]` must set `debug = false`, warn by default (MAN-19).
+
+### Changed
+
+- `profile-defaults` no longer demands `split-debuginfo` when `profile.dev.debug` is off (MAN-19).
+
 ## [0.7.1] - 2026-11-20
 
 ### Added

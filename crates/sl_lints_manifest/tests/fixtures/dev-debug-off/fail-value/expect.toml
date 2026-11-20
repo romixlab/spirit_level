@@ -1,0 +1,3 @@
+[[finding]]
+at = "Cargo.toml:12"
+contains = "not off and not in `allow`"
