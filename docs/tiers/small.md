@@ -54,6 +54,7 @@ Use it with `extends = "small"` in `spirit_level.toml`.
 | [D0023](../lints/D0023.md) | page-figures | `warn` | a guide that explains a mechanism in words alone is skimmed; a figure shows it whole | small |
 | [D0024](../lints/D0024.md) | paragraph-run-words | `warn` | short paragraphs under many headings are still a wall of text when nothing else sits between them | small |
 | [D0025](../lints/D0025.md) | prose-per-element | `warn` | a page of sentences with little else between them is skimmed; the reader needs something to look at | small |
+| [D0026](../lints/D0026.md) | glossary-terms | `warn` | a reader arriving in a section finds a term's definition only where the section marks it | small |
 | [M0001](../lints/M0001.md) | default-features-off | `warn` | dependencies are added with default-features = false and only the features in use | small |
 | [M0003](../lints/M0003.md) | git-dependency-pins | `warn` | git dependencies follow a branch; Cargo.lock fixes the commit | small |
 | [M0004](../lints/M0004.md) | no-sys-crates | `deny` | pure-Rust crates only: no bundled C, no -sys bindings without a written reason | small |
@@ -434,6 +435,10 @@ reason = "a term used before its definition is guessed at, and a wrong guess is 
 [lints.term-synonyms]
 level = "warn"
 reason = "a reader takes two names for two things and looks for a difference that is not there"
+
+[lints.glossary-terms]
+level = "warn"
+reason = "a reader arriving in a section finds a term's definition only where the section marks it"
 
 [lints.passive-voice]
 level = "warn"

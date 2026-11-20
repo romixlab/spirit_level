@@ -328,3 +328,4 @@ D0022 = { id = "book-deploy", group = "docs", status = "active" }
 D0023 = { id = "page-figures", group = "docs", status = "active" }
 D0024 = { id = "paragraph-run-words", group = "docs", status = "active" }
 D0025 = { id = "prose-per-element", group = "docs", status = "active" }
+D0026 = { id = "glossary-terms", group = "docs", status = "active" }

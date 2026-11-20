@@ -73,6 +73,7 @@ Use it with `extends = "big"` in `spirit_level.toml`.
 | [D0023](../lints/D0023.md) | page-figures | `warn` | a guide that explains a mechanism in words alone is skimmed; a figure shows it whole | small |
 | [D0024](../lints/D0024.md) | paragraph-run-words | `warn` | short paragraphs under many headings are still a wall of text when nothing else sits between them | small |
 | [D0025](../lints/D0025.md) | prose-per-element | `warn` | a page of sentences with little else between them is skimmed; the reader needs something to look at | small |
+| [D0026](../lints/D0026.md) | glossary-terms | `warn` | a reader arriving in a section finds a term's definition only where the section marks it | small |
 | [G0001](../lints/G0001.md) | core-crate-deps | `deny` | a _core crate holds shared types and drags nothing in | big |
 | [G0002](../lints/G0002.md) | core-crate-types | `deny` | _core crates hold only types: no I/O, threads or runtimes | big |
 | [G0003](../lints/G0003.md) | crate-cycles | `deny` | crates in a cycle cannot be built or tested apart | medium |

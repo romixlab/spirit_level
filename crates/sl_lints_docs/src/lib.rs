@@ -7,6 +7,7 @@
 //! its Markdown sources by the reading and word lints; the book lints always read the sources.
 
 mod book;
+mod glossary;
 mod links;
 mod reading;
 mod words;
@@ -112,6 +113,9 @@ lint!(THEME_FEATURE_CONFLICTS, "D0019", "theme-feature-conflicts", "book", "them
 lint!(ZENSICAL_KEYS, "D0020", "zensical-keys", "book", "zensical.toml names only keys Zensical reads",
     params: [("known", StrList, "[\"site_name\", \"site_dir\", \"docs_dir\", \"site_url\", \"site_description\", \"site_author\", \"use_directory_urls\", \"strict\", \"dev_addr\", \"copyright\", \"watch\", \"exclude_docs\", \"draft_docs\", \"not_in_nav\", \"remote_branch\", \"remote_name\", \"repo_url\", \"repo_name\", \"edit_uri_template\", \"edit_uri\", \"extra_css\", \"extra_templates\", \"extra_javascript\", \"nav\", \"validation\", \"validation.*\", \"extra\", \"extra.*\", \"markdown_extensions\", \"markdown_extensions.*\", \"plugins\", \"plugins.*\", \"theme\", \"theme.name\", \"theme.custom_dir\", \"theme.variant\", \"theme.language\", \"theme.direction\", \"theme.features\", \"theme.favicon\", \"theme.logo\", \"theme.font\", \"theme.font.text\", \"theme.font.code\", \"theme.icon\", \"theme.icon.logo\", \"theme.icon.edit\", \"theme.icon.view\", \"theme.icon.top\", \"theme.icon.share\", \"theme.icon.menu\", \"theme.icon.alternate\", \"theme.icon.search\", \"theme.icon.close\", \"theme.icon.previous\", \"theme.icon.next\", \"theme.icon.repo\", \"theme.icon.annotation\", \"theme.icon.tag\", \"theme.icon.admonition\", \"theme.icon.admonition.*\", \"theme.icon.blog\", \"theme.icon.blog.back\", \"theme.icon.blog.date\", \"theme.icon.blog.date_updated\", \"theme.icon.blog.categories\", \"theme.icon.blog.readtime\", \"theme.palette\", \"theme.palette.media\", \"theme.palette.scheme\", \"theme.palette.primary\", \"theme.palette.accent\", \"theme.palette.toggle\", \"theme.palette.toggle.icon\", \"theme.palette.toggle.name\"]", "dotted key paths zensical.toml may use, read from Zensical's own configuration code; a path ending `.*` accepts any key below it (a plugin's options, a reader-chosen admonition icon map)")],
     needs: [], fix: None);
+lint!(GLOSSARY_TERMS, "D0026", "glossary-terms", "book", "a book that marks glossary terms marks each once in every section that uses it",
+    params: [("ignore", StrList, "[]", "terms that need no mark: everyday words the glossary also defines")],
+    needs: [], fix: None);
 lint!(BOOK_DEPLOY, "D0022", "book-deploy", "book", "a book with a site_url is built strict and published with actions/deploy-pages by one workflow",
     params: [], needs: [], fix: None);
 
@@ -147,6 +151,7 @@ static DOCS_LINTS: &[&LintMeta] = &[
     &ZENSICAL_KEYS,
     &PAGE_LINKS,
     &BOOK_DEPLOY,
+    &GLOSSARY_TERMS,
 ];
 
 impl Analysis for Docs {
@@ -172,7 +177,10 @@ impl Analysis for Docs {
             }
         }
         match Book::read(&cx.project.root) {
-            Ok(Some(b)) => book::run(cx, &b),
+            Ok(Some(b)) => {
+                book::run(cx, &b);
+                glossary::run(cx, &b);
+            }
             Ok(None) => {}
             Err(e) => {
                 for m in DOCS_LINTS.iter().filter(|m| m.category == "book") {

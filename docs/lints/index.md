@@ -39,6 +39,7 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [D0019](D0019.md) | [theme-feature-conflicts](D0019.md) | theme features that exclude each other are not both on | deny | deny | deny | deny | off | off | off | off | off | off |
 | [D0020](D0020.md) | [zensical-keys](D0020.md) | zensical.toml names only keys Zensical reads | deny | deny | deny | deny | off | off | off | off | off | off |
 | [D0022](D0022.md) | [book-deploy](D0022.md) | a book with a site_url is built strict and published with actions/deploy-pages by one workflow | warn | warn | warn | warn | off | off | off | off | off | off |
+| [D0026](D0026.md) | [glossary-terms](D0026.md) | a book that marks glossary terms marks each once in every section that uses it | warn | warn | warn | warn | off | off | off | off | off | off |
 
 ## boot
 

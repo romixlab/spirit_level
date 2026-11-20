@@ -1,0 +1,12 @@
+[[term]]
+name = "piece"
+forms = ["pieces"]
+short = "One file of a tape."
+
+[[term]]
+name = "content hash"
+short = "A hash of every byte of a piece."
+
+[[term]]
+name = "clock"
+short = "Anything that counts time at an exact rate."

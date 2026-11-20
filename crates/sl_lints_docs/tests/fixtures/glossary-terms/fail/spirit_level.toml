@@ -1,0 +1,5 @@
+extends = []
+
+[lints.glossary-terms]
+level = "warn"
+reason = "fixture"

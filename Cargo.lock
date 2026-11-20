@@ -1072,7 +1072,7 @@ dependencies = [
 
 [[package]]
 name = "sl_book_refs"
-version = "0.5.9"
+version = "0.7.0"
 dependencies = [
  "serde",
  "sl_model",
@@ -1216,6 +1216,7 @@ version = "0.7.4"
 dependencies = [
  "serde",
  "sl_analysis",
+ "sl_book_refs",
  "sl_config",
  "sl_core",
  "sl_docs",

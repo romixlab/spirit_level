@@ -314,6 +314,10 @@ reason = "a term used before its definition is guessed at, and a wrong guess is 
 level = "warn"
 reason = "a reader takes two names for two things and looks for a difference that is not there"
 
+[lints.glossary-terms]
+level = "warn"
+reason = "a reader arriving in a section finds a term's definition only where the section marks it"
+
 [lints.passive-voice]
 level = "warn"
 reason = "a passive sentence hides who acts; a page of them reads as things that happen on their own"

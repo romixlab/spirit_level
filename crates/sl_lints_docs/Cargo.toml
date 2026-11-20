@@ -12,6 +12,7 @@ publish = false
 [dependencies]
 serde.workspace = true
 sl_analysis.workspace = true
+sl_book_refs.workspace = true
 sl_config.workspace = true
 sl_core.workspace = true
 sl_docs.workspace = true
