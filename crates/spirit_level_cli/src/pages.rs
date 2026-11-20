@@ -116,10 +116,10 @@ fn listed(items: &[String]) -> String {
 /// One row per page, columns aligned
 fn table(pages: &[PageReport]) -> String {
     let head = [
-        "page", "kind", "words", "read", "run", "para", "sent", "flesch", "pass%", "abbr", "terms",
-        "syn", "img", "h", "links", "cta", "code",
+        "page", "kind", "words", "read", "run", "prun", "para", "sent", "flesch", "pass%", "abbr",
+        "terms", "syn", "img", "w/img", "h", "links", "cta", "code",
     ];
-    let rows: Vec<[String; 17]> = pages
+    let rows: Vec<[String; 19]> = pages
         .iter()
         .map(|p| {
             let s = &p.stats;
@@ -130,6 +130,7 @@ fn table(pages: &[PageReport]) -> String {
                 s.words.to_string(),
                 format!("{:.1}m", s.reading_minutes),
                 s.longest_run.to_string(),
+                s.longest_paragraph_run.to_string(),
                 s.paragraph_max.to_string(),
                 format!("{:.0}", s.sentence_median),
                 score(s.flesch),
@@ -138,6 +139,7 @@ fn table(pages: &[PageReport]) -> String {
                 w.early_terms.len().to_string(),
                 w.synonyms.len().to_string(),
                 s.figures.to_string(),
+                score(s.words_per_figure),
                 s.headings.len().to_string(),
                 format!("{}/{}", s.links_internal, s.links_external),
                 s.ctas.to_string(),
@@ -203,6 +205,17 @@ fn detail(p: &PageReport) -> String {
         out,
         "  paragraphs {}: longest {}, median {:.0} words",
         s.paragraphs, s.paragraph_max, s.paragraph_median
+    );
+    let paragraph_runs: Vec<String> = s
+        .paragraph_runs
+        .iter()
+        .map(|r| format!("{}@{}", r.words, r.line))
+        .collect();
+    let _ = writeln!(
+        out,
+        "  longest paragraph run {} words (headings within); runs (words@line): {}",
+        s.longest_paragraph_run,
+        paragraph_runs.join(" ")
     );
     let _ = writeln!(
         out,

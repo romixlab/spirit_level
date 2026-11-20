@@ -72,6 +72,10 @@ pub struct Stats {
     pub runs: Vec<Run>,
     /// The longest run's words
     pub longest_run: usize,
+    /// The runs of paragraphs with no list, figure, table or code between them, headings within, in order
+    pub paragraph_runs: Vec<Run>,
+    /// The longest paragraph run's words
+    pub longest_paragraph_run: usize,
     /// Paragraphs and list items
     pub paragraphs: usize,
     /// The longest paragraph's words
@@ -84,7 +88,7 @@ pub struct Stats {
     pub sentence_median: f64,
     /// The longest sentence's words
     pub sentence_max: usize,
-    /// Figures: paragraphs of images only and HTML figures
+    /// Figures: paragraphs of images only, HTML figures and drawings, diagram blocks
     pub figures: usize,
     /// Images, Markdown and HTML
     pub images: usize,
@@ -150,6 +154,33 @@ pub fn runs(page: &Page) -> Vec<Run> {
     out
 }
 
+/// The runs of paragraphs a reader meets with nothing else to look at: headings do not end a run, every other
+/// item does (a list, a figure, a table, a code block, an admonition)
+pub fn paragraph_runs(page: &Page) -> Vec<Run> {
+    let mut out = Vec::new();
+    let mut cur: Option<Run> = None;
+    for item in &page.items {
+        match item {
+            Item::Prose {
+                text,
+                line,
+                list: false,
+                ..
+            } => {
+                cur.get_or_insert(Run {
+                    words: 0,
+                    line: *line,
+                })
+                .words += words(text).len();
+            }
+            Item::Heading { .. } => {}
+            _ => out.extend(cur.take()),
+        }
+    }
+    out.extend(cur);
+    out
+}
+
 /// The metrics of a page; `english` turns Flesch reading ease on
 pub fn stats(page: &Page, speed: &ReadingSpeed, english: bool) -> Stats {
     let mut para = Vec::new();
@@ -191,6 +222,7 @@ pub fn stats(page: &Page, speed: &ReadingSpeed, english: bool) -> Stats {
         })
         .collect();
     let runs = runs(page);
+    let paragraph_runs = paragraph_runs(page);
     let external = page.links.iter().filter(|l| l.external()).count();
     Stats {
         words,
@@ -198,6 +230,8 @@ pub fn stats(page: &Page, speed: &ReadingSpeed, english: bool) -> Stats {
         reading_minutes: speed.minutes(words, figures),
         longest_run: runs.iter().map(|r| r.words).max().unwrap_or(0),
         runs,
+        longest_paragraph_run: paragraph_runs.iter().map(|r| r.words).max().unwrap_or(0),
+        paragraph_runs,
         paragraphs: para.len(),
         paragraph_max: para.iter().copied().max().unwrap_or(0),
         paragraph_median: median(para.clone()),
@@ -287,6 +321,34 @@ mod tests {
         let s = stats(&p, &SPEED, true);
         assert_eq!(s.passive_sentences, 2);
         assert_eq!(s.passive_percent, Some(50.0));
+    }
+
+    #[test]
+    fn headings_do_not_end_a_paragraph_run() {
+        let p = Page::parse(
+            "p.md",
+            Kind::Guide,
+            "one two
+
+## H
+
+three four five
+
+- six
+
+seven
+
+![a](a.png)
+
+eight nine
+",
+        );
+        let r: Vec<(usize, u32)> = paragraph_runs(&p)
+            .iter()
+            .map(|r| (r.words, r.line))
+            .collect();
+        assert_eq!(r, [(5, 1), (1, 9), (2, 13)]);
+        assert_eq!(stats(&p, &SPEED, true).longest_paragraph_run, 5);
     }
 
     #[test]

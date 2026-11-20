@@ -9,10 +9,10 @@ The numbers are useful on their own, before any budget. `spl pages` prints them 
 `spl pages` prints one row per page:
 
 ```text
-page                     kind       words  read  run  para  sent  flesch  pass%  abbr  terms  syn  img   h  links  cta  code
-README.md                guide        412  1.8m  140    48    14      52     12     1      0    0    1   6    9/3    0     4
-docs/configuration.md    guide       1630  7.1m  210    61    16      48     21     0      2    1    0  14   12/0    0    11
-docs/lints/D0001.md      reference    310  1.3m   88    40    11      55     18     0      0    0    0   6    8/0    0     1
+page                     kind       words  read  run  prun  para  sent  flesch  pass%  abbr  terms  syn  img  w/img   h  links  cta  code
+README.md                guide        412  1.8m  140   160    48    14      52     12     1      0    0    1    380   6    9/3    0     4
+docs/configuration.md    guide       1630  7.1m  210   420    61    16      48     21     0      2    1    0      -  14   12/0    0    11
+docs/lints/D0001.md      reference    310  1.3m   88    88    40    11      55     18     0      0    0    0      -   6    8/0    0     1
 ```
 
 | Column | Meaning |
@@ -21,6 +21,7 @@ docs/lints/D0001.md      reference    310  1.3m   88    40    11      55     18 
 | `words` | words of prose and headings |
 | `read` | reading time in minutes, images included |
 | `run` | the longest run of prose words between two visual breaks |
+| `prun` | the longest run of paragraph words with no list, figure, table or code block between them; headings do not end it |
 | `para` | the longest paragraph, in words |
 | `sent` | the median sentence, in words |
 | `flesch` | Flesch reading ease, English pages only; `-` otherwise |
@@ -28,7 +29,8 @@ docs/lints/D0001.md      reference    310  1.3m   88    40    11      55     18 
 | `abbr` | abbreviations not spelled out at their first use |
 | `terms` | terms used before the page defines them |
 | `syn` | uses of a name the project's word list prefers otherwise |
-| `img` | figures: paragraphs that hold only images, and HTML figures |
+| `img` | figures: paragraphs that hold only images, HTML figures and drawings, diagram blocks |
+| `w/img` | prose words per figure; `-` without figures |
 | `h` | headings |
 | `links` | internal and external links |
 | `cta` | calls to action: links and buttons styled to be pressed (built pages) |
@@ -55,7 +57,8 @@ A book configured by `mkdocs.yml` alone gets the reading lints but not the book 
 
 - **Prose** is the text of paragraphs, list items and block quotes. Inline code inside a sentence counts as words. Headings, code blocks, tables, image text and raw HTML are not prose.
 - **Visual breaks** are headings, code blocks, tables, figures, admonitions, content tabs and HTML figures, videos, tables and `<details>` blocks. A **run** is the prose between two breaks.
-- **Figures** are paragraphs that hold only images (a row of badges is one figure), and HTML `<figure>` and `<img>` blocks.
+- **Figures** are paragraphs that hold only images (a row of badges is one figure), HTML `<figure>`, `<img>` and `<svg>` blocks, and diagram blocks: fenced blocks in `mermaid`, `dot`, `graphviz`, `plantuml`, `puml`, `d2`, `svgbob`, `bob`, `wavedrom` or `pikchr`, which a book draws. A diagram block is a figure, not code.
+- A **paragraph run** is the paragraphs in a row with no list, figure, table, code block or admonition between them. Headings do not end it, so many short sections of prose are one run.
 - **Reading time** is words divided by words per minute, plus a falling time per figure: the first figure costs `image-first-seconds`, each one after it a little less, down to `image-min-seconds` over `image-falloff-count` figures. Every further figure costs the floor.
 - **Sentences** are split after `.`, `!` or `?` and a space, except after a known abbreviation, a single letter or a number. The same splitter serves `sentence-words`.
 - **Words** in inline code are names, not prose: the word lints do not read them. A **definition** is bold text at a term's first use, or a sentence such as "A tier means ...".
@@ -105,7 +108,8 @@ The default `skip-classes` are Zensical's heading anchors, admonition titles, ta
 
 spirit_level does not build the site: build it first (`zola build`, `zensical build`). A missing build folder stops the reading and word lints with a note, and `spl pages` with exit code 2. A built page has these differences from a Markdown page:
 
-- Only the content element counts. The header, navigation and footer outside it never do, nor do scripts, styles, inline SVG drawings and elements marked `aria-hidden`.
+- Only the content element counts. The header, navigation and footer outside it never do, nor do scripts, styles and elements marked `aria-hidden`. An inline SVG drawing is a figure; its labels are not prose.
+- A `<pre>` with a diagram language as a class (`<pre class="mermaid">`) is a figure.
 - **Prose** is the text of `<p>`, `<li>` and `<blockquote>`. Text in a figure caption, a `<summary>`, a `<dt>` or an element of a `skip-classes` class is neither prose nor a break.
 - **Visual breaks** are headings, `<pre>` blocks, `<figure>`, `<video>`, `<table>`, `<details>`, admonitions, content tabs and calls to action. A figure of a `capture-classes` class is a break but no image to look at.
 - A code block's language comes from a `language-*` class or a `data-lang` attribute on the `<pre>`, its `<code>` or an element around them.

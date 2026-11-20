@@ -44,7 +44,7 @@ pub enum Source {
 pub enum Break {
     /// A table
     Table,
-    /// A paragraph of images only, or an HTML figure or image
+    /// A paragraph of images only, an HTML figure, image or inline SVG, or a diagram block ([`DIAGRAM_LANGUAGES`])
     Figure,
     /// An HTML video
     Video,
@@ -80,6 +80,8 @@ pub enum Item {
         line: u32,
         /// Its bold and inline code, in order
         marks: Vec<Mark>,
+        /// Whether it is a list item or a paragraph inside one
+        list: bool,
     },
     /// A code block
     Code {
@@ -281,6 +283,8 @@ struct Open {
     marks: Vec<Mark>,
     /// Where the bold text being read starts
     strong: Option<usize>,
+    /// Whether it is a list item or inside one
+    list: bool,
 }
 
 /// The builder of a page's items, fed in document order by the Markdown parser or the HTML front end
@@ -343,6 +347,20 @@ impl Walk {
         }
     }
 
+    /// An HTML inline SVG drawing in the flow of the page: a figure of its own outside a paragraph; a paragraph of
+    /// drawings and images only is a figure too
+    pub(crate) fn drawing(&mut self, line: u32) {
+        if let Some(o) = self.open.last_mut() {
+            o.images += 1;
+            o.line.get_or_insert(line);
+        } else {
+            self.items.push(Item::Break {
+                what: Break::Figure,
+                line,
+            });
+        }
+    }
+
     /// Emits the text gathered so far by every open paragraph: a break inside a list item splits its prose
     fn flush(&mut self) {
         for o in &mut self.open {
@@ -353,6 +371,7 @@ impl Walk {
                     text: std::mem::take(&mut o.text),
                     line,
                     marks: std::mem::take(&mut o.marks),
+                    list: o.list,
                 });
             }
             o.text.clear();
@@ -374,6 +393,7 @@ impl Walk {
                 text: o.text,
                 line,
                 marks: o.marks,
+                list: o.list,
             });
         }
     }
@@ -425,11 +445,15 @@ impl Walk {
             }
         }
         if !block {
+            for _ in html_tags(html, "svg") {
+                self.drawing(line);
+            }
             return;
         }
         let kinds = [
             ("figure", Break::Figure),
             ("img", Break::Figure),
+            ("svg", Break::Figure),
             ("video", Break::Video),
             ("table", Break::Table),
             ("details", Break::Details),
@@ -460,14 +484,18 @@ impl Walk {
                 self.brk(Break::Table, line);
                 self.table += 1;
             }
-            Tag::Paragraph | Tag::Item if self.table == 0 => self.open.push(Open {
-                text: String::new(),
-                line: None,
-                images: 0,
-                words: false,
-                marks: Vec::new(),
-                strong: None,
-            }),
+            Tag::Paragraph | Tag::Item if self.table == 0 => {
+                let list = matches!(tag, Tag::Item) || self.open.last().is_some_and(|o| o.list);
+                self.open.push(Open {
+                    text: String::new(),
+                    line: None,
+                    images: 0,
+                    words: false,
+                    marks: Vec::new(),
+                    strong: None,
+                    list,
+                });
+            }
             Tag::Strong => {
                 if let Some(o) = self.open.last_mut() {
                     o.strong = Some(o.text.len());
@@ -501,12 +529,19 @@ impl Walk {
             }
             TagEnd::CodeBlock => {
                 if let Some((lang, fenced, text, line)) = self.code.take() {
-                    self.items.push(Item::Code {
-                        lang,
-                        fenced,
-                        lines: text.lines().count(),
-                        line,
-                    });
+                    if lang.as_deref().is_some_and(diagram) {
+                        self.items.push(Item::Break {
+                            what: Break::Figure,
+                            line,
+                        });
+                    } else {
+                        self.items.push(Item::Code {
+                            lang,
+                            fenced,
+                            lines: text.lines().count(),
+                            line,
+                        });
+                    }
                 }
             }
             TagEnd::Table => self.table = self.table.saturating_sub(1),
@@ -548,6 +583,19 @@ impl Walk {
             _ => {}
         }
     }
+}
+
+/// Languages of fenced blocks a book renders as a drawing (`mermaid`, `dot`, `plantuml`, `d2`, `svgbob`, `wavedrom`,
+/// Pikchr): a figure, not code
+pub const DIAGRAM_LANGUAGES: &[&str] = &[
+    "mermaid", "dot", "graphviz", "plantuml", "puml", "d2", "svgbob", "bob", "wavedrom", "pikchr",
+];
+
+/// Whether a code block's language is drawn as a diagram
+pub fn diagram(lang: &str) -> bool {
+    DIAGRAM_LANGUAGES
+        .iter()
+        .any(|d| d.eq_ignore_ascii_case(lang))
 }
 
 /// The level of a heading tag, 1 for `h1`
@@ -658,7 +706,9 @@ impl Page {
     /// The text of the prose, item by item, with its line and its bold and inline code
     pub fn marked_prose(&self) -> impl Iterator<Item = (&str, u32, &[Mark])> {
         self.items.iter().filter_map(|i| match i {
-            Item::Prose { text, line, marks } => Some((text.as_str(), *line, marks.as_slice())),
+            Item::Prose {
+                text, line, marks, ..
+            } => Some((text.as_str(), *line, marks.as_slice())),
             _ => None,
         })
     }
@@ -755,6 +805,30 @@ mod tests {
                 (MarkKind::Code, "level"),
                 (MarkKind::Strong, "more")
             ]
+        );
+    }
+
+    #[test]
+    fn diagrams_drawings_and_lists() {
+        let p = page(
+            "Lead in:\n\n- one\n- two\n\n```mermaid\ngraph LR\n```\n\n<svg viewBox=\"0 0 1 1\"></svg>\n\nSee [the guide](g.md).\n",
+        );
+        let shape: Vec<String> = p
+            .items
+            .iter()
+            .map(|i| match i {
+                Item::Prose { list, .. } => format!("p{}", if *list { "l" } else { "" }),
+                Item::Break { what, .. } => format!("{what:?}"),
+                _ => "x".to_owned(),
+            })
+            .collect();
+        assert_eq!(shape, ["p", "pl", "pl", "Figure", "Figure", "p"]);
+        let loose = page("- one\n\n  more of one\n\n- two\n");
+        assert!(
+            loose
+                .items
+                .iter()
+                .all(|i| matches!(i, Item::Prose { list: true, .. }))
         );
     }
 

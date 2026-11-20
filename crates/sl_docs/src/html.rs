@@ -5,7 +5,7 @@
 //! quotes. Headings, code, figures, tables, videos, details and calls to action are what they are in Markdown;
 //! labels, captions, term lists and other marked elements are none of them.
 
-use crate::page::{Admonition, Break, Kind, Link, Page, Source, Walk, level_of};
+use crate::page::{Admonition, Break, Kind, Link, Page, Source, Walk, diagram, level_of};
 use html5gum::{DefaultEmitter, Token, Tokenizer};
 use pulldown_cmark::{CodeBlockKind, CowStr, Tag, TagEnd};
 
@@ -235,6 +235,9 @@ impl Front<'_> {
             };
             self.w.links.push(Link { line, dest });
         }
+        if tag == "svg" && reading {
+            self.w.drawing(line);
+        }
         if tag == "br" && reading {
             self.w.text(" ", line);
         }
@@ -336,6 +339,7 @@ impl Front<'_> {
             }
             "pre" => {
                 let lang = language(classes, data_lang)
+                    .or_else(|| classes.iter().find(|c| diagram(c)).cloned())
                     .or_else(|| self.stack.iter().rev().find_map(|n| n.lang.clone()));
                 let info = CowStr::from(lang.unwrap_or_default());
                 self.w
@@ -576,6 +580,7 @@ fn b() {}
                 "code:rust:2",
                 "Capture",
                 "Table",
+                "Figure",
                 "Admonition",
                 "p:Inside it.@21",
             ]
@@ -614,6 +619,15 @@ fn b() {}
         )
         .expect("a page");
         assert_eq!(shape(&p), ["Figure", "Figure"]);
+    }
+
+    #[test]
+    fn drawings_and_diagrams_are_figures() {
+        let p = parse_page(
+            "<main><p><svg><text>a</text></svg></p><p>Icon <svg></svg> in text.</p><pre class=\"mermaid\"><code>graph LR</code></pre></main>",
+        )
+        .expect("a page");
+        assert_eq!(shape(&p), ["Figure", "p:Icon  in text.@1", "Figure"]);
     }
 
     #[test]
