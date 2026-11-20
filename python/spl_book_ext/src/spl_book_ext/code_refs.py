@@ -13,8 +13,9 @@ build: a renamed or removed item, file or section cannot leave a stale reference
 
 The link opens the lines on the forge at the commit the index was written from. An item's card shows its kind and
 path, its signature (or whole source when short), and its docs rendered as Markdown, with rustdoc's intra-doc links
-resolved through the same index: to the named item's lines, or plain code when they name nothing. The summary paragraph
-always shows, and the blocks after it while they fit in `card_doc_chars_max` characters of Markdown. A file card shows
+resolved through the same index: to the named item's lines, or plain code when they name nothing. The docs show whole
+while they fit in `card_doc_chars_max` characters of Markdown; longer ones show their blocks while they fit, a first
+paragraph too long cut after the last sentence that fits, its first sentence always. A file card shows
 the code, at most `card_lines_max` lines. The setting `crates` is read by `spl book refs` alone.
 """
 
@@ -243,7 +244,7 @@ def doc_links(doc: str, at: dict, index: Index) -> str:
 
 
 def bounded(doc: str, chars_max: int) -> tuple[str, bool]:
-    """The summary paragraph and the blocks after it that fit in `chars_max`; whether any was left out"""
+    """The blocks of `doc` that fit in `chars_max`, a first paragraph cut at a sentence; whether any was left out"""
     blocks: list[str] = []
     current: list[str] = []
     fence: str | None = None
@@ -260,14 +261,30 @@ def bounded(doc: str, chars_max: int) -> tuple[str, bool]:
             current.append(line)
     if current:
         blocks.append("\n".join(current))
-    kept = blocks[:1]
+    kept: list[str] = []
     size = 0
-    for b in blocks[1:]:
-        if size + len(b) > chars_max:
-            break
-        kept.append(b)
-        size += len(b)
-    return "\n\n".join(kept), len(kept) < len(blocks)
+    for b in blocks:
+        if size + len(b) <= chars_max:
+            kept.append(b)
+            size += len(b)
+            continue
+        if not kept:
+            kept.append(b if re.match(r"\s*(`{3,}|~{3,})", b) else _sentences(b, chars_max))
+        break
+    out = "\n\n".join(kept)
+    return out, out != "\n\n".join(blocks)
+
+
+def _sentences(paragraph: str, chars_max: int) -> str:
+    """The sentences of `paragraph` that fit in `chars_max`, the first always; a code span is never cut"""
+    ends = [
+        m.end()
+        for m in re.finditer(r"[.!?](?=\s+[A-Z`\[(*_])", paragraph)
+        if paragraph.count("`", 0, m.start()) % 2 == 0
+    ]
+    fit = [e for e in ends if e <= chars_max]
+    end = fit[-1] if fit else (ends[0] if ends else len(paragraph))
+    return paragraph[:end]
 
 
 def _lines(text: str, lines_max: int) -> tuple[str, int]:
@@ -353,7 +370,7 @@ class CodeRefExtension(Extension):
             "index": ["target/spl-book/code_index.json", "the code index, from the project root"],
             "crates": [[], "the library crates spl book refs indexes; empty: every library of the workspace"],
             "card_lines_max": [16, "lines of code a card shows at most"],
-            "card_doc_chars_max": [600, "characters of docs a card shows after the summary paragraph, at most"],
+            "card_doc_chars_max": [400, "characters of docs a card shows at most; the first sentence always shows"],
         }
         super().__init__(**kwargs)
 
