@@ -21,7 +21,7 @@ from pathlib import Path
 from markdown import Extension
 from markdown.inlinepatterns import InlineProcessor
 
-from spl_book_ext.card import prose, reference
+from spl_book_ext.card import prose, reference, text
 
 # [`Name`], [`a::b::Name`], [`f()`], [`m!`]: rustdoc's shortcut form, not followed by a link target
 PATTERN = r"\[`((?:[A-Za-z_][A-Za-z0-9_]*::)*[A-Za-z_][A-Za-z0-9_]*)(\(\)|!)?`\](?![\[(])"
@@ -86,17 +86,17 @@ class CodeRefPattern(InlineProcessor):
         name, suffix = m.group(1), m.group(2) or ""
         item = self.index.find(name)
         code = etree.Element("code")
-        code.text = name + suffix
+        code.text = text(name + suffix)
         span, card = reference(code, item["url"], "code")
         head = etree.SubElement(card, "span", {"class": "spl-card-head"})
-        head.text = f"{item['kind']} {item['path']}"
+        head.text = text(f"{item['kind']} {item['path']}")
         src = etree.SubElement(card, "code", {"class": "spl-card-src"})
-        src.text = item["source"]
+        src.text = text(item["source"])
         if item["doc"]:
             doc = etree.SubElement(card, "span", {"class": "spl-card-doc"})
             prose(doc, item["doc"])
         where = etree.SubElement(card, "span", {"class": "spl-card-where"})
-        where.text = f"{item['file']}:{item['lines'][0]}"
+        where.text = text(f"{item['file']}:{item['lines'][0]}")
         return span, m.start(0), m.end(0)
 
 

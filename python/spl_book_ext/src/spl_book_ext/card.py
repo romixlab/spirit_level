@@ -5,8 +5,15 @@ from __future__ import annotations
 import re
 import xml.etree.ElementTree as etree
 
+from markdown.util import AtomicString
+
 # rustdoc's intra-doc links in a doc comment, `[Self::x]`, `[text](target)` and `[text][ref]`, shown as their text
 _DOC_LINK = re.compile(r"\[([^\[\]]+)\](?:\([^()]*\)|\[[^\[\]]*\])?")
+
+
+def text(s: str) -> AtomicString:
+    """Text Python-Markdown leaves as it is: escaped on output, never read again for patterns or raw HTML"""
+    return AtomicString(s)
 
 
 def reference(text: etree.Element | str, href: str, kind: str) -> tuple[etree.Element, etree.Element]:
@@ -14,7 +21,7 @@ def reference(text: etree.Element | str, href: str, kind: str) -> tuple[etree.El
     span = etree.Element("span", {"class": f"spl-ref spl-{kind}", "tabindex": "0"})
     link = etree.SubElement(span, "a", {"href": href})
     if isinstance(text, str):
-        link.text = text
+        link.text = AtomicString(text)
     else:
         link.append(text)
     card = etree.SubElement(span, "span", {"class": "spl-card", "role": "tooltip"})
@@ -28,8 +35,8 @@ def prose(parent: etree.Element, text: str) -> None:
     for i, part in enumerate(text.split("`")):
         if i % 2 == 1:
             last = etree.SubElement(parent, "code")
-            last.text = part
+            last.text = AtomicString(part)
         elif last is None:
-            parent.text = (parent.text or "") + part
+            parent.text = AtomicString((parent.text or "") + part)
         else:
-            last.tail = (last.tail or "") + part
+            last.tail = AtomicString((last.tail or "") + part)

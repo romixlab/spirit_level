@@ -23,7 +23,7 @@ from markdown import Extension
 from markdown.inlinepatterns import InlineProcessor
 from markdown.preprocessors import Preprocessor
 
-from spl_book_ext.card import prose, reference
+from spl_book_ext.card import prose, reference, text
 
 PATTERN = r"\[\[([^\[\]|`\n]+)(?:\|([^\[\]|`\n]+))?\]\]"
 MARKER = "<!-- glossary -->"
@@ -100,10 +100,8 @@ class TermPattern(InlineProcessor):
         t = self.glossary.find(name)
         span, card = reference(shown, self.glossary.href(t), "term")
         head = etree.SubElement(card, "strong")
-        head.text = t["name"]
-        if t.get("long"):
-            head.text += f" ({t['long']})"
-        head.tail = ": "
+        head.text = text(t["name"] + (f" ({t['long']})" if t.get("long") else ""))
+        head.tail = text(": ")
         rest = etree.SubElement(card, "span")
         prose(rest, t["short"])
         return span, m.start(0), m.end(0)

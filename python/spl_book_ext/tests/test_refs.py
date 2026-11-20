@@ -127,3 +127,34 @@ def test_a_missing_index_names_the_command(book):
     (book / "index.json").unlink()
     with pytest.raises(CodeRefError, match="run `spl book refs`"):
         render(book, "x")
+
+
+EVIL = "<script>alert(1)</script> <img src=x onerror=alert(1)>"
+
+
+def assert_text(html):
+    assert "<script" not in html and "<img" not in html, html
+    assert "&lt;script&gt;alert(1)&lt;/script&gt;" in html and "&lt;img src=x onerror=alert(1)&gt;" in html, html
+
+
+def test_a_doc_comment_is_text(book):
+    index = json.loads((book / "index.json").read_text())
+    index["items"].append(item("tape::Evil", "struct", doc=EVIL))
+    (book / "index.json").write_text(json.dumps(index))
+    assert_text(render(book, "[`Evil`]"))
+
+
+def test_a_glossary_definition_and_name_are_text(book):
+    (book / "glossary.toml").write_text(f'[[term]]\nname = "{EVIL}"\nforms = ["evil"]\nshort = "{EVIL}"\n')
+    assert_text(render(book, "An [[evil]] term."))
+
+
+def test_a_signature_with_generics_comes_out_whole(book):
+    index = json.loads((book / "index.json").read_text())
+    generic = item("tape::open", doc="Opens a `Sink<S>`.")
+    generic["source"] = "pub fn open<S: Sink>(s: S) -> Result<(TapeWriter, Resumed), WriteError<S::Error>>"
+    index["items"].append(generic)
+    (book / "index.json").write_text(json.dumps(index))
+    html = render(book, "[`open`]")
+    assert "pub fn open&lt;S: Sink&gt;(s: S) -&gt; Result&lt;(TapeWriter, Resumed), WriteError&lt;S::Error&gt;&gt;" in html
+    assert "<code>Sink&lt;S&gt;</code>" in html
