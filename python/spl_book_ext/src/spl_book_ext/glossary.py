@@ -2,7 +2,8 @@
 
 The glossary file (setting `file`, default `docs/glossary.toml`) holds one `[[term]]` table per term: its `name`,
 the `forms` prose also uses (plurals), a one-sentence `short` definition, the `chapter` that explains it, and for an
-abbreviation its `long` form. `[[pieces]]` finds `piece` by its forms; `[[the tail|tail]]` shows other words for a
+abbreviation its `long` form. A `chapter` is a relative link to a page of the book (letters, digits and `._~%#/-`,
+not starting with `/`); anything else fails the build, so the glossary cannot link out or run script. `[[pieces]]` finds `piece` by its forms; `[[the tail|tail]]` shows other words for a
 term. A term the file lacks, or a word naming two terms, raises `GlossaryError`, which fails the build.
 
 The glossary page holds the line `<!-- glossary -->`, which becomes every entry in order of name, each with the
@@ -27,6 +28,7 @@ from spl_book_ext import card
 PATTERN = r"\[\[([^\[\]|`\n]+)(?:\|([^\[\]|`\n]+))?\]\]"
 MARKER = "<!-- glossary -->"
 _KEYS = {"name", "forms", "short", "chapter", "long"}
+_RELATIVE_PAGE = re.compile(r"[A-Za-z0-9._~%#/-]+")
 
 
 class GlossaryError(Exception):
@@ -49,6 +51,14 @@ class Glossary:
             unknown = set(t) - _KEYS
             if unknown or "name" not in t or "short" not in t:
                 raise GlossaryError(f"{path}: term {t.get('name', '?')!r} needs name and short, knows only {sorted(_KEYS)}")
+            chapter = t.get("chapter")
+            if chapter is not None and (
+                not isinstance(chapter, str) or chapter.startswith("/") or not _RELATIVE_PAGE.fullmatch(chapter)
+            ):
+                raise GlossaryError(
+                    f'{path}: term "{t["name"]}": chapter "{chapter}" is no relative link to a page of the book, '
+                    'such as "../pieces/"'
+                )
         self.terms: list[dict] = sorted(terms, key=lambda t: t["name"].lower())
         self.by_form: dict[str, dict] = {}
         for t in terms:

@@ -174,6 +174,13 @@ def test_abbreviations_get_their_long_form_with_abbr_on(book):
     assert "*[CRC]" not in render(book, "Each CRC is checked.")
 
 
+@pytest.mark.parametrize("chapter", ["javascript:alert(1)", "https://x.org/", "//x.org/", "/abs/", 'a" onclick="x'])
+def test_a_chapter_must_be_a_relative_page_link(book, chapter):
+    (book / "glossary.toml").write_text(f'[[term]]\nname = "a"\nshort = "b"\nchapter = {json.dumps(chapter)}\n')
+    with pytest.raises(GlossaryError, match="is no relative link"):
+        render(book, "x")
+
+
 def test_a_word_naming_two_terms_fails(book):
     (book / "glossary.toml").write_text(GLOSSARY + '\n[[term]]\nname = "slice"\nforms = ["Piece"]\nshort = "x"\n')
     with pytest.raises(GlossaryError, match='"Piece" names two terms, "piece" and "slice"'):

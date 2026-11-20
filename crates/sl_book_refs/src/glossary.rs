@@ -14,7 +14,8 @@
 //! ```
 //!
 //! A word names one term at most: a form listed under two entries is an error, so a reference cannot be read two
-//! ways. Forms match without regard to case.
+//! ways. Forms match without regard to case. A `chapter` is a relative link to a page of the book (letters, digits
+//! and `._~%#/-`, not starting with `/`): no scheme, so it cannot run script or leave the site.
 
 use serde::Deserialize;
 use std::collections::BTreeMap;
@@ -31,7 +32,7 @@ pub struct Term {
     pub forms: Vec<String>,
     /// Its definition in one sentence
     pub short: String,
-    /// The page that explains it
+    /// The page that explains it, as a relative link
     #[serde(default)]
     pub chapter: Option<String>,
     /// For an abbreviation, its long form
@@ -60,6 +61,13 @@ pub enum GlossaryError {
     Read(std::io::Error),
     /// It is not a glossary: TOML syntax, a missing or unknown key
     Parse(toml::de::Error),
+    /// A `chapter` that is no relative link to a page
+    Chapter {
+        /// The term
+        term: String,
+        /// The chapter as written
+        chapter: String,
+    },
     /// A word names two terms
     TwoTerms {
         /// The word
@@ -76,6 +84,10 @@ impl std::fmt::Display for GlossaryError {
         match self {
             Self::Read(e) => write!(f, "cannot read it: {e}"),
             Self::Parse(e) => write!(f, "{e}"),
+            Self::Chapter { term, chapter } => write!(
+                f,
+                "term \"{term}\": chapter \"{chapter}\" is no relative link to a page of the book, such as \"../pieces/\""
+            ),
             Self::TwoTerms {
                 form,
                 first,
@@ -93,7 +105,7 @@ impl std::error::Error for GlossaryError {
         match self {
             Self::Read(e) => Some(e),
             Self::Parse(e) => Some(e),
-            Self::TwoTerms { .. } => None,
+            Self::Chapter { .. } | Self::TwoTerms { .. } => None,
         }
     }
 }
@@ -126,6 +138,14 @@ impl Glossary {
         let file: File = toml::from_str(text).map_err(GlossaryError::Parse)?;
         let mut by_form: BTreeMap<String, usize> = BTreeMap::new();
         for (i, t) in file.term.iter().enumerate() {
+            if let Some(chapter) = &t.chapter
+                && !is_relative_page(chapter)
+            {
+                return Err(GlossaryError::Chapter {
+                    term: t.name.clone(),
+                    chapter: chapter.clone(),
+                });
+            }
             for form in t.all_forms() {
                 let key = form.to_lowercase();
                 if let Some(first) = file
@@ -157,6 +177,15 @@ impl Glossary {
     }
 }
 
+/// Whether `link` is a relative link to a page: no scheme, no host, no absolute path
+fn is_relative_page(link: &str) -> bool {
+    !link.is_empty()
+        && !link.starts_with('/')
+        && link
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || "._~%#/-".contains(c))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -183,6 +212,23 @@ mod tests {
             e.to_string(),
             "\"Piece\" names two terms, \"piece\" and \"slice\""
         );
+    }
+
+    #[test]
+    fn a_chapter_is_a_relative_page_link() {
+        for bad in [
+            "javascript:alert(1)",
+            "https://x.org/",
+            "//x.org/a",
+            "/abs/",
+            "a b",
+            "",
+        ] {
+            let text = format!("[[term]]\nname = \"a\"\nshort = \"b\"\nchapter = \"{bad}\"\n");
+            let e = Glossary::parse(&text).unwrap_err();
+            assert!(e.to_string().contains("is no relative link"), "{bad}: {e}");
+        }
+        assert!(Glossary::parse(TWO).is_ok());
     }
 
     #[test]
