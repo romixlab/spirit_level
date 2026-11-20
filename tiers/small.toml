@@ -266,6 +266,10 @@ reason = "a guide that explains a mechanism in words alone is skimmed; a figure 
 level = "warn"
 reason = "short paragraphs under many headings are still a wall of text when nothing else sits between them"
 
+[lints.prose-per-element]
+level = "warn"
+reason = "a page of sentences with little else between them is skimmed; the reader needs something to look at"
+
 [lints.image-alt]
 level = "warn"
 reason = "an image without alternative text tells a screen reader, a search engine and a broken link nothing"

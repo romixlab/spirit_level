@@ -117,9 +117,9 @@ fn listed(items: &[String]) -> String {
 fn table(pages: &[PageReport]) -> String {
     let head = [
         "page", "kind", "words", "read", "run", "prun", "para", "sent", "flesch", "pass%", "abbr",
-        "terms", "syn", "img", "w/img", "h", "links", "cta", "code",
+        "terms", "syn", "img", "w/img", "w/el", "h", "links", "cta", "code",
     ];
-    let rows: Vec<[String; 19]> = pages
+    let rows: Vec<[String; 20]> = pages
         .iter()
         .map(|p| {
             let s = &p.stats;
@@ -140,6 +140,7 @@ fn table(pages: &[PageReport]) -> String {
                 w.synonyms.len().to_string(),
                 s.figures.to_string(),
                 score(s.words_per_figure),
+                format!("{:.0}", s.words_per_element),
                 s.headings.len().to_string(),
                 format!("{}/{}", s.links_internal, s.links_external),
                 s.ctas.to_string(),
@@ -230,6 +231,11 @@ fn detail(p: &PageReport) -> String {
         s.images_without_alt,
         s.words_per_figure
             .map_or_else(|| "-".to_owned(), |w| format!("{w:.0}"))
+    );
+    let _ = writeln!(
+        out,
+        "  lists, figures, tables, code blocks and other elements {}, {:.0} words of prose per element",
+        s.elements, s.words_per_element
     );
     let _ = writeln!(out, "  headings {}:", s.headings.len());
     for h in &s.headings {

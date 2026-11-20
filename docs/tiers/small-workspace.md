@@ -55,6 +55,7 @@ Use it with `extends = "small-workspace"` in `spirit_level.toml`.
 | [D0022](../lints/D0022.md) | book-deploy | `warn` | a book published by hand falls behind main, and a broken page goes live; one workflow builds it strict and deploys it | small |
 | [D0023](../lints/D0023.md) | page-figures | `warn` | a guide that explains a mechanism in words alone is skimmed; a figure shows it whole | small |
 | [D0024](../lints/D0024.md) | paragraph-run-words | `warn` | short paragraphs under many headings are still a wall of text when nothing else sits between them | small |
+| [D0025](../lints/D0025.md) | prose-per-element | `warn` | a page of sentences with little else between them is skimmed; the reader needs something to look at | small |
 | [G0003](../lints/G0003.md) | crate-cycles | `warn` | crates in a cycle cannot be built or tested apart | small-workspace |
 | [M0001](../lints/M0001.md) | default-features-off | `warn` | dependencies are added with default-features = false and only the features in use | small |
 | [M0002](../lints/M0002.md) | duplicate-versions | `warn` | two versions of a crate double its build time and split its types | small-workspace |

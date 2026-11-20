@@ -9,10 +9,10 @@ The numbers are useful on their own, before any budget. `spl pages` prints them 
 `spl pages` prints one row per page:
 
 ```text
-page                     kind       words  read  run  prun  para  sent  flesch  pass%  abbr  terms  syn  img  w/img   h  links  cta  code
-README.md                guide        412  1.8m  140   160    48    14      52     12     1      0    0    1    380   6    9/3    0     4
-docs/configuration.md    guide       1630  7.1m  210   420    61    16      48     21     0      2    1    0      -  14   12/0    0    11
-docs/lints/D0001.md      reference    310  1.3m   88    88    40    11      55     18     0      0    0    0      -   6    8/0    0     1
+page                     kind       words  read  run  prun  para  sent  flesch  pass%  abbr  terms  syn  img  w/img  w/el   h  links  cta  code
+README.md                guide        412  1.8m  140   160    48    14      52     12     1      0    0    1    380    63   6    9/3    0     4
+docs/configuration.md    guide       1630  7.1m  210   420    61    16      48     21     0      2    1    0      -    74  14   12/0    0    11
+docs/lints/D0001.md      reference    310  1.3m   88    88    40    11      55     18     0      0    0    0      -   103   6    8/0    0     1
 ```
 
 | Column | Meaning |
@@ -31,6 +31,7 @@ docs/lints/D0001.md      reference    310  1.3m   88    88    40    11      55  
 | `syn` | uses of a name the project's word list prefers otherwise |
 | `img` | figures: paragraphs that hold only images, HTML figures and drawings, diagram blocks |
 | `w/img` | prose words per figure; `-` without figures |
+| `w/el` | prose words per element: a list, figure, table, code block or other break |
 | `h` | headings |
 | `links` | internal and external links |
 | `cta` | calls to action: links and buttons styled to be pressed (built pages) |

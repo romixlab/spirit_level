@@ -457,6 +457,7 @@ Every lint, grouped by category, with its stable code and its level in each ship
 | [D0007](D0007.md) | [code-block-language](D0007.md) | every code block names its language | warn | warn | warn | warn | off | off | off | off | off | off |
 | [D0023](D0023.md) | [page-figures](D0023.md) | a guide has a figure for every so many words of prose | warn | warn | warn | warn | off | off | off | off | off | off |
 | [D0024](D0024.md) | [paragraph-run-words](D0024.md) | paragraphs in a row, headings or not between them, stay short | warn | warn | warn | warn | off | off | off | off | off | off |
+| [D0025](D0025.md) | [prose-per-element](D0025.md) | a guide sets lists, figures, tables or code among its prose | warn | warn | warn | warn | off | off | off | off | off | off |
 
 ## repo
 

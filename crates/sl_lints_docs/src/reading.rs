@@ -5,7 +5,7 @@ use crate::{first_words, judges, reading_speed};
 use sl_analysis::Context;
 use sl_core::{Confidence, Diagnostic, Span};
 use sl_docs::page::{Break, Item, Page};
-use sl_docs::stats::{paragraph_runs, runs};
+use sl_docs::stats::{elements, paragraph_runs, runs};
 use sl_docs::text::words;
 
 pub(crate) fn run(cx: &Context<'_>, pages: &[Page]) {
@@ -30,6 +30,9 @@ pub(crate) fn run(cx: &Context<'_>, pages: &[Page]) {
         }
         if cx.enabled("paragraph-run-words") {
             paragraph_run_words(cx, p);
+        }
+        if cx.enabled("prose-per-element") {
+            prose_per_element(cx, p);
         }
         if cx.enabled("image-alt") {
             image_alt(cx, p);
@@ -239,6 +242,32 @@ fn paragraph_run_words(cx: &Context<'_>, p: &Page) {
             .span(Span::new(p.rel.clone(), r.line))
             .metric("words", r.words as f64, Some(max as f64))
             .help("give the reader something other than sentences: a figure of the mechanism, a table for a comparison, a list for parallel facts, an example; more headings or shorter paragraphs do not end the run"),
+        );
+    }
+}
+
+fn prose_per_element(cx: &Context<'_>, p: &Page) {
+    let id = "prose-per-element";
+    let params = cx.params(id);
+    let prose: usize = p.prose().map(|(t, _)| words(t).len()).sum();
+    if !judges(params, p.kind) || prose < params.count("min-words") {
+        return;
+    }
+    let max = params.count("max-words") as f64;
+    let n = elements(p);
+    let per = prose as f64 / n.max(1) as f64;
+    if per > max {
+        cx.emit(
+            Diagnostic::new(
+                id,
+                p.rel.clone(),
+                format!(
+                    "{per:.0} words of prose per list, figure, table or code block: {prose} words, {n} of them (budget {max})"
+                ),
+            )
+            .span(Span::new(p.rel.clone(), 1))
+            .metric("words", per, Some(max))
+            .help("show what the prose tells: a figure of the mechanism, a table for values side by side, a list for parallel facts, an example in code"),
         );
     }
 }

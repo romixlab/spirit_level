@@ -96,6 +96,10 @@ pub struct Stats {
     pub images_without_alt: usize,
     /// Prose words per figure; None without figures
     pub words_per_figure: Option<f64>,
+    /// What is not prose or a heading ([`elements`]): lists, figures, tables, code blocks, admonitions
+    pub elements: usize,
+    /// Prose words per element, the page's prose over at least one element
+    pub words_per_element: f64,
     /// The headings
     pub headings: Vec<HeadingStat>,
     /// Links within the site
@@ -181,6 +185,27 @@ pub fn paragraph_runs(page: &Page) -> Vec<Run> {
     out
 }
 
+/// The items of a page that are neither prose nor a heading: a list (its items in a row) is one, so are every code
+/// block and every other break
+pub fn elements(page: &Page) -> usize {
+    let mut n = 0;
+    let mut in_list = false;
+    for item in &page.items {
+        match item {
+            Item::Prose { list: true, .. } => {
+                n += usize::from(!in_list);
+                in_list = true;
+            }
+            Item::Prose { .. } | Item::Heading { .. } => in_list = false,
+            Item::Code { .. } | Item::Break { .. } => {
+                n += 1;
+                in_list = false;
+            }
+        }
+    }
+    n
+}
+
 /// The metrics of a page; `english` turns Flesch reading ease on
 pub fn stats(page: &Page, speed: &ReadingSpeed, english: bool) -> Stats {
     let mut para = Vec::new();
@@ -250,6 +275,8 @@ pub fn stats(page: &Page, speed: &ReadingSpeed, english: bool) -> Stats {
             })
             .count(),
         words_per_figure: (figures > 0).then(|| prose_words as f64 / figures as f64),
+        elements: elements(page),
+        words_per_element: prose_words as f64 / elements(page).max(1) as f64,
         headings,
         links_internal: page.links.len() - external,
         links_external: external,
@@ -349,6 +376,13 @@ eight nine
             .collect();
         assert_eq!(r, [(5, 1), (1, 9), (2, 13)]);
         assert_eq!(stats(&p, &SPEED, true).longest_paragraph_run, 5);
+        assert_eq!(elements(&p), 2);
+        let list = Page::parse(
+            "p.md",
+            Kind::Guide,
+            "- a\n- b\n\ntext\n\n- c\n\n```sh\nls\n```\n",
+        );
+        assert_eq!(elements(&list), 3);
     }
 
     #[test]

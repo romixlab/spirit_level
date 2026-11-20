@@ -6,7 +6,8 @@
 
 - `page-figures`: a guide has a figure per 600 words of prose beyond the first 500 (DOCS-12).
 - `paragraph-run-words`: at most 350 words of paragraphs in a row, headings not counted as breaks (DOCS-12).
-- `spl pages` shows the longest paragraph run and prose words per figure (DOCS-12).
+- `prose-per-element`: a guide has at most 120 prose words per list, figure, table or code block (DOCS-12).
+- `spl pages` shows the longest paragraph run, prose words per figure and per element (DOCS-12).
 
 ### Changed
 

@@ -1,5 +1,5 @@
 //! Docs lints: the shape of a page as a reader meets it (long runs of prose, reading time, headings, walls of code,
-//! figures for the prose, paragraphs in a row under headings, images without alternative text, code
+//! figures for the prose, paragraphs in a row under headings, prose per element, images without alternative text, code
 //! without a language), its words (abbreviations, terms, synonyms, passive
 //! voice, reading ease) and the practices of a Zensical book (a navigation that names real pages, no page nobody
 //! reaches, one title, admonitions that render, a workflow that publishes it). One analysis, [`DOCS`]; the
@@ -50,6 +50,11 @@ lint!(PAGE_FIGURES, "D0023", "page-figures", "reading", "a guide has a figure fo
     needs: [], fix: None);
 lint!(PARAGRAPH_RUN_WORDS, "D0024", "paragraph-run-words", "reading", "paragraphs in a row, headings or not between them, stay short",
     params: [("max-words", Int, "350", "words of paragraphs a reader meets with no list, figure, table or code block between them; headings do not end a run"),
+             ("pages", Choice["all", "guide", "reference"], "\"guide\"", "the kinds of page judged")],
+    needs: [], fix: None);
+lint!(PROSE_PER_ELEMENT, "D0025", "prose-per-element", "reading", "a guide sets lists, figures, tables or code among its prose",
+    params: [("max-words", Int, "120", "words of prose a page may have per list, figure, table, code block or other element"),
+             ("min-words", Int, "300", "words of prose from which a page is judged"),
              ("pages", Choice["all", "guide", "reference"], "\"guide\"", "the kinds of page judged")],
     needs: [], fix: None);
 lint!(IMAGE_ALT, "D0006", "image-alt", "reading", "every image has alternative text",
@@ -121,6 +126,7 @@ static DOCS_LINTS: &[&LintMeta] = &[
     &CODE_WALL,
     &PAGE_FIGURES,
     &PARAGRAPH_RUN_WORDS,
+    &PROSE_PER_ELEMENT,
     &IMAGE_ALT,
     &CODE_BLOCK_LANGUAGE,
     &NAV_ENTRIES,
