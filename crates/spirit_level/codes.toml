@@ -324,3 +324,5 @@ D0019 = { id = "theme-feature-conflicts", group = "docs", status = "active" }
 D0020 = { id = "zensical-keys", group = "docs", status = "active" }
 D0021 = { id = "page-links", group = "docs", status = "active" }
 D0022 = { id = "book-deploy", group = "docs", status = "active" }
+D0023 = { id = "page-figures", group = "docs", status = "active" }
+D0024 = { id = "paragraph-run-words", group = "docs", status = "active" }

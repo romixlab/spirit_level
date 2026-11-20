@@ -1,10 +1,11 @@
-//! The reading lints: runs of prose, reading time, headings, sections, walls of code, image text, code languages.
+//! The reading lints: runs of prose and of paragraphs, reading time, headings, sections, walls of code, figures,
+//! image text, code languages.
 
 use crate::{first_words, judges, reading_speed};
 use sl_analysis::Context;
 use sl_core::{Confidence, Diagnostic, Span};
-use sl_docs::page::{Item, Page};
-use sl_docs::stats::runs;
+use sl_docs::page::{Break, Item, Page};
+use sl_docs::stats::{paragraph_runs, runs};
 use sl_docs::text::words;
 
 pub(crate) fn run(cx: &Context<'_>, pages: &[Page]) {
@@ -23,6 +24,12 @@ pub(crate) fn run(cx: &Context<'_>, pages: &[Page]) {
         }
         if cx.enabled("code-wall") {
             code_walls(cx, p);
+        }
+        if cx.enabled("page-figures") {
+            figures(cx, p);
+        }
+        if cx.enabled("paragraph-run-words") {
+            paragraph_run_words(cx, p);
         }
         if cx.enabled("image-alt") {
             image_alt(cx, p);
@@ -169,6 +176,73 @@ fn code_walls(cx: &Context<'_>, p: &Page) {
     }
 }
 
+/// The figures a page of `words` words of prose needs: none up to `free`, then one for each `per` words begun
+fn figures_needed(words: usize, free: usize, per: usize) -> usize {
+    words.saturating_sub(free).div_ceil(per.max(1))
+}
+
+fn figures(cx: &Context<'_>, p: &Page) {
+    let id = "page-figures";
+    let params = cx.params(id);
+    if !judges(params, p.kind) {
+        return;
+    }
+    let (free, per) = (params.count("free-words"), params.count("words-per-figure"));
+    let prose: usize = p.prose().map(|(t, _)| words(t).len()).sum();
+    let have = p
+        .items
+        .iter()
+        .filter(|i| {
+            matches!(
+                i,
+                Item::Break {
+                    what: Break::Figure,
+                    ..
+                }
+            )
+        })
+        .count();
+    let need = figures_needed(prose, free, per);
+    if have < need {
+        cx.emit(
+            Diagnostic::new(
+                id,
+                p.rel.clone(),
+                format!(
+                    "{prose} words of prose and {have} figures; the page needs {need} (none for the first {free} words, then one per {per})"
+                ),
+            )
+            .span(Span::new(p.rel.clone(), 1))
+            .metric("figures", have as f64, Some(need as f64))
+            .help("draw what the text explains: the layout, the flow, the curve; a figure shows the mechanism, a decoration does not count for the reader"),
+        );
+    }
+}
+
+fn paragraph_run_words(cx: &Context<'_>, p: &Page) {
+    let id = "paragraph-run-words";
+    let params = cx.params(id);
+    if !judges(params, p.kind) {
+        return;
+    }
+    let max = params.count("max-words");
+    for r in paragraph_runs(p).into_iter().filter(|r| r.words > max) {
+        cx.emit(
+            Diagnostic::new(
+                id,
+                format!("{}:{}", p.rel, prose_at(p, r.line)),
+                format!(
+                    "{} words of paragraphs in a row with no list, figure, table or code block, headings between them or not (budget {max})",
+                    r.words
+                ),
+            )
+            .span(Span::new(p.rel.clone(), r.line))
+            .metric("words", r.words as f64, Some(max as f64))
+            .help("give the reader something other than sentences: a figure of the mechanism, a table for a comparison, a list for parallel facts, an example; more headings or shorter paragraphs do not end the run"),
+        );
+    }
+}
+
 fn image_alt(cx: &Context<'_>, p: &Page) {
     let id = "image-alt";
     for (n, img) in p
@@ -225,5 +299,18 @@ fn code_language(cx: &Context<'_>, p: &Page) {
                 .span(Span::new(p.rel.clone(), line))
                 .help(help),
         );
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::figures_needed;
+
+    #[test]
+    fn figures_needed_per_words_begun() {
+        assert_eq!(figures_needed(500, 500, 600), 0);
+        assert_eq!(figures_needed(501, 500, 600), 1);
+        assert_eq!(figures_needed(1100, 500, 600), 1);
+        assert_eq!(figures_needed(1101, 500, 600), 2);
     }
 }

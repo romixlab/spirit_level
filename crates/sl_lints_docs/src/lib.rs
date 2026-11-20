@@ -1,5 +1,6 @@
 //! Docs lints: the shape of a page as a reader meets it (long runs of prose, reading time, headings, walls of code,
-//! images without alternative text, code without a language), its words (abbreviations, terms, synonyms, passive
+//! figures for the prose, paragraphs in a row under headings, images without alternative text, code
+//! without a language), its words (abbreviations, terms, synonyms, passive
 //! voice, reading ease) and the practices of a Zensical book (a navigation that names real pages, no page nobody
 //! reaches, one title, admonitions that render, a workflow that publishes it). One analysis, [`DOCS`]; the
 //! same numbers feed `spl pages` through [`report`]. A built site that `[docs.site]` names is read in place of
@@ -40,6 +41,15 @@ lint!(PAGE_HEADINGS, "D0004", "page-headings", "reading", "a long page is divide
     needs: [], fix: None);
 lint!(CODE_WALL, "D0005", "code-wall", "reading", "code comes with prose that explains it",
     params: [("max-lines", Int, "60", "lines of code a reader meets with no prose between them"),
+             ("pages", Choice["all", "guide", "reference"], "\"guide\"", "the kinds of page judged")],
+    needs: [], fix: None);
+lint!(PAGE_FIGURES, "D0023", "page-figures", "reading", "a guide has a figure for every so many words of prose",
+    params: [("free-words", Int, "500", "words of prose a page may have with no figure"),
+             ("words-per-figure", Int, "600", "words of prose above `free-words` for each further figure"),
+             ("pages", Choice["all", "guide", "reference"], "\"guide\"", "the kinds of page judged")],
+    needs: [], fix: None);
+lint!(PARAGRAPH_RUN_WORDS, "D0024", "paragraph-run-words", "reading", "paragraphs in a row, headings or not between them, stay short",
+    params: [("max-words", Int, "350", "words of paragraphs a reader meets with no list, figure, table or code block between them; headings do not end a run"),
              ("pages", Choice["all", "guide", "reference"], "\"guide\"", "the kinds of page judged")],
     needs: [], fix: None);
 lint!(IMAGE_ALT, "D0006", "image-alt", "reading", "every image has alternative text",
@@ -109,6 +119,8 @@ static DOCS_LINTS: &[&LintMeta] = &[
     &HEADING_WORDS,
     &PAGE_HEADINGS,
     &CODE_WALL,
+    &PAGE_FIGURES,
+    &PARAGRAPH_RUN_WORDS,
     &IMAGE_ALT,
     &CODE_BLOCK_LANGUAGE,
     &NAV_ENTRIES,

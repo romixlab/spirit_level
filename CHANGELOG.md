@@ -2,6 +2,16 @@
 
 ## [Unreleased]
 
+### Added
+
+- `page-figures`: a guide has a figure per 600 words of prose beyond the first 500 (DOCS-12).
+- `paragraph-run-words`: at most 350 words of paragraphs in a row, headings not counted as breaks (DOCS-12).
+- `spl pages` shows the longest paragraph run and prose words per figure (DOCS-12).
+
+### Changed
+
+- Diagram blocks (`mermaid`, `dot`, `d2` ...) and inline SVG count as figures, not code (DOCS-12).
+
 ## [0.6.0] - 2026-11-20
 
 ### Added

@@ -1,0 +1,4 @@
+params = { max-words = 25 }
+
+[[finding]]
+at = "README.md:3"

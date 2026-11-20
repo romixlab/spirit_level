@@ -51,6 +51,8 @@ Use it with `extends = "small"` in `spirit_level.toml`.
 | [D0020](../lints/D0020.md) | zensical-keys | `deny` | Zensical ignores a key it does not know, silently; a typo in zensical.toml never fails the build | small |
 | [D0021](../lints/D0021.md) | page-links | `deny` | a link to a page that moved or never existed, or to the built site, leads a reader nowhere | small |
 | [D0022](../lints/D0022.md) | book-deploy | `warn` | a book published by hand falls behind main, and a broken page goes live; one workflow builds it strict and deploys it | small |
+| [D0023](../lints/D0023.md) | page-figures | `warn` | a guide that explains a mechanism in words alone is skimmed; a figure shows it whole | small |
+| [D0024](../lints/D0024.md) | paragraph-run-words | `warn` | short paragraphs under many headings are still a wall of text when nothing else sits between them | small |
 | [M0001](../lints/M0001.md) | default-features-off | `warn` | dependencies are added with default-features = false and only the features in use | small |
 | [M0003](../lints/M0003.md) | git-dependency-pins | `warn` | git dependencies follow a branch; Cargo.lock fixes the commit | small |
 | [M0004](../lints/M0004.md) | no-sys-crates | `deny` | pure-Rust crates only: no bundled C, no -sys bindings without a written reason | small |
@@ -374,6 +376,14 @@ reason = "a long page without sections gives the reader no map"
 [lints.code-wall]
 level = "warn"
 reason = "code without prose leaves the reader to guess what it shows"
+
+[lints.page-figures]
+level = "warn"
+reason = "a guide that explains a mechanism in words alone is skimmed; a figure shows it whole"
+
+[lints.paragraph-run-words]
+level = "warn"
+reason = "short paragraphs under many headings are still a wall of text when nothing else sits between them"
 
 [lints.image-alt]
 level = "warn"

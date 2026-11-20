@@ -132,6 +132,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `DOCS-9` `book-deploy` (D0022): a book with a `site_url` has one workflow that builds it strict (`zensical build --strict`, `mkdocs build --strict`, or a just recipe running it) and publishes it with `actions/deploy-pages`.
 - ✅ `DOCS-10` `[docs.book]`: pages another repo's book takes; `page-links` resolves their links from their place in that book and looks its other pages up in its checkout.
 - ✅ `DOCS-11` book-lint-search: the book's search finds a lint by code, id or Clippy name first; each Clippy lint, group and `clippy.toml` setting of the tiers has a generated page (level per tier, reason, Clippy's docs), and tool lints link the tool's docs of the check.
+- ✅ `DOCS-12` figures-and-paragraph-runs: `page-figures` (D0023) wants a figure per so many words of a guide; `paragraph-run-words` (D0024) limits paragraphs in a row under headings; diagram blocks and inline SVG are figures; `spl pages` shows both.
 
 ## AI - code written with agents
 

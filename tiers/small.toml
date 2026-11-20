@@ -258,6 +258,14 @@ reason = "a long page without sections gives the reader no map"
 level = "warn"
 reason = "code without prose leaves the reader to guess what it shows"
 
+[lints.page-figures]
+level = "warn"
+reason = "a guide that explains a mechanism in words alone is skimmed; a figure shows it whole"
+
+[lints.paragraph-run-words]
+level = "warn"
+reason = "short paragraphs under many headings are still a wall of text when nothing else sits between them"
+
 [lints.image-alt]
 level = "warn"
 reason = "an image without alternative text tells a screen reader, a search engine and a broken link nothing"
