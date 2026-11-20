@@ -1,12 +1,15 @@
-# Changelog
+# Record
 
-## [Unreleased]
+The XYZQ format.
 
-### Added
+word word word word word word word word word word.
 
-- word word word word word word word word word word.
-- word word word word word word word word word word.
-- word word word word word word word word word word.
-- word word word word word word word word word word.
-- word word word word word word word word word word.
-- word word word word word word word word word word.
+word word word word word word word word word word.
+
+word word word word word word word word word word.
+
+word word word word word word word word word word.
+
+word word word word word word word word word word.
+
+word word word word word word word word word word.

@@ -1,0 +1,8 @@
+[lints.page-reading-time]
+level = "deny"
+reason = "fixture: records are never judged, also as reference pages under pages = all"
+pages = "all"
+max-minutes = 0.05
+
+[docs]
+reference = ["**/*.md"]

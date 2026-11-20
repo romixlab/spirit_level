@@ -1,4 +1,4 @@
-params = { max-words = 15, min-words = 20 }
+params = { max-words = 10, min-words = 42 }
 
 [[finding]]
 at = "README.md:1"

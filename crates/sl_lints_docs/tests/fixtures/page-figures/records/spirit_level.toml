@@ -1,0 +1,9 @@
+[lints.page-figures]
+level = "deny"
+reason = "fixture: records are never judged, also as reference pages under pages = all"
+pages = "all"
+free-words = 10
+words-per-figure = 10
+
+[docs]
+reference = ["**/*.md"]

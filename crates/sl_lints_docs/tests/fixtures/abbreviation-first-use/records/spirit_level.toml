@@ -1,0 +1,7 @@
+[lints.abbreviation-first-use]
+level = "deny"
+reason = "fixture: records are never judged, also as reference pages under pages = all"
+pages = "all"
+
+[docs]
+reference = ["**/*.md"]

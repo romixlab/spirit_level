@@ -1,0 +1,9 @@
+[lints.prose-per-element]
+level = "deny"
+reason = "fixture: records are never judged, also as reference pages under pages = all"
+pages = "all"
+max-words = 10
+min-words = 20
+
+[docs]
+reference = ["**/*.md"]
