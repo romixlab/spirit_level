@@ -489,23 +489,10 @@ impl Walk<'_> {
         let join = |name: &syn::Ident| format!("{}::{name}", module.join("::"));
         for item in items {
             match item {
-                Item::Fn(f) if is_pub(&f.vis) => {
-                    let open = f.block.brace_token.span.open().start().line;
-                    self.push(at, join(&f.sig.ident), Kind::Fn, &f.attrs, item, Some(open));
-                }
                 Item::Struct(s) if is_pub(&s.vis) => self.structure(at, join(&s.ident), s),
                 Item::Union(u) if is_pub(&u.vis) => self.union(at, join(&u.ident), u),
                 Item::Enum(e) if is_pub(&e.vis) => self.enumeration(at, join(&e.ident), e),
                 Item::Trait(t) if is_pub(&t.vis) => self.tr(at, join(&t.ident), t),
-                Item::Type(t) if is_pub(&t.vis) => {
-                    self.push(at, join(&t.ident), Kind::Type, &t.attrs, item, None);
-                }
-                Item::Const(c) if is_pub(&c.vis) => {
-                    self.push(at, join(&c.ident), Kind::Const, &c.attrs, item, None);
-                }
-                Item::Static(s) if is_pub(&s.vis) => {
-                    self.push(at, join(&s.ident), Kind::Static, &s.attrs, item, None);
-                }
                 Item::Macro(m) => self.exported_macro(at, module, m),
                 Item::Mod(m) if !is_cfg_test(&m.attrs) => self.module(at, module, children, m)?,
                 Item::Use(u) if is_pub(&u.vis) => uses(module, &mut Vec::new(), &u.tree, self.uses),
@@ -516,10 +503,28 @@ impl Walk<'_> {
                         self.inherent(at, &join(&ty.ident), &i.items);
                     }
                 }
-                _ => {}
+                _ => self.single(at, module, item),
             }
         }
         Ok(())
+    }
+
+    /// A public function, type alias, constant or static: one entry without parts
+    fn single(&mut self, at: &At<'_>, module: &[String], item: &Item) {
+        let (ident, kind, attrs, open) = match item {
+            Item::Fn(f) if is_pub(&f.vis) => (
+                &f.sig.ident,
+                Kind::Fn,
+                &f.attrs,
+                Some(f.block.brace_token.span.open().start().line),
+            ),
+            Item::Type(t) if is_pub(&t.vis) => (&t.ident, Kind::Type, &t.attrs, None),
+            Item::Const(c) if is_pub(&c.vis) => (&c.ident, Kind::Const, &c.attrs, None),
+            Item::Static(s) if is_pub(&s.vis) => (&s.ident, Kind::Static, &s.attrs, None),
+            _ => return,
+        };
+        let path = format!("{}::{ident}", module.join("::"));
+        self.push(at, path, kind, attrs, item, open);
     }
 
     /// A `macro_rules!` macro, when exported: it lives at the crate's root, wherever it is written
