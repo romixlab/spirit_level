@@ -61,7 +61,7 @@ lint!(THINKING_COMMENTS, "P0016", "thinking-comments", "prose", "comments state 
              ("questions", Bool, "true", "also report comments that end with a question mark")],
     needs: [], fix: None);
 lint!(EMOJI, "P0010", "emoji", "prose", "docs and comments carry no emoji",
-    params: [("allow", StrList, "[\"✅\", \"🚧\", \"📋\", \"🐛\"]", "emoji allowed (status marks of FEATURES.md)"),
+    params: [("allow", StrList, "[\"✅\", \"🚧\", \"📋\", \"🐛\", \"💡\", \"⛔\", \"🔍\", \"🧪\"]", "emoji allowed (status marks of FEATURES.md)"),
              ("files", StrList, "[\"**/*.md\"]", "globs of the Markdown files checked, relative to the root"),
              ("skip", StrList, "[]", "globs of Markdown files left out"),
              ("comments", Bool, "true", "also check Rust comments")],
