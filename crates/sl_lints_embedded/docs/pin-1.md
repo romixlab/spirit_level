@@ -4,7 +4,7 @@ Embassy's GPIO wrappers (`Output`, `Input`, `Flex`) disconnect the pin's functio
 
 ## Example
 
-Donguru_template's `firmware/src/main.rs` shows the pattern to follow instead: `let _pa4 = Output::new(p.PA4, Level::High, Speed::Low)` binds the driver to a named (if underscore-prefixed) local that lives for the rest of `main`, so the pin stays driven. The generic Notion firmware checklist item on "destructors" is the same lesson in HAL-agnostic form: anything whose `Drop` undoes a hardware configuration needs an owner that outlives the configuration's intended lifetime.
+Portwright_template's `firmware/src/main.rs` shows the pattern to follow instead: `let _pa4 = Output::new(p.PA4, Level::High, Speed::Low)` binds the driver to a named (if underscore-prefixed) local that lives for the rest of `main`, so the pin stays driven. The generic Notion firmware checklist item on "destructors" is the same lesson in HAL-agnostic form: anything whose `Drop` undoes a hardware configuration needs an owner that outlives the configuration's intended lifetime.
 
 ## How to fix
 
@@ -16,4 +16,4 @@ Check: src easy — `let _ = <ctor>(..)` (or an unnamed temporary passed by valu
 
 ## Source
 
-Ported from embedded_bedrock's firmware check catalogue, `PIN-1` (`book/checks.md`, detail in `book/checks/pin.md`). Found on: donguru_template main.rs; notion "destructors".
+Ported from embedded_bedrock's firmware check catalogue, `PIN-1` (`book/checks.md`, detail in `book/checks/pin.md`). Found on: portwright_template main.rs; notion "destructors".

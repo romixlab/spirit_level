@@ -6,7 +6,7 @@ Changing the RTC clock source is exactly the kind of backup-domain change embass
 
 ## Example
 
-Donguru_template's `main.rs` needed this worked out explicitly: a clock-config edit that touched the RTC source reset backup-domain state nobody meant to lose.
+Portwright_template's `main.rs` needed this worked out explicitly: a clock-config edit that touched the RTC source reset backup-domain state nobody meant to lose.
 
 ## How to fix
 
@@ -18,4 +18,4 @@ Keep the RTC clock source stable once the firmware starts relying on backup-doma
 
 ## Source
 
-Ported from embedded_bedrock's firmware check catalogue, `PWR-4` (`book/checks.md`, detail in `book/checks/pwr.md`). Found on: donguru_template main.rs.
+Ported from embedded_bedrock's firmware check catalogue, `PWR-4` (`book/checks.md`, detail in `book/checks/pwr.md`). Found on: portwright_template main.rs.

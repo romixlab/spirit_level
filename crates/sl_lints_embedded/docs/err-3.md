@@ -10,7 +10,7 @@ It applies to every 512 KiB part (always dual-bank) and to 256 KiB parts with `D
 
 ## Example
 
-Typec_dongle's Donguru firmware (`FW-38`) HardFaulted with garbage in `r0`-`r3` within seconds under USB load, from a call at `0x0804005c` into `BufReader::read_le32` at `0x08039d18` — a branch from bank 2 into bank 1 with prefetch on. The template's fix (`TPL-32`) takes ST's second option: prefetch stays off needlessly costs ~40% throughput (so the template turns it back on for embassy's G0 target, which otherwise leaves it off by default), and instead `memory.x` gets `ASSERT(__etext <= <bank 2 base>)` on dual-bank G0B1/G0C1, so code that would reach bank 2 fails to **link**, not to run — the error moves from an intermittent HardFault under load to a build-time failure every time.
+Typec_dongle's Portwright firmware (`FW-38`) HardFaulted with garbage in `r0`-`r3` within seconds under USB load, from a call at `0x0804005c` into `BufReader::read_le32` at `0x08039d18` — a branch from bank 2 into bank 1 with prefetch on. The template's fix (`TPL-32`) takes ST's second option: prefetch stays off needlessly costs ~40% throughput (so the template turns it back on for embassy's G0 target, which otherwise leaves it off by default), and instead `memory.x` gets `ASSERT(__etext <= <bank 2 base>)` on dual-bank G0B1/G0C1, so code that would reach bank 2 fails to **link**, not to run — the error moves from an intermittent HardFault under load to a build-time failure every time.
 
 ## How to fix
 

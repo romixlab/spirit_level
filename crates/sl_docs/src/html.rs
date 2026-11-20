@@ -532,11 +532,11 @@ mod tests {
 
     const PAGE: &str = r##"<!doctype html>
 <html lang="en">
-<head><title>Donguru | vhrd</title><meta name="description" content="A board"></head>
+<head><title>Portwright | vhrd</title><meta name="description" content="A board"></head>
 <body>
 <nav><p>Home About</p></nav>
 <main>
-<h1>Donguru <a class="headerlink" href="#x">link</a></h1>
+<h1>Portwright <a class="headerlink" href="#x">link</a></h1>
 <p class="v-label">Label words</p>
 <p>One two <strong>three</strong> four
 five.</p>
@@ -600,7 +600,7 @@ fn b() {}
         assert_eq!(
             shape(&p),
             [
-                "h1:Donguru@7",
+                "h1:Portwright@7",
                 "p:One two three four five.@9",
                 "Figure",
                 "p:six seven@12",
@@ -617,7 +617,7 @@ fn b() {}
         );
         assert_eq!(p.source, Source::Html);
         assert_eq!(p.language.as_deref(), Some("en"));
-        assert_eq!(p.title.as_deref(), Some("Donguru | vhrd"));
+        assert_eq!(p.title.as_deref(), Some("Portwright | vhrd"));
         assert_eq!(p.description.as_deref(), Some("A board"));
         assert_eq!(p.admonitions[0].kind, "note");
     }

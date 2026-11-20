@@ -97,7 +97,7 @@ Use it with `extends = "embedded"` in `spirit_level.toml`.
 | [F0085](../lints/F0085.md) | pwr-4 | `warn` | bedrock warning: RTC clock source changed in the clock config of a firmware that keeps state in the backup domain: embassy resets the domain | embedded |
 | [F0086](../lints/F0086.md) | siz-1 | `warn` | bedrock warning: Flash or RAM use over a threshold (default 90 % of the region) in a shipped profile | embedded |
 | [F0087](../lints/F0087.md) | siz-3 | `warn` | bedrock suggestion, reported without failing the run: Per-package `opt-level` together with `lto = "fat"`: the override does nothing | embedded |
-| [F0088](../lints/F0088.md) | siz-4 | `warn` | bedrock suggestion, reported without failing the run: Release profile without `codegen-units = 1`, `lto`, `panic = "abort"`, and an `opt-level` chosen by measurement (z vs 3 is the largest lever: Donguru 501.7 → 321.8 KiB, 10-25 % slower USB) | embedded |
+| [F0088](../lints/F0088.md) | siz-4 | `warn` | bedrock suggestion, reported without failing the run: Release profile without `codegen-units = 1`, `lto`, `panic = "abort"`, and an `opt-level` chosen by measurement (z vs 3 is the largest lever: Portwright 501.7 → 321.8 KiB, 10-25 % slower USB) | embedded |
 | [F0089](../lints/F0089.md) | siz-5 | `warn` | bedrock suggestion, reported without failing the run: `core::fmt` pulled in: `Result::unwrap` / `expect` (through `&dyn Debug`), `Debug2Format`, a panic handler that formats `PanicInfo` (4-5 KiB) | embedded |
 | [F0090](../lints/F0090.md) | siz-6 | `warn` | bedrock suggestion, reported without failing the run: Large `.data` initializer (a static with a non-zero const value): zero-init and set it up in place | embedded |
 | [F0091](../lints/F0091.md) | stk-1 | `deny` | bedrock error: flip-link not the linker: `linker = "flip-link"` under `[target.<triple>]` in `.cargo/config.toml` | embedded |
@@ -298,7 +298,7 @@ reason = "bedrock suggestion, reported without failing the run: Per-package `opt
 
 [lints.siz-4]
 level = "warn"
-reason = "bedrock suggestion, reported without failing the run: Release profile without `codegen-units = 1`, `lto`, `panic = \"abort\"`, and an `opt-level` chosen by measurement (z vs 3 is the largest lever: Donguru 501.7 → 321.8 KiB, 10-25 % slower USB)"
+reason = "bedrock suggestion, reported without failing the run: Release profile without `codegen-units = 1`, `lto`, `panic = \"abort\"`, and an `opt-level` chosen by measurement (z vs 3 is the largest lever: Portwright 501.7 → 321.8 KiB, 10-25 % slower USB)"
 
 [lints.siz-5]
 level = "warn"

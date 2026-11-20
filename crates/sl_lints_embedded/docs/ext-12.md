@@ -29,4 +29,4 @@ Src mid — a lint can look for a raw register write to a newly-enabled peripher
 
 ## Source
 
-Ported from embedded_bedrock's firmware check catalogue, `EXT-12` (`book/checks.md`, detail in `book/checks/ext.md`). Found on: donguru_template main.rs.
+Ported from embedded_bedrock's firmware check catalogue, `EXT-12` (`book/checks.md`, detail in `book/checks/ext.md`). Found on: portwright_template main.rs.
