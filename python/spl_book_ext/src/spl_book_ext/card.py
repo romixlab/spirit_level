@@ -9,6 +9,9 @@ the heading's anchor and its line in the table of contents hold its words alone.
 Everything that reaches a card is escaped here or rendered by `render`, a Markdown converter with raw HTML off, no
 images, and links only to `http` and `https` addresses: a doc comment holding `<script>` or an `onerror` attribute
 comes out as text.
+
+A reference that fails names its page and line: the page from Zensical's rendering context, the line from the page's
+file, or from the Markdown given when there is no file.
 """
 
 from __future__ import annotations
@@ -19,13 +22,69 @@ import html
 import re
 import xml.etree.ElementTree as etree
 from collections.abc import Callable
+from pathlib import Path
 
 import markdown
+from markdown.preprocessors import Preprocessor
 from markdown.treeprocessors import Treeprocessor
 
 _ATTR = "_spl_cards"
+_SOURCE = "_spl_source"
 _HEADINGS = {"h1", "h2", "h3", "h4", "h5", "h6"}
 _SAFE_SCHEMES = ("https://", "http://")
+
+
+class RefError(Exception):
+    """A reference that cannot be resolved; it fails the build"""
+
+
+def located(handle):
+    """`handle` (an inline processor's `handleMatch`) with its errors naming the page and line of the reference"""
+
+    @functools.wraps(handle)
+    def run(self, m, data):
+        try:
+            return handle(self, m, data)
+        except RefError as e:
+            raise type(e)(f"{where(self.md, m.group(0))}: {e}") from None
+
+    return run
+
+
+def _context(md: markdown.Markdown) -> tuple[str | None, str]:
+    """The page's path and the docs folder, from Zensical's rendering context when it renders"""
+    for p in md.preprocessors:
+        path = getattr(getattr(p, "page", None), "path", None)
+        if isinstance(path, str):
+            config = getattr(p, "config", None)
+            docs = config.get("docs_dir", "docs") if isinstance(config, dict) else "docs"
+            return path, docs
+    return None, "docs"
+
+
+def where(md: markdown.Markdown, text: str) -> str:
+    """`page:line` of the first line holding `text`"""
+    page, docs = _context(md)
+    lines: list[str] = getattr(md, _SOURCE, [])
+    if page is not None:
+        for f in (Path(docs) / page, Path(page)):
+            try:
+                lines = f.read_text(encoding="utf-8").split("\n")
+                page = str(f)
+                break
+            except OSError:
+                continue
+    line = next((n for n, l in enumerate(lines, 1) if text in l), None)
+    name = page or "the page"
+    return f"{name}:{line}" if line else name
+
+
+class _Source(Preprocessor):
+    """Keeps the page's Markdown, to say the line of a failing reference"""
+
+    def run(self, lines: list[str]) -> list[str]:
+        setattr(self.md, _SOURCE, list(lines))
+        return lines
 
 
 class Cards:
@@ -99,6 +158,8 @@ def install(md: markdown.Markdown) -> None:
     if "spl_cards" not in md.treeprocessors:
         # after the inline patterns (20), which add the cards, and before prettify (10)
         md.treeprocessors.register(_CardsBlock(md), "spl_cards", 15)
+        # first, before any preprocessor changes the lines
+        md.preprocessors.register(_Source(md), "spl_source", 100)
     reset(md)
 
 

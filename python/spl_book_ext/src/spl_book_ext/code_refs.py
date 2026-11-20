@@ -57,7 +57,7 @@ _LANGS = {"rs": "rust", "py": "python", "sh": "bash", "js": "javascript", "ts": 
           "md": "markdown", "x": "text", "ld": "text"}
 
 
-class CodeRefError(Exception):
+class CodeRefError(card.RefError):
     pass
 
 
@@ -288,6 +288,7 @@ class _Refs(InlineProcessor):
 
 
 class ItemPattern(_Refs):
+    @card.located
     def handleMatch(self, m, data):
         kind, cfg, name, suffix = m.group(1), m.group(2), m.group(3), m.group(4) or ""
         item = self.index.find(name, kind, cfg, suffix)
@@ -312,6 +313,7 @@ class ItemPattern(_Refs):
 
 
 class FilePattern(_Refs):
+    @card.located
     def handleMatch(self, m, data):
         name, section = m.group(1), m.group(2)
         f = self.index.file(name)

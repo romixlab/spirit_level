@@ -31,7 +31,7 @@ _KEYS = {"name", "forms", "short", "chapter", "long"}
 _RELATIVE_PAGE = re.compile(r"[A-Za-z0-9._~%#/-]+")
 
 
-class GlossaryError(Exception):
+class GlossaryError(card.RefError):
     pass
 
 
@@ -98,6 +98,7 @@ class TermPattern(InlineProcessor):
         super().__init__(PATTERN, md)
         self.glossary = glossary
 
+    @card.located
     def handleMatch(self, m, data):
         shown, name = m.group(1), m.group(2) or m.group(1)
         t = self.glossary.find(name)

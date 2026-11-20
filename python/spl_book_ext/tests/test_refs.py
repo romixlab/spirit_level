@@ -181,6 +181,38 @@ def test_a_chapter_must_be_a_relative_page_link(book, chapter):
         render(book, "x")
 
 
+def test_an_error_names_the_line(book):
+    with pytest.raises(CodeRefError, match=r"^the page:4: \[`Gone`\]: no public item"):
+        render(book, "First.\n\nSee [`hello!`] and\n[`Gone`].")
+    with pytest.raises(GlossaryError, match=r"^the page:1: \[\[nope\]\]: no such term"):
+        render(book, "A [[nope]].")
+
+
+def test_an_error_names_the_page_zensical_renders(book):
+    class Page:
+        path = "crashes.md"
+
+    class Context(markdown.preprocessors.Preprocessor):
+        page = Page()
+        config = {"docs_dir": "docs"}
+
+        def run(self, lines):
+            return lines
+
+    class ContextExt(markdown.Extension):
+        def extendMarkdown(self, md):
+            md.preprocessors.register(Context(md), "rendering_context", 0)
+
+    (book / "docs").mkdir()
+    (book / "docs" / "crashes.md").write_text("---\ntitle: x\n---\n\n# Crashes\n\nSee [`Gone`].\n")
+    with pytest.raises(CodeRefError, match=r"^docs/crashes.md:7: "):
+        markdown.markdown(
+            "# Crashes\n\nSee [`Gone`].\n",
+            extensions=[ContextExt(), "spl_book_ext.code_refs"],
+            extension_configs={"spl_book_ext.code_refs": {"index": "index.json"}},
+        )
+
+
 def test_a_word_naming_two_terms_fails(book):
     (book / "glossary.toml").write_text(GLOSSARY + '\n[[term]]\nname = "slice"\nforms = ["Piece"]\nshort = "x"\n')
     with pytest.raises(GlossaryError, match='"Piece" names two terms, "piece" and "slice"'):
