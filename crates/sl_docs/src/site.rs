@@ -158,9 +158,14 @@ impl<'a> Site<'a> {
         self.sources.iter().any(|g| sl_core::glob::matches(g, rel))
     }
 
-    /// The built pages, in path order; `kind` tells a page's kind from its path relative to the root, `badges`
-    /// are URL parts that mark a badge beyond [`crate::page::BADGES`]
-    pub fn pages(&self, root: &Path, kind: impl Fn(&str) -> Kind, badges: &[String]) -> Vec<Page> {
+    /// The built pages, in path order; `kind` tells a page's kind from its path relative to the root, `images`
+    /// what makes an image a badge or a figure
+    pub fn pages(
+        &self,
+        root: &Path,
+        kind: impl Fn(&str) -> Kind,
+        images: &crate::page::ImageRules,
+    ) -> Vec<Page> {
         let t = self.table;
         let m = Markup {
             content: &self.content,
@@ -168,7 +173,7 @@ impl<'a> Site<'a> {
             cta_classes: &t.cta_classes,
             capture_classes: &t.capture_classes,
             url: self.url.as_deref(),
-            badges,
+            images,
         };
         let built = root.join(&self.dir);
         walk::files(&built, &[], &t.files, &t.skip)
@@ -237,7 +242,7 @@ mod tests {
         assert_eq!(s.dir, "public");
         assert_eq!(s.url.as_deref(), Some("https://vhrd.tech"));
         assert!(s.is_source("content/blog/x.md") && !s.is_source("README.md"));
-        let pages = s.pages(&r.0, |_| Kind::Guide, &[]);
+        let pages = s.pages(&r.0, |_| Kind::Guide, &crate::page::ImageRules::default());
         let rels: Vec<&str> = pages.iter().map(|p| p.rel.as_str()).collect();
         assert_eq!(rels, ["public/a/index.html", "public/index.html"]);
         assert_eq!(pages[1].links[0].dest, "/a/");

@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+### Added
+
+- `page-figures` takes `badges` and `figures`: URL parts that make an image a badge, or a figure regardless (DOCS-12).
+
+### Changed
+
+- A badge is an image from a badge service or linked to a page; one linked to an image file is a figure (DOCS-12).
+
+### Fixed
+
+- Figures: an `<a>` anchor, a one-line `<details>` drawing and an HTML heading image count right (DOCS-12).
+
 ## [0.7.0] - 2026-11-20
 
 ### Added

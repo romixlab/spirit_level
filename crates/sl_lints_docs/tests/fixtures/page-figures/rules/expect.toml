@@ -1,0 +1,1 @@
+params = { free-words = 10, words-per-figure = 10, figures = ["img/badge/"] }

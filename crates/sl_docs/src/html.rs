@@ -66,8 +66,8 @@ pub struct Markup<'a> {
     pub capture_classes: &'a [String],
     /// The site's own address, without a trailing `/`: a link to it is turned into a site path
     pub url: Option<&'a str>,
-    /// URL parts that mark a badge beyond [`crate::page::BADGES`]
-    pub badges: &'a [String],
+    /// What makes an image a badge or a figure beyond [`crate::page::BADGES`]
+    pub images: &'a crate::page::ImageRules,
 }
 
 /// What an open element means for the page
@@ -272,7 +272,7 @@ impl Front<'_> {
             tag: tag.to_owned(),
             role,
             lang,
-            href: (tag == "a").then(|| attr("href").unwrap_or_default()),
+            href: if tag == "a" { attr("href") } else { None },
         });
     }
 
@@ -466,7 +466,7 @@ impl Front<'_> {
 pub fn parse(rel: impl Into<String>, kind: Kind, html: &str, m: Markup<'_>) -> Option<Page> {
     let mut f = Front {
         m,
-        w: Walk::new(html).with_badges(m.badges),
+        w: Walk::new(html).with_rules(m.images),
         stack: Vec::new(),
         found: false,
         language: None,
@@ -575,7 +575,7 @@ fn b() {}
                 cta_classes: &cta,
                 capture_classes: &capture,
                 url: Some("https://vhrd.tech"),
-                badges: &[],
+                images: &crate::page::ImageRules::default(),
             },
         )
     }
@@ -676,6 +676,10 @@ fn b() {}
         )
         .expect("a page");
         assert_eq!(shape(&p), ["h2:Title@1", "Figure"]);
+        let p =
+            parse_page("<main><p><a name=\"layout\"></a><img src=\"a.png\" alt=\"a\"></p></main>")
+                .expect("a page");
+        assert_eq!(shape(&p), ["Figure"]);
     }
 
     #[test]

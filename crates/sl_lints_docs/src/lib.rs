@@ -16,6 +16,7 @@ pub use words::{Synonym, Words};
 use sl_analysis::{Analysis, Context, lint};
 use sl_config::Config;
 use sl_core::{LintMeta, Params};
+use sl_docs::page::ImageRules;
 use sl_docs::{Book, Kind, Page, ReadingSpeed, Selection, Site, SiteError, Source, Stats};
 use sl_model::Project;
 
@@ -47,6 +48,7 @@ lint!(PAGE_FIGURES, "D0023", "page-figures", "reading", "a guide has a figure fo
     params: [("free-words", Int, "500", "words of prose a page may have with no figure"),
              ("words-per-figure", Int, "600", "words of prose above `free-words` for each further figure"),
              ("badges", StrList, "[]", "URL parts that mark an image as a badge, beyond the built-in badge services and `badge.svg` endpoints"),
+             ("figures", StrList, "[]", "URL parts that mark an image as a figure whatever else its URL holds, such as a folder of diagrams under a `/badge/` path"),
              ("pages", Choice["all", "guide", "reference"], "\"guide\"", "the kinds of page judged")],
     needs: [], fix: None);
 lint!(PARAGRAPH_RUN_WORDS, "D0024", "paragraph-run-words", "reading", "paragraphs in a row, headings or not between them, stay short",
@@ -190,18 +192,23 @@ fn members(project: &Project) -> Vec<&str> {
 /// sources when it names one
 fn pages(project: &Project, config: &Config) -> Result<Vec<Page>, SiteError> {
     let d = &config.docs;
+    let figures = &config.lint(PAGE_FIGURES.id).params;
+    let images = ImageRules {
+        badges: figures.list("badges").to_vec(),
+        figures: figures.list("figures").to_vec(),
+    };
     let sel = Selection {
         files: &d.files,
         skip: &d.skip,
         reference: &d.reference,
         records: &d.records,
-        badges: config.lint(PAGE_FIGURES.id).params.list("badges"),
+        images: &images,
     };
     let mut pages = sl_docs::pages(&project.root, &members(project), &sel);
     if let Some(table) = &d.site {
         let site = Site::resolve(&project.root, table)?;
         pages.retain(|p| !site.is_source(&p.rel));
-        pages.extend(site.pages(&project.root, |rel| sel.kind(rel), sel.badges));
+        pages.extend(site.pages(&project.root, |rel| sel.kind(rel), sel.images));
     }
     Ok(pages)
 }

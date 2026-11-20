@@ -298,16 +298,34 @@ pub const BADGES: &[&str] = &[
     "/badge?",
 ];
 
+/// What makes an image a badge or a figure beyond [`BADGES`]: `page-figures`' `badges` and `figures`
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct ImageRules {
+    /// URL parts that mark a badge
+    pub badges: Vec<String>,
+    /// URL parts that mark a figure whatever else its URL holds; they win over every badge part
+    pub figures: Vec<String>,
+}
+
+/// Whether some part of `parts` is in `lower`, a lowercase URL
+fn holds(lower: &str, parts: &[String]) -> bool {
+    parts
+        .iter()
+        .any(|p| !p.is_empty() && lower.contains(&p.to_ascii_lowercase()))
+}
+
 /// Whether an image at `src`, inside a link to `link` (None: no link), is a badge
 ///
-/// It is when its URL holds a part of [`BADGES`] or of `extra`, or when its link leads to a page. A link to an
-/// image file, the same or a larger one, keeps the image a figure.
-pub fn badge(src: &str, link: Option<&str>, extra: &[String]) -> bool {
+/// It is when its URL holds a part of [`BADGES`] or of the rules' `badges`, or when its link leads to a page. A
+/// URL holding a part of the rules' `figures` is never a badge. A link to an image file, the same or a larger
+/// one, keeps the image a figure.
+pub fn badge(src: &str, link: Option<&str>, rules: &ImageRules) -> bool {
     let lower = src.to_ascii_lowercase();
+    if holds(&lower, &rules.figures) {
+        return false;
+    }
     BADGES.iter().any(|b| lower.contains(b))
-        || extra
-            .iter()
-            .any(|b| !b.is_empty() && lower.contains(&b.to_ascii_lowercase()))
+        || holds(&lower, &rules.badges)
         || link.is_some_and(|l| !image_file(l))
 }
 
@@ -407,8 +425,12 @@ pub(crate) struct Walk {
     alt: Option<(String, u32)>,
     /// The targets of the links open around the text being read, Markdown or inline HTML
     link: Vec<String>,
-    /// URL parts that mark a badge beyond [`BADGES`]
-    badges: Vec<String>,
+    /// What makes an image a badge or a figure beyond [`BADGES`]
+    rules: ImageRules,
+    /// The targets of the raw HTML links open in the current HTML block or paragraph
+    html_link: Vec<String>,
+    /// Raw HTML headings open in the current HTML block or paragraph
+    html_heading: usize,
     /// HTML `<figure>` elements open across blocks of raw HTML
     figure: usize,
     /// Whether an HTML comment is open across blocks of raw HTML
@@ -429,7 +451,9 @@ impl Walk {
             table: 0,
             alt: None,
             link: Vec::new(),
-            badges: Vec::new(),
+            rules: ImageRules::default(),
+            html_link: Vec::new(),
+            html_heading: 0,
             figure: 0,
             comment: false,
         }
@@ -457,15 +481,29 @@ impl Walk {
         self.picture(line, badge);
     }
 
-    /// Sets the URL parts that mark a badge beyond [`BADGES`]
-    pub(crate) fn with_badges(mut self, badges: &[String]) -> Self {
-        self.badges = badges.to_vec();
+    /// Sets what makes an image a badge or a figure beyond [`BADGES`]
+    pub(crate) fn with_rules(mut self, rules: &ImageRules) -> Self {
+        self.rules = rules.clone();
         self
     }
 
     /// Whether an image at `src` inside a link to `link` (None: no link) is a badge ([`badge`])
     pub(crate) fn is_badge(&self, src: &str, link: Option<&str>) -> bool {
-        badge(src, link, &self.badges)
+        badge(src, link, &self.rules)
+    }
+
+    /// The target of the innermost link open around the text, raw HTML or Markdown
+    fn open_link(&self) -> Option<&str> {
+        self.html_link
+            .last()
+            .or(self.link.last())
+            .map(String::as_str)
+    }
+
+    /// Ends what raw HTML left open: links and headings do not reach past their block or paragraph
+    fn close_raw_html(&mut self) {
+        self.html_link.clear();
+        self.html_heading = 0;
     }
 
     /// An image or drawing in the flow of the page. In a table cell or outside a paragraph it is a figure of its
@@ -620,11 +658,26 @@ impl Walk {
         let mut drawings = 0;
         for (name, attrs) in tags(&html) {
             match name.as_str() {
-                "a" => self
-                    .link
-                    .push(attr_value(attrs, "href").unwrap_or("").to_owned()),
+                "a" => {
+                    if let Some(href) = attr_value(attrs, "href") {
+                        self.html_link.push(href.to_owned());
+                    }
+                }
                 "/a" => {
-                    self.link.pop();
+                    self.html_link.pop();
+                }
+                "h1" | "h2" | "h3" | "h4" | "h5" | "h6" => self.html_heading += 1,
+                "/h1" | "/h2" | "/h3" | "/h4" | "/h5" | "/h6" => {
+                    self.html_heading = self.html_heading.saturating_sub(1);
+                }
+                "img" | "svg" | "object" if self.html_heading > 0 => {
+                    if name == "img" {
+                        self.images.push(Image {
+                            line,
+                            alt: has_attr(attrs, "alt").then(String::new),
+                            html: true,
+                        });
+                    }
                 }
                 "img" => {
                     self.images.push(Image {
@@ -633,7 +686,7 @@ impl Walk {
                         html: true,
                     });
                     let src = attr_value(attrs, "src").unwrap_or("");
-                    let badge = self.is_badge(src, self.link.last().map(String::as_str));
+                    let badge = self.is_badge(src, self.open_link());
                     if !block {
                         self.picture(line, badge);
                     } else if !badge {
@@ -660,12 +713,15 @@ impl Walk {
         let what = kinds
             .iter()
             .find(|(tag, _)| !html_tags(&html, tag).is_empty())
-            .map(|(_, what)| *what)
-            .or((drawings > 0).then_some(Break::Figure));
+            .map(|(_, what)| *what);
         match what {
             Some(Break::Figure) if self.figure > 0 => {}
             Some(what) => self.brk(what, line),
             None => {}
+        }
+        // a drawing on the line of a details, table or video block is a figure of its own as well
+        if drawings > 0 && what != Some(Break::Figure) && self.figure == 0 {
+            self.brk(Break::Figure, line);
         }
         let lower = html.to_ascii_lowercase();
         self.figure += html_tags(&html, "figure").len();
@@ -732,7 +788,7 @@ impl Walk {
                 }
             }
             Tag::Image { dest_url, .. } => {
-                let badge = self.is_badge(&dest_url, self.link.last().map(String::as_str));
+                let badge = self.is_badge(&dest_url, self.open_link());
                 self.picture(line, badge);
                 self.alt = Some((String::new(), line));
             }
@@ -788,7 +844,11 @@ impl Walk {
                     });
                 }
             }
-            TagEnd::Paragraph | TagEnd::Item if self.table == 0 => self.close(line),
+            TagEnd::Paragraph | TagEnd::Item if self.table == 0 => {
+                self.close(line);
+                self.close_raw_html();
+            }
+            TagEnd::HtmlBlock => self.close_raw_html(),
             TagEnd::Link => {
                 self.link.pop();
             }
@@ -882,12 +942,11 @@ fn line_starts(text: &str) -> Vec<usize> {
 impl Page {
     /// Parses a page's Markdown, Zensical's admonitions and tabs included
     pub fn parse(rel: impl Into<String>, kind: Kind, text: &str) -> Self {
-        Self::parse_with(rel, kind, text, &[])
+        Self::parse_with(rel, kind, text, &ImageRules::default())
     }
 
-    /// Parses a page's Markdown like [`Self::parse`], with `badges` as URL parts that mark a badge beyond
-    /// [`BADGES`]
-    pub fn parse_with(rel: impl Into<String>, kind: Kind, text: &str, badges: &[String]) -> Self {
+    /// Parses a page's Markdown like [`Self::parse`], with `rules` for what makes an image a badge or a figure
+    pub fn parse_with(rel: impl Into<String>, kind: Kind, text: &str, rules: &ImageRules) -> Self {
         let (title, description, body) = front_matter(text);
         let (body, blocks) = dialect::blocks(&body);
         let opts = Options::ENABLE_TABLES
@@ -895,7 +954,7 @@ impl Page {
             | Options::ENABLE_STRIKETHROUGH
             | Options::ENABLE_TASKLISTS
             | Options::ENABLE_HEADING_ATTRIBUTES;
-        let mut w = Walk::new(&body).with_badges(badges);
+        let mut w = Walk::new(&body).with_rules(rules);
         for (ev, range) in Parser::new_ext(&body, opts).into_offset_iter() {
             let line = w.line(range.start);
             w.event(ev, line);
@@ -1142,6 +1201,27 @@ mod tests {
                 1,
             ),
             ("## ![logo](logo.png) Title\n\nText.\n", 0),
+            ("<a name=\"layout\">\n\n![a](a.png)\n", 1),
+            (
+                "<div><a href=\"https://example.org\">\n\nText.\n\n![a](a.png)\n",
+                1,
+            ),
+            (
+                "Text <a href=\"https://example.org\">open.\n\n![a](a.png)\n",
+                1,
+            ),
+            (
+                "<details><summary>More</summary><svg viewBox=\"0 0 1 1\"></svg></details>\n",
+                1,
+            ),
+            (
+                "<h2><img src=\"logo.png\" alt=\"\"> Title</h2>\n\nText.\n",
+                0,
+            ),
+            (
+                "<h2>\n<img src=\"logo.png\" alt=\"\">\nTitle\n</h2>\n\nText.\n",
+                0,
+            ),
         ];
         for (text, n) in cases {
             assert_eq!(figures(text), n, "{text}");
@@ -1150,14 +1230,22 @@ mod tests {
 
     #[test]
     fn badges_by_url_and_link() {
-        assert!(badge("https://img.shields.io/x", None, &[]));
-        assert!(badge("a.png", Some("https://example.org/ci"), &[]));
-        assert!(!badge("a.png", Some("a-big.PNG#top"), &[]));
-        assert!(!badge("https://ci.example.org/status.png", None, &[]));
-        assert!(badge(
-            "https://ci.example.org/status.png",
-            None,
-            &["ci.example.org".to_owned()]
+        let none = ImageRules::default();
+        assert!(badge("https://img.shields.io/x", None, &none));
+        assert!(badge("a.png", Some("https://example.org/ci"), &none));
+        assert!(!badge("a.png", Some("a-big.PNG#top"), &none));
+        assert!(!badge("https://ci.example.org/status.png", None, &none));
+        let rules = ImageRules {
+            badges: vec!["ci.example.org".to_owned()],
+            figures: vec!["img/badge/".to_owned()],
+        };
+        assert!(badge("https://ci.example.org/status.png", None, &rules));
+        assert!(badge("img/badge/flow.svg", None, &none));
+        assert!(!badge("img/badge/flow.svg", None, &rules));
+        assert!(!badge(
+            "img/badge/flow.svg",
+            Some("https://example.org/page"),
+            &rules
         ));
     }
 

@@ -2,6 +2,8 @@
 
 ## ![logo](logo.png) The tank
 
+<h2><img src="logo.png" alt=""> The valve</h2>
+
 [![ci](https://img.shields.io/badge/ci-passing-green)](https://ci.example.org) [![docs](https://img.shields.io/badge/docs-ok-blue)](https://docs.example.org)
 [![crate](https://img.shields.io/badge/crate-0.1-orange)](https://crates.io)
 
