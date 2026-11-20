@@ -1072,7 +1072,7 @@ dependencies = [
 
 [[package]]
 name = "sl_book_refs"
-version = "0.7.1"
+version = "0.7.4"
 dependencies = [
  "proc-macro2",
  "serde",
