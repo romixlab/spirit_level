@@ -106,6 +106,15 @@ def cards(html):
     return re.findall(r'<div class="spl-card spl-card-\w+" id="([^"]+)"', html)
 
 
+def test_a_reference_in_a_longer_code_span_stays_as_written(book):
+    html = render(book, "Write ``[`resume_on`]`` or ``` [`resume.rs:call`] ``` and `` [[piece]] ``.")
+    assert "<code>[`resume_on`]</code>" in html
+    assert "<code>[`resume.rs:call`]</code>" in html
+    assert "<code>[[piece]]</code>" in html
+    assert not cards(html)
+    assert "klzzwxh" not in html and "\x02" not in html
+
+
 def test_a_term_is_a_plain_link_naming_its_card(book):
     html = render(book, "Each of the [[pieces]] and [[the file|piece]].")
     (cid,) = cards(html)

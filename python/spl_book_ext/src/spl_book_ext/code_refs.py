@@ -27,7 +27,7 @@ import xml.etree.ElementTree as etree
 from pathlib import Path
 
 from markdown import Extension
-from markdown.inlinepatterns import InlineProcessor
+from markdown.inlinepatterns import BacktickInlineProcessor, InlineProcessor
 
 from spl_book_ext import card
 
@@ -44,6 +44,9 @@ KINDS = {
     "const": {"const"}, "constant": {"const"}, "static": {"static"}, "value": {"fn", "const", "static"},
     "macro": {"macro"}, "field": {"field"}, "variant": {"variant"},
 }
+# a code span opened by two backticks or more, which may hold a reference as written: ``[`Name`]``; the empty
+# group stands for the escaped backslashes the backtick processor's own pattern catches in its first group
+LONG_CODE = r"(?<![\\`])()`{2,}"
 # [`file.rs`], [`dir/file.rs`], [`file.rs:section`]
 FILE = r"\[`((?:[\w.-]+/)*[\w-][\w.-]*\.[A-Za-z0-9]+)(?::([^`\s]+))?`\](?![\[(])"
 FORMAT = 2
@@ -359,7 +362,9 @@ class CodeRefExtension(Extension):
         index = load(Path(self.getConfig("index")))
         md.registerExtension(self)
         card.install(md)
-        # before the backtick pattern (190), which would take the code span first
+        # before the backtick pattern (190), which would take the code span first; a longer code span before both,
+        # so a reference written inside one stays as written
+        md.inlinePatterns.register(BacktickInlineProcessor(LONG_CODE), "spl_long_code", 196)
         md.inlinePatterns.register(ItemPattern(ITEM, self, index), "spl_code_ref", 195)
         md.inlinePatterns.register(FilePattern(FILE, self, index), "spl_file_ref", 194)
 
