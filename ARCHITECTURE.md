@@ -39,6 +39,7 @@ The table below is generated from each crate's `description` and its layer in th
 | [`sl_core`](crates/sl_core) | core | spirit_level's shared types: lint metadata, levels, parameters, diagnostics, spans, fixes, dates and globs |
 | [`sl_board`](crates/sl_board) | model | spirit_level's model of board descriptions: board.toml through sl_board_model, stm32-data chip JSON, the MCU's nets from the PCB geometry |
 | [`sl_board_model`](crates/sl_board_model) | model | The board description board.toml: schema, loading with source spans, revisions and reworks as patches |
+| [`sl_book_refs`](crates/sl_book_refs) | model | A book's references in prose: the glossary its terms link to, and the index of public items its code links name, with the cards both show |
 | [`sl_config`](crates/sl_config) | model | spirit_level's configuration format: tiers, extends, lint levels, parameters, reasons, expiries, scoped exceptions and the crate map |
 | [`sl_dependents`](crates/sl_dependents) | model | The repos that build on a library and the crates in them to retest when it changes (`spl dependents`) |
 | [`sl_docs`](crates/sl_docs) | model | Pages as a reader meets them, from Markdown or a built site: their shape, reading metrics, and the Zensical book they belong to |
@@ -78,7 +79,7 @@ The table below is generated from each crate's `description` and its layer in th
 | [`sl_tool_udeps`](crates/sl_tool_udeps) | lints | spirit_level adapter of cargo-udeps: dependencies the compiler never loaded, on nightly |
 | [`sl_engine`](crates/sl_engine) | engine | spirit_level's engine: picks the analyses a configuration enables, checks their needs, runs them, applies levels, exceptions and waivers, and applies exact fixes |
 | [`sl_report`](crates/sl_report) | engine | spirit_level's report output: coloured text for people, a stable JSON document for CI and agents |
-| [`sl_book`](crates/sl_book) | app | Generates spirit_level's book pages (one per lint, per tier and per Clippy name of the tiers, the indexes and the nav) from the lints' own metadata and the shipped tiers, a book's footer build stamp, and a README's picture of a check |
+| [`sl_book`](crates/sl_book) | app | Generates spirit_level's book pages (one per lint, per tier and per Clippy name of the tiers, the indexes and the nav) from the lints' own metadata and the shipped tiers, a book's footer build stamp, the files its references in prose need at build time, and a README's picture of a check |
 | [`spirit_level`](crates/spirit_level) | app | spirit_level as a library: the registry of every analysis, the shipped tier files, and a one-call check |
 | [`spirit_level_cli`](crates/spirit_level_cli) | app | The spl command: check a project, explain a lint, list lints and tiers, show the resolved configuration, write the book pages, list the dependents to retest, measure the docs pages, count its own usage |
 | [`sl_testkit`](crates/sl_testkit) | tests | Golden fixture harness for spirit_level analyses: runs one lint on small projects and compares the findings with each project's expect.toml |

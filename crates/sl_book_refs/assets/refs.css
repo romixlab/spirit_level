@@ -1,0 +1,67 @@
+/* spl book refs: the cards of glossary terms ([[term]]) and code links ([`Item`]), written by `spl book refs`
+   (do not edit). A reference is a link; its card shows on hover and on focus, so a tap or the keyboard opens it
+   too. Colours come from the theme's variables, so light and dark both follow the book. */
+.md-typeset .spl-ref {
+  position: relative;
+  display: inline;
+}
+.md-typeset .spl-term > a {
+  color: inherit;
+  text-decoration: underline dotted var(--md-default-fg-color--light);
+  text-underline-offset: 0.2em;
+}
+.md-typeset .spl-code > a > code {
+  text-decoration: underline dotted var(--md-default-fg-color--light);
+  text-underline-offset: 0.2em;
+}
+.md-typeset .spl-card {
+  display: none;
+  position: absolute;
+  z-index: 10;
+  left: 0;
+  top: 1.6em;
+  width: max-content;
+  max-width: min(34rem, 86vw);
+  padding: 0.6em 0.8em;
+  border: 1px solid var(--md-default-fg-color--lighter);
+  border-radius: 0.3em;
+  background: var(--md-default-bg-color);
+  box-shadow: var(--md-shadow-z2);
+  color: var(--md-default-fg-color);
+  font-size: 0.72rem;
+  line-height: 1.45;
+  font-weight: normal;
+  white-space: normal;
+}
+.md-typeset .spl-ref:hover > .spl-card,
+.md-typeset .spl-ref:focus-within > .spl-card {
+  display: block;
+}
+.md-typeset .spl-card .spl-card-head {
+  display: block;
+  color: var(--md-default-fg-color--light);
+  font-family: var(--md-code-font-family);
+  font-size: 0.66rem;
+  margin-bottom: 0.4em;
+}
+.md-typeset .spl-card code.spl-card-src {
+  display: block;
+  white-space: pre;
+  overflow-x: auto;
+  padding: 0.4em 0.6em;
+  font-size: 0.68rem;
+}
+.md-typeset .spl-card .spl-card-doc {
+  display: block;
+  margin-top: 0.5em;
+}
+.md-typeset .spl-card .spl-card-where {
+  display: block;
+  margin-top: 0.4em;
+  color: var(--md-default-fg-color--light);
+  font-family: var(--md-code-font-family);
+  font-size: 0.64rem;
+}
+.md-typeset p.spl-gloss {
+  margin: 0.4em 0 0.8em;
+}

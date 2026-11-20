@@ -1058,13 +1058,26 @@ name = "sl_book"
 version = "0.7.4"
 dependencies = [
  "serde_json",
+ "sl_book_refs",
  "sl_config",
  "sl_core",
+ "sl_docs",
+ "sl_model",
  "sl_report",
  "spirit_level",
  "toml",
  "vc_build",
  "vc_ui",
+]
+
+[[package]]
+name = "sl_book_refs"
+version = "0.5.9"
+dependencies = [
+ "serde",
+ "sl_model",
+ "syn 3.0.10",
+ "toml",
 ]
 
 [[package]]

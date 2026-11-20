@@ -1,10 +1,11 @@
-//! The generated pages of the book (one per lint, per tier and per Clippy name of the tiers, [`clippy`]), its footer build stamp ([`stamp`]) and a README's picture of a check ([`sample`]).
+//! The generated pages of the book (one per lint, per tier and per Clippy name of the tiers, [`clippy`]), its footer build stamp ([`stamp`]), the files its glossary and code links need at build time ([`refs`]) and a README's picture of a check ([`sample`]).
 #![expect(
     clippy::let_underscore_must_use,
     reason = "fmt::Write into a String cannot fail; a test removes its scratch directory as far as it can"
 )]
 
 pub mod clippy;
+pub mod refs;
 pub mod sample;
 pub mod stamp;
 

@@ -64,6 +64,11 @@ pub struct Book {
     pub features: Vec<String>,
     /// `site_url`; some theme features need it set, since they rely on the generated sitemap
     pub site_url: Option<String>,
+    /// `repo_url`: the repository the book's edit and source links open
+    pub repo_url: Option<String>,
+    /// `markdown_extensions` turned on, in file order, each with its configuration (an empty mapping when it
+    /// takes none); `mkdocs.yml`'s list of names and one-key mappings is read into the same shape
+    pub extensions: Vec<(String, ConfigNode)>,
     /// Every key written in the file, in file order, each with the line its own key is on; `zensical-keys`'
     /// `known` parameter is checked against this instead of walking the file itself, so it reads either format
     pub keys: Vec<ConfigKey>,
@@ -87,6 +92,40 @@ fn nav_entries(node: &ConfigNode, out: &mut Vec<NavEntry>) {
         ConfigValue::Sequence(items) => items.iter().for_each(|n| nav_entries(n, out)),
         ConfigValue::Mapping(entries) => entries.iter().for_each(|(_, _, v)| nav_entries(v, out)),
         ConfigValue::Null => {}
+    }
+}
+
+/// `markdown_extensions` as names with their configuration: a TOML table of tables, or a YAML list of names and
+/// one-key mappings
+fn extensions(node: &ConfigNode) -> Vec<(String, ConfigNode)> {
+    let empty = |line| ConfigNode {
+        line,
+        value: ConfigValue::Mapping(Vec::new()),
+    };
+    match &node.value {
+        ConfigValue::Mapping(entries) => entries
+            .iter()
+            .map(|(k, _, v)| (k.clone(), v.clone()))
+            .collect(),
+        ConfigValue::Sequence(items) => items
+            .iter()
+            .flat_map(|item| match &item.value {
+                ConfigValue::Scalar(name) => vec![(name.clone(), empty(item.line))],
+                ConfigValue::Mapping(entries) => entries
+                    .iter()
+                    .map(|(k, line, v)| {
+                        let v = if matches!(v.value, ConfigValue::Null) {
+                            empty(*line)
+                        } else {
+                            v.clone()
+                        };
+                        (k.clone(), v)
+                    })
+                    .collect(),
+                ConfigValue::Sequence(_) | ConfigValue::Null => Vec::new(),
+            })
+            .collect(),
+        ConfigValue::Scalar(_) | ConfigValue::Null => Vec::new(),
     }
 }
 
@@ -208,8 +247,20 @@ impl Book {
             site_url: get("site_url")
                 .and_then(ConfigNode::as_str)
                 .map(str::to_owned),
+            repo_url: get("repo_url")
+                .and_then(ConfigNode::as_str)
+                .map(str::to_owned),
+            extensions: get("markdown_extensions").map_or_else(Vec::new, extensions),
             keys,
         }
+    }
+
+    /// The configuration of a Markdown extension the book turns on
+    pub fn extension(&self, name: &str) -> Option<&ConfigNode> {
+        self.extensions
+            .iter()
+            .find(|(n, _)| n == name)
+            .map(|(_, c)| c)
     }
 
     /// A path relative to the docs folder, as a path relative to the project root
@@ -373,6 +424,43 @@ mod tests {
                 "theme.palette.toggle.icon"
             ]
         );
+    }
+
+    #[test]
+    fn extensions_with_their_configuration_in_either_format() {
+        let names = |b: &Book| {
+            b.extensions
+                .iter()
+                .map(|(n, _)| n.clone())
+                .collect::<Vec<_>>()
+        };
+        let t = toml_book(
+            "ext",
+            "[project]\nrepo_url = \"https://github.com/o/r\"\n[project.markdown_extensions]\nabbr = {}\n\"spl_book_ext.code_refs\" = { index = \"i.json\" }\n",
+        );
+        assert_eq!(names(&t), ["abbr", "spl_book_ext.code_refs"]);
+        assert_eq!(t.repo_url.as_deref(), Some("https://github.com/o/r"));
+        let idx = t
+            .extension("spl_book_ext.code_refs")
+            .and_then(|c| c.get(&["index"]));
+        assert_eq!(idx.and_then(ConfigNode::as_str), Some("i.json"));
+        let y = book(
+            "ext_yml",
+            FILE_MKDOCS,
+            "site_name: x\nmarkdown_extensions:\n  - abbr\n  - toc:\n      permalink: true\n  - spl_book_ext.glossary:\n",
+        );
+        assert_eq!(names(&y), ["abbr", "toc", "spl_book_ext.glossary"]);
+        assert!(
+            y.extension("spl_book_ext.glossary")
+                .and_then(ConfigNode::as_mapping)
+                .is_some()
+        );
+        assert!(
+            y.extension("toc")
+                .and_then(|c| c.get(&["permalink"]))
+                .is_some()
+        );
+        assert!(y.extension("pymdownx.snippets").is_none());
     }
 
     #[test]

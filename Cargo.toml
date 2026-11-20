@@ -72,6 +72,7 @@ sl_analysis = { path = "crates/sl_analysis" }
 sl_board = { path = "crates/sl_board" }
 sl_board_model = { path = "crates/sl_board_model" }
 sl_book = { path = "crates/sl_book" }
+sl_book_refs = { path = "crates/sl_book_refs" }
 sl_config = { path = "crates/sl_config" }
 sl_dependents = { path = "crates/sl_dependents" }
 sl_docs = { path = "crates/sl_docs" }
