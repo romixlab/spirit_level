@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.7.2] - 2026-11-20
+
 ### Added
 
 - `dev-debug-off`: `[profile.dev]` must set `debug = false`, warn by default (MAN-19).
