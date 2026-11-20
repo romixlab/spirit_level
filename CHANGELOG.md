@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-11-20
+
 ### Added
 
 - `page-figures`: a guide has a figure per 600 words of prose beyond the first 500 (DOCS-12).
