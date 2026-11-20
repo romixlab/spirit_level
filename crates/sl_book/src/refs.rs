@@ -23,9 +23,20 @@ pub struct Assets {
     pub script: Option<PathBuf>,
 }
 
-/// One file written
+/// What was done to a file
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Did {
+    /// Read and found sound
+    Checked,
+    /// Written
+    Wrote,
+}
+
+/// One file checked or written
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Written {
+    /// What was done to it
+    pub did: Did,
     /// Its path, relative to the project root
     pub path: PathBuf,
     /// What it holds, for the report: `1711 items`
@@ -81,7 +92,10 @@ impl fmt::Display for Error {
                 f,
                 "{CODE_REFS_EXTENSION} is on but the book sets no repo_url: code links open their lines there"
             ),
-            Self::Commit(e) => write!(f, "the commit the book is built from: {e}"),
+            Self::Commit(e) => write!(
+                f,
+                "`git rev-parse HEAD` names no commit for the code links ({e}): pass --commit"
+            ),
             Self::Project(e) => write!(f, "{e}"),
             Self::Index(e) => write!(f, "the code index: {e}"),
             Self::Write { path, source } => write!(f, "writing {}: {source}", path.display()),
@@ -138,10 +152,12 @@ pub fn write(root: &Path, commit: Option<&str>, assets: &Assets) -> Result<Vec<W
     save(root, &css, sl_book_refs::CARD_CSS)?;
     save(root, &script, sl_book_refs::CARD_SCRIPT)?;
     out.push(Written {
+        did: Did::Wrote,
         path: css,
         what: "the cards' stylesheet".to_owned(),
     });
     out.push(Written {
+        did: Did::Wrote,
         path: script,
         what: "the cards' script".to_owned(),
     });
@@ -155,8 +171,9 @@ fn check_glossary(root: &Path, g: &GlossaryRefs) -> Result<Written, Error> {
         source,
     })?;
     Ok(Written {
+        did: Did::Checked,
         path: g.file.clone().into(),
-        what: format!("{} terms, checked", glossary.terms.len()),
+        what: format!("{} terms", glossary.terms.len()),
     })
 }
 
@@ -171,7 +188,7 @@ fn write_index(
     let commit = match commit {
         Some(c) if !c.is_empty() => c.to_owned(),
         _ => sl_model::git::git(root, &["rev-parse", "HEAD"])
-            .map_err(Error::Commit)?
+            .map_err(|e| Error::Commit(e.lines().next().unwrap_or_default().to_owned()))?
             .trim()
             .to_owned(),
     };
@@ -186,6 +203,7 @@ fn write_index(
     let path = PathBuf::from(&c.index);
     save(root, &path, &json)?;
     Ok(Written {
+        did: Did::Wrote,
         path,
         what: format!("{} items at {}", index.items.len(), short(&commit)),
     })

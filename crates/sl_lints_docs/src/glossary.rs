@@ -75,8 +75,16 @@ fn book_pages(cx: &Context<'_>, book: &Book) -> Vec<Page> {
 struct Section<'a> {
     /// Its heading, empty before the first
     heading: &'a str,
-    /// Its prose: text, line, and the byte ranges of its inline code
-    prose: Vec<(&'a str, u32, Vec<(usize, usize)>)>,
+    /// Its prose
+    prose: Vec<Para<'a>>,
+}
+
+/// One prose item of a section
+struct Para<'a> {
+    text: &'a str,
+    line: u32,
+    /// The byte ranges of its inline code
+    code: Vec<(usize, usize)>,
 }
 
 fn sections(page: &Page) -> Vec<Section<'_>> {
@@ -99,7 +107,11 @@ fn sections(page: &Page) -> Vec<Section<'_>> {
                     .map(|m| (m.start, m.end))
                     .collect();
                 if let Some(s) = out.last_mut() {
-                    s.prose.push((text, *line, code));
+                    s.prose.push(Para {
+                        text,
+                        line: *line,
+                        code,
+                    });
                 }
             }
             Item::Code { .. } | Item::Break { .. } => {}
@@ -182,13 +194,13 @@ fn check(cx: &Context<'_>, page: &Page, section: &Section<'_>, glossary: &Glossa
     let mut marked = BTreeSet::new();
     // the first unmarked use of each term: its line and the form written
     let mut unmarked: BTreeMap<String, (u32, String)> = BTreeMap::new();
-    for (text, line, code) in &section.prose {
-        let refs = references(text, code, glossary);
+    for p in &section.prose {
+        let refs = references(p.text, &p.code, glossary);
         marked.extend(refs.iter().filter_map(|r| r.2.clone()));
-        let mut taken: Vec<(usize, usize)> = code.clone();
+        let mut taken: Vec<(usize, usize)> = p.code.clone();
         taken.extend(refs.iter().map(|&(a, b, _)| (a, b)));
-        for (term, form) in words.uses(text, &mut taken) {
-            unmarked.entry(term).or_insert((*line, form));
+        for (term, form) in words.uses(p.text, &mut taken) {
+            unmarked.entry(term).or_insert((p.line, form));
         }
     }
     for (term, (line, form)) in unmarked {
@@ -198,13 +210,13 @@ fn check(cx: &Context<'_>, page: &Page, section: &Section<'_>, glossary: &Glossa
         let at = if section.heading.is_empty() {
             "before the first heading".to_owned()
         } else {
-            format!("in \"{}\"", section.heading)
+            format!("in the section \"{}\"", section.heading)
         };
         cx.emit(
             Diagnostic::new(
                 GLOSSARY_TERMS.id,
                 format!("{}#{}:{term}", page.rel, section.heading),
-                format!("\"{form}\" reads as the glossary term \"{term}\", which the section {at} never marks"),
+                format!("\"{form}\" is the glossary term \"{term}\", never marked {at}"),
             )
             .span(Span::new(page.rel.clone(), line))
             .confidence(Confidence::Estimate)

@@ -190,9 +190,13 @@ fn refs(a: RefsArgs) -> Result<Exit, String> {
         sl_book::refs::write(&a.repo, a.commit.as_deref(), &assets).map_err(|e| e.to_string())?;
     let paint = Paint::stdout();
     for w in written {
+        let did = match w.did {
+            sl_book::refs::Did::Checked => "checked",
+            sl_book::refs::Did::Wrote => "wrote",
+        };
         println!(
             "{} {} ({})",
-            paint.good("wrote"),
+            paint.good(did),
             w.path.display(),
             paint.dim(&w.what)
         );
