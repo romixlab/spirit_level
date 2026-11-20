@@ -12,8 +12,11 @@ const ABBREVIATIONS: &[&str] = &[
     "e.g", "i.e", "etc", "vs", "cf", "approx", "no", "fig", "mr", "mrs", "dr",
 ];
 
-/// The sentences of a paragraph: split after `.`, `!` or `?` followed by a space, unless the word before the dot
-/// is an abbreviation, a single letter or a number
+/// The sentences of a paragraph
+///
+/// A sentence ends after `.`, `!` or `?` followed by a space, unless the word before the dot is an abbreviation, a
+/// single letter or a number. A dot after code or a bracket (`` `x`. ``, `` [`x`]. ``, or either masked to spaces)
+/// ends a sentence.
 pub fn sentences(text: &str) -> Vec<&str> {
     let mut out = Vec::new();
     let mut start = 0;
@@ -28,10 +31,9 @@ pub fn sentences(text: &str) -> Vec<&str> {
                 .next()
                 .unwrap_or("")
                 .to_lowercase();
-            if before.chars().count() <= 1
-                || before.chars().all(|ch| ch.is_ascii_digit())
-                || ABBREVIATIONS.contains(&before.trim_end_matches('.'))
-            {
+            let initial = before.chars().count() == 1 && before.chars().all(char::is_alphabetic);
+            let number = !before.is_empty() && before.chars().all(|ch| ch.is_ascii_digit());
+            if initial || number || ABBREVIATIONS.contains(&before.trim_end_matches('.')) {
                 continue;
             }
         }
@@ -225,6 +227,18 @@ mod tests {
         assert_eq!(
             sentences("One e.g. two. Three is 3.5 ms! Four?"),
             vec!["One e.g. two.", "Three is 3.5 ms!", "Four?"]
+        );
+        assert_eq!(sentences("Ask J. Smith. Then go.").len(), 2);
+    }
+
+    #[test]
+    fn a_dot_after_code_ends_a_sentence() {
+        let masked = "A call gets [                 ]. The lock stays.";
+        assert_eq!(sentences(masked).len(), 2);
+        assert_eq!(sentences("It returns       . Then it stops.").len(), 2);
+        assert_eq!(
+            sentences("A call gets [`FsError::Locked`]. The lock stays."),
+            vec!["A call gets [`FsError::Locked`].", "The lock stays."]
         );
         assert_eq!(
             words("it's a re-run, 3 ms"),

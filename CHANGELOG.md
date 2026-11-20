@@ -17,6 +17,10 @@
 - `emoji` allows four more tracker status marks by default: idea, blocked, to verify, in test (PROSE-2).
 - Diagram blocks (`mermaid`, `dot`, `d2` ...) and inline SVG count as figures, not code (DOCS-12).
 
+### Fixed
+
+- Sentences end at a period after a code span or a bracket: `[`x`]. Next` is two (PROSE-1).
+
 ## [0.6.0] - 2026-11-20
 
 ### Added
