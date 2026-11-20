@@ -1,8 +1,9 @@
 // spl book refs: opens a reference's card (spl-refs.css) beside it, written by `spl book refs` (do not edit). A
 // reference is a link naming its card in `data-spl-card`; without this script it stays a plain link. A card opens on
 // hover, on keyboard focus and on a first tap (a second tap follows the link), and closes on Escape, on a tap
-// elsewhere and when the pointer or focus leaves both reference and card. Listeners sit on the document, so pages
-// that instant navigation loads later need nothing.
+// elsewhere and when the pointer or focus leaves both reference and card. The cards sit at the end of the page, so
+// Tab from an open card's reference goes into its links, and Tab past them (Shift+Tab before them) goes on from the
+// reference. Listeners sit on the document, so pages that instant navigation loads later need nothing.
 (function () {
   var open = null;
   var timer = null;
@@ -51,6 +52,29 @@
   function inOpen(node) {
     return open && node && (open.ref.contains(node) || open.card.contains(node));
   }
+  function links(root) {
+    return Array.prototype.slice.call(root.querySelectorAll("a[href]"));
+  }
+  // the focusable element next to `ref` in the page, leaving out the cards
+  function beside(ref, step) {
+    var all = Array.prototype.slice
+      .call(document.querySelectorAll("a[href], button, input, select, textarea, [tabindex]"))
+      .filter(function (el) {
+        return el.tabIndex >= 0 && !el.disabled && !el.closest(".spl-cards") && el.getClientRects().length;
+      });
+    return all[all.indexOf(ref) + step] || null;
+  }
+  function tab(e) {
+    var inside = links(open.card);
+    var at = inside.indexOf(document.activeElement);
+    var next = null;
+    if (document.activeElement === open.ref && !e.shiftKey) next = inside[0];
+    else if (at === 0 && e.shiftKey) next = open.ref;
+    else if (at === inside.length - 1 && !e.shiftKey) next = beside(open.ref, 1);
+    if (!next) return;
+    e.preventDefault();
+    next.focus();
+  }
 
   document.addEventListener("pointerdown", function (e) {
     touch = e.pointerType === "touch" || e.pointerType === "pen";
@@ -82,7 +106,12 @@
     if (inOpen(e.target) && !inOpen(e.relatedTarget)) later();
   });
   document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape" && open) hide();
+    if (!open) return;
+    if (e.key === "Tab") tab(e);
+    else if (e.key === "Escape") {
+      if (open.card.contains(document.activeElement)) open.ref.focus();
+      hide();
+    }
   });
   window.addEventListener("scroll", function () {
     if (open) place(open.ref, open.card);
