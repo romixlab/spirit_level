@@ -450,12 +450,12 @@ fn words(line: &str) -> Vec<(&str, usize)> {
         let start = i;
         let mut depth = 0usize;
         while i < b.len() {
-            if line[i..].starts_with("{{") {
+            if b[i..].starts_with(b"{{") {
                 depth += 1;
                 i += 2;
                 continue;
             }
-            if depth > 0 && line[i..].starts_with("}}") {
+            if depth > 0 && b[i..].starts_with(b"}}") {
                 depth -= 1;
                 i += 2;
                 continue;
@@ -552,6 +552,35 @@ mod tests {
         for n in ["master", "v1", "main", "{{nightly}}", "x86_64"] {
             assert!(!is_toolchain_name(n), "{n}");
         }
+    }
+
+    #[test]
+    fn words_split_text_with_multibyte_chars() {
+        let line = "echo \"🚀 готово — ok\" {{ x 🦀 }};cargo +beta t";
+        let w: Vec<&str> = words(line).into_iter().map(|(w, _)| w).collect();
+        assert_eq!(
+            w,
+            [
+                "echo",
+                "\"🚀",
+                "готово",
+                "—",
+                "ok\"",
+                "{{ x 🦀 }}",
+                "cargo",
+                "+beta",
+                "t"
+            ]
+        );
+        for (w, at) in words(line) {
+            assert_eq!(&line[at..at + w.len()], w);
+        }
+        let just = "r:\n    echo \"🚀 done\" # ✓\n    cargo +beta t\n";
+        let names: Vec<String> = choices(just, &variables(just), true)
+            .into_iter()
+            .map(|c| c.name)
+            .collect();
+        assert_eq!(names, ["beta"]);
     }
 
     #[test]

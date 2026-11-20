@@ -75,6 +75,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `MAN-16` `per-member-graph`: the graph lints walk each checked crate's own feature resolution (default features, every target), not cargo metadata's workspace-unified features ([what each crate builds](docs/configuration.md#what-each-crate-builds)).
 - ✅ `MAN-17` `binary-name-chars`: every explicit `[[bin]]` and implicit binary (`src/main.rs`, `src/bin/*.rs`, `src/bin/*/main.rs`) checked against a configurable character set, lowercase ASCII letters and digits by default; in no tier by default.
 - ✅ `MAN-13` Pinned toolchain at the base tier: `toolchain-pinned` (M0019) holds every toolchain file to the shipped stable or nightly; `toolchain-overrides-pinned` (M0036) checks `cargo +X` and CI; `--fix` writes them.
+- ✅ `MAN-18` `toolchain-overrides-pinned` reads justfiles and workflows with non-ASCII text (emoji, Cyrillic, CJK) without panicking.
 
 ## GRAPH - crate graph and map
 

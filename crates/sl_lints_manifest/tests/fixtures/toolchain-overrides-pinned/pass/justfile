@@ -12,3 +12,6 @@ fuzz:
 miri:
     cargo +{{nightly}} miri test
     rustup run 1.100.0 cargo build
+
+notify:
+    @echo "🚀 готово — 日本語 ✓"

@@ -12,6 +12,7 @@
 
 ### Fixed
 
+- `toolchain-overrides-pinned` no longer panics on non-ASCII text in a justfile (MAN-18).
 - Figures: an `<a>` anchor, a one-line `<details>` drawing and an HTML heading image count right (DOCS-12).
 
 ## [0.7.0] - 2026-11-20
