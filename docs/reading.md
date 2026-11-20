@@ -11,7 +11,7 @@ The numbers are useful on their own, before any budget. `spl pages` prints them 
 ```text
 page                     kind       words  read  run  prun  para  sent  flesch  pass%  abbr  terms  syn  img  w/img  w/el   h  links  cta  code
 README.md                guide        412  1.8m  140   160    48    14      52     12     1      0    0    1    380    63   6    9/3    0     4
-docs/configuration.md    guide       1630  7.1m  210   420    61    16      48     21     0      2    1    0      -    74  14   12/0    0    11
+docs/configuration.md    guide       1630  7.1m  210   420    61    16      48     21     0      2    1    0      -  74.0  14   12/0    0    11
 docs/lints/D0001.md      reference    310  1.3m   88    88    40    11      55     18     0      0    0    0      -   103   6    8/0    0     1
 ```
 

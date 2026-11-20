@@ -140,7 +140,8 @@ fn table(pages: &[PageReport]) -> String {
                 w.synonyms.len().to_string(),
                 s.figures.to_string(),
                 score(s.words_per_figure),
-                score(s.words_per_element),
+                s.words_per_element
+                    .map_or_else(|| "-".to_owned(), |w| format!("{w:.1}")),
                 s.headings.len().to_string(),
                 format!("{}/{}", s.links_internal, s.links_external),
                 s.ctas.to_string(),
