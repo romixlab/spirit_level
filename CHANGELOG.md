@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- `just dist` builds for a user without the musl target: `rust-toolchain.toml` names it, so rustup adds it.
+
 ## [0.7.3] - 2026-11-20
 
 ### Added
