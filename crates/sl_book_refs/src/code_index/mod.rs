@@ -9,13 +9,17 @@
 //! The index is written at every book build and never kept in git, so it always matches the code: a link to a
 //! renamed or removed item fails the build in the change that renames it.
 
+mod files;
+
+pub use files::{FileEntry, SectionError};
+
 use serde::{Deserialize, Serialize};
 use sl_model::{Package, Project, SourceFile, TargetKind};
 use syn::spanned::Spanned;
 use syn::{Attribute, Fields, ImplItem, Item, Visibility};
 
 /// The version of the index's layout; the Markdown extension refuses an index of another
-pub(crate) const FORMAT: u32 = 1;
+pub(crate) const FORMAT: u32 = 2;
 
 /// Lines of an item's source shown whole at most; a longer item shows its signature alone
 const WHOLE_LINES_MAX: usize = 14;
@@ -59,7 +63,7 @@ pub struct Entry {
     pub lines: [usize; 2],
     /// Its signature, or its whole source when short, dedented
     pub source: String,
-    /// The first paragraph of its docs, as written
+    /// Its docs, as written: Markdown with rustdoc's intra-doc links
     pub doc: String,
     /// Its lines on the forge at the index's commit
     pub url: String,
@@ -68,12 +72,16 @@ pub struct Entry {
 /// The index file
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Index {
-    /// The version of its layout, 1; the Markdown extension refuses an index of another
+    /// The version of its layout, 2; the Markdown extension refuses an index of another
     pub format: u32,
     /// The commit the addresses point at
     pub commit: String,
-    /// The entries, sorted by path
+    /// The address a file's path follows to open it at the commit, `#L1-L9` after it for lines
+    pub blob: String,
+    /// The public items, sorted by path
     pub items: Vec<Entry>,
+    /// The project's text files, which file references name, sorted by path
+    pub files: Vec<FileEntry>,
 }
 
 /// Where the entries' addresses point
@@ -86,13 +94,18 @@ pub struct Forge<'a> {
 }
 
 impl Forge<'_> {
-    /// A file's lines, as GitHub, Gitea and Forgejo address them
-    fn url(&self, file: &str, [from, to]: [usize; 2]) -> String {
+    /// The address a file's path follows, as GitHub, Gitea and Forgejo address files at a commit
+    fn blob(&self) -> String {
         format!(
-            "{}/blob/{}/{file}#L{from}-L{to}",
+            "{}/blob/{}/",
             self.repository.trim_end_matches('/'),
             self.commit
         )
+    }
+
+    /// A file's lines
+    fn url(&self, file: &str, [from, to]: [usize; 2]) -> String {
+        format!("{}{file}#L{from}-L{to}", self.blob())
     }
 }
 
@@ -108,6 +121,8 @@ pub enum IndexError {
     },
     /// A source file does not parse (`file:line:column: message`)
     Parse(String),
+    /// A marked section that does not pair up
+    Section(SectionError),
     /// A `mod x;` whose file is not there
     MissingModule {
         /// The declaring file
@@ -126,6 +141,7 @@ impl std::fmt::Display for IndexError {
                 known.join(", ")
             ),
             Self::Parse(e) => write!(f, "{e}"),
+            Self::Section(e) => write!(f, "{e}"),
             Self::MissingModule { file, name } => {
                 write!(f, "{file}: `mod {name};` has no file")
             }
@@ -135,12 +151,19 @@ impl std::fmt::Display for IndexError {
 
 impl std::error::Error for IndexError {}
 
-/// The index of `crates` (library target names; empty: every library of the workspace)
+/// The index of `crates` (library target names; empty: every library of the workspace) and of the project's text
+/// files, leaving out the directories `skip` (relative to the root, such as the built site)
 ///
 /// # Errors
 ///
-/// A crate is no library of the workspace, a file does not parse, or a declared module has no file.
-pub fn index(project: &Project, crates: &[String], forge: Forge<'_>) -> Result<Index, IndexError> {
+/// A crate is no library of the workspace, a file does not parse, a declared module has no file, or a file's
+/// marked sections do not pair up.
+pub fn index(
+    project: &Project,
+    crates: &[String],
+    skip: &[&str],
+    forge: Forge<'_>,
+) -> Result<Index, IndexError> {
     let libs: Vec<(&Package, &str, &str)> = project
         .packages
         .iter()
@@ -179,13 +202,15 @@ pub fn index(project: &Project, crates: &[String], forge: Forge<'_>) -> Result<I
     Ok(Index {
         format: FORMAT,
         commit: forge.commit.to_owned(),
+        blob: forge.blob(),
         items,
+        files: files::files(&project.root, skip).map_err(IndexError::Section)?,
     })
 }
 
-/// The first paragraph of the docs in `attrs`
+/// The docs in `attrs`, as written: Markdown, dedented, without leading and trailing blank lines
 fn doc(attrs: &[Attribute]) -> String {
-    let mut lines = Vec::new();
+    let mut lines: Vec<String> = Vec::new();
     for a in attrs.iter().filter(|a| a.path().is_ident("doc")) {
         let syn::Meta::NameValue(nv) = &a.meta else {
             continue;
@@ -198,24 +223,24 @@ fn doc(attrs: &[Attribute]) -> String {
             continue;
         };
         let value = s.value();
-        // an empty `///` line is an empty value, which has no lines: a paragraph break all the same
-        let parts: Vec<&str> = if value.trim().is_empty() {
-            vec![""]
+        // an empty `///` line is an empty value, which has no lines: a blank line all the same
+        if value.trim().is_empty() {
+            lines.push(String::new());
         } else {
-            value.lines().collect()
-        };
-        for l in parts {
-            let line = l.strip_prefix(' ').unwrap_or(l);
-            if line.trim().is_empty() {
-                if lines.is_empty() {
-                    continue;
-                }
-                return lines.join(" ");
-            }
-            lines.push(line.trim_end().to_owned());
+            lines.extend(value.lines().map(|l| l.trim_end().to_owned()));
         }
     }
-    lines.join(" ")
+    let indent = lines
+        .iter()
+        .filter(|l| !l.trim().is_empty())
+        .map(|l| l.len() - l.trim_start().len())
+        .min()
+        .unwrap_or(0);
+    let lines: Vec<&str> = lines
+        .iter()
+        .map(|l| l.get(indent..).unwrap_or(""))
+        .collect();
+    lines.join("\n").trim_matches('\n').to_owned()
 }
 
 fn is_pub(v: &Visibility) -> bool {

@@ -7,7 +7,8 @@ description = "Glossary terms and code links with cards on hover, for Zensical b
 readme = "README.md"
 license = "MIT OR Apache-2.0"
 requires-python = ">=3.12"
-dependencies = ["markdown>=3.7"]
+# Zensical brings these too; the cards highlight code as its pymdownx.highlight does
+dependencies = ["markdown>=3.7", "pymdown-extensions>=10", "pygments>=2.18"]
 
 [dependency-groups]
 dev = ["pytest>=8"]

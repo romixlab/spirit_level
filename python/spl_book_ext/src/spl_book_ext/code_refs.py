@@ -1,31 +1,43 @@
-"""`` [`TapeWriter::resume_on`] ``: a public item of the book's crates, named as rustdoc's intra-doc links name it.
+"""Code references: `` [`TapeWriter::resume_on`] `` names a public item, `` [`resume.rs`] `` or `` [`crashes.rs:resume`] `` a
+file or a marked section of one. A plain code span stays plain.
 
-The items come from the code index (setting `index`, default `target/spl-book/code_index.json`), which
-`spl book refs` writes from the code before each build. A name matches an item whose path ends with it; a name that
-starts with a crate's name matches only in that crate, so `ww_tape_fs::writer::resume` and `writer::resume` both
-find one function. A trailing `()` or `!` is shown and ignored. A name that no item or several items have raises
-`CodeRefError`, which fails the build: a renamed or removed item cannot leave a stale link behind.
+The names come from the code index (setting `index`, default `target/spl-book/code_index.json`), which
+`spl book refs` writes from the code before each build. An item name matches an item whose path ends with it; a name
+that starts with a crate's name matches only in that crate. A trailing `()` or `!` is shown and ignored. A file name
+matches a file whose path ends with it, and a section is one marked `--8<-- [start:NAME]` ... `--8<-- [end:NAME]`, as
+the snippet includes mark them. A name that matches nothing, or several things, raises `CodeRefError`, which fails the
+build: a renamed or removed item, file or section cannot leave a stale reference behind.
 
-The link opens the item's lines on the forge at the commit the index was written from; the card shows its
-signature, or its whole source when short, and the first paragraph of its docs. The setting `crates` is read by
-`spl book refs` alone: the library crates indexed.
+The link opens the lines on the forge at the commit the index was written from. An item's card shows its kind and
+path, its signature (or whole source when short), and its docs rendered as Markdown, with rustdoc's intra-doc links
+resolved through the same index: to the named item's lines, or plain code when they name nothing. The summary paragraph
+always shows, and the blocks after it while they fit in `card_doc_chars_max` characters of Markdown. A file card shows
+the code, at most `card_lines_max` lines. The setting `crates` is read by `spl book refs` alone.
 """
 
 from __future__ import annotations
 
 import functools
 import json
+import re
 import xml.etree.ElementTree as etree
 from pathlib import Path
 
 from markdown import Extension
 from markdown.inlinepatterns import InlineProcessor
 
-from spl_book_ext.card import prose, reference, text
+from spl_book_ext import card
 
 # [`Name`], [`a::b::Name`], [`f()`], [`m!`]: rustdoc's shortcut form, not followed by a link target
-PATTERN = r"\[`((?:[A-Za-z_][A-Za-z0-9_]*::)*[A-Za-z_][A-Za-z0-9_]*)(\(\)|!)?`\](?![\[(])"
-FORMAT = 1
+ITEM = r"\[`((?:[A-Za-z_][A-Za-z0-9_]*::)*[A-Za-z_][A-Za-z0-9_]*)(\(\)|!)?`\](?![\[(])"
+# [`file.rs`], [`dir/file.rs`], [`file.rs:section`]
+FILE = r"\[`((?:[\w.-]+/)*[\w-][\w.-]*\.[A-Za-z0-9]+)(?::([^`\s]+))?`\](?![\[(])"
+FORMAT = 2
+
+_PATH = re.compile(r"^(?:[a-z]+@)?((?:[A-Za-z_][A-Za-z0-9_]*::)*[A-Za-z_][A-Za-z0-9_]*)(?:\(\)|!)?$")
+_RUSTDOC_LANGS = {"", "rust", "no_run", "ignore", "should_panic", "compile_fail", "edition2018", "edition2021", "edition2024"}
+_LANGS = {"rs": "rust", "py": "python", "sh": "bash", "js": "javascript", "ts": "typescript", "h": "c", "yml": "yaml",
+          "md": "markdown", "x": "text", "ld": "text"}
 
 
 class CodeRefError(Exception):
@@ -41,25 +53,47 @@ class Index:
         except (OSError, ValueError) as e:
             raise CodeRefError(f"{path}: {e}") from e
         if not isinstance(data, dict) or data.get("format") != FORMAT:
-            raise CodeRefError(f"{path} is not a code index of format {FORMAT}: update spl or spl_book_ext together")
+            raise CodeRefError(f"{path} is not a code index of format {FORMAT}: update spl and spl_book_ext together")
         self.items: list[dict] = data["items"]
+        self.files: list[dict] = data["files"]
+        self.blob: str = data["blob"]
         self.crates = {i["path"].split("::")[0] for i in self.items}
 
-    def find(self, name: str) -> dict:
+    def matches(self, name: str) -> list[dict]:
         want = name.split("::")
         if want[0] in self.crates and len(want) > 1:
-            found = [
+            return [
                 i
                 for i in self.items
                 if i["path"].split("::")[0] == want[0] and i["path"].split("::")[-(len(want) - 1) :] == want[1:]
             ]
-        else:
-            found = [i for i in self.items if i["path"].split("::")[-len(want) :] == want]
+        return [i for i in self.items if i["path"].split("::")[-len(want) :] == want]
+
+    def find(self, name: str) -> dict:
+        found = self.matches(name)
         if not found:
             raise CodeRefError(f"[`{name}`]: no public item of the book's crates has this name")
         if len(found) > 1:
             paths = ", ".join(i["path"] for i in found)
             raise CodeRefError(f"[`{name}`]: several items have this name ({paths}); name more of the path")
+        return found[0]
+
+    def near(self, name: str, at: dict) -> dict | None:
+        """The item an intra-doc link in `at`'s docs names, or None: the one match, else the one in `at`'s crate"""
+        found = self.matches(name)
+        if len(found) > 1:
+            crate = at["path"].split("::")[0]
+            found = [i for i in found if i["path"].split("::")[0] == crate]
+        return found[0] if len(found) == 1 else None
+
+    def file(self, name: str) -> dict:
+        want = name.split("/")
+        found = [f for f in self.files if f["path"].split("/")[-len(want) :] == want]
+        if not found:
+            raise CodeRefError(f"[`{name}`]: no file of the project has this name")
+        if len(found) > 1:
+            paths = ", ".join(f["path"] for f in found)
+            raise CodeRefError(f"[`{name}`]: several files have this name ({paths}); name more of the path")
         return found[0]
 
 
@@ -77,27 +111,182 @@ def load(path: Path) -> Index:
     return _load(str(path), mtime)
 
 
-class CodeRefPattern(InlineProcessor):
-    def __init__(self, index: Index):
-        super().__init__(PATTERN)
+def _outside_fences(text: str, fix) -> str:
+    """`fix` applied to the parts of a doc outside fenced code; rustdoc's hidden lines dropped inside rust fences"""
+    out: list[str] = []
+    prose: list[str] = []
+    fence: str | None = None
+    hide = False
+    for line in text.split("\n"):
+        stripped = line.strip()
+        if fence is None and (m := re.match(r"^(`{3,}|~{3,})\s*([\w,-]*)", stripped)):
+            out.append(fix("\n".join(prose)))
+            prose = []
+            fence = m.group(1)
+            langs = set(m.group(2).split(",")) if m.group(2) else {""}
+            hide = langs <= _RUSTDOC_LANGS
+            out.append(fence + ("rust" if hide else m.group(2)))
+        elif fence is not None and stripped.startswith(fence):
+            out.append(fence)
+            fence = None
+        elif fence is not None:
+            if not (hide and (stripped == "#" or stripped.startswith("# "))):
+                out.append(line)
+        else:
+            prose.append(line)
+    out.append(fix("\n".join(prose)))
+    return "\n".join(out)
+
+
+def doc_links(doc: str, at: dict, index: Index) -> str:
+    """rustdoc's intra-doc links in `at`'s docs as Markdown links to the items' lines, or plain text"""
+    defs: dict[str, str] = {}
+
+    def strip_defs(text: str) -> str:
+        lines = []
+        for line in text.split("\n"):
+            if m := re.match(r"^\s*\[([^\]]+)\]:\s*(\S+)\s*$", line):
+                defs[m.group(1).strip("`")] = m.group(2)
+            else:
+                lines.append(line)
+        return "\n".join(lines)
+
+    parent = "::".join(at["path"].split("::")[:-1]) if at["kind"] in ("fn", "const", "field", "variant") else at["path"]
+
+    def url(target: str) -> str | None:
+        if target.startswith(("https://", "http://")):
+            return target
+        m = _PATH.match(target.strip("`"))
+        if not m:
+            return None
+        name = m.group(1)
+        if name.startswith("Self::"):
+            name = parent + name[4:]
+        name = re.sub(r"^(crate|self|super)::", "", name)
+        item = index.near(name, at)
+        return item["url"] if item else None
+
+    def link(text: str, target: str) -> str:
+        u = url(target)
+        return f"[{text}]({u})" if u else text
+
+    def fix(text: str) -> str:
+        text = re.sub(r"\[([^\[\]]+)\]\(([^()\s]+)\)", lambda m: link(m.group(1), m.group(2)), text)
+        text = re.sub(
+            r"\[([^\[\]]+)\]\[([^\[\]]*)\]",
+            lambda m: link(m.group(1), defs.get(m.group(2) or m.group(1).strip("`"), m.group(2) or m.group(1))),
+            text,
+        )
+        return re.sub(
+            r"\[([^\[\]]+)\](?![(\[:])",
+            lambda m: link(m.group(1), defs.get(m.group(1).strip("`"), m.group(1)))
+            if _PATH.match(m.group(1).strip("`")) or m.group(1).strip("`") in defs
+            else m.group(0),
+            text,
+        )
+
+    return _outside_fences(doc, lambda t: fix(strip_defs(t)))
+
+
+def bounded(doc: str, chars_max: int) -> tuple[str, bool]:
+    """The summary paragraph and the blocks after it that fit in `chars_max`; whether any was left out"""
+    blocks: list[str] = []
+    current: list[str] = []
+    fence: str | None = None
+    for line in doc.split("\n"):
+        stripped = line.strip()
+        if fence is None and (m := re.match(r"^(`{3,}|~{3,})", stripped)):
+            fence = m.group(1)
+        elif fence is not None and stripped.startswith(fence):
+            fence = None
+        if fence is None and not stripped and current:
+            blocks.append("\n".join(current))
+            current = []
+        elif stripped or fence is not None:
+            current.append(line)
+    if current:
+        blocks.append("\n".join(current))
+    kept = blocks[:1]
+    size = 0
+    for b in blocks[1:]:
+        if size + len(b) > chars_max:
+            break
+        kept.append(b)
+        size += len(b)
+    return "\n\n".join(kept), len(kept) < len(blocks)
+
+
+def _lines(text: str, lines_max: int) -> tuple[str, int]:
+    """At most `lines_max` lines of `text`, and how many were left out"""
+    lines = text.split("\n")
+    return "\n".join(lines[:lines_max]), max(0, len(lines) - lines_max)
+
+
+def _more(n: int) -> str:
+    return card.part("spl-card-more", f"{n} more line{'s' if n != 1 else ''} in the source") if n else ""
+
+
+class _Refs(InlineProcessor):
+    def __init__(self, pattern: str, ext: CodeRefExtension, index: Index):
+        super().__init__(pattern, ext.md)
+        self.ext = ext
         self.index = index
 
+
+class ItemPattern(_Refs):
     def handleMatch(self, m, data):
         name, suffix = m.group(1), m.group(2) or ""
         item = self.index.find(name)
-        code = etree.Element("code")
-        code.text = text(name + suffix)
-        span, card = reference(code, item["url"], "code")
-        head = etree.SubElement(card, "span", {"class": "spl-card-head"})
-        head.text = text(f"{item['kind']} {item['path']}")
-        src = etree.SubElement(card, "code", {"class": "spl-card-src"})
-        src.text = text(item["source"])
+        card_id = card.page_cards(self.md).add(f"item {item['path']}", lambda i: self.build(i, item))
+        code_el = etree.Element("code")
+        code_el.text = name + suffix
+        return card.reference(code_el, item["url"], "code", card_id), m.start(0), m.end(0)
+
+    def build(self, card_id: str, item: dict) -> str:
+        src, left = _lines(item["source"], self.ext.lines_max)
+        body = card.part("spl-card-head", card.escape(f"{item['kind']} {item['path']}"))
+        body += card.part("spl-card-src", card.code(src, "rust")) + _more(left)
         if item["doc"]:
-            doc = etree.SubElement(card, "span", {"class": "spl-card-doc"})
-            prose(doc, item["doc"])
-        where = etree.SubElement(card, "span", {"class": "spl-card-where"})
-        where.text = text(f"{item['file']}:{item['lines'][0]}")
-        return span, m.start(0), m.end(0)
+            doc, cut = bounded(doc_links(item["doc"], item, self.index), self.ext.doc_chars_max)
+            body += card.part("spl-card-doc", card.render(doc))
+            if cut:
+                body += card.part("spl-card-more", "The docs go on in the source")
+        body += card.part("spl-card-where", card.escape(f"{item['file']}:{item['lines'][0]}"))
+        return card.frame(card_id, "code", body)
+
+
+class FilePattern(_Refs):
+    def handleMatch(self, m, data):
+        name, section = m.group(1), m.group(2)
+        f = self.index.file(name)
+        if section is None:
+            first, last = 1, f["lines"]
+            href = self.index.blob + f["path"]
+        else:
+            span = f.get("sections", {}).get(section)
+            if span is None:
+                known = ", ".join(sorted(f.get("sections", {}))) or "none"
+                raise CodeRefError(f"[`{name}:{section}`]: {f['path']} marks no section `{section}` (it marks: {known})")
+            first, last = span
+            href = f"{self.index.blob}{f['path']}#L{first}-L{last}"
+        key = f"file {f['path']}:{section or ''}"
+        card_id = card.page_cards(self.md).add(key, lambda i: self.build(i, f, section, first, last))
+        code_el = etree.Element("code")
+        code_el.text = m.group(0)[2:-2]
+        return card.reference(code_el, href, "file", card_id), m.start(0), m.end(0)
+
+    def build(self, card_id: str, f: dict, section: str | None, first: int, last: int) -> str:
+        try:
+            lines = Path(f["path"]).read_text(encoding="utf-8").split("\n")[first - 1 : last]
+        except OSError as e:
+            raise CodeRefError(f"{f['path']}: {e}") from e
+        src, left = _lines("\n".join(lines), self.ext.lines_max)
+        ext = f["path"].rsplit(".", 1)[-1].lower()
+        head = f["path"] + (f", section {section}" if section else "")
+        body = card.part("spl-card-head", card.escape(head))
+        body += card.part("spl-card-src", card.code(src, _LANGS.get(ext, ext))) + _more(left)
+        body += card.part("spl-card-where", card.escape(f"{f['path']}:{first}-{last}"))
+        return card.frame(card_id, "file", body)
 
 
 class CodeRefExtension(Extension):
@@ -105,13 +294,24 @@ class CodeRefExtension(Extension):
         self.config = {
             "index": ["target/spl-book/code_index.json", "the code index, from the project root"],
             "crates": [[], "the library crates spl book refs indexes; empty: every library of the workspace"],
+            "card_lines_max": [16, "lines of code a card shows at most"],
+            "card_doc_chars_max": [600, "characters of docs a card shows after the summary paragraph, at most"],
         }
         super().__init__(**kwargs)
 
     def extendMarkdown(self, md):
+        self.md = md
+        self.lines_max = int(self.getConfig("card_lines_max"))
+        self.doc_chars_max = int(self.getConfig("card_doc_chars_max"))
         index = load(Path(self.getConfig("index")))
+        md.registerExtension(self)
+        card.install(md)
         # before the backtick pattern (190), which would take the code span first
-        md.inlinePatterns.register(CodeRefPattern(index), "spl_code_ref", 195)
+        md.inlinePatterns.register(ItemPattern(ITEM, self, index), "spl_code_ref", 195)
+        md.inlinePatterns.register(FilePattern(FILE, self, index), "spl_file_ref", 194)
+
+    def reset(self):
+        card.reset(self.md)
 
 
 def makeExtension(**kwargs):

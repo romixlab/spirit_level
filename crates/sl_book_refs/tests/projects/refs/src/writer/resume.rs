@@ -7,8 +7,10 @@ impl TapeWriter {
     #[must_use]
     pub fn resume_on(self, at: u64) -> Self {
         let _ = at;
+        // --8<-- [start:call]
         let a = 1;
         let b = 2;
+        // --8<-- [end:call]
         let c = 3;
         let d = 4;
         let e = 5;

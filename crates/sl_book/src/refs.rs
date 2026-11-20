@@ -197,7 +197,8 @@ fn write_index(
         repository,
         commit: &commit,
     };
-    let index = code_index::index(&project, &c.crates, forge).map_err(Error::Index)?;
+    let index = code_index::index(&project, &c.crates, &[book.site_dir.as_str()], forge)
+        .map_err(Error::Index)?;
     let mut json = serde_json::to_string_pretty(&index).map_err(Error::Json)?;
     json.push('\n');
     let path = PathBuf::from(&c.index);

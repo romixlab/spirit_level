@@ -16,14 +16,13 @@ import functools
 import html
 import re
 import tomllib
-import xml.etree.ElementTree as etree
 from pathlib import Path
 
 from markdown import Extension
 from markdown.inlinepatterns import InlineProcessor
 from markdown.preprocessors import Preprocessor
 
-from spl_book_ext.card import prose, reference, text
+from spl_book_ext import card
 
 PATTERN = r"\[\[([^\[\]|`\n]+)(?:\|([^\[\]|`\n]+))?\]\]"
 MARKER = "<!-- glossary -->"
@@ -84,27 +83,21 @@ def load(path: Path, page: str) -> Glossary:
     return _load(str(path), mtime, page)
 
 
-def _inline(text: str) -> str:
-    """A definition as HTML: escaped, `code` as code"""
-    parts = html.escape(text).split("`")
-    return "".join(f"<code>{p}</code>" if i % 2 else p for i, p in enumerate(parts))
-
-
 class TermPattern(InlineProcessor):
-    def __init__(self, glossary: Glossary):
-        super().__init__(PATTERN)
+    def __init__(self, glossary: Glossary, md):
+        super().__init__(PATTERN, md)
         self.glossary = glossary
 
     def handleMatch(self, m, data):
         shown, name = m.group(1), m.group(2) or m.group(1)
         t = self.glossary.find(name)
-        span, card = reference(shown, self.glossary.href(t), "term")
-        head = etree.SubElement(card, "strong")
-        head.text = text(t["name"] + (f" ({t['long']})" if t.get("long") else ""))
-        head.tail = text(": ")
-        rest = etree.SubElement(card, "span")
-        prose(rest, t["short"])
-        return span, m.start(0), m.end(0)
+        card_id = card.page_cards(self.md).add(f"term {t['name']}", lambda i: self.build(i, t))
+        return card.reference(shown, self.glossary.href(t), "term", card_id), m.start(0), m.end(0)
+
+    def build(self, card_id: str, t: dict) -> str:
+        head = t["name"] + (f" ({t['long']})" if t.get("long") else "")
+        body = f"<strong>{card.escape(head)}</strong>: {card.render_inline(t['short'])}"
+        return card.frame(card_id, "term", body)
 
 
 class GlossaryPage(Preprocessor):
@@ -127,7 +120,7 @@ class GlossaryPage(Preprocessor):
                 more = f' <a href="{html.escape(t["chapter"])}">More</a>' if t.get("chapter") else ""
                 out.append(
                     f'<p class="spl-gloss" id="term-{slug(t["name"])}"><strong>{name}</strong>: '
-                    f"{_inline(t['short'])}{more}</p>"
+                    f"{card.render_inline(t['short'])}{more}</p>"
                 )
                 out.append("")
         if "abbr" in self.md.parser.blockprocessors:
@@ -146,11 +139,18 @@ class GlossaryExtension(Extension):
         super().__init__(**kwargs)
 
     def extendMarkdown(self, md):
+        self.md = md
         glossary = load(Path(self.getConfig("file")), self.getConfig("page"))
+        md.registerExtension(self)
+        card.install(md)
         md.preprocessors.register(GlossaryPage(md, glossary), "spl_glossary_page", 25)
         # after the backtick pattern (190), so a code span keeps `[[x]]` as written; before the link pattern
         # (160), which would take the brackets apart
-        md.inlinePatterns.register(TermPattern(glossary), "spl_glossary_term", 185)
+        md.inlinePatterns.register(TermPattern(glossary, md), "spl_glossary_term", 185)
+
+
+    def reset(self):
+        card.reset(self.md)
 
 
 def makeExtension(**kwargs):

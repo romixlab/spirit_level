@@ -26,7 +26,7 @@ fn find<'a>(index: &'a Index, path: &str) -> &'a Entry {
 
 #[test]
 fn walks_the_library_module_tree() {
-    let index = index(&project(), &[], FORGE).unwrap();
+    let index = index(&project(), &[], &[], FORGE).unwrap();
     let paths: Vec<&str> = index.items.iter().map(|e| e.path.as_str()).collect();
     assert_eq!(
         paths,
@@ -50,13 +50,13 @@ fn walks_the_library_module_tree() {
 
 #[test]
 fn an_entry_has_its_lines_signature_docs_and_address() {
-    let index = index(&project(), &["tape".to_owned()], FORGE).unwrap();
+    let index = index(&project(), &["tape".to_owned()], &[], FORGE).unwrap();
     let c = find(&index, "tape::PIECE_BYTES_MAX");
     assert_eq!(c.kind, Kind::Const);
     assert_eq!(c.file, "src/lib.rs");
     assert_eq!(c.lines, [14, 14]);
     assert_eq!(c.source, "pub const PIECE_BYTES_MAX: usize = 4096;");
-    assert_eq!(c.doc, "The largest piece.");
+    assert_eq!(c.doc, "The largest piece.\n\nMore text, not in the card.");
     assert_eq!(
         c.url,
         "https://github.com/o/r/blob/abc123/src/lib.rs#L14-L14"
@@ -64,9 +64,12 @@ fn an_entry_has_its_lines_signature_docs_and_address() {
 
     let r = find(&index, "tape::writer::resume::TapeWriter::resume_on");
     assert_eq!(r.kind, Kind::Fn);
-    assert_eq!(r.lines, [8, 23]);
+    assert_eq!(r.lines, [8, 25]);
     assert_eq!(r.source, "pub fn resume_on(self, at: u64) -> Self");
-    assert_eq!(r.doc, "Reopen the unfinished piece and go on writing it.");
+    assert_eq!(
+        r.doc,
+        "Reopen the unfinished piece and go on writing it.\n\nSecond paragraph."
+    );
 
     let s = find(&index, "tape::writer::TapeWriter");
     assert_eq!(
@@ -77,7 +80,7 @@ fn an_entry_has_its_lines_signature_docs_and_address() {
 
 #[test]
 fn an_unknown_crate_names_the_libraries() {
-    let e = index(&project(), &["tape_core".to_owned()], FORGE).unwrap_err();
+    let e = index(&project(), &["tape_core".to_owned()], &[], FORGE).unwrap_err();
     assert_eq!(
         e.to_string(),
         "`tape_core` is no library of the workspace; the libraries are tape"
@@ -108,4 +111,19 @@ fn the_extension_reads_this_format() {
         py.contains(&format!("\nFORMAT = {FORMAT}\n")),
         "spl_book_ext's FORMAT differs from {FORMAT}"
     );
+}
+
+#[test]
+fn lists_the_text_files_with_their_sections() {
+    let index = index(&project(), &[], &["app"], FORGE).unwrap();
+    let paths: Vec<&str> = index.files.iter().map(|f| f.path.as_str()).collect();
+    assert!(paths.contains(&"src/writer/resume.rs"), "{paths:?}");
+    assert!(!paths.iter().any(|p| p.starts_with("app/")), "{paths:?}");
+    let resume = index
+        .files
+        .iter()
+        .find(|f| f.path == "src/writer/resume.rs")
+        .unwrap();
+    assert_eq!(resume.sections.get("call"), Some(&[11, 12]));
+    assert_eq!(index.blob, "https://github.com/o/r/blob/abc123/");
 }

@@ -17,10 +17,10 @@ mod settings;
 
 pub use settings::{CODE_REFS_EXTENSION, CodeRefs, GLOSSARY_EXTENSION, GlossaryRefs, Settings};
 
-/// The cards' stylesheet: hidden until the reference is hovered or focused, colours from the theme's variables
+/// The cards' stylesheet: hidden until the script opens one, colours from the theme's variables
 pub const CARD_CSS: &str = include_str!("../assets/refs.css");
 
-/// The script that keeps an open card inside the window
+/// The script that opens a reference's card beside it on hover, keyboard focus and a first tap
 pub const CARD_SCRIPT: &str = include_str!("../assets/refs.js");
 
 #[cfg(test)]
@@ -42,6 +42,8 @@ mod tests {
             "spl-card-src",
             "spl-card-doc",
             "spl-card-where",
+            "spl-card-more",
+            "spl-cards",
             "spl-gloss",
         ] {
             assert!(
@@ -53,9 +55,9 @@ mod tests {
                 "the stylesheet lacks .{class}"
             );
         }
-        for kind in ["term", "code"] {
+        for kind in ["term", "code", "file"] {
             assert!(
-                py.contains(&format!("\"{kind}\")")),
+                py.contains(&format!("\"{kind}\", card_id)")),
                 "the extension writes no spl-{kind}"
             );
             assert!(
