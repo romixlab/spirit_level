@@ -3,7 +3,8 @@
 A reference is a plain link: to the glossary entry, or to the lines on the forge. It names its card by id
 (`data-spl-card`, `aria-describedby`), so without the script it still works as a link. Each distinct card is written
 once per page, at the end of the page's content in a `spl-cards` block the stylesheet hides; the script shows a card
-beside its reference on hover, on keyboard focus and on a first tap.
+beside its reference on hover, on keyboard focus and on a first tap. A reference in a heading is plain text there, so
+the heading's anchor and its line in the table of contents hold its words alone.
 
 Everything that reaches a card is escaped here or rendered by `render`, a Markdown converter with raw HTML off, no
 images, and links only to `http` and `https` addresses: a doc comment holding `<script>` or an `onerror` attribute
@@ -23,6 +24,7 @@ import markdown
 from markdown.treeprocessors import Treeprocessor
 
 _ATTR = "_spl_cards"
+_HEADINGS = {"h1", "h2", "h3", "h4", "h5", "h6"}
 _SAFE_SCHEMES = ("https://", "http://")
 
 
@@ -42,15 +44,54 @@ class Cards:
         return card_id
 
 
+def _is_ref(el: etree.Element) -> bool:
+    return el.tag == "a" and "spl-ref" in (el.get("class") or "").split()
+
+
+def _append(parent: etree.Element, at: int, text: str) -> None:
+    """Adds `text` after child `at - 1` of `parent`, or to its own text when `at` is 0"""
+    if not text:
+        return
+    if at == 0:
+        parent.text = (parent.text or "") + text
+    else:
+        prev = parent[at - 1]
+        prev.tail = (prev.tail or "") + text
+
+
+def _plain(parent: etree.Element) -> None:
+    """The references under `parent` replaced by what they show"""
+    i = 0
+    while i < len(parent):
+        child = parent[i]
+        if not _is_ref(child):
+            _plain(child)
+            i += 1
+            continue
+        inner = list(child)
+        parent.remove(child)
+        _append(parent, i, child.text or "")
+        for n, el in enumerate(inner):
+            parent.insert(i + n, el)
+        _append(parent, i + len(inner), child.tail or "")
+        i += len(inner)
+
+
 class _CardsBlock(Treeprocessor):
-    """Appends the page's cards after its content"""
+    """Makes references in headings plain text, then appends the cards still referenced after the content"""
 
     def run(self, root: etree.Element) -> None:
         cards = page_cards(self.md)
         if not cards.html:
             return
-        block = etree.SubElement(root, "div", {"class": "spl-cards"})
-        block.text = self.md.htmlStash.store("".join(cards.html.values()))
+        for el in list(root.iter()):
+            if el.tag in _HEADINGS:
+                _plain(el)
+        used = {el.get("data-spl-card") for el in root.iter() if _is_ref(el)}
+        kept = [html for card_id, html in cards.html.items() if card_id in used]
+        if kept:
+            block = etree.SubElement(root, "div", {"class": "spl-cards"})
+            block.text = self.md.htmlStash.store("".join(kept))
 
 
 def install(md: markdown.Markdown) -> None:

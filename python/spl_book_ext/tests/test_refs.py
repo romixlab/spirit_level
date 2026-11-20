@@ -115,6 +115,19 @@ def test_a_reference_in_a_longer_code_span_stays_as_written(book):
     assert "klzzwxh" not in html and "\x02" not in html
 
 
+def test_a_reference_in_a_heading_is_plain_text(book):
+    html = markdown.markdown(
+        "## Resume a [[piece]] with [`resume_on`]\n\nA [[piece]] again.",
+        extensions=["toc", "spl_book_ext.glossary", "spl_book_ext.code_refs"],
+        extension_configs={
+            "spl_book_ext.glossary": {"file": "glossary.toml"},
+            "spl_book_ext.code_refs": {"index": "index.json"},
+        },
+    )
+    assert '<h2 id="resume-a-piece-with-resume_on">Resume a piece with <code>resume_on</code></h2>' in html
+    assert len(cards(html)) == 1
+
+
 def test_a_term_is_a_plain_link_naming_its_card(book):
     html = render(book, "Each of the [[pieces]] and [[the file|piece]].")
     (cid,) = cards(html)
