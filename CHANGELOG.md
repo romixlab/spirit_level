@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.7.1] - 2026-11-20
+
 ### Added
 
 - `page-figures` takes `badges` and `figures`: URL parts that make an image a badge, or a figure regardless (DOCS-12).
