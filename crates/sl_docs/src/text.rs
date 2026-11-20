@@ -229,6 +229,7 @@ mod tests {
             vec!["One e.g. two.", "Three is 3.5 ms!", "Four?"]
         );
         assert_eq!(sentences("Ask J. Smith. Then go.").len(), 2);
+        assert_eq!(sentences("Do steps 1. and 2. in order.").len(), 1);
     }
 
     #[test]
