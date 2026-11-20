@@ -259,6 +259,59 @@ fn html_tags<'a>(html: &'a str, tag: &str) -> Vec<&'a str> {
     out
 }
 
+/// The value of attribute `name` in the attributes of a tag, quoted or not
+fn attr_value<'a>(attrs: &'a str, name: &str) -> Option<&'a str> {
+    let lower = attrs.to_ascii_lowercase();
+    let mut from = 0;
+    while let Some(i) = lower[from..].find(name) {
+        let at = from + i;
+        from = at + name.len();
+        if !lower[..at]
+            .chars()
+            .next_back()
+            .is_some_and(char::is_whitespace)
+        {
+            continue;
+        }
+        let Some(rest) = attrs[from..].trim_start().strip_prefix('=') else {
+            continue;
+        };
+        let rest = rest.trim_start();
+        return Some(match rest.chars().next() {
+            Some(q @ ('"' | '\'')) => rest[1..].split(q).next().unwrap_or(""),
+            _ => rest
+                .split(|c: char| c.is_whitespace() || c == '>')
+                .next()
+                .unwrap_or(""),
+        });
+    }
+    None
+}
+
+/// Whether a path names an image file a browser draws
+pub(crate) fn image_file(path: &str) -> bool {
+    let ext = path.rsplit('.').next().unwrap_or("").to_ascii_lowercase();
+    matches!(
+        ext.as_str(),
+        "svg" | "png" | "jpg" | "jpeg" | "gif" | "webp" | "avif"
+    )
+}
+
+/// The text with its attribute lists (`{ width="300" }`) taken out
+fn without_attr_lists(text: &str) -> String {
+    let mut out = String::with_capacity(text.len());
+    let mut depth = 0usize;
+    for c in text.chars() {
+        match c {
+            '{' => depth += 1,
+            '}' if depth > 0 => depth -= 1,
+            _ if depth == 0 => out.push(c),
+            _ => {}
+        }
+    }
+    out
+}
+
 /// Whether the attributes of a tag hold `name` (`alt`, `alt=""`, `alt='x'`)
 fn has_attr(attrs: &str, name: &str) -> bool {
     let lower = attrs.to_ascii_lowercase();
@@ -281,8 +334,12 @@ fn has_attr(attrs: &str, name: &str) -> bool {
 struct Open {
     text: String,
     line: Option<u32>,
+    /// Images and drawings on its first line, outside a link
     images: usize,
-    words: bool,
+    /// Images inside a link on its first line: badges
+    badges: usize,
+    /// Where its first line ends: the offset in the text and the next line
+    first_line_end: Option<(usize, u32)>,
     marks: Vec<Mark>,
     /// Where the bold text being read starts
     strong: Option<usize>,
@@ -302,6 +359,12 @@ pub(crate) struct Walk {
     pub(crate) code: Option<(Option<String>, bool, String, u32)>,
     table: usize,
     alt: Option<(String, u32)>,
+    /// Markdown links open around the text being read
+    link: usize,
+    /// HTML `<figure>` elements open across blocks of raw HTML
+    figure: usize,
+    /// Whether an HTML comment is open across blocks of raw HTML
+    comment: bool,
 }
 
 impl Walk {
@@ -317,6 +380,9 @@ impl Walk {
             code: None,
             table: 0,
             alt: None,
+            link: 0,
+            figure: 0,
+            comment: false,
         }
     }
 
@@ -333,16 +399,41 @@ impl Walk {
 
     /// An HTML image in the flow of the page: a figure of its own outside a paragraph; a paragraph of images
     /// only is a figure too
-    pub(crate) fn html_image(&mut self, alt: Option<String>, line: u32) {
+    pub(crate) fn html_image(&mut self, alt: Option<String>, line: u32, linked: bool) {
         self.images.push(Image {
             line,
             alt,
             html: true,
         });
-        if let Some(o) = self.open.last_mut() {
-            o.images += 1;
+        self.picture(line, linked);
+    }
+
+    /// An image or drawing in the flow of the page. In a table cell or outside a paragraph it is a figure of its
+    /// own; in a paragraph it counts toward a figure when it sits on the paragraph's first line. An image inside a
+    /// link is a badge, never a figure; inside an open `<figure>` it is part of that figure.
+    pub(crate) fn picture(&mut self, line: u32, linked: bool) {
+        if self.table > 0 || self.open.is_empty() {
+            if !linked && self.figure == 0 {
+                self.items.push(Item::Break {
+                    what: Break::Figure,
+                    line,
+                });
+            }
+        } else if let Some(o) = self.open.last_mut() {
             o.line.get_or_insert(line);
-        } else {
+            if o.first_line_end.is_none() {
+                if linked {
+                    o.badges += 1;
+                } else {
+                    o.images += 1;
+                }
+            }
+        }
+    }
+
+    /// An HTML image in a table cell: a figure of its own unless it is a badge
+    pub(crate) fn picture_in_table(&mut self, line: u32, linked: bool) {
+        if !linked {
             self.items.push(Item::Break {
                 what: Break::Figure,
                 line,
@@ -350,18 +441,23 @@ impl Walk {
         }
     }
 
+    /// The end of a line inside a paragraph
+    fn line_end(&mut self, line: u32) {
+        self.text(" ", line);
+        if self.heading.is_none()
+            && self.alt.is_none()
+            && self.table == 0
+            && let Some(o) = self.open.last_mut()
+            && o.first_line_end.is_none()
+        {
+            o.first_line_end = Some((o.text.len(), line + 1));
+        }
+    }
+
     /// An HTML inline SVG drawing in the flow of the page: a figure of its own outside a paragraph; a paragraph of
     /// drawings and images only is a figure too
     pub(crate) fn drawing(&mut self, line: u32) {
-        if let Some(o) = self.open.last_mut() {
-            o.images += 1;
-            o.line.get_or_insert(line);
-        } else {
-            self.items.push(Item::Break {
-                what: Break::Figure,
-                line,
-            });
-        }
+        self.picture(line, false);
     }
 
     /// Emits the text gathered so far by every open paragraph: a break inside a list item splits its prose
@@ -386,11 +482,32 @@ impl Walk {
     fn close(&mut self, at: u32) {
         let Some(o) = self.open.pop() else { return };
         let line = o.line.unwrap_or(at);
-        if o.images > 0 && !o.words {
-            self.items.push(Item::Break {
-                what: Break::Figure,
-                line,
-            });
+        let (head_end, next_line) = o.first_line_end.unwrap_or((o.text.len(), line));
+        if o.images + o.badges > 0 && words(&without_attr_lists(&o.text[..head_end])).is_empty() {
+            if o.images > 0 && self.figure == 0 {
+                self.items.push(Item::Break {
+                    what: Break::Figure,
+                    line,
+                });
+            }
+            let caption = &o.text[head_end..];
+            if !words(caption).is_empty() {
+                self.items.push(Item::Prose {
+                    text: caption.to_owned(),
+                    line: next_line,
+                    marks: o
+                        .marks
+                        .iter()
+                        .filter(|m| m.start >= head_end)
+                        .map(|m| Mark {
+                            kind: m.kind,
+                            start: m.start - head_end,
+                            end: m.end - head_end,
+                        })
+                        .collect(),
+                    list: o.list,
+                });
+            }
         } else if !words(&o.text).is_empty() {
             self.items.push(Item::Prose {
                 text: o.text,
@@ -430,29 +547,33 @@ impl Walk {
         {
             o.text.push_str(t);
             o.line.get_or_insert(line);
-            if !words(t).is_empty() {
-                o.words = true;
-            }
         }
     }
 
+    /// Raw HTML, a line of a block or an inline tag
     fn html(&mut self, html: &str, line: u32, block: bool) {
-        for attrs in html_tags(html, "img") {
+        let html = self.uncomment(html);
+        for attrs in html_tags(&html, "img") {
             self.images.push(Image {
                 line,
                 alt: has_attr(attrs, "alt").then(String::new),
                 html: true,
             });
-            if let Some(o) = self.open.last_mut() {
-                o.images += 1;
+            if !block {
+                self.picture(line, self.link > 0);
             }
         }
+        let objects = html_tags(&html, "object")
+            .iter()
+            .filter(|a| attr_value(a, "data").is_some_and(image_file))
+            .count();
         if !block {
-            for _ in html_tags(html, "svg") {
+            for _ in 0..html_tags(&html, "svg").len() + objects {
                 self.drawing(line);
             }
             return;
         }
+        let object = objects > 0;
         let kinds = [
             ("figure", Break::Figure),
             ("img", Break::Figure),
@@ -461,12 +582,42 @@ impl Walk {
             ("table", Break::Table),
             ("details", Break::Details),
         ];
-        if let Some((_, what)) = kinds
+        let what = kinds
             .iter()
-            .find(|(tag, _)| !html_tags(html, tag).is_empty())
-        {
-            self.brk(*what, line);
+            .find(|(tag, _)| !html_tags(&html, tag).is_empty())
+            .map(|(_, what)| *what)
+            .or(object.then_some(Break::Figure));
+        match what {
+            Some(Break::Figure) if self.figure > 0 => {}
+            Some(what) => self.brk(what, line),
+            None => {}
         }
+        let lower = html.to_ascii_lowercase();
+        self.figure += html_tags(&html, "figure").len();
+        self.figure = self
+            .figure
+            .saturating_sub(lower.matches("</figure").count());
+    }
+
+    /// The HTML with its comments blanked, an open comment carried to the next block
+    fn uncomment(&mut self, html: &str) -> String {
+        let mut out = String::with_capacity(html.len());
+        let mut rest = html;
+        loop {
+            if self.comment {
+                let Some(end) = rest.find("-->") else { break };
+                rest = &rest[end + 3..];
+                self.comment = false;
+            } else if let Some(start) = rest.find("<!--") {
+                out.push_str(&rest[..start]);
+                rest = &rest[start + 4..];
+                self.comment = true;
+            } else {
+                out.push_str(rest);
+                break;
+            }
+        }
+        out
     }
 
     pub(crate) fn start(&mut self, tag: Tag<'_>, line: u32) {
@@ -493,7 +644,8 @@ impl Walk {
                     text: String::new(),
                     line: None,
                     images: 0,
-                    words: false,
+                    badges: 0,
+                    first_line_end: None,
                     marks: Vec::new(),
                     strong: None,
                     list,
@@ -505,16 +657,16 @@ impl Walk {
                 }
             }
             Tag::Image { .. } => {
+                self.picture(line, self.link > 0);
                 self.alt = Some((String::new(), line));
-                if let Some(o) = self.open.last_mut() {
-                    o.images += 1;
-                    o.line.get_or_insert(line);
-                }
             }
-            Tag::Link { dest_url, .. } => self.links.push(Link {
-                line,
-                dest: dest_url.into_string(),
-            }),
+            Tag::Link { dest_url, .. } => {
+                self.links.push(Link {
+                    line,
+                    dest: dest_url.into_string(),
+                });
+                self.link += 1;
+            }
             _ => {}
         }
     }
@@ -561,6 +713,7 @@ impl Walk {
                 }
             }
             TagEnd::Paragraph | TagEnd::Item if self.table == 0 => self.close(line),
+            TagEnd::Link => self.link = self.link.saturating_sub(1),
             TagEnd::Image => {
                 if let Some((alt, line)) = self.alt.take() {
                     self.images.push(Image {
@@ -580,7 +733,7 @@ impl Walk {
             Event::End(tag) => self.end(tag, line),
             Event::Text(t) => self.text(&t, line),
             Event::Code(t) => self.code(&t, line),
-            Event::SoftBreak | Event::HardBreak => self.text(" ", line),
+            Event::SoftBreak | Event::HardBreak => self.line_end(line),
             Event::Html(h) => self.html(&h, line, true),
             Event::InlineHtml(h) => self.html(&h, line, false),
             _ => {}
@@ -833,6 +986,60 @@ mod tests {
                 .iter()
                 .all(|i| matches!(i, Item::Prose { list: true, .. }))
         );
+    }
+
+    fn figures(text: &str) -> usize {
+        page(text)
+            .items
+            .iter()
+            .filter(|i| {
+                matches!(
+                    i,
+                    Item::Break {
+                        what: Break::Figure,
+                        ..
+                    }
+                )
+            })
+            .count()
+    }
+
+    #[test]
+    fn what_is_a_figure() {
+        let cases = [
+            ("<figure>\n  <img src=\"a.png\" alt=\"a\">\n</figure>\n", 1),
+            ("<figure><img src=\"a.png\" alt=\"a\"></figure>\n", 1),
+            ("<figure markdown>\n\n![a](a.png)\n\n</figure>\n", 1),
+            ("<!-- an <svg> would go here -->\n", 0),
+            ("<!-- <img src=\"tank.png\"> -->\n", 0),
+            ("<!--\n<svg>\n</svg>\n-->\n\nText.\n", 0),
+            ("<svg viewBox=\"0 0 1 1\">\n  <rect/>\n</svg>\n", 1),
+            (
+                "[![ci](https://img.shields.io/ci)](x) [![docs](https://img.shields.io/d)](y)\n",
+                0,
+            ),
+            ("[![ci](a.svg)](x)\n[![docs](b.svg)](y)\n", 0),
+            ("![a](a.png){ width=\"300\" }\n", 1),
+            ("![a](a.png)\nThe layout of a block.\n", 1),
+            ("Text with ![a](a.png) inside.\n", 0),
+            ("| a | b |\n|---|---|\n| ![a](a.png) | ![b](b.png) |\n", 2),
+            (
+                "<object data=\"x.svg\" type=\"image/svg+xml\"></object>\n",
+                1,
+            ),
+            ("<object data=\"x.pdf\"></object>\n", 0),
+            ("| a |\n|---|\n| b |\n", 0),
+        ];
+        for (text, n) in cases {
+            assert_eq!(figures(text), n, "{text}");
+        }
+    }
+
+    #[test]
+    fn a_caption_line_is_prose() {
+        let p = page("![a](a.png){ width=\"300\" }\nThe layout of a block.\n");
+        let prose: Vec<(&str, u32)> = p.prose().collect();
+        assert_eq!(prose, [("The layout of a block.", 2)]);
     }
 
     #[test]

@@ -16,6 +16,7 @@
 - Breaking: `[docs]` stops skipping changelogs, feature trackers and agent files; they are records now (DOCS-13).
 - `emoji` allows four more tracker status marks by default: idea, blocked, to verify, in test (PROSE-2).
 - Diagram blocks (`mermaid`, `dot`, `d2` ...) and inline SVG count as figures, not code (DOCS-12).
+- Figures: a multi-line `<figure>` counts once, badges and commented-out markup none; captioned, table and object images count (DOCS-12).
 
 ### Fixed
 

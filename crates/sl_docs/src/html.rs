@@ -5,7 +5,9 @@
 //! quotes. Headings, code, figures, tables, videos, details and calls to action are what they are in Markdown;
 //! labels, captions, term lists and other marked elements are none of them.
 
-use crate::page::{Admonition, Break, Kind, Link, Page, Source, Walk, diagram, level_of};
+use crate::page::{
+    Admonition, Break, Kind, Link, Page, Source, Walk, diagram, image_file, level_of,
+};
 use html5gum::{DefaultEmitter, Token, Tokenizer};
 use pulldown_cmark::{CodeBlockKind, CowStr, Tag, TagEnd};
 
@@ -259,7 +261,7 @@ impl Front<'_> {
         } else if !reading {
             Role::Plain
         } else {
-            self.role(tag, &classes, attr("data-lang"), line)
+            self.role(tag, &classes, attr("data-lang"), attr("data"), line)
         };
         let lang = language(&classes, attr("data-lang"));
         self.stack.push(Node {
@@ -275,6 +277,7 @@ impl Front<'_> {
         tag: &str,
         classes: &[String],
         data_lang: Option<String>,
+        data: Option<String>,
         line: u32,
     ) -> Role {
         let m = self.m;
@@ -354,6 +357,10 @@ impl Front<'_> {
                 self.w.brk(Break::Figure, line);
                 Role::Figure
             }
+            "object" if data.is_some_and(|d| image_file(&d)) => {
+                self.w.brk(Break::Figure, line);
+                Role::Skip
+            }
             "video" => {
                 self.w.brk(Break::Video, line);
                 Role::Skip
@@ -376,7 +383,18 @@ impl Front<'_> {
             return;
         }
         if self.reading() {
-            self.w.html_image(alt, line);
+            let linked = self.stack.iter().any(|n| n.tag == "a");
+            self.w.html_image(alt, line, linked);
+        } else if self.stack.iter().any(|n| n.tag == "table")
+            && !self.stack.iter().any(|n| n.role == Role::Figure)
+        {
+            self.w.images.push(crate::page::Image {
+                line,
+                alt,
+                html: true,
+            });
+            let linked = self.stack.iter().any(|n| n.tag == "a");
+            self.w.picture_in_table(line, linked);
         } else if self.stack.iter().any(|n| n.role == Role::Figure)
             && !self.stack.iter().any(|n| n.role == Role::Skip)
         {
@@ -628,6 +646,15 @@ fn b() {}
         )
         .expect("a page");
         assert_eq!(shape(&p), ["Figure", "p:Icon  in text.@1", "Figure"]);
+    }
+
+    #[test]
+    fn badges_tables_and_objects() {
+        let p = parse_page(
+            "<main><p><a href=\"x\"><img src=\"ci.svg\" alt=\"ci\"></a></p><table><tr><td><img src=\"a.png\" alt=\"a\"></td></tr></table><object data=\"x.svg\"></object></main>",
+        )
+        .expect("a page");
+        assert_eq!(shape(&p), ["Table", "Figure", "Figure"]);
     }
 
     #[test]
