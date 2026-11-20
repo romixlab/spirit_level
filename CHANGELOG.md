@@ -9,6 +9,10 @@
 - `spl_book_ext`: file and section references `` [`file.rs:section`] `` with code cards; `fn@` and `cfg(...)@` pick an item (BOOK-7).
 - `glossary-terms`: a book's glossary term is marked once in every section that uses it, warn from `small` (DOCS-14).
 
+### Changed
+
+- `emoji` allows ❌ by default, the FEATURES.md mark of a dropped item (PROSE-2).
+
 ### Fixed
 
 - `page-figures`: a raw `<a href>` around an image follows its target across blank lines too (DOCS-12).

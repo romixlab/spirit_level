@@ -196,5 +196,7 @@ mod tests {
             .map(|e| e.1)
             .collect();
         assert_eq!(e, vec!["🚀", "✨"]);
+        // ❌ is an emoji: the default allow list lets it pass as the mark of a dropped item
+        assert_eq!(emoji("❌ dropped", &[]).len(), 1);
     }
 }
