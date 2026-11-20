@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.7.3] - 2026-11-20
+
 ### Added
 
 - `just dist OUT`: a static-musl `spl` bundle, for `tpm dist build`.
