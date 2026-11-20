@@ -66,6 +66,8 @@ pub struct Markup<'a> {
     pub capture_classes: &'a [String],
     /// The site's own address, without a trailing `/`: a link to it is turned into a site path
     pub url: Option<&'a str>,
+    /// URL parts that mark a badge beyond [`crate::page::BADGES`]
+    pub badges: &'a [String],
 }
 
 /// What an open element means for the page
@@ -97,6 +99,8 @@ struct Node {
     tag: String,
     role: Role,
     lang: Option<String>,
+    /// A link's target
+    href: Option<String>,
 }
 
 struct Front<'a> {
@@ -220,7 +224,7 @@ impl Front<'_> {
             self.implied_ends(tag, line);
         }
         if tag == "img" {
-            self.image(attr("alt"), line);
+            self.image(attr("alt"), &attr("src").unwrap_or_default(), line);
             return;
         }
         if tag == "a"
@@ -268,6 +272,7 @@ impl Front<'_> {
             tag: tag.to_owned(),
             role,
             lang,
+            href: (tag == "a").then(|| attr("href").unwrap_or_default()),
         });
     }
 
@@ -378,13 +383,19 @@ impl Front<'_> {
         }
     }
 
-    fn image(&mut self, alt: Option<String>, line: u32) {
+    /// Whether an image at `src` is a badge, by its URL and the link around it
+    fn badge(&self, src: &str) -> bool {
+        let link = self.stack.iter().rev().find_map(|n| n.href.as_deref());
+        self.w.is_badge(src, link)
+    }
+
+    fn image(&mut self, alt: Option<String>, src: &str, line: u32) {
         if !self.in_content() || self.stack.iter().any(|n| n.role == Role::Drop) {
             return;
         }
         if self.reading() {
-            let linked = self.stack.iter().any(|n| n.tag == "a");
-            self.w.html_image(alt, line, linked);
+            let badge = self.badge(src);
+            self.w.html_image(alt, line, badge);
         } else if self.stack.iter().any(|n| n.tag == "table")
             && !self.stack.iter().any(|n| n.role == Role::Figure)
         {
@@ -393,8 +404,8 @@ impl Front<'_> {
                 alt,
                 html: true,
             });
-            let linked = self.stack.iter().any(|n| n.tag == "a");
-            self.w.picture_in_table(line, linked);
+            let badge = self.badge(src);
+            self.w.picture_in_table(line, badge);
         } else if self.stack.iter().any(|n| n.role == Role::Figure)
             && !self.stack.iter().any(|n| n.role == Role::Skip)
         {
@@ -455,7 +466,7 @@ impl Front<'_> {
 pub fn parse(rel: impl Into<String>, kind: Kind, html: &str, m: Markup<'_>) -> Option<Page> {
     let mut f = Front {
         m,
-        w: Walk::new(html),
+        w: Walk::new(html).with_badges(m.badges),
         stack: Vec::new(),
         found: false,
         language: None,
@@ -564,6 +575,7 @@ fn b() {}
                 cta_classes: &cta,
                 capture_classes: &capture,
                 url: Some("https://vhrd.tech"),
+                badges: &[],
             },
         )
     }
@@ -655,6 +667,15 @@ fn b() {}
         )
         .expect("a page");
         assert_eq!(shape(&p), ["Table", "Figure", "Figure"]);
+    }
+
+    #[test]
+    fn linked_figures_badges_and_headings() {
+        let p = parse_page(
+            "<main><h2><img src=\"logo.png\" alt=\"\">Title</h2><p><a href=\"big.png\"><img src=\"a.png\" alt=\"a\"></a></p><p><img src=\"https://img.shields.io/x\" alt=\"ci\"></p></main>",
+        )
+        .expect("a page");
+        assert_eq!(shape(&p), ["h2:Title@1", "Figure"]);
     }
 
     #[test]

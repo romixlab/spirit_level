@@ -288,8 +288,54 @@ fn attr_value<'a>(attrs: &'a str, name: &str) -> Option<&'a str> {
     None
 }
 
+/// URL parts that mark a badge: badge services and the paths of badge endpoints (docs.rs, CI workflows)
+pub const BADGES: &[&str] = &[
+    "img.shields.io/",
+    "badgen.net/",
+    "badge.fury.io/",
+    "/badge.svg",
+    "/badge/",
+    "/badge?",
+];
+
+/// Whether an image at `src`, inside a link to `link` (None: no link), is a badge
+///
+/// It is when its URL holds a part of [`BADGES`] or of `extra`, or when its link leads to a page. A link to an
+/// image file, the same or a larger one, keeps the image a figure.
+pub fn badge(src: &str, link: Option<&str>, extra: &[String]) -> bool {
+    let lower = src.to_ascii_lowercase();
+    BADGES.iter().any(|b| lower.contains(b))
+        || extra
+            .iter()
+            .any(|b| !b.is_empty() && lower.contains(&b.to_ascii_lowercase()))
+        || link.is_some_and(|l| !image_file(l))
+}
+
+/// The tags of an HTML fragment in order: the lowercase name (`a`, `/a`) and its attributes
+fn tags(html: &str) -> Vec<(String, &str)> {
+    let mut out = Vec::new();
+    let mut rest = html;
+    let mut at = 0;
+    while let Some(i) = rest.find('<') {
+        let start = at + i + 1;
+        let end = html[start..].find('>').map_or(html.len(), |e| start + e);
+        let inner = &html[start..end];
+        let name_end = inner
+            .find(|c: char| c.is_whitespace() || c == '/' && !inner.starts_with('/') || c == '>')
+            .unwrap_or(inner.len());
+        let name = inner[..name_end].to_ascii_lowercase();
+        if !name.is_empty() {
+            out.push((name, &inner[name_end..]));
+        }
+        at = end.min(html.len());
+        rest = &html[at..];
+    }
+    out
+}
+
 /// Whether a path names an image file a browser draws
 pub(crate) fn image_file(path: &str) -> bool {
+    let path = path.split(['?', '#']).next().unwrap_or("");
     let ext = path.rsplit('.').next().unwrap_or("").to_ascii_lowercase();
     matches!(
         ext.as_str(),
@@ -359,8 +405,10 @@ pub(crate) struct Walk {
     pub(crate) code: Option<(Option<String>, bool, String, u32)>,
     table: usize,
     alt: Option<(String, u32)>,
-    /// Markdown links open around the text being read
-    link: usize,
+    /// The targets of the links open around the text being read, Markdown or inline HTML
+    link: Vec<String>,
+    /// URL parts that mark a badge beyond [`BADGES`]
+    badges: Vec<String>,
     /// HTML `<figure>` elements open across blocks of raw HTML
     figure: usize,
     /// Whether an HTML comment is open across blocks of raw HTML
@@ -380,7 +428,8 @@ impl Walk {
             code: None,
             table: 0,
             alt: None,
-            link: 0,
+            link: Vec::new(),
+            badges: Vec::new(),
             figure: 0,
             comment: false,
         }
@@ -399,19 +448,33 @@ impl Walk {
 
     /// An HTML image in the flow of the page: a figure of its own outside a paragraph; a paragraph of images
     /// only is a figure too
-    pub(crate) fn html_image(&mut self, alt: Option<String>, line: u32, linked: bool) {
+    pub(crate) fn html_image(&mut self, alt: Option<String>, line: u32, badge: bool) {
         self.images.push(Image {
             line,
             alt,
             html: true,
         });
-        self.picture(line, linked);
+        self.picture(line, badge);
+    }
+
+    /// Sets the URL parts that mark a badge beyond [`BADGES`]
+    pub(crate) fn with_badges(mut self, badges: &[String]) -> Self {
+        self.badges = badges.to_vec();
+        self
+    }
+
+    /// Whether an image at `src` inside a link to `link` (None: no link) is a badge ([`badge`])
+    pub(crate) fn is_badge(&self, src: &str, link: Option<&str>) -> bool {
+        badge(src, link, &self.badges)
     }
 
     /// An image or drawing in the flow of the page. In a table cell or outside a paragraph it is a figure of its
-    /// own; in a paragraph it counts toward a figure when it sits on the paragraph's first line. An image inside a
-    /// link is a badge, never a figure; inside an open `<figure>` it is part of that figure.
+    /// own; in a paragraph it counts toward a figure when it sits on the paragraph's first line. A badge is never a
+    /// figure, nor is an image in a heading; inside an open `<figure>` an image is part of that figure.
     pub(crate) fn picture(&mut self, line: u32, linked: bool) {
+        if self.heading.is_some() {
+            return;
+        }
         if self.table > 0 || self.open.is_empty() {
             if !linked && self.figure == 0 {
                 self.items.push(Item::Break {
@@ -550,34 +613,46 @@ impl Walk {
         }
     }
 
-    /// Raw HTML, a line of a block or an inline tag
+    /// Raw HTML, a line of a block or an inline tag. Its tags are read in order, so an `<img>` knows the `<a>`
+    /// around it, also across the lines of a block
     fn html(&mut self, html: &str, line: u32, block: bool) {
         let html = self.uncomment(html);
-        for attrs in html_tags(&html, "img") {
-            self.images.push(Image {
-                line,
-                alt: has_attr(attrs, "alt").then(String::new),
-                html: true,
-            });
-            if !block {
-                self.picture(line, self.link > 0);
+        let mut drawings = 0;
+        for (name, attrs) in tags(&html) {
+            match name.as_str() {
+                "a" => self
+                    .link
+                    .push(attr_value(attrs, "href").unwrap_or("").to_owned()),
+                "/a" => {
+                    self.link.pop();
+                }
+                "img" => {
+                    self.images.push(Image {
+                        line,
+                        alt: has_attr(attrs, "alt").then(String::new),
+                        html: true,
+                    });
+                    let src = attr_value(attrs, "src").unwrap_or("");
+                    let badge = self.is_badge(src, self.link.last().map(String::as_str));
+                    if !block {
+                        self.picture(line, badge);
+                    } else if !badge {
+                        drawings += 1;
+                    }
+                }
+                "svg" => drawings += 1,
+                "object" if attr_value(attrs, "data").is_some_and(image_file) => drawings += 1,
+                _ => {}
             }
         }
-        let objects = html_tags(&html, "object")
-            .iter()
-            .filter(|a| attr_value(a, "data").is_some_and(image_file))
-            .count();
         if !block {
-            for _ in 0..html_tags(&html, "svg").len() + objects {
+            for _ in 0..drawings {
                 self.drawing(line);
             }
             return;
         }
-        let object = objects > 0;
         let kinds = [
             ("figure", Break::Figure),
-            ("img", Break::Figure),
-            ("svg", Break::Figure),
             ("video", Break::Video),
             ("table", Break::Table),
             ("details", Break::Details),
@@ -586,7 +661,7 @@ impl Walk {
             .iter()
             .find(|(tag, _)| !html_tags(&html, tag).is_empty())
             .map(|(_, what)| *what)
-            .or(object.then_some(Break::Figure));
+            .or((drawings > 0).then_some(Break::Figure));
         match what {
             Some(Break::Figure) if self.figure > 0 => {}
             Some(what) => self.brk(what, line),
@@ -656,16 +731,17 @@ impl Walk {
                     o.strong = Some(o.text.len());
                 }
             }
-            Tag::Image { .. } => {
-                self.picture(line, self.link > 0);
+            Tag::Image { dest_url, .. } => {
+                let badge = self.is_badge(&dest_url, self.link.last().map(String::as_str));
+                self.picture(line, badge);
                 self.alt = Some((String::new(), line));
             }
             Tag::Link { dest_url, .. } => {
+                self.link.push(dest_url.to_string());
                 self.links.push(Link {
                     line,
                     dest: dest_url.into_string(),
                 });
-                self.link += 1;
             }
             _ => {}
         }
@@ -713,7 +789,9 @@ impl Walk {
                 }
             }
             TagEnd::Paragraph | TagEnd::Item if self.table == 0 => self.close(line),
-            TagEnd::Link => self.link = self.link.saturating_sub(1),
+            TagEnd::Link => {
+                self.link.pop();
+            }
             TagEnd::Image => {
                 if let Some((alt, line)) = self.alt.take() {
                     self.images.push(Image {
@@ -804,6 +882,12 @@ fn line_starts(text: &str) -> Vec<usize> {
 impl Page {
     /// Parses a page's Markdown, Zensical's admonitions and tabs included
     pub fn parse(rel: impl Into<String>, kind: Kind, text: &str) -> Self {
+        Self::parse_with(rel, kind, text, &[])
+    }
+
+    /// Parses a page's Markdown like [`Self::parse`], with `badges` as URL parts that mark a badge beyond
+    /// [`BADGES`]
+    pub fn parse_with(rel: impl Into<String>, kind: Kind, text: &str, badges: &[String]) -> Self {
         let (title, description, body) = front_matter(text);
         let (body, blocks) = dialect::blocks(&body);
         let opts = Options::ENABLE_TABLES
@@ -811,7 +895,7 @@ impl Page {
             | Options::ENABLE_STRIKETHROUGH
             | Options::ENABLE_TASKLISTS
             | Options::ENABLE_HEADING_ATTRIBUTES;
-        let mut w = Walk::new(&body);
+        let mut w = Walk::new(&body).with_badges(badges);
         for (ev, range) in Parser::new_ext(&body, opts).into_offset_iter() {
             let line = w.line(range.start);
             w.event(ev, line);
@@ -1029,10 +1113,52 @@ mod tests {
             ),
             ("<object data=\"x.pdf\"></object>\n", 0),
             ("| a |\n|---|\n| b |\n", 0),
+            ("[![diagram](a.svg)](a.svg)\n", 1),
+            (
+                "[![diagram](a.svg)](a-full.png?raw=1)\nThe layout, full size behind the link.\n",
+                1,
+            ),
+            ("[![x][img]][full]\n\n[img]: a.png\n[full]: a-big.png\n", 1),
+            ("| a |\n|---|\n| [![a](a.png)](a.png) |\n", 1),
+            (
+                "[![ci](https://img.shields.io/ci)](https://ci.example.org)\n",
+                0,
+            ),
+            (
+                "![ci](https://img.shields.io/ci) ![v](https://badgen.net/crates/v/x)\n",
+                0,
+            ),
+            ("![docs](https://docs.rs/x/badge.svg)\n", 0),
+            (
+                "<p align=\"center\">\n<a href=\"https://ci\"><img src=\"https://img.shields.io/a\"></a>\n<a href=\"https://d\"><img src=\"https://img.shields.io/b\"></a>\n</p>\n",
+                0,
+            ),
+            (
+                "<a href=\"https://ci\"><img src=\"https://img.shields.io/a\"></a> <a href=\"https://d\"><img src=\"b.png\"></a>\n",
+                0,
+            ),
+            (
+                "<p align=\"center\">\n<a href=\"a-big.png\"><img src=\"a.png\" alt=\"a\"></a>\n</p>\n",
+                1,
+            ),
+            ("## ![logo](logo.png) Title\n\nText.\n", 0),
         ];
         for (text, n) in cases {
             assert_eq!(figures(text), n, "{text}");
         }
+    }
+
+    #[test]
+    fn badges_by_url_and_link() {
+        assert!(badge("https://img.shields.io/x", None, &[]));
+        assert!(badge("a.png", Some("https://example.org/ci"), &[]));
+        assert!(!badge("a.png", Some("a-big.PNG#top"), &[]));
+        assert!(!badge("https://ci.example.org/status.png", None, &[]));
+        assert!(badge(
+            "https://ci.example.org/status.png",
+            None,
+            &["ci.example.org".to_owned()]
+        ));
     }
 
     #[test]

@@ -16,3 +16,7 @@ The flow of a write, step by step, from the call to the disk.
 <object data="states.svg" type="image/svg+xml"></object>
 
 word word word word word word word word word word.
+
+[![The states of a writer](states.svg)](states-full.svg)
+
+word word word word word word word word word word.

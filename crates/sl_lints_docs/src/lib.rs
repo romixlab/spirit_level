@@ -46,6 +46,7 @@ lint!(CODE_WALL, "D0005", "code-wall", "reading", "code comes with prose that ex
 lint!(PAGE_FIGURES, "D0023", "page-figures", "reading", "a guide has a figure for every so many words of prose",
     params: [("free-words", Int, "500", "words of prose a page may have with no figure"),
              ("words-per-figure", Int, "600", "words of prose above `free-words` for each further figure"),
+             ("badges", StrList, "[]", "URL parts that mark an image as a badge, beyond the built-in badge services and `badge.svg` endpoints"),
              ("pages", Choice["all", "guide", "reference"], "\"guide\"", "the kinds of page judged")],
     needs: [], fix: None);
 lint!(PARAGRAPH_RUN_WORDS, "D0024", "paragraph-run-words", "reading", "paragraphs in a row, headings or not between them, stay short",
@@ -194,12 +195,13 @@ fn pages(project: &Project, config: &Config) -> Result<Vec<Page>, SiteError> {
         skip: &d.skip,
         reference: &d.reference,
         records: &d.records,
+        badges: config.lint(PAGE_FIGURES.id).params.list("badges"),
     };
     let mut pages = sl_docs::pages(&project.root, &members(project), &sel);
     if let Some(table) = &d.site {
         let site = Site::resolve(&project.root, table)?;
         pages.retain(|p| !site.is_source(&p.rel));
-        pages.extend(site.pages(&project.root, |rel| sel.kind(rel)));
+        pages.extend(site.pages(&project.root, |rel| sel.kind(rel), sel.badges));
     }
     Ok(pages)
 }

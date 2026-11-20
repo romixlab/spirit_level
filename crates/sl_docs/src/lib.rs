@@ -36,6 +36,8 @@ pub struct Selection<'a> {
     /// Records: changelogs, feature trackers, agent files; every page neither a record nor a reference page is a
     /// guide
     pub records: &'a [String],
+    /// URL parts that mark an image as a badge beyond [`page::BADGES`]
+    pub badges: &'a [String],
 }
 
 impl Selection<'_> {
@@ -64,7 +66,7 @@ pub fn pages(root: &Path, members: &[&str], sel: &Selection<'_>) -> Vec<Page> {
         })
         .filter_map(|f| {
             let text = walk::read_page(root, &f)?;
-            Some(Page::parse(f.clone(), sel.kind(&f), &text))
+            Some(Page::parse_with(f.clone(), sel.kind(&f), &text, sel.badges))
         })
         .collect()
 }
