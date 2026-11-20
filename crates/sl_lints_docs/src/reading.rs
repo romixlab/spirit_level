@@ -257,14 +257,17 @@ fn prose_per_element(cx: &Context<'_>, p: &Page) {
     let n = elements(p);
     let per = prose as f64 / n.max(1) as f64;
     if per > max {
-        cx.emit(
-            Diagnostic::new(
-                id,
-                p.rel.clone(),
-                format!(
-                    "{per:.0} words of prose per list, figure, table or code block: {prose} words, {n} of them (budget {max})"
-                ),
+        let msg = if n == 0 {
+            format!(
+                "{prose} words of prose and no list, figure, table or code block (budget {max} words per element)"
             )
+        } else {
+            format!(
+                "{per:.1} words of prose per list, figure, table or code block: {prose} words, {n} of them (budget {max})"
+            )
+        };
+        cx.emit(
+            Diagnostic::new(id, p.rel.clone(), msg)
             .span(Span::new(p.rel.clone(), 1))
             .metric("words", per, Some(max))
             .help("show what the prose tells: a figure of the mechanism, a table for values side by side, a list for parallel facts, an example in code"),

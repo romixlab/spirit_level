@@ -140,7 +140,7 @@ fn table(pages: &[PageReport]) -> String {
                 w.synonyms.len().to_string(),
                 s.figures.to_string(),
                 score(s.words_per_figure),
-                format!("{:.0}", s.words_per_element),
+                score(s.words_per_element),
                 s.headings.len().to_string(),
                 format!("{}/{}", s.links_internal, s.links_external),
                 s.ctas.to_string(),
@@ -234,8 +234,9 @@ fn detail(p: &PageReport) -> String {
     );
     let _ = writeln!(
         out,
-        "  lists, figures, tables, code blocks and other elements {}, {:.0} words of prose per element",
-        s.elements, s.words_per_element
+        "  lists, figures, tables, code blocks and other elements {}, {} words of prose per element",
+        s.elements,
+        score(s.words_per_element)
     );
     let _ = writeln!(out, "  headings {}:", s.headings.len());
     for h in &s.headings {

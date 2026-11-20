@@ -31,7 +31,7 @@ docs/lints/D0001.md      reference    310  1.3m   88    88    40    11      55  
 | `syn` | uses of a name the project's word list prefers otherwise |
 | `img` | figures: paragraphs that hold only images, HTML figures and drawings, diagram blocks |
 | `w/img` | prose words per figure; `-` without figures |
-| `w/el` | prose words per element: a list, figure, table, code block or other break |
+| `w/el` | prose words per element: a list, figure, table, code block or other break; `-` without elements |
 | `h` | headings |
 | `links` | internal and external links |
 | `cta` | calls to action: links and buttons styled to be pressed (built pages) |

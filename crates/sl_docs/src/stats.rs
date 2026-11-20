@@ -98,8 +98,8 @@ pub struct Stats {
     pub words_per_figure: Option<f64>,
     /// What is not prose or a heading ([`elements`]): lists, figures, tables, code blocks, admonitions
     pub elements: usize,
-    /// Prose words per element, the page's prose over at least one element
-    pub words_per_element: f64,
+    /// Prose words per element; None without elements
+    pub words_per_element: Option<f64>,
     /// The headings
     pub headings: Vec<HeadingStat>,
     /// Links within the site
@@ -248,6 +248,7 @@ pub fn stats(page: &Page, speed: &ReadingSpeed, english: bool) -> Stats {
         .collect();
     let runs = runs(page);
     let paragraph_runs = paragraph_runs(page);
+    let element_count = elements(page);
     let external = page.links.iter().filter(|l| l.external()).count();
     Stats {
         words,
@@ -275,8 +276,8 @@ pub fn stats(page: &Page, speed: &ReadingSpeed, english: bool) -> Stats {
             })
             .count(),
         words_per_figure: (figures > 0).then(|| prose_words as f64 / figures as f64),
-        elements: elements(page),
-        words_per_element: prose_words as f64 / elements(page).max(1) as f64,
+        elements: element_count,
+        words_per_element: (element_count > 0).then(|| prose_words as f64 / element_count as f64),
         headings,
         links_internal: page.links.len() - external,
         links_external: external,
