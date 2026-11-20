@@ -133,6 +133,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `DOCS-10` `[docs.book]`: pages another repo's book takes; `page-links` resolves their links from their place in that book and looks its other pages up in its checkout.
 - ✅ `DOCS-11` book-lint-search: the book's search finds a lint by code, id or Clippy name first; each Clippy lint, group and `clippy.toml` setting of the tiers has a generated page (level per tier, reason, Clippy's docs), and tool lints link the tool's docs of the check.
 - ✅ `DOCS-12` figures-and-paragraph-runs: `page-figures` (D0023) wants a figure per so many words of a guide; `paragraph-run-words` (D0024) limits paragraphs in a row under headings; `prose-per-element` (D0025) limits a page's prose per list, figure, table or code block; diagram blocks and inline SVG are figures; `spl pages` shows both.
+- ✅ `DOCS-13` docs-records: changelogs, feature trackers and agent files are records (`[docs] records`), no longer skipped; lints that assume a page read from its start leave them out.
 
 ## AI - code written with agents
 

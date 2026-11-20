@@ -1,7 +1,10 @@
 //! The word lints: abbreviations at first use, terms before their definition, synonyms, passive voice, reading
 //! ease.
 
-use crate::{ABBREVIATION_FIRST_USE, TERM_BEFORE_DEFINITION, TERM_SYNONYMS, judges, reading_speed};
+use crate::{
+    ABBREVIATION_FIRST_USE, TERM_BEFORE_DEFINITION, TERM_SYNONYMS, judges, judges_read,
+    reading_speed,
+};
 use sl_analysis::Context;
 use sl_config::Config;
 use sl_core::{Confidence, Diagnostic, Span};
@@ -125,7 +128,7 @@ pub(crate) fn run(cx: &Context<'_>, pages: &[Page], english: bool) {
     let speed = reading_speed(cx.config);
     for (p, w) in pages.iter().zip(&words) {
         if cx.enabled("abbreviation-first-use")
-            && judges(cx.params("abbreviation-first-use"), p.kind)
+            && judges_read(cx.params("abbreviation-first-use"), p.kind)
         {
             abbreviations(cx, p, w);
         }

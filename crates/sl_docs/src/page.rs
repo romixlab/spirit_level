@@ -16,14 +16,17 @@ pub enum Kind {
     Guide,
     /// Looked up: a lint's page, an API list, a table of options
     Reference,
+    /// Kept as a list of entries: a changelog, a feature tracker, an agent file; its shape is its format's
+    Record,
 }
 
 impl Kind {
-    /// `guide`, `reference`
+    /// `guide`, `reference`, `record`
     pub fn name(self) -> &'static str {
         match self {
             Self::Guide => "guide",
             Self::Reference => "reference",
+            Self::Record => "record",
         }
     }
 }

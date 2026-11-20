@@ -31,18 +31,20 @@ pub struct Selection<'a> {
     pub files: &'a [String],
     /// Files left out
     pub skip: &'a [String],
-    /// Reference pages; every other page is a guide
+    /// Reference pages
     pub reference: &'a [String],
+    /// Records: changelogs, feature trackers, agent files; every page neither a record nor a reference page is a
+    /// guide
+    pub records: &'a [String],
 }
 
 impl Selection<'_> {
     /// The kind of a page
     pub fn kind(&self, rel: &str) -> Kind {
-        if self
-            .reference
-            .iter()
-            .any(|g| sl_core::glob::matches(g, rel))
-        {
+        let any = |globs: &[String]| globs.iter().any(|g| sl_core::glob::matches(g, rel));
+        if any(self.records) {
+            Kind::Record
+        } else if any(self.reference) {
             Kind::Reference
         } else {
             Kind::Guide

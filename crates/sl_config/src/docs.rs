@@ -1,11 +1,12 @@
-//! The `[docs]` table: which Markdown files are the project's pages, and which of them are reference pages (the
-//! docs lints and `spl pages`).
+//! The `[docs]` table: which Markdown files are the project's pages, and which of them are reference pages and
+//! records (the docs lints and `spl pages`).
 //!
 //! ```toml
 //! [docs]
 //! files = ["**/*.md"]                             # globs of the pages, relative to the root
-//! skip = ["CHANGELOG.md", "FEATURES.md"]          # files left out
+//! skip = ["**/tests/**"]                         # files left out
 //! reference = ["docs/lints/**"]                   # pages read by lookup; every other page is a guide
+//! records = ["CHANGELOG.md", "**/CHANGELOG.md"]   # records and agent files: no page shape judged
 //! language = "en"                                 # default: the book's theme language, else English
 //!
 //! [docs.site]                    # read a built site's pages in place of their Markdown sources
@@ -36,15 +37,19 @@ use std::path::{Path, PathBuf};
 
 /// The pages when the table names none
 const DEFAULT_FILES: &[&str] = &["**/*.md"];
-/// The files left out when the table names none: records, agent rules and test data, not pages a person reads
-/// through
-const DEFAULT_SKIP: &[&str] = &[
+/// The files left out when the table names none: test data
+const DEFAULT_SKIP: &[&str] = &["**/tests/**"];
+/// The records when the table names none: changelogs, feature trackers and agent files, kept and looked up, never
+/// read through
+const DEFAULT_RECORDS: &[&str] = &[
     "CHANGELOG.md",
-    "FEATURES.md",
-    "AGENTS.md",
-    "CLAUDE.md",
     "**/CHANGELOG.md",
-    "**/tests/**",
+    "FEATURES.md",
+    "**/FEATURES.md",
+    "AGENTS.md",
+    "**/AGENTS.md",
+    "CLAUDE.md",
+    "**/CLAUDE.md",
 ];
 
 /// The built pages when the table names none, relative to the site's folder
@@ -280,6 +285,8 @@ pub struct Docs {
     pub skip: Vec<String>,
     /// Globs of the reference pages
     pub reference: Vec<String>,
+    /// Globs of the records: changelogs, feature trackers, agent files
+    pub records: Vec<String>,
     /// The language of the pages (`en`); None: the book's theme language, else English
     pub language: Option<String>,
     /// The built site read in place of its Markdown sources: the `[docs.site]` table
@@ -294,6 +301,7 @@ impl Default for Docs {
             files: owned(DEFAULT_FILES),
             skip: owned(DEFAULT_SKIP),
             reference: Vec::new(),
+            records: owned(DEFAULT_RECORDS),
             language: None,
             site: None,
             book: None,
@@ -307,6 +315,7 @@ impl Docs {
         let files = r.opt_list("files", true, errs).unwrap_or(d.files);
         let skip = r.opt_list("skip", true, errs).unwrap_or(d.skip);
         let reference = r.opt_list("reference", true, errs).unwrap_or_default();
+        let records = r.opt_list("records", true, errs).unwrap_or(d.records);
         let language = r.opt_str("language", errs);
         let site = r.table("site", errs).map(|t| Site::read(t, errs));
         let book = r.table("book", errs).and_then(|t| Book::read(t, dir, errs));
@@ -321,6 +330,7 @@ impl Docs {
             files,
             skip,
             reference,
+            records,
             language,
             site,
             book,

@@ -16,7 +16,7 @@ use vc_ui::{Exit, Paint};
 const SCHEMA: &str = "spirit_level.pages/1";
 
 /// The tail of `spl pages --help`
-const AFTER_HELP: &str = "Examples:\n  spl pages\n  spl pages --page docs/start.md\n  spl pages --format json > before.json\n\nThe pages are the Markdown files of the [docs] table (default: every .md but CHANGELOG, FEATURES, agent files and tests); with [docs.site], a built site's pages (zola, Zensical) in place of their Markdown sources: build the site first. Reading speed and image times come from the page-reading-time lint's parameters. Exit codes: 0 listed, 2 a configuration error, a built site that cannot be read or an unknown page";
+const AFTER_HELP: &str = "Examples:\n  spl pages\n  spl pages --page docs/start.md\n  spl pages --format json > before.json\n\nThe pages are the Markdown files of the [docs] table (default: every .md but tests; changelogs, feature trackers and agent files are records); with [docs.site], a built site's pages (zola, Zensical) in place of their Markdown sources: build the site first. Reading speed and image times come from the page-reading-time lint's parameters. Exit codes: 0 listed, 2 a configuration error, a built site that cannot be read or an unknown page";
 
 /// The reading metrics of every page, Markdown or built: words, reading time, longest run of prose, paragraphs,
 /// sentences, figures, headings, links, code

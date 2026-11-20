@@ -1,7 +1,7 @@
 //! The reading lints: runs of prose and of paragraphs, reading time, headings, sections, walls of code, figures,
 //! image text, code languages.
 
-use crate::{first_words, judges, reading_speed};
+use crate::{first_words, judges, judges_read, reading_speed};
 use sl_analysis::Context;
 use sl_core::{Confidence, Diagnostic, Span};
 use sl_docs::page::{Break, Item, Page};
@@ -53,7 +53,7 @@ fn prose_at(p: &Page, line: u32) -> String {
 fn prose_runs(cx: &Context<'_>, p: &Page) {
     let id = "prose-run-words";
     let params = cx.params(id);
-    if !judges(params, p.kind) {
+    if !judges_read(params, p.kind) {
         return;
     }
     let max = params.count("max-words");
@@ -77,7 +77,7 @@ fn prose_runs(cx: &Context<'_>, p: &Page) {
 fn reading_time(cx: &Context<'_>, p: &Page) {
     let id = "page-reading-time";
     let params = cx.params(id);
-    if !judges(params, p.kind) {
+    if !judges_read(params, p.kind) {
         return;
     }
     let speed = reading_speed(cx.config);
@@ -187,7 +187,7 @@ fn figures_needed(words: usize, free: usize, per: usize) -> usize {
 fn figures(cx: &Context<'_>, p: &Page) {
     let id = "page-figures";
     let params = cx.params(id);
-    if !judges(params, p.kind) {
+    if !judges_read(params, p.kind) {
         return;
     }
     let (free, per) = (params.count("free-words"), params.count("words-per-figure"));
@@ -225,7 +225,7 @@ fn figures(cx: &Context<'_>, p: &Page) {
 fn paragraph_run_words(cx: &Context<'_>, p: &Page) {
     let id = "paragraph-run-words";
     let params = cx.params(id);
-    if !judges(params, p.kind) {
+    if !judges_read(params, p.kind) {
         return;
     }
     let max = params.count("max-words");
@@ -250,7 +250,7 @@ fn prose_per_element(cx: &Context<'_>, p: &Page) {
     let id = "prose-per-element";
     let params = cx.params(id);
     let prose: usize = p.prose().map(|(t, _)| words(t).len()).sum();
-    if !judges(params, p.kind) || prose < params.count("min-words") {
+    if !judges_read(params, p.kind) || prose < params.count("min-words") {
         return;
     }
     let max = params.count("max-words") as f64;

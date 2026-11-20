@@ -193,6 +193,7 @@ fn pages(project: &Project, config: &Config) -> Result<Vec<Page>, SiteError> {
         files: &d.files,
         skip: &d.skip,
         reference: &d.reference,
+        records: &d.records,
     };
     let mut pages = sl_docs::pages(&project.root, &members(project), &sel);
     if let Some(table) = &d.site {
@@ -210,7 +211,13 @@ fn page_english(p: &Page, project: bool) -> bool {
         .map_or(project, |l| l.to_ascii_lowercase().starts_with("en"))
 }
 
-/// Whether a lint's `pages` parameter judges a page of this kind
+/// Whether a lint that assumes a page read from its start (its runs, length, figures, elements, first uses) judges
+/// a page of this kind: never a record, a list of entries each read alone, else as its `pages` parameter says
+fn judges_read(p: &Params, kind: Kind) -> bool {
+    kind != Kind::Record && judges(p, kind)
+}
+
+/// Whether a lint's `pages` parameter judges a page of this kind; `all` takes records too
 fn judges(p: &Params, kind: Kind) -> bool {
     match p.str("pages") {
         "guide" => kind == Kind::Guide,

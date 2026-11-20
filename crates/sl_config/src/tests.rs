@@ -411,14 +411,17 @@ fn docs_table() {
     let d = load("extends = \"small\"\n").unwrap().docs;
     assert_eq!(d, Docs::default());
     assert_eq!(d.files, ["**/*.md"]);
+    assert_eq!(d.skip, ["**/tests/**"]);
+    assert!(d.records.iter().any(|r| r == "**/CHANGELOG.md"));
     let d = load(
-        "extends = \"small\"\n[docs]\nfiles = \"docs/**/*.md\"\nreference = [\"docs/lints/**\"]\nlanguage = \"de\"\n",
+        "extends = \"small\"\n[docs]\nfiles = \"docs/**/*.md\"\nreference = [\"docs/lints/**\"]\nrecords = [\"NEWS.md\"]\nlanguage = \"de\"\n",
     )
     .unwrap()
     .docs;
     assert_eq!(d.files, ["docs/**/*.md"]);
     assert_eq!(d.skip, Docs::default().skip);
     assert_eq!(d.reference, ["docs/lints/**"]);
+    assert_eq!(d.records, ["NEWS.md"]);
     assert_eq!(d.language.as_deref(), Some("de"));
     let m = messages(load("extends = \"small\"\n[docs]\nfiles = []\nkinds = 1\n"));
     assert!(m.iter().any(|s| s.contains("docs.files is empty")), "{m:?}");

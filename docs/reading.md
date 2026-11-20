@@ -17,7 +17,7 @@ docs/lints/D0001.md      reference    310  1.3m   88    88    40    11      55  
 
 | Column | Meaning |
 |---|---|
-| `kind` | `guide` or `reference` (see [Kinds of page](#kinds-of-page)) |
+| `kind` | `guide`, `reference` or `record` (see [Kinds of page](#kinds-of-page)) |
 | `words` | words of prose and headings |
 | `read` | reading time in minutes, images included |
 | `run` | the longest run of prose words between two visual breaks |
@@ -71,12 +71,13 @@ The optional `[docs]` table in `spirit_level.toml` says which Markdown files are
 ```toml
 [docs]
 files = ["**/*.md"]                                  # globs of the pages, relative to the root
-skip = ["CHANGELOG.md", "FEATURES.md", "AGENTS.md", "CLAUDE.md", "**/CHANGELOG.md", "**/tests/**"]
+skip = ["**/tests/**"]                               # files left out
 reference = ["docs/lints/**", "docs/tiers/**"]       # pages read by lookup, not front to back
+records = ["CHANGELOG.md", "**/CHANGELOG.md", "FEATURES.md", "**/FEATURES.md", "AGENTS.md", "**/AGENTS.md", "CLAUDE.md", "**/CLAUDE.md"]
 language = "en"                                      # default: the book's theme language, else "en"
 ```
 
-The values shown for `files` and `skip` are the defaults. A walk from the root leaves out `target/`, hidden folders and nested cargo projects that are not workspace members, such as test fixtures.
+The values shown for `files`, `skip` and `records` are the defaults. A walk from the root leaves out `target/`, hidden folders and nested cargo projects that are not workspace members, such as test fixtures.
 
 ### A built site
 
@@ -148,7 +149,9 @@ Pages outside `dir`, such as the README, are judged as before. Read from this re
 
 A guide is read from front to back: an introduction, a tutorial, a concept page. A reference page is looked up: a lint's page, an API list, a table of options. A reader does not read a reference page whole, so its length is no burden, but a long stretch of prose without a heading is still hard to scan.
 
-A page is a reference page when one of the `reference` globs matches its path, and a guide otherwise. Generated pages usually sit in their own folder, so one glob covers them. Each budget lint has a `pages` parameter: `all`, `guide` or `reference`. The defaults judge reading time, heading length and code walls on guides only, and runs of prose and sections on every page.
+A record is a list of entries, each read alone: a changelog, a feature tracker, an agent file. Its shape is its format's, so the lints that assume a page read from its start never judge it, whatever their `pages` parameter: `prose-run-words`, `page-reading-time`, `page-figures`, `paragraph-run-words`, `prose-per-element` and `abbreviation-first-use`. The other lints judge it by their `pages` parameter, where `all` takes records too: its links, its synonyms, its headings when `pages = "all"`.
+
+A page is a record when one of the `records` globs matches its path, a reference page when one of the `reference` globs does, and a guide otherwise. Generated pages usually sit in their own folder, so one glob covers them. Each budget lint has a `pages` parameter: `all`, `guide` or `reference`. The defaults judge reading time, heading length and code walls on guides only, and runs of prose and sections on every page.
 
 ## Language
 
