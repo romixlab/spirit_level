@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.7.5] - 2026-11-21
+
 ### Added
 
 - `spl book refs`: a book's code index of public items, its glossary checked, and the cards' stylesheet and script (BOOK-7).
