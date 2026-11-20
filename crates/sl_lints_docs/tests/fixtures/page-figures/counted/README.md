@@ -20,3 +20,13 @@ word word word word word word word word word word.
 [![The states of a writer](states.svg)](states-full.svg)
 
 word word word word word word word word word word.
+
+<a href="layout-big.png">
+
+![The layout, larger on click](layout.png)
+
+</a>
+
+word word word word word word word word word word.
+
+<a href="flow-big.png">![The flow, larger on click](flow.png)</a>

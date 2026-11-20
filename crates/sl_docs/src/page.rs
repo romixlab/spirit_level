@@ -429,6 +429,9 @@ pub(crate) struct Walk {
     rules: ImageRules,
     /// The targets of the raw HTML links open in the current HTML block or paragraph
     html_link: Vec<String>,
+    /// The raw HTML links an HTML block left open: they reach into the next block when it is a paragraph, as
+    /// `<a href>`, a blank line and an image do in the browser, and no further
+    html_link_carried: Vec<String>,
     /// Raw HTML headings open in the current HTML block or paragraph
     html_heading: usize,
     /// HTML `<figure>` elements open across blocks of raw HTML
@@ -453,6 +456,7 @@ impl Walk {
             link: Vec::new(),
             rules: ImageRules::default(),
             html_link: Vec::new(),
+            html_link_carried: Vec::new(),
             html_heading: 0,
             figure: 0,
             comment: false,
@@ -752,6 +756,10 @@ impl Walk {
     }
 
     pub(crate) fn start(&mut self, tag: Tag<'_>, line: u32) {
+        let carried = std::mem::take(&mut self.html_link_carried);
+        if matches!(tag, Tag::Paragraph) {
+            self.html_link = carried;
+        }
         match tag {
             Tag::Heading { level, .. } => {
                 self.flush();
@@ -848,7 +856,10 @@ impl Walk {
                 self.close(line);
                 self.close_raw_html();
             }
-            TagEnd::HtmlBlock => self.close_raw_html(),
+            TagEnd::HtmlBlock => {
+                self.html_link_carried = std::mem::take(&mut self.html_link);
+                self.close_raw_html();
+            }
             TagEnd::Link => {
                 self.link.pop();
             }
@@ -1212,6 +1223,18 @@ mod tests {
             ),
             (
                 "<details><summary>More</summary><svg viewBox=\"0 0 1 1\"></svg></details>\n",
+                1,
+            ),
+            // a raw link around an image follows its target, with blank lines between the tags or without
+            (
+                "<a href=\"https://example.org/\">\n\n![a](a.png)\n\n</a>\n",
+                0,
+            ),
+            ("<a href=\"https://example.org/\">![a](a.png)</a>\n", 0),
+            ("<a href=\"a-big.png\">\n\n![a](a.png)\n\n</a>\n", 1),
+            ("<a href=\"a-big.png\">![a](a.png)</a>\n", 1),
+            (
+                "<a href=\"https://example.org/\">\n\nText.\n\n![a](a.png)\n",
                 1,
             ),
             (

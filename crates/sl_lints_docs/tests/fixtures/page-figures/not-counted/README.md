@@ -28,3 +28,11 @@ One more short line here.
 <a href="https://ci.example.org"><img src="https://img.shields.io/badge/a-b-c" alt="a"></a>
 <a href="https://docs.example.org"><img src="https://badgen.net/badge/d/e" alt="d"></a>
 </p>
+
+<a href="https://example.org/status">
+
+![status](status.png)
+
+</a>
+
+<a href="https://example.org/status">![status](status.png)</a>

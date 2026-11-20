@@ -2,3 +2,4 @@ params = { free-words = 10, words-per-figure = 10 }
 
 [[finding]]
 at = "README.md:1"
+contains = "and 1 figures"

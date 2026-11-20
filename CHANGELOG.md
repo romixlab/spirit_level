@@ -9,6 +9,10 @@
 - `spl_book_ext`: file and section references `` [`file.rs:section`] `` with code cards; `fn@` and `cfg(...)@` pick an item (BOOK-7).
 - `glossary-terms`: a book's glossary term is marked once in every section that uses it, warn from `small` (DOCS-14).
 
+### Fixed
+
+- `page-figures`: a raw `<a href>` around an image follows its target across blank lines too (DOCS-12).
+
 ## [0.7.4] - 2026-11-21
 
 ### Fixed
