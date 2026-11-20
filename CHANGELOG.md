@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-11-20
+
 ### Added
 
 - `toolchain-overrides-pinned` (M0036): justfiles and CI name the pinned toolchain, never `+nightly` or `+stable` (MAN-13).
