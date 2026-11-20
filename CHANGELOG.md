@@ -5,6 +5,7 @@
 ### Added
 
 - `spl book refs`: a book's code index of public items, its glossary checked, and the cards' stylesheet and script (BOOK-7).
+- `spl_book_ext`: Markdown extensions for `[[term]]` glossary cards and `` [`Item`] `` code cards in any Zensical book (BOOK-7).
 
 ## [0.7.4] - 2026-11-21
 

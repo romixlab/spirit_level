@@ -1,0 +1,17 @@
+# spl_book_ext: the Markdown extensions of a book's references in prose, loaded by Zensical from zensical.toml.
+# A book adds it to its build with `uv run --with "spl-book-ext @ git+https://github.com/romixlab/spirit_level#subdirectory=python/spl_book_ext"`.
+[project]
+name = "spl-book-ext"
+version = "0.1.0"
+description = "Glossary terms and code links with cards on hover, for Zensical books; the files they read come from spl book refs"
+readme = "README.md"
+license = "MIT OR Apache-2.0"
+requires-python = ">=3.12"
+dependencies = ["markdown>=3.7"]
+
+[dependency-groups]
+dev = ["pytest>=8"]
+
+[build-system]
+requires = ["uv_build>=0.9,<0.14"]
+build-backend = "uv_build"

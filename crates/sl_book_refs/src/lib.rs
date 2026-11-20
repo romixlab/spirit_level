@@ -22,3 +22,46 @@ pub const CARD_CSS: &str = include_str!("../assets/refs.css");
 
 /// The script that keeps an open card inside the window
 pub const CARD_SCRIPT: &str = include_str!("../assets/refs.js");
+
+#[cfg(test)]
+mod tests {
+    /// The extension's sources, which write the classes the stylesheet styles
+    const EXTENSION: [&str; 3] = [
+        include_str!("../../../python/spl_book_ext/src/spl_book_ext/card.py"),
+        include_str!("../../../python/spl_book_ext/src/spl_book_ext/glossary.py"),
+        include_str!("../../../python/spl_book_ext/src/spl_book_ext/code_refs.py"),
+    ];
+
+    #[test]
+    fn the_stylesheet_styles_every_class_the_extension_writes() {
+        let py = EXTENSION.concat();
+        for class in [
+            "spl-ref",
+            "spl-card",
+            "spl-card-head",
+            "spl-card-src",
+            "spl-card-doc",
+            "spl-card-where",
+            "spl-gloss",
+        ] {
+            assert!(
+                py.contains(&format!("\"{class}")),
+                "the extension writes no {class}"
+            );
+            assert!(
+                super::CARD_CSS.contains(&format!(".{class}")),
+                "the stylesheet lacks .{class}"
+            );
+        }
+        for kind in ["term", "code"] {
+            assert!(
+                py.contains(&format!("\"{kind}\")")),
+                "the extension writes no spl-{kind}"
+            );
+            assert!(
+                super::CARD_CSS.contains(&format!(".spl-{kind}")),
+                "the stylesheet lacks .spl-{kind}"
+            );
+        }
+    }
+}

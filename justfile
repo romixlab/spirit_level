@@ -7,10 +7,15 @@ default:
 test *flags:
     {{ if flags == "--changed" { "changedtests run" } else { just_executable() + " test-all" } }}
 
-# Every test: nextest, then the doctests (nextest does not run them)
+# Every test: nextest, then the doctests (nextest does not run them), then spl_book_ext's
 test-all:
     cargo nextest run --workspace --no-fail-fast
     cargo test --workspace --doc -q
+    {{just_executable()}} test-py
+
+# The tests of the Markdown extension spl_book_ext (python/spl_book_ext), with uv
+test-py:
+    uv run --directory python/spl_book_ext pytest -q
 
 # Format, clippy, spl on itself at the big tier (`just tools` installs the tools it needs), the lint codes, book and README picture freshness
 lint:

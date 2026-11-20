@@ -100,3 +100,12 @@ fn source_cuts_a_long_body() {
     let long: Vec<&str> = long.iter().map(String::as_str).collect();
     assert_eq!(source(&long, 1, 22, Some(1)), "pub fn f()");
 }
+
+#[test]
+fn the_extension_reads_this_format() {
+    let py = include_str!("../../../../python/spl_book_ext/src/spl_book_ext/code_refs.py");
+    assert!(
+        py.contains(&format!("\nFORMAT = {FORMAT}\n")),
+        "spl_book_ext's FORMAT differs from {FORMAT}"
+    );
+}
