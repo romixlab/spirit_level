@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.7.7] - 2026-11-21
+
 ### Changed
 
 - Embedded lint docs and messages name the repo `portwright` where a finding was seen (was `typec_dongle`, renamed).
