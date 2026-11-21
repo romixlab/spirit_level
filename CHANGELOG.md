@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.7.6] - 2026-11-21
+
 ### Added
 
 - `spl_book_ext.abbreviations`: a tabled abbreviation's long form shows on hover in the book (DOCS-15).
