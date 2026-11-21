@@ -52,7 +52,7 @@ lint!(AGENT_CONFIG_PERMISSIONS, "A0001", "agent-config-permissions", "hygiene", 
              ("broad", StrList, "[\"Bash\", \"Bash(*)\", \"Bash(:*)\", \"Bash(*:*)\", \"*\", \"Bash(sudo:*)\", \"Bash(rm:*)\", \"Bash(sh:*)\", \"Bash(bash:*)\", \"Bash(eval:*)\", \"Bash(curl:*)\", \"Bash(git push:*)\"]", "permission rules that grant too much")],
     needs: [Need::Tool("git")], fix: None);
 lint!(AGENT_SESSION_FILES, "A0003", "agent-session-files", "hygiene", "no agent transcripts or per-person agent files are committed",
-    params: [("patterns", StrList, "[\"**/.claude/settings.local.json\", \"**/CLAUDE.local.md\", \"**/.claude/projects/**\", \"**/.claude/todos/**\", \"**/.claude/**/*.jsonl\", \"**/*transcript*\", \"**/.aider.chat.history.md\", \"**/.aider.input.history\", \"**/.specstory/**\"]", "globs of tracked files that are session files")],
+    params: [("patterns", StrList, "[\"**/.claude/settings.local.json\", \"**/CLAUDE.local.md\", \"**/.claude/projects/**\", \"**/.claude/todos/**\", \"**/.claude/**/*.jsonl\", \"**/*transcript*.jsonl\", \"**/history.jsonl\", \"**/.aider.chat.history.md\", \"**/.aider.input.history\", \"**/.specstory/**\"]", "globs of tracked files that are session files")],
     needs: [Need::Tool("git")], fix: None);
 
 /// The stop-gap and hygiene analysis

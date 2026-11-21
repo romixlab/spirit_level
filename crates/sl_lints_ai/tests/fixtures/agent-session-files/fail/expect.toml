@@ -5,5 +5,7 @@ at = ".claude/projects/x/s.jsonl"
 at = ".claude/settings.local.json"
 
 [[finding]]
-at = "session-transcript.md"
+at = "history.jsonl"
 
+[[finding]]
+at = "session-transcript.jsonl"

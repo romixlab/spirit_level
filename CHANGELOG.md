@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- `agent-session-files`: matches transcripts by format and location, not a source file named `transcript.rs` (AI-1).
+
 ## [0.7.6] - 2026-11-21
 
 ### Added
