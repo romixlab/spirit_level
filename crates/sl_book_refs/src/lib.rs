@@ -45,6 +45,7 @@ mod tests {
             "spl-card-src",
             "spl-card-doc",
             "spl-card-where",
+            "spl-card-links",
             "spl-card-more",
             "spl-cards",
             "spl-gloss",

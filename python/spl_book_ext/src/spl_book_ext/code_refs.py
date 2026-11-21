@@ -11,7 +11,9 @@ matches a file git tracks whose path ends with it, and a section is one marked `
 the snippet includes mark them. A name that matches nothing, or several things, raises `CodeRefError`, which fails the
 build: a renamed or removed item, file or section cannot leave a stale reference behind.
 
-The link opens the lines on the forge at the commit the index was written from. An item's card shows its kind and
+The link opens the lines on the forge at the commit the index was written from. An item's card links to the same
+lines and, for a crate published on crates.io, to the item's page on docs.rs; an unpublished crate has the first link
+alone. The card shows its kind and
 path, its signature (or whole source when short), and its docs rendered as Markdown, with rustdoc's intra-doc links
 resolved through the same index: to the named item's lines, or plain code when they name nothing. The docs show whole
 while they fit in `card_doc_chars_max` characters of Markdown; longer ones show their blocks while they fit, a first
@@ -75,6 +77,7 @@ class Index:
         self.items: list[dict] = data["items"]
         self.files: list[dict] = data["files"]
         self.blob: str = data["blob"]
+        self.crate_info: dict[str, dict] = data.get("crates", {})
         self.crates = {i["path"].split("::")[0] for i in self.items}
         # each definition by the path a card shows: the shortest that keeps the item's own name
         defined = {_site(i): i["path"].split("::")[-1] for i in self.items if "reexports" not in i}
@@ -135,6 +138,41 @@ class Index:
             paths = ", ".join(f["path"] for f in found)
             raise CodeRefError(f"[`{name}`]: several files have this name ({paths}); name more of the path")
         return found[0]
+
+
+_ANCHORS = {"fn": "method", "field": "structfield", "variant": "variant", "const": "associatedconstant", "type": "associatedtype"}
+_MEMBER_OF = {"struct", "enum", "union", "trait", "type"}
+
+
+def docs_rs_url(item: dict, index: Index) -> str | None:
+    """The item's page on docs.rs, or None for a crate that is not published (or one the index knows nothing of)"""
+    path = item["path"].split("::")
+    info = index.crate_info.get(path[0])
+    if not info or not info.get("published"):
+        return None
+    root = f"https://docs.rs/{info['package']}/latest/{path[0]}/"
+    kind, name = item["kind"], path[-1]
+    if kind == "macro":
+        return f"{root}macro.{name}.html"
+    owner = None
+    if len(path) > 2 and kind in _ANCHORS:
+        # a member sits on its type's page; its path may name the module of the `impl`, not the type's own
+        types = [
+            i
+            for i in index.items
+            if i["kind"] in _MEMBER_OF and i["path"].split("::")[0] == path[0] and "reexports" not in i
+        ]
+        owner = next((i for i in types if i["path"] == "::".join(path[:-1])), None) or next(
+            (i for i in types if i["path"].split("::")[-1] == path[-2]), None
+        )
+        if owner is None and kind in ("field", "variant"):
+            return None
+    if owner is not None:
+        mods = owner["path"].split("::")[1:-1]
+        page = f"{owner['kind']}.{owner['path'].split('::')[-1]}.html"
+        return f"{root}{''.join(m + '/' for m in mods)}{page}#{_ANCHORS[kind]}.{name}"
+    mods = path[1:-1]
+    return f"{root}{''.join(m + '/' for m in mods)}{kind}.{name}.html"
 
 
 def _site(item: dict) -> tuple:
@@ -327,6 +365,12 @@ class ItemPattern(_Refs):
             if cut:
                 body += card.part("spl-card-more", "The docs go on in the source")
         body += card.part("spl-card-where", card.escape(f"{item['file']}:{item['lines'][0]}"))
+        links = [("Source on GitHub", item["url"])]
+        if docs := docs_rs_url(item, self.index):
+            links.append(("docs.rs", docs))
+        body += card.part(
+            "spl-card-links", " · ".join(f'<a href="{card.escape(u)}">{card.escape(t)}</a>' for t, u in links)
+        )
         return card.frame(card_id, "code", body)
 
 

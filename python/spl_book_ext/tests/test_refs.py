@@ -360,3 +360,52 @@ def test_a_signature_with_generics_comes_out_whole(book):
     text = html_lib.unescape(re.sub(r"<[^>]+>", "", html))
     assert "pub fn open<S: Sink>(s: S) -> Result<(TapeWriter, Resumed), WriteError<S::Error>>" in text
     assert "<code>Sink&lt;S&gt;</code>" in html
+
+
+
+def _with_crates(book, crates):
+    path = book / "index.json"
+    data = json.loads(path.read_text())
+    data["crates"] = crates
+    data["items"] += [
+        item("tape::Bits", "struct", lines=(60, 66)),
+        item("tape::Bits::word", lines=(62, 64)),
+        item("tape::Outcome", "enum", lines=(70, 75)),
+        item("tape::Outcome::Done", "variant", lines=(72, 72)),
+        item("tape::hidden::deep", "fn", lines=(80, 82)),
+        item("tape::fmt", "macro", lines=(90, 92)),
+    ]
+    path.write_text(json.dumps(data))
+
+
+def test_a_card_links_to_the_source_and_docs_rs_for_a_published_crate(book):
+    _with_crates(book, {"tape": {"package": "tape-core", "published": True}})
+    for text, docs in [
+        ("[`tape::level()`]", "https://docs.rs/tape-core/latest/tape/fn.level.html"),
+        ("[`tape::hidden::deep`]", "https://docs.rs/tape-core/latest/tape/hidden/fn.deep.html"),
+        ("[`tape::Bits`]", "https://docs.rs/tape-core/latest/tape/struct.Bits.html"),
+        ("[`tape::Bits::word`]", "https://docs.rs/tape-core/latest/tape/struct.Bits.html#method.word"),
+        ("[`tape::Outcome::Done`]", "https://docs.rs/tape-core/latest/tape/enum.Outcome.html#variant.Done"),
+        ("[`tape::fmt!`]", "https://docs.rs/tape-core/latest/tape/macro.fmt.html"),
+    ]:
+        html = render(book, text)
+        links = re.findall(r'<div class="spl-card-links">(.*?)</div>', html)
+        assert len(links) == 1, text
+        hrefs = re.findall(r'<a href="([^"]+)">([^<]+)</a>', links[0])
+        assert [t for _, t in hrefs] == ["Source on GitHub", "docs.rs"], text
+        assert hrefs[0][0].startswith(f"{BLOB}src/lib.rs#L"), text
+        assert hrefs[1][0] == docs, text
+
+
+def test_a_card_of_an_unpublished_crate_links_to_the_source_alone(book):
+    _with_crates(book, {"tape": {"package": "tape-core", "published": False}})
+    html = render(book, "[`tape::Bits`]")
+    links = re.findall(r'<div class="spl-card-links">(.*?)</div>', html)
+    hrefs = re.findall(r'<a href="([^"]+)">([^<]+)</a>', links[0])
+    assert [t for _, t in hrefs] == ["Source on GitHub"]
+    assert "docs.rs" not in html
+
+
+def test_an_index_without_crates_links_to_the_source_alone(book):
+    html = render(book, "[`tape::level()`]")
+    assert "Source on GitHub" in html and "docs.rs" not in html

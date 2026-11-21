@@ -203,3 +203,15 @@ fn lists_the_text_files_with_their_sections() {
     assert!(broken.sections.is_empty());
     assert_eq!(index.blob, "https://github.com/o/r/blob/abc123/");
 }
+
+#[test]
+fn a_library_has_its_package_name_and_whether_it_is_published() {
+    let index = index(&project(), &[], &[], FORGE).unwrap();
+    assert_eq!(
+        index.crates.get("tape"),
+        Some(&CrateEntry {
+            package: "tape-core".to_owned(),
+            published: true
+        })
+    );
+}

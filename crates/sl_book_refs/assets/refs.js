@@ -3,11 +3,15 @@
 // hover, on keyboard focus and on a first tap (a second tap follows the link), and closes on Escape, on a tap
 // elsewhere and when the pointer or focus leaves both reference and card. The cards sit at the end of the page, so
 // Tab from an open card's reference goes into its links, and Tab past them (Shift+Tab before them) goes on from the
-// reference. Listeners sit on the document, so pages that instant navigation loads later need nothing.
+// reference. No card opens while the reader selects text: a mouse button held down, or a selection that holds the
+// reference; the card of a reference the pointer rests on opens when the selection is cleared. Listeners sit on the
+// document, so pages that instant navigation loads later need nothing.
 (function () {
   var open = null;
   var timer = null;
   var touch = false;
+  var pressed = false;
+  var over = null;
 
   function refOf(node) {
     return node && node.closest ? node.closest("a.spl-ref[data-spl-card]") : null;
@@ -27,6 +31,15 @@
     if (top + h > window.innerHeight - 8 && r.top - h - 4 > 8) top = r.top - h - 4;
     card.style.left = Math.round(left) + "px";
     card.style.top = Math.round(top) + "px";
+  }
+  // whether a non-empty selection holds `ref`, wholly or in part
+  function selected(ref) {
+    var sel = window.getSelection ? window.getSelection() : null;
+    return !!sel && !sel.isCollapsed && sel.rangeCount > 0 && sel.containsNode(ref, true);
+  }
+  // whether the reader is selecting at `ref`: a mouse drag in progress, or a selection holding it
+  function selecting(ref) {
+    return pressed || selected(ref);
   }
   function show(ref) {
     var card = cardOf(ref);
@@ -78,11 +91,17 @@
 
   document.addEventListener("pointerdown", function (e) {
     touch = e.pointerType === "touch" || e.pointerType === "pen";
+    pressed = !touch && e.button === 0;
     if (open && !inOpen(e.target)) hide();
   });
+  function released() {
+    pressed = false;
+  }
+  document.addEventListener("pointerup", released);
+  document.addEventListener("pointercancel", released);
   document.addEventListener("click", function (e) {
     var ref = refOf(e.target);
-    if (!ref || !touch) return;
+    if (!ref || !touch || selecting(ref)) return;
     if (!open || open.ref !== ref) {
       e.preventDefault();
       show(ref);
@@ -90,16 +109,28 @@
   });
   document.addEventListener("mouseover", function (e) {
     if (touch) return;
+    if (!e.buttons) pressed = false;
     var ref = refOf(e.target);
-    if (ref) show(ref);
-    else if (inOpen(e.target)) clearTimeout(timer);
+    over = ref;
+    if (ref) {
+      if (!selecting(ref)) show(ref);
+    } else if (inOpen(e.target)) clearTimeout(timer);
   });
   document.addEventListener("mouseout", function (e) {
+    if (!refOf(e.relatedTarget)) over = null;
     if (!touch && inOpen(e.target) && !inOpen(e.relatedTarget)) later();
+  });
+  // a selection that grows over the open reference closes its card; a cleared one lets the reference under the
+  // pointer open its card
+  document.addEventListener("selectionchange", function () {
+    if (open && selected(open.ref)) hide();
+    else if (!open && over && !selecting(over)) show(over);
   });
   document.addEventListener("focusin", function (e) {
     var ref = refOf(e.target);
-    if (ref) show(ref);
+    if (ref) {
+      if (!selecting(ref)) show(ref);
+    }
     else if (inOpen(e.target)) clearTimeout(timer);
   });
   document.addEventListener("focusout", function (e) {

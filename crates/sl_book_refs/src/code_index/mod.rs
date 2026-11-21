@@ -78,6 +78,15 @@ pub struct Entry {
     pub reexports: Option<String>,
 }
 
+/// A library crate of the index, as docs.rs addresses it
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CrateEntry {
+    /// The package name, which docs.rs puts first in its addresses (`ww-tape`; the library's own name is `ww_tape`)
+    pub package: String,
+    /// Whether the package is published on crates.io: no `publish = false` and no empty registry list
+    pub published: bool,
+}
+
 /// The index file
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Index {
@@ -87,6 +96,9 @@ pub struct Index {
     pub commit: String,
     /// The address a file's path follows to open it at the commit, `#L1-L9` after it for lines
     pub blob: String,
+    /// The indexed libraries by library name, the first segment of their items' paths
+    #[serde(default)]
+    pub crates: std::collections::BTreeMap<String, CrateEntry>,
     /// The public items, sorted by path
     pub items: Vec<Entry>,
     /// The project's text files, which file references name, sorted by path
@@ -192,10 +204,18 @@ pub fn index(
     }
     let mut items = Vec::new();
     let mut uses = Vec::new();
+    let mut indexed = std::collections::BTreeMap::new();
     for (pkg, name, root) in libs {
         if !crates.is_empty() && !crates.iter().any(|c| c == name) {
             continue;
         }
+        indexed.insert(
+            name.to_owned(),
+            CrateEntry {
+                package: pkg.name.clone(),
+                published: pkg.publish,
+            },
+        );
         let files = project.sources(pkg);
         let mut walk = Walk {
             files,
@@ -211,6 +231,7 @@ pub fn index(
         format: FORMAT,
         commit: forge.commit.to_owned(),
         blob: forge.blob(),
+        crates: indexed,
         items,
         files: files::files(project, skip),
     })

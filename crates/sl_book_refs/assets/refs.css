@@ -71,6 +71,10 @@
   color: var(--md-default-fg-color--light);
   font-size: 0.64rem;
 }
+.md-typeset .spl-card .spl-card-links {
+  margin-top: 0.3em;
+  font-size: 0.64rem;
+}
 .md-typeset .spl-card .spl-card-where {
   font-family: var(--md-code-font-family);
 }

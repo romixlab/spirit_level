@@ -2,8 +2,13 @@
 
 ## [Unreleased]
 
+### Added
+
+- Code cards in the book link to the source on GitHub and, for published crates, to docs.rs (DOCS-16).
+
 ### Fixed
 
+- Book cards stay closed while the reader selects text (DOCS-16).
 - `dev-debug-off --fix` writes a new `[profile.dev]` when only `[profile.dev.package]` exists, not into that table (MAN-19).
 
 ## [0.7.7] - 2026-11-21
