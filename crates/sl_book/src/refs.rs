@@ -230,13 +230,20 @@ fn write_index(
         repository,
         commit: &commit,
     };
-    let config =
-        spirit_level::config(project, &spirit_level::Options::new(today)).map_err(Error::Config)?;
+    // a repo without spirit_level.toml has no `[book]` table: no crate is on crates.io
+    let on_crates_io = if root.join(sl_config::FILE).is_file() {
+        spirit_level::config(project, &spirit_level::Options::new(today))
+            .map_err(Error::Config)?
+            .book
+            .on_crates_io
+    } else {
+        Vec::new()
+    };
     let index = code_index::index(
         project,
         &c.crates,
         &[book.site_dir.as_str()],
-        &config.book.on_crates_io,
+        &on_crates_io,
         forge,
     )
     .map_err(Error::Index)?;
