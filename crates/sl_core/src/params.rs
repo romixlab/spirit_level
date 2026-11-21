@@ -19,6 +19,8 @@ pub enum ParamKind {
     Str,
     /// A list of strings
     StrList,
+    /// A table of strings by key (an abbreviation's long form)
+    StrTable,
     /// One string of a fixed set (a policy, a mode)
     Choice(&'static [&'static str]),
 }
@@ -32,6 +34,7 @@ impl ParamKind {
             Self::Bool => "boolean".into(),
             Self::Str => "string".into(),
             Self::StrList => "list of strings".into(),
+            Self::StrTable => "table of strings".into(),
             Self::Choice(c) => format!("one of {}", quoted(c)).into(),
         }
     }
@@ -81,6 +84,8 @@ pub enum ParamValue {
     Str(String),
     /// A list of strings
     StrList(Vec<String>),
+    /// A table of strings by key
+    StrTable(BTreeMap<String, String>),
 }
 
 impl ParamValue {
@@ -93,6 +98,7 @@ impl ParamValue {
                 | (Self::Bool(_), ParamKind::Bool)
                 | (Self::Str(_), ParamKind::Str)
                 | (Self::StrList(_), ParamKind::StrList)
+                | (Self::StrTable(_), ParamKind::StrTable)
         ) || matches!((self, kind), (Self::Str(v), ParamKind::Choice(c)) if c.contains(&v.as_str()))
     }
 }
@@ -113,6 +119,14 @@ impl fmt::Display for ParamValue {
                     write!(f, "{s:?}")?;
                 }
                 f.write_str("]")
+            }
+            Self::StrTable(v) => {
+                f.write_str("{")?;
+                for (i, (k, s)) in v.iter().enumerate() {
+                    f.write_str(if i > 0 { ", " } else { " " })?;
+                    write!(f, "{k:?} = {s:?}")?;
+                }
+                f.write_str(if v.is_empty() { "}" } else { " }" })
             }
         }
     }
@@ -183,6 +197,14 @@ impl Params {
         match self.get(name) {
             ParamValue::StrList(v) => v,
             other => misuse(name, "a list", Some(other)),
+        }
+    }
+
+    /// A table parameter
+    pub fn table(&self, name: &str) -> &BTreeMap<String, String> {
+        match self.get(name) {
+            ParamValue::StrTable(v) => v,
+            other => misuse(name, "a table", Some(other)),
         }
     }
 }

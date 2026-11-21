@@ -995,8 +995,7 @@ fn params_of(
             ));
             continue;
         };
-        let item = t.item(&k);
-        let v = item.and_then(|i| i.as_value()).and_then(value_of);
+        let v = t.item(&k).and_then(item_value);
         match v {
             Some(v) if v.fits(spec.kind) => {
                 let v = match (v, spec.kind) {
@@ -1014,8 +1013,24 @@ fn params_of(
     out
 }
 
+/// A parameter's value: a value, or a table of strings written as a `[lints.ID.KEY]` table
+fn item_value(item: &toml_edit::Item) -> Option<ParamValue> {
+    match item {
+        toml_edit::Item::Table(t) => table_of(t),
+        other => other.as_value().and_then(value_of),
+    }
+}
+
+fn table_of(t: &dyn toml_edit::TableLike) -> Option<ParamValue> {
+    t.iter()
+        .map(|(k, v)| v.as_str().map(|s| (k.to_owned(), s.to_owned())))
+        .collect::<Option<BTreeMap<_, _>>>()
+        .map(ParamValue::StrTable)
+}
+
 fn value_of(v: &Value) -> Option<ParamValue> {
     Some(match v {
+        Value::InlineTable(t) => return table_of(t),
         Value::Integer(i) => ParamValue::Int(*i.value()),
         Value::Float(f) => ParamValue::Float(*f.value()),
         Value::Boolean(b) => ParamValue::Bool(*b.value()),
@@ -1025,7 +1040,7 @@ fn value_of(v: &Value) -> Option<ParamValue> {
                 .map(|x| x.as_str().map(str::to_owned))
                 .collect::<Option<Vec<_>>>()?,
         ),
-        _ => return None,
+        Value::Datetime(_) => return None,
     })
 }
 

@@ -323,5 +323,10 @@ fn same(v: &toml_edit::Value, w: &ParamValue) -> bool {
                 .map(toml_edit::Value::as_str)
                 .eq(l.iter().map(|s| Some(s.as_str())))
         }),
+        ParamValue::StrTable(t) => v.as_inline_table().is_some_and(|i| {
+            i.len() == t.len()
+                && t.iter()
+                    .all(|(k, s)| i.get(k).and_then(toml_edit::Value::as_str) == Some(s.as_str()))
+        }),
     }
 }

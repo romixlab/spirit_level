@@ -30,6 +30,12 @@ static A: LintMeta = LintMeta {
             default: "\"lines\"",
             doc: "",
         },
+        ParamSpec {
+            name: "long",
+            kind: ParamKind::StrTable,
+            default: "{ KB = \"kilobyte\" }",
+            doc: "",
+        },
     ],
     needs: &[],
     fix: FixKind::None,
@@ -103,6 +109,28 @@ fn a_code_names_its_lint() {
     let c = load("extends = \"big\"\n[lints.S0001]\nwarn-above = 100\nreason = \"small repo\"\n\n[[exceptions]]\nlint = \"M0011\"\ncrates = [\"a\"]\nlevel = \"warn\"\nreason = \"r\"\n").unwrap();
     assert_eq!(c.lint("crate-lines").params.int("warn-above"), 100);
     assert_eq!(c.exceptions[0].lint, "readme-per-crate");
+}
+
+#[test]
+fn a_table_of_strings_as_a_table_or_inline() {
+    let c = load("extends = \"big\"\n").unwrap();
+    let long = c.lint("crate-lines").params.table("long");
+    assert_eq!(long.get("KB").map(String::as_str), Some("kilobyte"));
+    let c = load("extends = \"big\"\n[lints.crate-lines]\nreason = \"r\"\n[lints.crate-lines.long]\nCAN = \"Controller Area Network\"\n\"I2C\" = \"Inter-Integrated Circuit\"\n").unwrap();
+    let long = c.lint("crate-lines").params.table("long");
+    assert_eq!(
+        long.keys().map(String::as_str).collect::<Vec<_>>(),
+        ["CAN", "I2C"]
+    );
+    let c = load("extends = \"big\"\n[lints.crate-lines]\nreason = \"r\"\nlong = { SD = \"Secure Digital\" }\n").unwrap();
+    assert_eq!(c.lint("crate-lines").params.table("long").len(), 1);
+    let e = messages(load(
+        "extends = \"big\"\n[lints.crate-lines]\nreason = \"r\"\n[lints.crate-lines.long]\nSD = 1\n",
+    ));
+    assert!(
+        e[0].contains("crate-lines.long must be a table of strings"),
+        "{e:?}"
+    );
 }
 
 #[test]
