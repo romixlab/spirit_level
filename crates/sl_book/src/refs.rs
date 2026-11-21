@@ -168,7 +168,7 @@ pub fn write(
         None
     };
     if let (Some(c), Some(project)) = (&settings.code_refs, &project) {
-        out.push(write_index(root, project, &book, c, commit)?);
+        out.push(write_index(root, project, &book, c, commit, today)?);
     }
     if let (Some(a), Some(project)) = (&settings.abbreviations, &project) {
         out.push(write_abbreviations(root, project, a, today)?);
@@ -216,6 +216,7 @@ fn write_index(
     book: &Book,
     c: &CodeRefs,
     commit: Option<&str>,
+    today: Date,
 ) -> Result<Written, Error> {
     let repository = book.repo_url.as_deref().ok_or(Error::NoRepository)?;
     let commit = match commit {
@@ -229,8 +230,16 @@ fn write_index(
         repository,
         commit: &commit,
     };
-    let index = code_index::index(project, &c.crates, &[book.site_dir.as_str()], forge)
-        .map_err(Error::Index)?;
+    let config =
+        spirit_level::config(project, &spirit_level::Options::new(today)).map_err(Error::Config)?;
+    let index = code_index::index(
+        project,
+        &c.crates,
+        &[book.site_dir.as_str()],
+        &config.book.on_crates_io,
+        forge,
+    )
+    .map_err(Error::Index)?;
     let mut json = serde_json::to_string_pretty(&index).map_err(|source| Error::Json {
         what: "the code index",
         source,

@@ -138,7 +138,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `DOCS-13` docs-records: changelogs, feature trackers and agent files are records (`[docs] records`), no longer skipped; lints that assume a page read from its start leave them out.
 - ✅ `DOCS-14` glossary-terms: a book that marks glossary terms marks each once in every section that uses it (`glossary-terms`, D0026).
 - ✅ `DOCS-15` abbreviations-on-hover: `abbreviation-first-use` takes two lists, `known` (plain) and `long-forms` (shown on hover by `spl_book_ext.abbreviations`); it flags an abbreviation in neither and prose that spells one out.
-- ✅ `DOCS-16` code-card-links: a code card links to its source on GitHub at the book's commit and, for a crate published on crates.io, to docs.rs; no card opens while the reader selects text.
+- ✅ `DOCS-16` code-card-links: a code card links to its source on GitHub at the book's commit and, for a crate listed in `[book] on-crates-io`, to docs.rs; no card opens while the reader selects text.
 
 ## AI - code written with agents
 

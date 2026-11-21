@@ -691,3 +691,13 @@ fn excludes_need_scope_reason_and_expiry() {
     ));
     assert!(m.iter().any(|s| s.contains("unknown key")), "{m:?}");
 }
+
+#[test]
+fn book_table_names_the_crates_on_crates_io() {
+    let none = load("extends = \"small\"\n").unwrap();
+    assert_eq!(none.book, BookRefs::default());
+    let c = load("extends = \"small\"\n[book]\non-crates-io = [\"ww_tape\", \"ww_tape_codecs\"]\n")
+        .unwrap();
+    assert_eq!(c.book.on_crates_io, ["ww_tape", "ww_tape_codecs"]);
+    assert!(load("extends = \"small\"\n[book]\nbogus = 1\n").is_err());
+}

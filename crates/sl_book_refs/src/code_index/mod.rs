@@ -83,7 +83,7 @@ pub struct Entry {
 pub struct CrateEntry {
     /// The package name, which docs.rs puts first in its addresses (`ww-tape`; the library's own name is `ww_tape`)
     pub package: String,
-    /// Whether the package is published on crates.io: no `publish = false` and no empty registry list
+    /// Whether the package is published on crates.io, as the project's `[book] on-crates-io` declares
     pub published: bool,
 }
 
@@ -179,6 +179,7 @@ pub fn index(
     project: &Project,
     crates: &[String],
     skip: &[&str],
+    on_crates_io: &[String],
     forge: Forge<'_>,
 ) -> Result<Index, IndexError> {
     let libs: Vec<(&Package, &str, &str)> = project
@@ -213,7 +214,7 @@ pub fn index(
             name.to_owned(),
             CrateEntry {
                 package: pkg.name.clone(),
-                published: pkg.publish,
+                published: on_crates_io.contains(&pkg.name),
             },
         );
         let files = project.sources(pkg);

@@ -12,8 +12,8 @@ the snippet includes mark them. A name that matches nothing, or several things, 
 build: a renamed or removed item, file or section cannot leave a stale reference behind.
 
 The link opens the lines on the forge at the commit the index was written from. An item's card links to the same
-lines and, for a crate published on crates.io, to the item's page on docs.rs; an unpublished crate has the first link
-alone. The card shows its kind and
+lines and, for a crate the project lists in `[book] on-crates-io` of spirit_level.toml, to the item's page on docs.rs; any
+other crate has the first link alone. The card shows its kind and
 path, its signature (or whole source when short), and its docs rendered as Markdown, with rustdoc's intra-doc links
 resolved through the same index: to the named item's lines, or plain code when they name nothing. The docs show whole
 while they fit in `card_doc_chars_max` characters of Markdown; longer ones show their blocks while they fit, a first

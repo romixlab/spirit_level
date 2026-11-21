@@ -26,7 +26,7 @@ fn find<'a>(index: &'a Index, path: &str) -> &'a Entry {
 
 #[test]
 fn walks_the_library_module_tree() {
-    let index = index(&project(), &[], &[], FORGE).unwrap();
+    let index = index(&project(), &[], &[], &[], FORGE).unwrap();
     let paths: Vec<&str> = index.items.iter().map(|e| e.path.as_str()).collect();
     assert_eq!(
         paths,
@@ -68,7 +68,7 @@ fn walks_the_library_module_tree() {
 
 #[test]
 fn an_entry_has_its_lines_signature_docs_and_address() {
-    let index = index(&project(), &["tape".to_owned()], &[], FORGE).unwrap();
+    let index = index(&project(), &["tape".to_owned()], &[], &[], FORGE).unwrap();
     let c = find(&index, "tape::PIECE_BYTES_MAX");
     assert_eq!(c.kind, Kind::Const);
     assert_eq!(c.file, "src/lib.rs");
@@ -98,7 +98,7 @@ fn an_entry_has_its_lines_signature_docs_and_address() {
 
 #[test]
 fn a_reexport_has_the_item_s_lines_under_its_own_path() {
-    let index = index(&project(), &[], &[], FORGE).unwrap();
+    let index = index(&project(), &[], &[], &[], FORGE).unwrap();
     let alias = find(&index, "tape::Writer");
     let item = find(&index, "tape::writer::TapeWriter");
     assert_eq!(
@@ -112,7 +112,7 @@ fn a_reexport_has_the_item_s_lines_under_its_own_path() {
 
 #[test]
 fn trait_items_unions_and_cfg_arms_are_listed() {
-    let index = index(&project(), &[], &[], FORGE).unwrap();
+    let index = index(&project(), &[], &[], &[], FORGE).unwrap();
     assert_eq!(find(&index, "tape::moved::Sink::SIDES").kind, Kind::Const);
     let put = find(&index, "tape::moved::Sink::put");
     assert_eq!(
@@ -138,7 +138,7 @@ fn trait_items_unions_and_cfg_arms_are_listed() {
 
 #[test]
 fn an_attribute_on_the_item_s_line_is_part_of_it() {
-    let index = index(&project(), &[], &[], FORGE).unwrap();
+    let index = index(&project(), &[], &[], &[], FORGE).unwrap();
     let q = find(&index, "tape::quick");
     assert_eq!(q.source, "#[inline] pub fn quick() {}");
     assert_eq!(q.lines[0], q.lines[1]);
@@ -146,7 +146,7 @@ fn an_attribute_on_the_item_s_line_is_part_of_it() {
 
 #[test]
 fn an_unknown_crate_names_the_libraries() {
-    let e = index(&project(), &["tape_core".to_owned()], &[], FORGE).unwrap_err();
+    let e = index(&project(), &["tape_core".to_owned()], &[], &[], FORGE).unwrap_err();
     assert_eq!(
         e.to_string(),
         "`tape_core` is no library of the workspace; the libraries are tape"
@@ -181,7 +181,7 @@ fn the_extension_reads_this_format() {
 
 #[test]
 fn lists_the_text_files_with_their_sections() {
-    let index = index(&project(), &[], &["app"], FORGE).unwrap();
+    let index = index(&project(), &[], &["app"], &[], FORGE).unwrap();
     let paths: Vec<&str> = index.files.iter().map(|f| f.path.as_str()).collect();
     assert!(paths.contains(&"src/writer/resume.rs"), "{paths:?}");
     assert!(!paths.iter().any(|p| p.starts_with("app/")), "{paths:?}");
@@ -205,8 +205,9 @@ fn lists_the_text_files_with_their_sections() {
 }
 
 #[test]
-fn a_library_has_its_package_name_and_whether_it_is_published() {
-    let index = index(&project(), &[], &[], FORGE).unwrap();
+fn a_library_has_its_package_name_and_is_published_when_declared() {
+    let listed = ["tape-core".to_owned()];
+    let index = index(&project(), &[], &[], &listed, FORGE).unwrap();
     assert_eq!(
         index.crates.get("tape"),
         Some(&CrateEntry {
@@ -214,4 +215,10 @@ fn a_library_has_its_package_name_and_whether_it_is_published() {
             published: true
         })
     );
+    let index = index_without(&project());
+    assert_eq!(index.crates.get("tape").map(|c| c.published), Some(false));
+}
+
+fn index_without(p: &Project) -> Index {
+    index(p, &[], &[], &[], FORGE).unwrap()
 }

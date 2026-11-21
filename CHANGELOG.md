@@ -4,7 +4,7 @@
 
 ### Added
 
-- Code cards in the book link to the source on GitHub and, for published crates, to docs.rs (DOCS-16).
+- Code cards in the book link to the source on GitHub and, for crates named in `[book] on-crates-io`, to docs.rs (DOCS-16).
 
 ### Fixed
 
