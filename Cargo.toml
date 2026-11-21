@@ -14,7 +14,6 @@ homepage = "https://spl.vhrd.tech/"
 [workspace.dependencies]
 # crates/core and model:
 annotate-snippets = { version = "0.12", default-features = false, features = ["std"] }
-anstyle = { version = "1", default-features = false, features = ["std"] }
 cargo_metadata = { version = "0.23", default-features = false }
 clap = { version = "4", default-features = false, features = [
   "std",
