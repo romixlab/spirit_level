@@ -71,7 +71,8 @@ pub struct StampArgs {
     /// The project whose Cargo.toml and git state are stamped
     #[arg(long, default_value = ".", value_hint = clap::ValueHint::DirPath)]
     repo: PathBuf,
-    /// The name the stamp shows, for a virtual workspace whose Cargo.toml has no `[package].name`
+    /// The name the stamp shows, for a virtual workspace whose Cargo.toml has no `[package].name`; its version is
+    /// the workspace member's with that `[package].name`, else `[workspace.package].version`
     #[arg(long)]
     name: Option<String>,
     /// Where to write the stamp partial, included by the theme's copyright partial (D0017's `partial`)

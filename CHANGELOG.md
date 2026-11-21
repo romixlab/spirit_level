@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- `spl book stamp --name` in a virtual workspace takes the version of the member with that name.
+
 ## [0.7.8] - 2026-11-21
 
 ### Added

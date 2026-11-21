@@ -19,6 +19,8 @@ pub enum Error {
     MissingName,
     /// Neither `[package].version` nor `[workspace.package].version`.
     MissingVersion,
+    /// A virtual workspace with no `[workspace.package].version` and no member named so.
+    MissingMember(String),
 }
 
 impl fmt::Display for Error {
@@ -34,6 +36,10 @@ impl fmt::Display for Error {
                 f,
                 "Cargo.toml has neither [package].version nor [workspace.package].version"
             ),
+            Self::MissingMember(name) => write!(
+                f,
+                "Cargo.toml has no [workspace.package].version and no workspace member with [package].name \"{name}\""
+            ),
         }
     }
 }
@@ -43,7 +49,7 @@ impl std::error::Error for Error {
         match self {
             Self::ReadManifest(e) => Some(e),
             Self::ParseManifest(e) => Some(e),
-            Self::MissingName | Self::MissingVersion => None,
+            Self::MissingName | Self::MissingVersion | Self::MissingMember(_) => None,
         }
     }
 }
@@ -52,11 +58,15 @@ impl std::error::Error for Error {
 ///
 /// `[package].name` (or `name_override` for a virtual workspace, which has none) and `[package].version`,
 /// falling back to `[workspace.package].version` for a member that inherits it (`version.workspace = true`).
+/// A virtual workspace with `name_override` takes the version of the member whose `[package].name` is that name
+/// (`version.workspace = true` there resolves to `[workspace.package].version`); with no such member it uses
+/// `[workspace.package].version`.
 ///
 /// # Errors
 ///
-/// `Cargo.toml` is missing or not valid TOML, it has no `[package].name` and `name_override` is `None`, or it has
-/// neither `[package].version` nor `[workspace.package].version`.
+/// `Cargo.toml` is missing or not valid TOML, it has no `[package].name` and `name_override` is `None`, it has
+/// neither `[package].version` nor `[workspace.package].version` (and, for a virtual workspace, no member named
+/// `name_override`).
 ///
 /// ```
 /// let dir = std::env::temp_dir().join("sl_book-doctest-package");
@@ -83,10 +93,72 @@ pub fn package(repo: &Path, name_override: Option<&str>) -> Result<(String, Stri
         Some(n) => n.to_owned(),
         None => str_field(package, "name").ok_or(Error::MissingName)?,
     };
-    let version = str_field(package, "version")
-        .or_else(|| str_field(workspace_package, "version"))
-        .ok_or(Error::MissingVersion)?;
+    let workspace_version = str_field(workspace_package, "version");
+    let version = match str_field(package, "version") {
+        Some(v) => v,
+        None if package.is_none() && name_override.is_some() => {
+            match member_version(repo, &doc, &name)? {
+                Some(MemberVersion::Own(v)) => v,
+                Some(MemberVersion::Inherited) | None => {
+                    workspace_version.ok_or_else(|| Error::MissingMember(name.clone()))?
+                }
+            }
+        }
+        None => workspace_version.ok_or(Error::MissingVersion)?,
+    };
     Ok((name, version))
+}
+
+/// What a workspace member's `[package].version` says.
+enum MemberVersion {
+    /// A version of its own.
+    Own(String),
+    /// `version.workspace = true` or no version at all.
+    Inherited,
+}
+
+/// The version of the workspace member named `name`, `None` when no member has that `[package].name`.
+///
+/// Members are literal paths or `dir/*` patterns, the forms workspaces use for crate directories.
+fn member_version(
+    repo: &Path,
+    doc: &toml::Table,
+    name: &str,
+) -> Result<Option<MemberVersion>, Error> {
+    let members = doc
+        .get("workspace")
+        .and_then(|w| w.get("members"))
+        .and_then(toml::Value::as_array)
+        .into_iter()
+        .flatten()
+        .filter_map(toml::Value::as_str);
+    for member in members {
+        let dirs = match member.strip_suffix("/*") {
+            Some(parent) => std::fs::read_dir(repo.join(parent))
+                .map(|rd| rd.filter_map(|e| e.ok().map(|e| e.path())).collect())
+                .unwrap_or_default(),
+            None => vec![repo.join(member)],
+        };
+        for dir in dirs {
+            let Ok(text) = std::fs::read_to_string(dir.join("Cargo.toml")) else {
+                continue;
+            };
+            let manifest: toml::Table = text.parse().map_err(Error::ParseManifest)?;
+            let Some(package) = manifest.get("package").and_then(toml::Value::as_table) else {
+                continue;
+            };
+            if package.get("name").and_then(toml::Value::as_str) != Some(name) {
+                continue;
+            }
+            return Ok(Some(
+                match package.get("version").and_then(toml::Value::as_str) {
+                    Some(v) => MemberVersion::Own(v.to_owned()),
+                    None => MemberVersion::Inherited,
+                },
+            ));
+        }
+    }
+    Ok(None)
 }
 
 /// A build stamp: the pieces a reader needs to tell which build they are looking at.
@@ -243,6 +315,45 @@ mod tests {
             package(&dir, Some("spirit_level")).unwrap(),
             ("spirit_level".to_owned(), "0.4.15".to_owned())
         );
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
+    #[test]
+    fn virtual_workspace_takes_the_named_member_s_version() {
+        let dir = std::env::temp_dir().join(format!("sl_book-test-member-{}", std::process::id()));
+        std::fs::create_dir_all(dir.join("ww_tape")).unwrap();
+        std::fs::create_dir_all(dir.join("crates/other")).unwrap();
+        std::fs::write(
+            dir.join("Cargo.toml"),
+            "[workspace]\nmembers = [\"ww_tape\", \"crates/*\"]\n",
+        )
+        .unwrap();
+        std::fs::write(
+            dir.join("ww_tape/Cargo.toml"),
+            "[package]\nname = \"ww_tape\"\nversion = \"0.1.0\"\n",
+        )
+        .unwrap();
+        std::fs::write(
+            dir.join("crates/other/Cargo.toml"),
+            "[package]\nname = \"other\"\nversion = \"9.9.9\"\n",
+        )
+        .unwrap();
+        assert_eq!(
+            package(&dir, Some("ww_tape")).unwrap(),
+            ("ww_tape".to_owned(), "0.1.0".to_owned())
+        );
+        assert_eq!(
+            package(&dir, Some("other")).unwrap(),
+            ("other".to_owned(), "9.9.9".to_owned())
+        );
+        match package(&dir, Some("absent")) {
+            Err(e @ Error::MissingMember(_)) => {
+                let msg = e.to_string();
+                assert!(msg.contains("[workspace.package].version"), "{msg}");
+                assert!(msg.contains("absent"), "{msg}");
+            }
+            other => panic!("{other:?}"),
+        }
         std::fs::remove_dir_all(&dir).unwrap();
     }
 
