@@ -220,3 +220,43 @@ fn dev_debug_off_fix(root: &TomlFile) -> Fix {
         edits: vec![edit],
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn fixed(text: &str) -> TomlFile {
+        let root = TomlFile::parse("Cargo.toml", text.to_owned()).unwrap();
+        let mut out = text.to_owned();
+        for e in dev_debug_off_fix(&root).edits.iter().rev() {
+            out.replace_range(e.start..e.end, &e.replacement);
+        }
+        TomlFile::parse("Cargo.toml", out).unwrap()
+    }
+
+    #[test]
+    fn fix_sets_debug_off() {
+        for text in [
+            "[workspace]\n",
+            "[workspace]\n\n[profile.dev]\nopt-level = 1\n",
+            "[workspace]\n\n[profile.dev]\ndebug = true\n",
+            "[workspace]\n\n[profile.dev.package.\"*\"]\nopt-level = 2\n",
+            "[workspace]\n\n[profile.dev.package.\"*\"]\nopt-level = 2\n\n[profile.release]\nlto = true\n",
+        ] {
+            let after = fixed(text);
+            assert_eq!(
+                after
+                    .get(&["profile", "dev", "debug"])
+                    .and_then(toml_edit::Item::as_bool),
+                Some(false),
+                "{text:?} became {:?}",
+                after.text
+            );
+            assert!(
+                after.get(&["profile", "dev", "package", "debug"]).is_none(),
+                "{:?}",
+                after.text
+            );
+        }
+    }
+}

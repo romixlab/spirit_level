@@ -81,9 +81,13 @@ impl TomlFile {
         key.span().or_else(|| item.span())
     }
 
-    /// The byte range of the item at `path`
+    /// The byte range of the item at `path`; `None` for an implicit table (`[a]` that only `[a.b]` creates), which
+    /// has no text of its own
     pub fn item_span(&self, path: &[&str]) -> Option<Range<usize>> {
         let item = self.get(path)?;
+        if item.as_table().is_some_and(Table::is_implicit) {
+            return None;
+        }
         item.span()
     }
 
@@ -187,6 +191,18 @@ mod tests {
         assert_eq!(f.line(&["dependencies", "foo"]), 6);
         assert_eq!(f.line(&["package", "missing"]), 0);
         assert_eq!(f.line(&["dependencies", "foo", "version"]), 6);
+    }
+
+    #[test]
+    fn implicit_table_has_no_span() {
+        let f = TomlFile::parse(
+            "Cargo.toml",
+            "[profile.dev.package.\"*\"]\nopt-level = 2\n".into(),
+        )
+        .unwrap();
+        assert!(f.get(&["profile", "dev"]).is_some());
+        assert_eq!(f.item_span(&["profile", "dev"]), None);
+        assert!(f.item_span(&["profile", "dev", "package", "*"]).is_some());
     }
 
     #[test]

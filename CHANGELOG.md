@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- `dev-debug-off --fix` writes a new `[profile.dev]` when only `[profile.dev.package]` exists, not into that table (MAN-19).
+
 ## [0.7.7] - 2026-11-21
 
 ### Changed

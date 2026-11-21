@@ -1,0 +1,3 @@
+[[finding]]
+at = "Cargo.toml:12:10"
+contains = "does not set debug"
