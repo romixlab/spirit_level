@@ -169,33 +169,34 @@ fn abbreviation(word: &str) -> Option<&str> {
     (ok && !SHOUTED.contains(&w)).then_some(w)
 }
 
-/// Whether the abbreviation at `start..end` is spelled out where it stands.
+/// Whether the abbreviation `abbr`, written at `start..end`, is spelled out where it stands.
 ///
 /// "Pulse-width modulation (PWM)", "PWM (pulse-width modulation)", "PWM stands for ...". Words in parentheses
-/// spell it out when there are two or more and one of them starts with the abbreviation's first letter: "USB (two
-/// ports)" is no long form.
-fn spelled_out(text: &str, start: usize, end: usize) -> bool {
-    let first = text[start..].chars().next().map(|c| c.to_ascii_lowercase());
-    let spells = |words: &[(usize, &str)]| {
-        words.len() >= 2
-            && words
-                .iter()
-                .any(|(_, w)| w.chars().next().map(|c| c.to_ascii_lowercase()) == first)
-    };
+/// after it, or the words before parentheses around it, spell it out when they are its `long` form, or two or more
+/// words whose initials hold its letters in order. "USB (two ports)" and "API (and the types)" are no long forms.
+fn spelled_out(text: &str, (start, end): (usize, usize), abbr: &str, long: Option<&str>) -> bool {
     let before = text[..start].trim_end();
     let after = text[end..].trim_start();
     if let Some(inner) = after.strip_prefix('(') {
         let inner = inner.split(')').next().unwrap_or_default();
-        if spells(&tokens(inner)) {
+        if long.is_some_and(|l| inner.trim().eq_ignore_ascii_case(l))
+            || initials_spell(abbr, &tokens(inner))
+        {
             return true;
         }
     }
     if let Some(prev) = before.strip_suffix('(')
         && after.starts_with(')')
     {
+        let prev = prev.trim_end();
+        let ends_long = long.is_some_and(|l| {
+            prev.len() >= l.len()
+                && prev.is_char_boundary(prev.len() - l.len())
+                && prev[prev.len() - l.len()..].eq_ignore_ascii_case(l)
+        });
         let words = tokens(prev);
-        let n = (end - start).max(2);
-        if spells(&words[words.len().saturating_sub(n)..]) {
+        let n = 2 * abbr.len() + 2;
+        if ends_long || initials_spell(abbr, &words[words.len().saturating_sub(n)..]) {
             return true;
         }
     }
@@ -203,6 +204,28 @@ fn spelled_out(text: &str, start: usize, end: usize) -> bool {
     ["stands for ", "is short for ", "short for ", "means "]
         .iter()
         .any(|p| after.starts_with(p))
+}
+
+/// Whether two or more words, split at hyphens too, have initials that hold the abbreviation's letters in order:
+/// "pulse-width modulation" for `PWM`, "Inter-Integrated Circuit" for `I2C`
+fn initials_spell(abbr: &str, words: &[(usize, &str)]) -> bool {
+    if words.len() < 2 && words.iter().all(|(_, w)| !w.contains('-')) {
+        return false;
+    }
+    let mut letters = abbr
+        .chars()
+        .filter(char::is_ascii_alphabetic)
+        .map(|c| c.to_ascii_lowercase())
+        .peekable();
+    for (_, w) in words {
+        for part in w.split('-') {
+            let initial = part.chars().next().map(|c| c.to_ascii_lowercase());
+            if initial.is_some() && letters.peek() == initial.as_ref() {
+                letters.next();
+            }
+        }
+    }
+    letters.peek().is_none()
 }
 
 /// The abbreviations the page's prose uses against its lists.
@@ -237,7 +260,12 @@ pub fn abbreviations(
             } else {
                 AbbreviationIssue::Unlisted
             };
-            let wrong = issue == AbbreviationIssue::Unlisted || spelled_out(&p.text, at, end);
+            let long_form = match &issue {
+                AbbreviationIssue::LongSpelledOut { long } => Some(long.as_str()),
+                _ => None,
+            };
+            let wrong = issue == AbbreviationIssue::Unlisted
+                || spelled_out(&p.text, (at, end), abbr, long_form);
             if wrong && seen.insert(abbr.to_owned()) {
                 out.push(Abbreviation {
                     abbr: abbr.to_owned(),
@@ -513,14 +541,16 @@ mod tests {
         let p = page(
             "The MCU drives PWMs over USB. Pulse-width modulation (PWM) again.\n\nThe DMA (direct memory access) \
              unit and `HAL` code. See AGENTS.md. It MUST stop. A CAN bus. The ADC stands for nothing. MCU again.\n\n\
-             A personal computer (PC) and a PC. Controller Area Network (CAN). USB (two ports).\n",
+             A personal computer (PC) and a PC. Controller Area Network (CAN). USB (two ports). API (and the types). The WebAssembly (WASM) and the WASM. Cyclic redundancy checks (CRCs).\n",
         );
         let long = BTreeMap::from([
             ("CAN".to_owned(), "Controller Area Network".to_owned()),
             ("DMA".to_owned(), "direct memory access".to_owned()),
+            ("WASM".to_owned(), "WebAssembly".to_owned()),
+            ("CRC".to_owned(), "cyclic redundancy check".to_owned()),
         ]);
         let mut known = known();
-        known.push("PC".to_owned());
+        known.extend(["PC".to_owned(), "API".to_owned()]);
         let found = abbreviations(&p, &known, &long);
         let got: Vec<(&str, u32, AbbreviationIssue)> = found
             .iter()
@@ -536,6 +566,8 @@ mod tests {
                 ("ADC", 3, AbbreviationIssue::Unlisted),
                 ("PC", 5, AbbreviationIssue::KnownSpelledOut),
                 ("CAN", 5, spelled("Controller Area Network")),
+                ("WASM", 5, spelled("WebAssembly")),
+                ("CRC", 5, spelled("cyclic redundancy check")),
             ]
         );
     }
