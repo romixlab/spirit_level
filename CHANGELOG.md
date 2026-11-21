@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.7.8] - 2026-11-21
+
 ### Added
 
 - Code cards in the book link to the source on GitHub and, for crates named in `[book] on-crates-io`, to docs.rs (DOCS-16).
