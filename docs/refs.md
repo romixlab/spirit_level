@@ -7,6 +7,7 @@ A book about code names two kinds of things in its prose: the terms it defines a
 | `[[piece]]` | the term's entry on the glossary page | the one-sentence definition |
 | ``[`TapeWriter::resume_on`]`` | the item's lines in the repository | kind, path, signature and docs |
 | ``[`resume.rs`]``, ``[`crashes.rs:resume`]`` | the file's lines in the repository | the code of the file or of one marked section |
+| `CAN`, an abbreviation of the lint's table | nothing | its long form, as a tooltip |
 
 All are checked when the book builds. A term the glossary lacks, or an item, file or section that was renamed or removed, fails the build in the same change that breaks it. The error names the page and line of the reference.
 
@@ -17,7 +18,7 @@ Three parts work together, and none of their output belongs in git.
 | Part | What it does |
 |---|---|
 | `spl_book_ext` | The Markdown extensions Zensical loads. They turn the references into links and cards. |
-| `spl book refs` | Run before each build. It checks the glossary and writes the code index and the cards' stylesheet and script. |
+| `spl book refs` | Run before each build. It checks the glossary and writes the code index, the table of long forms and the cards' stylesheet and script. |
 | `glossary-terms` | A lint. It reports a section that uses a term but never marks it. |
 
 ```mermaid
@@ -82,6 +83,7 @@ Each extension takes its settings in `zensical.toml`. Paths are relative to the 
 | `spl_book_ext.code_refs` | `crates` | every library of the workspace | The library crates indexed, by the names code uses. |
 | `spl_book_ext.code_refs` | `card_lines_max` | 16 | Lines of code a card shows at most. |
 | `spl_book_ext.code_refs` | `card_doc_chars_max` | 400 | Characters of docs a card shows at most. |
+| `spl_book_ext.abbreviations` | `file` | `target/spl-book/abbreviations.json` | The table of long forms that `spl book refs` writes. |
 
 `spl book refs` takes `--css` and `--script` to write the cards' files elsewhere. In CI it takes the commit from `GITHUB_SHA`; elsewhere it asks git for `HEAD`.
 
@@ -183,6 +185,18 @@ let w = writer.resume_on(cut)?;
 ```
 
 The card shows the code, at most `card_lines_max` lines, with the path and line range. The link opens those lines at the build's commit. A file that is gone or a section no longer marked fails the build. Markers that do not pair up fail only a page that references their file, and the error names the marker's file and line. A file git does not track cannot be named, since its link would lead nowhere.
+
+## Abbreviations
+
+The `abbreviation-first-use` lint holds the project's abbreviations in two lists of `spirit_level.toml`: `known` ones are written plain, `long-forms` ones carry their long form. `spl book refs` writes the table of long forms, and `spl_book_ext.abbreviations` marks each use in a page as `<abbr title="long form">`. The theme shows the title on hover with its `content.tooltips` feature. The extension needs Python-Markdown's `abbr` extension, and fails the build without it:
+
+```toml
+[project.markdown_extensions]
+abbr = {}
+"spl_book_ext.abbreviations" = {}
+```
+
+A glossary term's `long` form shows the same way. Where both name one abbreviation, the lint's table wins. The [lint's page](lints/D0012.md) has the rules for prose.
 
 ## The lint
 

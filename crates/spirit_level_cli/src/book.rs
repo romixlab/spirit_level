@@ -98,6 +98,9 @@ pub struct RefsArgs {
     /// folder
     #[arg(long, value_hint = clap::ValueHint::FilePath)]
     script: Option<PathBuf>,
+    /// Today's date for the expiries of `spirit_level.toml` (YYYY-MM-DD); default: the system clock
+    #[arg(long, env = "SPIRIT_LEVEL_TODAY")]
+    today: Option<String>,
 }
 
 #[derive(Args)]
@@ -186,8 +189,8 @@ fn refs(a: RefsArgs) -> Result<Exit, String> {
         css: a.css,
         script: a.script,
     };
-    let written =
-        sl_book::refs::write(&a.repo, a.commit.as_deref(), &assets).map_err(|e| e.to_string())?;
+    let written = sl_book::refs::write(&a.repo, a.commit.as_deref(), today(a.today)?, &assets)
+        .map_err(|e| e.to_string())?;
     let paint = Paint::stdout();
     for w in written {
         let did = match w.did {

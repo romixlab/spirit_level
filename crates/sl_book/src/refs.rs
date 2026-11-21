@@ -1,5 +1,5 @@
 //! What a book's references in prose need at build time (`spl book refs`): the index of code items, the cards'
-//! stylesheet and script, and a glossary that reads.
+//! stylesheet and script, a glossary that reads, and the table of abbreviations' long forms.
 //!
 //! The book turns the references on in `zensical.toml` ([`sl_book_refs::Settings`]); this writes the files the
 //! Markdown extension `spl_book_ext` and the theme read. None of them belongs in git: they are written at every
@@ -7,7 +7,11 @@
 
 use sl_book_refs::code_index::{self, Forge, IndexError};
 use sl_book_refs::glossary::{Glossary, GlossaryError};
-use sl_book_refs::{CODE_REFS_EXTENSION, CodeRefs, GLOSSARY_EXTENSION, GlossaryRefs, Settings};
+use sl_book_refs::{
+    ABBREVIATIONS_EXTENSION, AbbreviationRefs, CODE_REFS_EXTENSION, CodeRefs, GLOSSARY_EXTENSION,
+    GlossaryRefs, Settings,
+};
+use sl_core::Date;
 use sl_docs::Book;
 use sl_model::{LoadError, Project};
 use std::fmt;
@@ -50,7 +54,7 @@ pub enum Error {
     Book(String),
     /// There is no `zensical.toml` or `mkdocs.yml`
     NoBook,
-    /// The book turns on neither extension
+    /// The book turns on none of the extensions
     NotOn,
     /// The glossary does not read
     Glossary {
@@ -65,6 +69,8 @@ pub enum Error {
     Commit(String),
     /// The workspace cannot be loaded
     Project(LoadError),
+    /// The project's `spirit_level.toml` does not read
+    Config(spirit_level::CheckError),
     /// The index cannot be built
     Index(IndexError),
     /// A file cannot be written
@@ -74,8 +80,13 @@ pub enum Error {
         /// Why
         source: std::io::Error,
     },
-    /// The index cannot be serialized
-    Json(serde_json::Error),
+    /// A file's JSON cannot be written
+    Json {
+        /// What the file holds
+        what: &'static str,
+        /// Why
+        source: serde_json::Error,
+    },
 }
 
 impl fmt::Display for Error {
@@ -85,7 +96,7 @@ impl fmt::Display for Error {
             Self::NoBook => write!(f, "no zensical.toml or mkdocs.yml"),
             Self::NotOn => write!(
                 f,
-                "the book turns on neither {GLOSSARY_EXTENSION} nor {CODE_REFS_EXTENSION} in markdown_extensions"
+                "the book turns on none of {GLOSSARY_EXTENSION}, {CODE_REFS_EXTENSION} and {ABBREVIATIONS_EXTENSION} in markdown_extensions"
             ),
             Self::Glossary { file, source } => write!(f, "{file}: {source}"),
             Self::NoRepository => write!(
@@ -97,9 +108,10 @@ impl fmt::Display for Error {
                 "`git rev-parse HEAD` names no commit for the code links ({e}): pass --commit"
             ),
             Self::Project(e) => write!(f, "{e}"),
+            Self::Config(e) => write!(f, "{e}"),
             Self::Index(e) => write!(f, "the code index: {e}"),
             Self::Write { path, source } => write!(f, "writing {}: {source}", path.display()),
-            Self::Json(e) => write!(f, "the code index as JSON: {e}"),
+            Self::Json { what, source } => write!(f, "{what} as JSON: {source}"),
         }
     }
 }
@@ -109,9 +121,10 @@ impl std::error::Error for Error {
         match self {
             Self::Glossary { source, .. } => Some(source),
             Self::Project(e) => Some(e),
+            Self::Config(e) => Some(e),
             Self::Index(e) => Some(e),
             Self::Write { source, .. } => Some(source),
-            Self::Json(e) => Some(e),
+            Self::Json { source, .. } => Some(source),
             Self::Book(_) | Self::NoBook | Self::NotOn | Self::NoRepository | Self::Commit(_) => {
                 None
             }
@@ -119,27 +132,46 @@ impl std::error::Error for Error {
     }
 }
 
-/// Checks the glossary and writes the code index and the cards' files of the book at `root`. `commit` is the full
-/// hash code links point at; None: `git rev-parse HEAD`.
+/// Checks the glossary and writes the files the book's references read.
+///
+/// The files: the code index, the table of long forms and the cards' files of the book at `root`. `commit` is the
+/// full hash code links point at; None: `git rev-parse HEAD`. `today` resolves the project's `spirit_level.toml`
+/// (its expiries).
 ///
 /// # Errors
 ///
 /// The book does not turn the references on, its glossary does not read, or the index or a file cannot be
 /// written.
-pub fn write(root: &Path, commit: Option<&str>, assets: &Assets) -> Result<Vec<Written>, Error> {
+pub fn write(
+    root: &Path,
+    commit: Option<&str>,
+    today: Date,
+    assets: &Assets,
+) -> Result<Vec<Written>, Error> {
     let book = Book::read(root)
         .map_err(Error::Book)?
         .ok_or(Error::NoBook)?;
     let settings = Settings::from_extensions(|n| book.extension(n));
-    if settings.glossary.is_none() && settings.code_refs.is_none() {
+    if settings.glossary.is_none()
+        && settings.code_refs.is_none()
+        && settings.abbreviations.is_none()
+    {
         return Err(Error::NotOn);
     }
     let mut out = Vec::new();
     if let Some(g) = &settings.glossary {
         out.push(check_glossary(root, g)?);
     }
-    if let Some(c) = &settings.code_refs {
-        out.push(write_index(root, &book, c, commit)?);
+    let project = if settings.code_refs.is_some() || settings.abbreviations.is_some() {
+        Some(Project::load(root).map_err(Error::Project)?)
+    } else {
+        None
+    };
+    if let (Some(c), Some(project)) = (&settings.code_refs, &project) {
+        out.push(write_index(root, project, &book, c, commit)?);
+    }
+    if let (Some(a), Some(project)) = (&settings.abbreviations, &project) {
+        out.push(write_abbreviations(root, project, a, today)?);
     }
     let css = assets
         .css
@@ -180,6 +212,7 @@ fn check_glossary(root: &Path, g: &GlossaryRefs) -> Result<Written, Error> {
 /// Writes the index of the code items, pointing at `commit` (None: `git rev-parse HEAD`)
 fn write_index(
     root: &Path,
+    project: &Project,
     book: &Book,
     c: &CodeRefs,
     commit: Option<&str>,
@@ -192,14 +225,16 @@ fn write_index(
             .trim()
             .to_owned(),
     };
-    let project = Project::load(root).map_err(Error::Project)?;
     let forge = Forge {
         repository,
         commit: &commit,
     };
-    let index = code_index::index(&project, &c.crates, &[book.site_dir.as_str()], forge)
+    let index = code_index::index(project, &c.crates, &[book.site_dir.as_str()], forge)
         .map_err(Error::Index)?;
-    let mut json = serde_json::to_string_pretty(&index).map_err(Error::Json)?;
+    let mut json = serde_json::to_string_pretty(&index).map_err(|source| Error::Json {
+        what: "the code index",
+        source,
+    })?;
     json.push('\n');
     let path = PathBuf::from(&c.index);
     save(root, &path, &json)?;
@@ -207,6 +242,34 @@ fn write_index(
         did: Did::Wrote,
         path,
         what: format!("{} items at {}", index.items.len(), short(&commit)),
+    })
+}
+
+/// Writes the `abbreviation-first-use` lint's table of long forms, resolved from the project's configuration, as
+/// the JSON object the extension reads
+fn write_abbreviations(
+    root: &Path,
+    project: &Project,
+    a: &AbbreviationRefs,
+    today: Date,
+) -> Result<Written, Error> {
+    let config =
+        spirit_level::config(project, &spirit_level::Options::new(today)).map_err(Error::Config)?;
+    let table = config
+        .lint("abbreviation-first-use")
+        .params
+        .table("long-forms");
+    let mut json = serde_json::to_string_pretty(table).map_err(|source| Error::Json {
+        what: "the table of long forms",
+        source,
+    })?;
+    json.push('\n');
+    let path = PathBuf::from(&a.file);
+    save(root, &path, &json)?;
+    Ok(Written {
+        did: Did::Wrote,
+        path,
+        what: format!("{} long forms", table.len()),
     })
 }
 
@@ -257,7 +320,7 @@ mod tests {
             "both",
             "[project]\nrepo_url = \"https://github.com/o/demo\"\n[project.markdown_extensions]\n\"spl_book_ext.glossary\" = {}\n\"spl_book_ext.code_refs\" = {}\n",
         );
-        let written = write(&dir, Some("0123456789abcdef"), &Assets::default()).unwrap();
+        let written = write(&dir, Some("0123456789abcdef"), today(), &Assets::default()).unwrap();
         let paths: Vec<String> = written
             .iter()
             .map(|w| w.path.display().to_string())
@@ -286,13 +349,42 @@ mod tests {
         std::fs::remove_dir_all(&dir).unwrap();
     }
 
+    fn today() -> Date {
+        Date::parse("2026-11-13").unwrap()
+    }
+
+    #[test]
+    fn writes_the_table_of_long_forms() {
+        let dir = project(
+            "abbr",
+            "[project]\n[project.markdown_extensions]\nabbr = {}\n\"spl_book_ext.abbreviations\" = {}\n",
+        );
+        std::fs::write(
+            dir.join("spirit_level.toml"),
+            "extends = \"small\"\n[lints.abbreviation-first-use]\nreason = \"r\"\n[lints.abbreviation-first-use.long-forms]\nCAN = \"Controller Area Network\"\nSD = \"Secure Digital\"\n",
+        )
+        .unwrap();
+        let written = write(&dir, None, today(), &Assets::default()).unwrap();
+        assert_eq!(
+            written[0].path.display().to_string(),
+            "target/spl-book/abbreviations.json"
+        );
+        assert_eq!(written[0].what, "2 long forms");
+        let json = std::fs::read_to_string(dir.join("target/spl-book/abbreviations.json")).unwrap();
+        let table: std::collections::BTreeMap<String, String> =
+            serde_json::from_str(&json).unwrap();
+        assert_eq!(table["CAN"], "Controller Area Network");
+        assert_eq!(table.len(), 2);
+        std::fs::remove_dir_all(&dir).unwrap();
+    }
+
     #[test]
     fn code_links_need_a_repository() {
         let dir = project(
             "norepo",
             "[project]\n[project.markdown_extensions]\n\"spl_book_ext.code_refs\" = {}\n",
         );
-        let e = write(&dir, Some("abc"), &Assets::default()).unwrap_err();
+        let e = write(&dir, Some("abc"), today(), &Assets::default()).unwrap_err();
         assert!(matches!(e, Error::NoRepository), "{e}");
         std::fs::remove_dir_all(&dir).unwrap();
     }
@@ -300,7 +392,7 @@ mod tests {
     #[test]
     fn a_book_without_the_extensions_is_an_error() {
         let dir = project("off", "[project]\nsite_name = \"x\"\n");
-        let e = write(&dir, None, &Assets::default()).unwrap_err();
+        let e = write(&dir, None, today(), &Assets::default()).unwrap_err();
         assert!(matches!(e, Error::NotOn), "{e}");
         std::fs::remove_dir_all(&dir).unwrap();
     }

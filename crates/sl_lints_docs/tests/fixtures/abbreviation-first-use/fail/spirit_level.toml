@@ -1,0 +1,10 @@
+extends = []
+
+[lints.abbreviation-first-use]
+level = "warn"
+reason = "fixture"
+
+[lints.abbreviation-first-use.long-forms]
+ADC = "analog-to-digital converter"
+MCU = "microcontroller unit"
+PWM = "pulse-width modulation"

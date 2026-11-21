@@ -4,6 +4,7 @@
 //! [project.markdown_extensions]
 //! "spl_book_ext.glossary" = { file = "docs/glossary.toml", page = "/glossary/" }
 //! "spl_book_ext.code_refs" = { index = "target/spl-book/code_index.json", crates = ["ww_tape", "ww_tape_fs"] }
+//! "spl_book_ext.abbreviations" = { file = "target/spl-book/abbreviations.json" }
 //! ```
 //!
 //! Paths are relative to the project root, where the book is built from. `crates` is read by `spl book refs`
@@ -16,6 +17,12 @@ pub const GLOSSARY_EXTENSION: &str = "spl_book_ext.glossary";
 
 /// The code link extension's name in `markdown_extensions`
 pub const CODE_REFS_EXTENSION: &str = "spl_book_ext.code_refs";
+
+/// The abbreviation extension's name in `markdown_extensions`
+pub const ABBREVIATIONS_EXTENSION: &str = "spl_book_ext.abbreviations";
+
+/// The table of long forms when the settings name none: under `target/`, beside the code index
+const DEFAULT_ABBREVIATIONS: &str = "target/spl-book/abbreviations.json";
 
 /// The glossary file when the settings name none
 const DEFAULT_GLOSSARY: &str = "docs/glossary.toml";
@@ -44,6 +51,13 @@ pub struct CodeRefs {
     pub crates: Vec<String>,
 }
 
+/// The abbreviation extension's settings
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct AbbreviationRefs {
+    /// The table of long forms, relative to the project root: a JSON object of abbreviation to long form
+    pub file: String,
+}
+
 /// Which extensions a book turns on, with their settings
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct Settings {
@@ -51,6 +65,8 @@ pub struct Settings {
     pub glossary: Option<GlossaryRefs>,
     /// The code link extension, when on
     pub code_refs: Option<CodeRefs>,
+    /// The abbreviation extension, when on
+    pub abbreviations: Option<AbbreviationRefs>,
 }
 
 impl Settings {
@@ -72,6 +88,9 @@ impl Settings {
                         .collect(),
                     _ => Vec::new(),
                 },
+            }),
+            abbreviations: ext(ABBREVIATIONS_EXTENSION).map(|n| AbbreviationRefs {
+                file: text(n, "file").unwrap_or(DEFAULT_ABBREVIATIONS).to_owned(),
             }),
         }
     }
@@ -96,7 +115,13 @@ mod tests {
     #[test]
     fn defaults_when_the_extensions_take_no_settings() {
         let s = settings(
-            "[markdown_extensions]\n\"spl_book_ext.glossary\" = {}\n\"spl_book_ext.code_refs\" = {}\n",
+            "[markdown_extensions]\n\"spl_book_ext.glossary\" = {}\n\"spl_book_ext.code_refs\" = {}\n\"spl_book_ext.abbreviations\" = {}\n",
+        );
+        assert_eq!(
+            s.abbreviations,
+            Some(AbbreviationRefs {
+                file: DEFAULT_ABBREVIATIONS.to_owned()
+            })
         );
         assert_eq!(
             s.glossary,
@@ -120,6 +145,7 @@ mod tests {
             "[markdown_extensions]\n\"spl_book_ext.code_refs\" = { index = \"x.json\", crates = [\"a\", \"b\"] }\n",
         );
         assert_eq!(s.glossary, None);
+        assert_eq!(s.abbreviations, None);
         let c = s.code_refs.expect("code refs on");
         assert_eq!(c.index, "x.json");
         assert_eq!(c.crates, ["a", "b"]);

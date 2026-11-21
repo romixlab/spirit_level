@@ -74,8 +74,9 @@ lint!(PAGE_TITLE, "D0010", "page-title", "book", "every page of the book has one
 lint!(ADMONITION_SYNTAX, "D0011", "admonition-syntax", "book", "admonitions use a type Zensical styles and a body indented four spaces",
     params: [("types", StrList, "[\"note\", \"abstract\", \"info\", \"tip\", \"success\", \"question\", \"warning\", \"failure\", \"danger\", \"bug\", \"example\", \"quote\"]", "the admonition types the book styles")],
     needs: [], fix: None);
-lint!(ABBREVIATION_FIRST_USE, "D0012", "abbreviation-first-use", "words", "an abbreviation is spelled out at its first use on a page",
-    params: [("known", StrList, "[\"API\", \"ASCII\", \"CI\", \"CLI\", \"CPU\", \"CSS\", \"CSV\", \"DNS\", \"GPU\", \"HTML\", \"HTTP\", \"HTTPS\", \"ID\", \"IDE\", \"IP\", \"JSON\", \"OK\", \"OS\", \"PCB\", \"PDF\", \"PNG\", \"PR\", \"RAM\", \"README\", \"SDK\", \"SQL\", \"SSH\", \"SVG\", \"TCP\", \"TLS\", \"TOML\", \"UDP\", \"UI\", \"URL\", \"USB\", \"UTF\", \"XML\", \"YAML\"]", "abbreviations every reader knows, never spelled out"),
+lint!(ABBREVIATION_FIRST_USE, "D0012", "abbreviation-first-use", "words", "an abbreviation is one every reader knows or one the book shows the long form of on hover, and prose never spells it out",
+    params: [("known", StrList, "[\"AI\", \"AMD\", \"API\", \"ASCII\", \"CI\", \"CLI\", \"CPU\", \"CSS\", \"CSV\", \"DNS\", \"FAQ\", \"GPU\", \"HTML\", \"HTTP\", \"HTTPS\", \"IBM\", \"ID\", \"IDE\", \"IP\", \"JSON\", \"LED\", \"OK\", \"OS\", \"PC\", \"PCB\", \"PDF\", \"PNG\", \"PR\", \"RAM\", \"README\", \"SDK\", \"SQL\", \"SSH\", \"SVG\", \"TCP\", \"TLS\", \"TOML\", \"UDP\", \"UI\", \"URL\", \"USB\", \"UTF\", \"XML\", \"YAML\"]", "abbreviations every reader knows: written plain, no long form, no tooltip"),
+             ("long-forms", StrTable, "{}", "abbreviations with their long forms, which spl_book_ext shows on hover wherever the book writes the abbreviation"),
              ("pages", Choice["all", "guide", "reference"], "\"all\"", "the kinds of page judged")],
     needs: [], fix: None);
 lint!(TERM_BEFORE_DEFINITION, "D0013", "term-before-definition", "words", "a page defines a term before it uses it",

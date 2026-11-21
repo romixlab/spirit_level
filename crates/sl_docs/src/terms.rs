@@ -1,12 +1,12 @@
 //! The words a page names things with.
 //!
-//! Abbreviations spelled out at first use or not, terms used before the page defines them, and one concept named
+//! Abbreviations against the project's lists (known, or with a long form shown on hover), terms used before the page defines them, and one concept named
 //! by several words of a project's word list. Heuristics on the prose as written; inline code is never read as
 //! words.
 
 use crate::page::{MarkKind, Page};
 use crate::text::sentences;
-use std::collections::BTreeSet;
+use std::collections::{BTreeMap, BTreeSet};
 
 /// Words written in capitals for stress, not abbreviations
 const SHOUTED: &[&str] = &[
@@ -126,13 +126,30 @@ fn prose(page: &Page) -> Vec<Prose> {
         .collect()
 }
 
-/// An abbreviation whose first use on a page is not spelled out
+/// What is wrong with an abbreviation on a page
+#[derive(Clone, Debug, PartialEq, Eq, serde::Serialize)]
+#[serde(rename_all = "kebab-case")]
+pub enum AbbreviationIssue {
+    /// Neither every reader knows it nor has it a long form to show
+    Unlisted,
+    /// Every reader knows it, yet the prose spells it out
+    KnownSpelledOut,
+    /// The book shows its long form on hover, yet the prose spells it out
+    LongSpelledOut {
+        /// The long form the book shows
+        long: String,
+    },
+}
+
+/// An abbreviation a page uses against its lists: unlisted at its first use, or spelled out
 #[derive(Clone, Debug, PartialEq, Eq, serde::Serialize)]
 pub struct Abbreviation {
     /// The abbreviation, singular: `PWM` for "PWMs"
     pub abbr: String,
-    /// 1-based line of its first use
+    /// 1-based line of the use
     pub line: u32,
+    /// What is wrong
+    pub issue: AbbreviationIssue,
 }
 
 /// The abbreviation a word is: two to six capitals and digits with at least two capitals and at most one digit
@@ -152,22 +169,35 @@ fn abbreviation(word: &str) -> Option<&str> {
     (ok && !SHOUTED.contains(&w)).then_some(w)
 }
 
-/// Whether the abbreviation at `start..end` is spelled out where it stands: "Pulse-width modulation (PWM)",
-/// "PWM (pulse-width modulation)", "PWM stands for ..."
+/// Whether the abbreviation at `start..end` is spelled out where it stands.
+///
+/// "Pulse-width modulation (PWM)", "PWM (pulse-width modulation)", "PWM stands for ...". Words in parentheses
+/// spell it out when there are two or more and one of them starts with the abbreviation's first letter: "USB (two
+/// ports)" is no long form.
 fn spelled_out(text: &str, start: usize, end: usize) -> bool {
+    let first = text[start..].chars().next().map(|c| c.to_ascii_lowercase());
+    let spells = |words: &[(usize, &str)]| {
+        words.len() >= 2
+            && words
+                .iter()
+                .any(|(_, w)| w.chars().next().map(|c| c.to_ascii_lowercase()) == first)
+    };
     let before = text[..start].trim_end();
     let after = text[end..].trim_start();
     if let Some(inner) = after.strip_prefix('(') {
         let inner = inner.split(')').next().unwrap_or_default();
-        if tokens(inner).len() >= 2 {
+        if spells(&tokens(inner)) {
             return true;
         }
     }
     if let Some(prev) = before.strip_suffix('(')
         && after.starts_with(')')
-        && tokens(prev).len() >= 2
     {
-        return true;
+        let words = tokens(prev);
+        let n = (end - start).max(2);
+        if spells(&words[words.len().saturating_sub(n)..]) {
+            return true;
+        }
     }
     let after = after.trim_start_matches(',').trim_start().to_lowercase();
     ["stands for ", "is short for ", "short for ", "means "]
@@ -175,9 +205,16 @@ fn spelled_out(text: &str, start: usize, end: usize) -> bool {
         .any(|p| after.starts_with(p))
 }
 
-/// The abbreviations whose first use in the page's prose is not spelled out; `known` ones (`USB`) are left out.
-/// A word followed by a file extension (`AGENTS.md`) is a file name, not an abbreviation
-pub fn abbreviations(page: &Page, known: &[String]) -> Vec<Abbreviation> {
+/// The abbreviations the page's prose uses against its lists.
+///
+/// The first use of one in neither `known` (`USB`) nor `long` (abbreviation to long form), and the first use
+/// spelled out of one in either. A word followed by a file extension (`AGENTS.md`) is a file name, not an
+/// abbreviation.
+pub fn abbreviations(
+    page: &Page,
+    known: &[String],
+    long: &BTreeMap<String, String>,
+) -> Vec<Abbreviation> {
     let mut seen = BTreeSet::new();
     let mut out = Vec::new();
     for p in prose(page) {
@@ -190,13 +227,22 @@ pub fn abbreviations(page: &Page, known: &[String]) -> Vec<Abbreviation> {
                 .strip_prefix('.')
                 .and_then(|r| r.chars().next())
                 .is_some_and(char::is_alphanumeric);
-            if file || known.iter().any(|k| k == abbr) || !seen.insert(abbr.to_owned()) {
+            if file {
                 continue;
             }
-            if !spelled_out(&p.text, at, end) {
+            let issue = if known.iter().any(|k| k == abbr) {
+                AbbreviationIssue::KnownSpelledOut
+            } else if let Some(l) = long.get(abbr) {
+                AbbreviationIssue::LongSpelledOut { long: l.clone() }
+            } else {
+                AbbreviationIssue::Unlisted
+            };
+            let wrong = issue == AbbreviationIssue::Unlisted || spelled_out(&p.text, at, end);
+            if wrong && seen.insert(abbr.to_owned()) {
                 out.push(Abbreviation {
                     abbr: abbr.to_owned(),
                     line: p.line,
+                    issue,
                 });
             }
         }
@@ -457,20 +503,41 @@ mod tests {
     #[test]
     fn part_numbers_are_no_abbreviations() {
         let p = page("The STM32 and RP2350 talk over I2C.\n");
-        let found = abbreviations(&p, &[]);
+        let found = abbreviations(&p, &[], &BTreeMap::new());
         let got: Vec<&str> = found.iter().map(|a| a.abbr.as_str()).collect();
         assert_eq!(got, ["I2C"]);
     }
 
     #[test]
-    fn abbreviations_at_first_use() {
+    fn abbreviations_against_the_lists() {
         let p = page(
             "The MCU drives PWMs over USB. Pulse-width modulation (PWM) again.\n\nThe DMA (direct memory access) \
-             unit and `HAL` code. See AGENTS.md. It MUST stop. The ADC stands for nothing. MCU again.\n",
+             unit and `HAL` code. See AGENTS.md. It MUST stop. A CAN bus. The ADC stands for nothing. MCU again.\n\n\
+             A personal computer (PC) and a PC. Controller Area Network (CAN). USB (two ports).\n",
         );
-        let found = abbreviations(&p, &known());
-        let got: Vec<(&str, u32)> = found.iter().map(|a| (a.abbr.as_str(), a.line)).collect();
-        assert_eq!(got, [("MCU", 1), ("PWM", 1)]);
+        let long = BTreeMap::from([
+            ("CAN".to_owned(), "Controller Area Network".to_owned()),
+            ("DMA".to_owned(), "direct memory access".to_owned()),
+        ]);
+        let mut known = known();
+        known.push("PC".to_owned());
+        let found = abbreviations(&p, &known, &long);
+        let got: Vec<(&str, u32, AbbreviationIssue)> = found
+            .iter()
+            .map(|a| (a.abbr.as_str(), a.line, a.issue.clone()))
+            .collect();
+        let spelled = |l: &str| AbbreviationIssue::LongSpelledOut { long: l.to_owned() };
+        assert_eq!(
+            got,
+            [
+                ("MCU", 1, AbbreviationIssue::Unlisted),
+                ("PWM", 1, AbbreviationIssue::Unlisted),
+                ("DMA", 3, spelled("direct memory access")),
+                ("ADC", 3, AbbreviationIssue::Unlisted),
+                ("PC", 5, AbbreviationIssue::KnownSpelledOut),
+                ("CAN", 5, spelled("Controller Area Network")),
+            ]
+        );
     }
 
     #[test]

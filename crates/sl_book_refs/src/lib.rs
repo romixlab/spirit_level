@@ -15,7 +15,10 @@ pub mod code_index;
 pub mod glossary;
 mod settings;
 
-pub use settings::{CODE_REFS_EXTENSION, CodeRefs, GLOSSARY_EXTENSION, GlossaryRefs, Settings};
+pub use settings::{
+    ABBREVIATIONS_EXTENSION, AbbreviationRefs, CODE_REFS_EXTENSION, CodeRefs, GLOSSARY_EXTENSION,
+    GlossaryRefs, Settings,
+};
 
 /// The cards' stylesheet: hidden until the script opens one, colours from the theme's variables
 pub const CARD_CSS: &str = include_str!("../assets/refs.css");

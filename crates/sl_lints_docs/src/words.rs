@@ -9,7 +9,7 @@ use sl_analysis::Context;
 use sl_config::Config;
 use sl_core::{Confidence, Diagnostic, Span};
 use sl_docs::Page;
-use sl_docs::terms::{self, Abbreviation, EarlyTerm, WordUses};
+use sl_docs::terms::{self, Abbreviation, AbbreviationIssue, EarlyTerm, WordUses};
 
 /// A name a page uses for a concept the word list names otherwise
 #[derive(Clone, Debug, PartialEq, Eq, serde::Serialize)]
@@ -29,7 +29,7 @@ pub struct Synonym {
 /// A page's words as the word lints judge them
 #[derive(Clone, Debug, Default, serde::Serialize)]
 pub struct Words {
-    /// Abbreviations not spelled out at their first use
+    /// Abbreviations against the lists: unlisted, or spelled out
     pub abbreviations: Vec<Abbreviation>,
     /// Terms used before their definition
     pub early_terms: Vec<EarlyTerm>,
@@ -40,7 +40,8 @@ pub struct Words {
 impl Words {
     /// The words of every page, in order, with the word lints' parameters
     pub(crate) fn all(config: &Config, pages: &[Page]) -> Vec<Self> {
-        let known = config.lint(ABBREVIATION_FIRST_USE.id).params.list("known");
+        let abbr = &config.lint(ABBREVIATION_FIRST_USE.id).params;
+        let (known, long) = (abbr.list("known"), abbr.table("long-forms"));
         let ignore = config.lint(TERM_BEFORE_DEFINITION.id).params.list("ignore");
         let syn = &config.lint(TERM_SYNONYMS.id).params;
         let groups = terms::word_groups(syn.list("words"));
@@ -50,7 +51,7 @@ impl Words {
         uses.iter()
             .zip(pages)
             .map(|(page_uses, p)| Self {
-                abbreviations: terms::abbreviations(p, known),
+                abbreviations: terms::abbreviations(p, known, long),
                 early_terms: terms::early_terms(p, ignore),
                 synonyms: page_uses
                     .iter()
@@ -156,15 +157,41 @@ pub(crate) fn run(cx: &Context<'_>, pages: &[Page], english: bool) {
 
 fn abbreviations(cx: &Context<'_>, p: &Page, w: &Words) {
     for a in &w.abbreviations {
+        let (kind, message, help) = match &a.issue {
+            AbbreviationIssue::Unlisted => (
+                "abbr",
+                format!(
+                    "{} is neither in the `known` list nor in the table of long forms",
+                    a.abbr
+                ),
+                "an abbreviation every reader knows goes into the lint's `known` list; any other goes into its `long-forms` table with its long form, which the book shows on hover".to_owned(),
+            ),
+            AbbreviationIssue::KnownSpelledOut => (
+                "abbr-spelled",
+                format!("{} is spelled out, yet every reader knows it", a.abbr),
+                format!("write {} alone, without its long form", a.abbr),
+            ),
+            AbbreviationIssue::LongSpelledOut { long } => (
+                "abbr-spelled",
+                format!(
+                    "{} is spelled out, yet the book shows its long form on hover",
+                    a.abbr
+                ),
+                format!(
+                    "write {} alone; the book shows \"{}\" when the reader points at it",
+                    a.abbr, long
+                ),
+            ),
+        };
         cx.emit(
             Diagnostic::new(
                 "abbreviation-first-use",
-                format!("{}:abbr:{}", p.rel, a.abbr),
-                format!("{} is not spelled out at its first use on the page", a.abbr),
+                format!("{}:{kind}:{}", p.rel, a.abbr),
+                message,
             )
             .span(Span::new(p.rel.clone(), a.line))
             .confidence(Confidence::Candidate)
-            .help("write it out once where it first appears, \"pulse-width modulation (PWM)\"; an abbreviation every reader knows goes into the lint's `known` list"),
+            .help(help),
         );
     }
 }

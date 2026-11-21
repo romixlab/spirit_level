@@ -1,15 +1,17 @@
 # Fx
 
-The microcontroller (MCU) drives the motor. The MCU again.
+The PC and its MCU drive the motor over USB. The MCU again.
 
-PWM (pulse-width modulation) sets the speed.
+PWM sets the speed. Two PWMs share a timer.
 
-The ADC, short for analog-to-digital converter, reads it.
+The ADC reads it. JSON is known.
 
-Read AGENTS.md and the `HAL` code. It MUST NOT stop. USB and JSON are known. D0012 is a code.
+Read AGENTS.md and the `HAL` code. It MUST NOT stop. D0012 is a code. The STM32 talks to it.
+
+USB (two ports) on the board.
 
 ## The SPI bus
 
 ```text
-SPI I2C
+SPI I2C personal computer (PC)
 ```

@@ -1,9 +1,19 @@
 [[finding]]
 at = "README.md:3"
-contains = "MCU is not spelled out"
+contains = "SPI is neither in the `known` list nor in the table of long forms"
 confidence = "candidate"
 
 [[finding]]
-at = "README.md:3"
-contains = "PWM is not spelled out"
+at = "README.md:5"
+contains = "PC is spelled out, yet every reader knows it"
+confidence = "candidate"
+
+[[finding]]
+at = "README.md:7"
+contains = "PWM is spelled out, yet the book shows its long form on hover"
+confidence = "candidate"
+
+[[finding]]
+at = "README.md:9"
+contains = "ADC is spelled out"
 confidence = "candidate"

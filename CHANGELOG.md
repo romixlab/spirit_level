@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Added
+
+- `spl_book_ext.abbreviations`: a tabled abbreviation's long form shows on hover in the book (DOCS-15).
+- Lint parameters may be a table of strings (DOCS-15).
+
+### Changed
+
+- `abbreviation-first-use`: an abbreviation is `known` or in `long-forms`; spelling one out is flagged (DOCS-15).
+
 ## [0.7.5] - 2026-11-21
 
 ### Added

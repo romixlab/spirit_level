@@ -137,6 +137,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `DOCS-12` figures-and-paragraph-runs: `page-figures` (D0023) wants a figure per so many words of a guide; `paragraph-run-words` (D0024) limits paragraphs in a row under headings; `prose-per-element` (D0025) limits a page's prose per list, figure, table or code block; diagram blocks and inline SVG are figures; `spl pages` shows both.
 - ✅ `DOCS-13` docs-records: changelogs, feature trackers and agent files are records (`[docs] records`), no longer skipped; lints that assume a page read from its start leave them out.
 - ✅ `DOCS-14` glossary-terms: a book that marks glossary terms marks each once in every section that uses it (`glossary-terms`, D0026).
+- ✅ `DOCS-15` abbreviations-on-hover: `abbreviation-first-use` takes two lists, `known` (plain) and `long-forms` (shown on hover by `spl_book_ext.abbreviations`); it flags an abbreviation in neither and prose that spells one out.
 
 ## AI - code written with agents
 

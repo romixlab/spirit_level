@@ -1,5 +1,9 @@
 # Fx
 
-The MCU drives PWMs over USB.
+The SPI bus runs at 1 MHz.
 
-Pulse-width modulation (PWM) is spelled out too late.
+A personal computer (PC) reads it.
+
+Pulse-width modulation (PWM) sets the speed.
+
+The ADC, short for analog-to-digital converter, reads it.

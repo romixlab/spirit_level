@@ -304,7 +304,7 @@ reason = "an unknown type loses its colour and a body indented less than four sp
 
 [lints.abbreviation-first-use]
 level = "warn"
-reason = "a reader arrives on any page and cannot look up an abbreviation the page never spells out"
+reason = "a reader arrives on any page: an abbreviation is one every reader knows, or the book shows its long form on hover"
 
 [lints.term-before-definition]
 level = "warn"

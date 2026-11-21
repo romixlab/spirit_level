@@ -50,7 +50,7 @@ Use it with `extends = "medium"` in `spirit_level.toml`.
 | [D0009](../lints/D0009.md) | orphan-pages | `warn` | a page nobody reaches is published, unread and left to go stale | small |
 | [D0010](../lints/D0010.md) | page-title | `warn` | a page without a title is shown under its file name | small |
 | [D0011](../lints/D0011.md) | admonition-syntax | `deny` | an unknown type loses its colour and a body indented less than four spaces renders outside the box | small |
-| [D0012](../lints/D0012.md) | abbreviation-first-use | `warn` | a reader arrives on any page and cannot look up an abbreviation the page never spells out | small |
+| [D0012](../lints/D0012.md) | abbreviation-first-use | `warn` | a reader arrives on any page: an abbreviation is one every reader knows, or the book shows its long form on hover | small |
 | [D0013](../lints/D0013.md) | term-before-definition | `warn` | a term used before its definition is guessed at, and a wrong guess is read into every sentence until then | small |
 | [D0014](../lints/D0014.md) | term-synonyms | `warn` | a reader takes two names for two things and looks for a difference that is not there | small |
 | [D0015](../lints/D0015.md) | passive-voice | `warn` | a passive sentence hides who acts; a page of them reads as things that happen on their own | small |
