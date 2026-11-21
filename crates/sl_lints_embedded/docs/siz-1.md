@@ -6,7 +6,7 @@ Past 90 % there's little headroom left for the next feature, the next dependency
 
 ## Example
 
-Vb135 PLAT-7, and typec_dongle at 99.6 % flash — both found after the fact rather than caught by a budget check at build time.
+Vb135 PLAT-7, and portwright at 99.6 % flash — both found after the fact rather than caught by a budget check at build time.
 
 ## How to fix
 
@@ -18,4 +18,4 @@ Nothing automatic — this check exists to surface the number early; reducing us
 
 ## Source
 
-Ported from embedded_bedrock's firmware check catalogue, `SIZ-1` (`book/checks.md`, detail in `book/checks/siz.md`). Found on: internal firmware playbook; vb135 PLAT-7; typec_dongle (99.6 %).
+Ported from embedded_bedrock's firmware check catalogue, `SIZ-1` (`book/checks.md`, detail in `book/checks/siz.md`). Found on: internal firmware playbook; vb135 PLAT-7; portwright (99.6 %).

@@ -18,4 +18,4 @@ Record the IRQ number raw (a `cnt!` counter indexed by vector, or a crash-record
 
 ## Source
 
-Ported from embedded_bedrock's firmware check catalogue, `IRQ-8` (`book/checks.md`, detail in `book/checks/irq.md`). Found on: notion; typec_dongle FW-48.
+Ported from embedded_bedrock's firmware check catalogue, `IRQ-8` (`book/checks.md`, detail in `book/checks/irq.md`). Found on: notion; portwright FW-48.

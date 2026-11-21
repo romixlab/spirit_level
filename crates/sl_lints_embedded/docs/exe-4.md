@@ -18,4 +18,4 @@ From the firmware model: for each interrupt executor, the set of interrupts whos
 
 ## Source
 
-Ported from embedded_bedrock's firmware check catalogue, `EXE-4` (`book/checks.md`, detail in `book/checks/exe.md`). Found on: typec_dongle FW-62 (P1 under USB/UCPD/DMA at P0); vb135 can.rs (P7 under FDCAN at P6).
+Ported from embedded_bedrock's firmware check catalogue, `EXE-4` (`book/checks.md`, detail in `book/checks/exe.md`). Found on: portwright FW-62 (P1 under USB/UCPD/DMA at P0); vb135 can.rs (P7 under FDCAN at P6).

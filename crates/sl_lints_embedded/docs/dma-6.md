@@ -18,4 +18,4 @@ Use DMA for the transfer direction the erratum calls out, per the chip's own err
 
 ## Source
 
-Ported from embedded_bedrock's firmware check catalogue, `DMA-6` (`book/checks.md`, detail in `book/checks/dma.md`). Found on: typec_dongle pd.rs.
+Ported from embedded_bedrock's firmware check catalogue, `DMA-6` (`book/checks.md`, detail in `book/checks/dma.md`). Found on: portwright pd.rs.

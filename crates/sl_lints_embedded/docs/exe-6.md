@@ -18,4 +18,4 @@ From the firmware model: for each static/mutex shared by a task on an interrupt 
 
 ## Source
 
-Ported from embedded_bedrock's firmware check catalogue, `EXE-6` (`book/checks.md`, detail in `book/checks/exe.md`). Found on: typec_dongle FW-62 note.
+Ported from embedded_bedrock's firmware check catalogue, `EXE-6` (`book/checks.md`, detail in `book/checks/exe.md`). Found on: portwright FW-62 note.

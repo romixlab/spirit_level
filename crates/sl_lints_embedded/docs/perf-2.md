@@ -4,7 +4,7 @@ Cortex-M0/M0+ has no hardware divider and no 64-bit ALU. Any 64-bit add/multiply
 
 ## Example
 
-This repo's own `bedrock_led` (DEV-12) and `bedrock_sync` (DEV-13) crates are the positive case, checked in the disassembly on purpose: `bedrock_led`'s breath/blink easing is "u32 math only (no 64-bit libcalls on the M0+)", and `bedrock_sync`'s hot path (`shared`, run every LED tick) has "no libcall on the Cortex-M0+ at opt-level `z` and `3`" for the common case — 64-bit adds and 32-bit products of chunks up to 32 ms — only falling onto a cold path with two `__aeabi_lmul` for a gap longer than that, and a 64-bit divide once a second at the steer point, not per tick. The negative case: typec_dongle's `ww_si` unit types cost "~4 / 3.4 KiB" (z/O3) for `i128` math alone (`ops::scale_i128`, `i128::checked_pow`, `ops::compare`) — measured in our internal flash-size investigation notes, which call i128 on a Cortex-M0+ "also slow", not just big.
+This repo's own `bedrock_led` (DEV-12) and `bedrock_sync` (DEV-13) crates are the positive case, checked in the disassembly on purpose: `bedrock_led`'s breath/blink easing is "u32 math only (no 64-bit libcalls on the M0+)", and `bedrock_sync`'s hot path (`shared`, run every LED tick) has "no libcall on the Cortex-M0+ at opt-level `z` and `3`" for the common case — 64-bit adds and 32-bit products of chunks up to 32 ms — only falling onto a cold path with two `__aeabi_lmul` for a gap longer than that, and a 64-bit divide once a second at the steer point, not per tick. The negative case: portwright's `ww_si` unit types cost "~4 / 3.4 KiB" (z/O3) for `i128` math alone (`ops::scale_i128`, `i128::checked_pow`, `ops::compare`) — measured in our internal flash-size investigation notes, which call i128 on a Cortex-M0+ "also slow", not just big.
 
 ## How to fix
 
@@ -16,4 +16,4 @@ Check: elf mid, chip: M0+ — grep the disassembly or the symbol table for `__ae
 
 ## Source
 
-Ported from embedded_bedrock's firmware check catalogue, `PERF-2` (`book/checks.md`, detail in `book/checks/perf.md`). Found on: embedded_bedrock DEV-12/13/14; typec_dongle FW-42; internal fw-size measurement.
+Ported from embedded_bedrock's firmware check catalogue, `PERF-2` (`book/checks.md`, detail in `book/checks/perf.md`). Found on: embedded_bedrock DEV-12/13/14; portwright FW-42; internal fw-size measurement.

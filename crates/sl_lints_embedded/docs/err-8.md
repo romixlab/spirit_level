@@ -22,4 +22,4 @@ Check: src mid · chip: G0 — needs the ADC kernel clock configuration to compu
 
 ## Source
 
-Ported from embedded_bedrock's firmware check catalogue, `ERR-8` (`book/checks.md`, detail in `book/checks/err.md`). Found on: typec_dongle 0.20.7 (G0 gotcha 221).
+Ported from embedded_bedrock's firmware check catalogue, `ERR-8` (`book/checks.md`, detail in `book/checks/err.md`). Found on: portwright 0.20.7 (G0 gotcha 221).

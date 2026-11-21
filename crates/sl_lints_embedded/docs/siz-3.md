@@ -18,4 +18,4 @@ Drop the override (fat LTO already re-optimises everything), or switch to `lto =
 
 ## Source
 
-Ported from embedded_bedrock's firmware check catalogue, `SIZ-3` (`book/checks.md`, detail in `book/checks/siz.md`). Found on: typec_dongle FW-57.
+Ported from embedded_bedrock's firmware check catalogue, `SIZ-3` (`book/checks.md`, detail in `book/checks/siz.md`). Found on: portwright FW-57.

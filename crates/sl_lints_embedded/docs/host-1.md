@@ -16,4 +16,4 @@ Src hard — finding every path from a host-controlled value to a panicking oper
 
 ## Source
 
-Ported from embedded_bedrock's firmware check catalogue, `HOST-1` (`book/checks.md`, detail in `book/checks/host.md`). Found on: usb_io_fw AGENTS.md; typec_dongle FW-19 (dap_rs indexed past a truncated request).
+Ported from embedded_bedrock's firmware check catalogue, `HOST-1` (`book/checks.md`, detail in `book/checks/host.md`). Found on: usb_io_fw AGENTS.md; portwright FW-19 (dap_rs indexed past a truncated request).

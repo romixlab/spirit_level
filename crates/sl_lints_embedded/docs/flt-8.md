@@ -18,4 +18,4 @@ Count boots in a backup register, clear it once the firmware marks itself health
 
 ## Source
 
-Ported from embedded_bedrock's firmware check catalogue, `FLT-8` (`book/checks.md`, detail in `book/checks/flt.md`). Found on: typec_dongle FW-45; embedded_bedrock DEV-16.
+Ported from embedded_bedrock's firmware check catalogue, `FLT-8` (`book/checks.md`, detail in `book/checks/flt.md`). Found on: portwright FW-45; embedded_bedrock DEV-16.

@@ -4,7 +4,7 @@ Placing a hot function's code in RAM (`#[link_section = ".data.*"]`, copied ther
 
 ## Example
 
-`wire_weaver`'s `ww_lz4` crate (used by typec_dongle's FW-42 UART RX compression, which runs the encoder "in RAM through ww_lz4's `ram`") marks every hot function with `#[cfg_attr(all(feature = "ram", target_os = "none"), unsafe(link_section = ".data.ww_lz4"), inline(never))]` — the `inline(never)` is load-bearing, not decoration: without it LTO would inline the function back into its flash-resident caller and the RAM placement would do nothing. The crate's own doc comment gives the payoff: "no flash wait states, about 30% fewer cycles than from flash on an STM32G0 at 64 MHz (1.5 KiB of RAM)."
+`wire_weaver`'s `ww_lz4` crate (used by portwright's FW-42 UART RX compression, which runs the encoder "in RAM through ww_lz4's `ram`") marks every hot function with `#[cfg_attr(all(feature = "ram", target_os = "none"), unsafe(link_section = ".data.ww_lz4"), inline(never))]` — the `inline(never)` is load-bearing, not decoration: without it LTO would inline the function back into its flash-resident caller and the RAM placement would do nothing. The crate's own doc comment gives the payoff: "no flash wait states, about 30% fewer cycles than from flash on an STM32G0 at 64 MHz (1.5 KiB of RAM)."
 
 ## How to fix
 
@@ -16,4 +16,4 @@ Check: src easy + elf easy — `src`: grep for `link_section = ".data` without a
 
 ## Source
 
-Ported from embedded_bedrock's firmware check catalogue, `PERF-3` (`book/checks.md`, detail in `book/checks/perf.md`). Found on: typec_dongle FW-42.
+Ported from embedded_bedrock's firmware check catalogue, `PERF-3` (`book/checks.md`, detail in `book/checks/perf.md`). Found on: portwright FW-42.

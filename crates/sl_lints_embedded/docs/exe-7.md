@@ -18,4 +18,4 @@ From the firmware model (`mid`): a loop with no static bound on iteration count 
 
 ## Source
 
-Ported from embedded_bedrock's firmware check catalogue, `EXE-7` (`book/checks.md`, detail in `book/checks/exe.md`). Found on: typec_dongle FW-42 uart_pump; FW-27 log_flood (62 ms in one go).
+Ported from embedded_bedrock's firmware check catalogue, `EXE-7` (`book/checks.md`, detail in `book/checks/exe.md`). Found on: portwright FW-42 uart_pump; FW-27 log_flood (62 ms in one go).

@@ -18,4 +18,4 @@ Read torn-writable flash regions only through `ww_ecc_flash` (or an equivalent N
 
 ## Source
 
-Ported from embedded_bedrock's firmware check catalogue, `FLS-1` (`book/checks.md`, detail in `book/checks/fls.md`). Found on: typec_dongle API-19; template settings; embassy#7235.
+Ported from embedded_bedrock's firmware check catalogue, `FLS-1` (`book/checks.md`, detail in `book/checks/fls.md`). Found on: portwright API-19; template settings; embassy#7235.

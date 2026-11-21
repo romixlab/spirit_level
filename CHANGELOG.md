@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Embedded lint docs and messages name the repo `portwright` where a finding was seen (was `typec_dongle`, renamed).
+
 ### Fixed
 
 - `agent-session-files`: matches transcripts by format and location, not a source file named `transcript.rs` (AI-1).

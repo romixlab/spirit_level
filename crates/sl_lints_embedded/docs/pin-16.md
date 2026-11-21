@@ -16,4 +16,4 @@ Check: src mid · chip: G0 — recognizing "this pin is also a UCPD dead-battery
 
 ## Source
 
-Ported from embedded_bedrock's firmware check catalogue, `PIN-16` (`book/checks.md`, detail in `book/checks/pin.md`). Found on: typec_dongle FW-22.
+Ported from embedded_bedrock's firmware check catalogue, `PIN-16` (`book/checks.md`, detail in `book/checks/pin.md`). Found on: portwright FW-22.

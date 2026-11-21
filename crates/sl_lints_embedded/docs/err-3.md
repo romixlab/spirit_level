@@ -22,4 +22,4 @@ Check: src mid (recognizing the flash prefetch enable needs the HAL config) + el
 
 ## Source
 
-Ported from embedded_bedrock's firmware check catalogue, `ERR-3` (`book/checks.md`, detail in `book/checks/err.md`). Found on: typec_dongle FW-38; template TPL-32.
+Ported from embedded_bedrock's firmware check catalogue, `ERR-3` (`book/checks.md`, detail in `book/checks/err.md`). Found on: portwright FW-38; template TPL-32.

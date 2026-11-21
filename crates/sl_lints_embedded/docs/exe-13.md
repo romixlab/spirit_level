@@ -18,4 +18,4 @@ After a short read, wait a short, fixed time (around 1 ms, tuned to the baud rat
 
 ## Source
 
-Ported from embedded_bedrock's firmware check catalogue, `EXE-13` (`book/checks.md`, detail in `book/checks/exe.md`). Found on: typec_dongle FW-42 RX_GATHER (921600 Bd).
+Ported from embedded_bedrock's firmware check catalogue, `EXE-13` (`book/checks.md`, detail in `book/checks/exe.md`). Found on: portwright FW-42 RX_GATHER (921600 Bd).

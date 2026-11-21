@@ -18,4 +18,4 @@ Zero-initialise the static (`.bss`) and fill it at startup in code instead of ba
 
 ## Source
 
-Ported from embedded_bedrock's firmware check catalogue, `SIZ-6` (`book/checks.md`, detail in `book/checks/siz.md`). Found on: typec_dongle FW-42 (20 KiB encoder).
+Ported from embedded_bedrock's firmware check catalogue, `SIZ-6` (`book/checks.md`, detail in `book/checks/siz.md`). Found on: portwright FW-42 (20 KiB encoder).

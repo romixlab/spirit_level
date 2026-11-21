@@ -6,7 +6,7 @@ Firmware entered by a jump from the ROM DfuSe bootloader (or another bootloader)
 
 ## Example
 
-Vb135 BOOT-6 and typec_dongle FW-12 both hit this: the application booted fine from a cold reset and misbehaved only right after a ROM DFU session handed control over by jump.
+Vb135 BOOT-6 and portwright FW-12 both hit this: the application booted fine from a cold reset and misbehaved only right after a ROM DFU session handed control over by jump.
 
 ## How to fix
 
@@ -18,4 +18,4 @@ Detect the jump-entry signature (RCC_CFGR SWS, VTOR, NVIC) early in `init()` and
 
 ## Source
 
-Ported from embedded_bedrock's firmware check catalogue, `BOOT-1` (`book/checks.md`, detail in `book/checks/boot.md`). Found on: vb135 BOOT-6; typec_dongle FW-12.
+Ported from embedded_bedrock's firmware check catalogue, `BOOT-1` (`book/checks.md`, detail in `book/checks/boot.md`). Found on: vb135 BOOT-6; portwright FW-12.

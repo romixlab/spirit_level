@@ -16,4 +16,4 @@ Check: cfg easy — `cargo tree -d` (duplicate dependencies) catches this direct
 
 ## Source
 
-Ported from embedded_bedrock's firmware check catalogue, `CFG-4` (`book/checks.md`, detail in `book/checks/cfg.md`). Found on: typec_dongle FW-51.
+Ported from embedded_bedrock's firmware check catalogue, `CFG-4` (`book/checks.md`, detail in `book/checks/cfg.md`). Found on: portwright FW-51.
