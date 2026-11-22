@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- `duplicate-versions` drops a crate reached only through dev-dependency edges, cargo-deny's own default (MAN-20).
+
 ## [0.7.9] - 2026-11-21
 
 ### Fixed

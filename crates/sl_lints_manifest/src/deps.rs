@@ -3,7 +3,6 @@
 use sl_analysis::Context;
 use sl_core::{Diagnostic, Span};
 use sl_model::{Dep, Package, Project, Resolve};
-use std::borrow::Cow;
 use std::collections::{BTreeMap, BTreeSet};
 
 /// Where a dependency's form is written: the member's line, or the root's `[workspace.dependencies]` line when
@@ -189,13 +188,13 @@ fn pin_policy(cx: &Context<'_>, d: &Dep) -> Option<PinBreak> {
     })
 }
 
-/// What each checked member reaches through normal and build edges (and its own dev edges), by package index: an
-/// excluded member's dependencies count only where a checked member reaches them too
-fn checked_reach(cx: &Context<'_>, res: &Resolve) -> BTreeMap<usize, BTreeSet<String>> {
+/// What each checked member reaches through normal and build edges, its own dev edges too when `dev` is set, by
+/// package index: an excluded member's dependencies count only where a checked member reaches them too
+fn checked_reach(cx: &Context<'_>, res: &Resolve, dev: bool) -> BTreeMap<usize, BTreeSet<String>> {
     let mut reached: BTreeMap<usize, BTreeSet<String>> = BTreeMap::new();
     for (i, rp) in res.packages.iter().enumerate() {
         if rp.member && !cx.excluded(&rp.name) {
-            for j in res.closure(i, true) {
+            for j in res.closure(i, dev) {
                 reached.entry(j).or_default().insert(rp.name.clone());
             }
         }
@@ -215,7 +214,7 @@ fn resolved(cx: &Context<'_>) {
     } else {
         "Cargo.toml"
     };
-    let reached = checked_reach(cx, res);
+    let reached = checked_reach(cx, res, true);
     let allow_sys = cx.params("no-sys-crates").list("allow");
     const C_BUILD: &[&str] = &["cc", "bindgen", "cmake", "pkg-config", "vcpkg", "autotools"];
     for (&j, by) in &reached {
@@ -243,17 +242,13 @@ fn resolved(cx: &Context<'_>) {
             );
         }
     }
-    duplicates(cx, res, &reached, lock);
+    duplicates(cx, res, lock);
 }
 
-/// `duplicate-versions` on the graph cargo-deny judges: deny.toml's `[graph] targets` narrow it, and its `skip` and
-/// `skip-tree` are the project's one list of accepted duplicates
-fn duplicates(
-    cx: &Context<'_>,
-    whole: &Resolve,
-    whole_reached: &BTreeMap<usize, BTreeSet<String>>,
-    lock: &str,
-) {
+/// `duplicate-versions` on the graph cargo-deny judges: deny.toml's `[graph] targets` narrow it, a crate reached
+/// only through dev-dependency edges is dropped unless `[bans] multiple-versions-include-dev` turns it back on
+/// (cargo-deny's own default), and its `skip` and `skip-tree` are the project's one list of accepted duplicates
+fn duplicates(cx: &Context<'_>, whole: &Resolve, lock: &str) {
     if !cx.enabled("duplicate-versions") {
         return;
     }
@@ -263,16 +258,16 @@ fn duplicates(
         Err(e) => return not_run(e),
     };
     let narrowed;
-    let (res, reached) = if deny.targets.is_empty() {
-        (whole, Cow::Borrowed(whole_reached))
+    let res = if deny.targets.is_empty() {
+        whole
     } else {
         narrowed = match cx.project.resolve_for(&deny.targets) {
             Ok(r) => r,
             Err(e) => return not_run(format!("the graph for deny.toml's targets: {e}")),
         };
-        let r = checked_reach(cx, &narrowed);
-        (&narrowed, Cow::Owned(r))
+        &narrowed
     };
+    let reached = checked_reach(cx, res, deny.multiple_versions_include_dev);
     let skipped = deny.skipped(res);
     let mut versions: BTreeMap<&str, BTreeSet<&str>> = BTreeMap::new();
     for &j in reached.keys() {

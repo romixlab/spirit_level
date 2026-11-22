@@ -104,7 +104,7 @@ The excluded code stays in the workspace: it builds with it, and other crates ma
 | Lint | Walks |
 |---|---|
 | [no-sys-crates](lints/M0004.md) | each checked crate's graph, with its own dev-dependencies; the finding names the crates that reach it |
-| [duplicate-versions](lints/M0002.md) | the same graphs; with deny.toml's `[graph] targets`, a declaration for another target turns no feature on |
+| [duplicate-versions](lints/M0002.md) | the same graphs, but without a checked crate's own dev-dependencies unless deny.toml's `[bans] multiple-versions-include-dev` is on (cargo-deny's own default); with `[graph] targets`, a declaration for another target turns no feature on |
 | [forbidden-closure](lints/G0006.md) | the graph of the crate the map names, with its own dev-dependencies |
 | [geiger-unsafe-deps](lints/X0023.md) | each checked crate's graph, without dev-dependencies |
 | `audit-*` (cargo-audit), with an `[[exclude]]` | the checked crates' graphs decide which advisories count |

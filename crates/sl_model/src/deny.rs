@@ -1,8 +1,9 @@
-//! What a project's `deny.toml` says about duplicate versions: the targets of `[graph]`, and the `skip` and
-//! `skip-tree` lists of `[bans]`.
+//! What a project's `deny.toml` says about duplicate versions: the targets of `[graph]`, whether
+//! `multiple-versions-include-dev` is on, and the `skip` and `skip-tree` lists of `[bans]`.
 //!
 //! cargo-deny and `spirit_level`'s `duplicate-versions` judge the same graph by the same lists, so a duplicate the
-//! project accepts is named once, in deny.toml.
+//! project accepts is named once, in deny.toml. cargo-deny's own default drops a crate reached only through
+//! dev-dependency edges from that graph before it ever gets to `skip`/`skip-tree`.
 
 use crate::graph::Resolve;
 use crate::project::DepKind;
@@ -63,6 +64,9 @@ impl PackageSpec {
 pub struct DenyConfig {
     /// `[graph] targets`: the target triples the graph is built for; empty means every target
     pub targets: Vec<String>,
+    /// `[bans] multiple-versions-include-dev`: whether a crate reached only through dev-dependency edges counts
+    /// in the duplicate check. cargo-deny's own default is `false`
+    pub multiple_versions_include_dev: bool,
     /// `skip`: versions left out of the duplicate check
     pub skip: Vec<PackageSpec>,
     /// `skip-tree`: crates left out with their dependencies, down to `depth` levels (None: all of them)
@@ -85,6 +89,11 @@ impl DenyConfig {
         let Some(bans) = doc.get("bans") else {
             return Ok(out);
         };
+        if let Some(v) = bans.get("multiple-versions-include-dev") {
+            out.multiple_versions_include_dev = v.as_bool().ok_or_else(|| {
+                "deny.toml: [bans] multiple-versions-include-dev is not a bool".to_owned()
+            })?;
+        }
         for item in entries(bans, "skip")? {
             out.skip.push(entry(item, "skip")?.0);
         }
@@ -244,7 +253,11 @@ skip-tree = [{ crate = "hakari", reason = "r" }, { crate = "geiger", depth = 1 }
         assert_eq!(b.skip.len(), 3);
         assert_eq!(b.skip[2].name, "syn");
         assert_eq!(b.skip_tree[1].1, Some(1));
+        assert!(!b.multiple_versions_include_dev);
         assert_eq!(DenyConfig::parse("").unwrap(), DenyConfig::default());
+        let dev = DenyConfig::parse("[bans]\nmultiple-versions-include-dev = true").unwrap();
+        assert!(dev.multiple_versions_include_dev);
+        assert!(DenyConfig::parse("[bans]\nmultiple-versions-include-dev = \"yes\"").is_err());
         let g = DenyConfig::parse(
             "[graph]\ntargets = [\"x86_64-unknown-linux-gnu\", { triple = \"wasm32-unknown-unknown\" }]",
         )
