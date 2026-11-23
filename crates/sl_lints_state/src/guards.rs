@@ -1,7 +1,8 @@
 //! Lock guards in blocks, read without types: a `let` whose value is a zero-argument `lock()`, `read()`,
 //! `write()`, `try_lock()`, `borrow()` or `borrow_mut()` call (after peeling `.unwrap()`, `.expect(..)`, `?` and
 //! `.await`) binds a guard that lives to the end of its block or a `drop(name)`. Later statements of the block
-//! that `.await`, do I/O or take another lock while it lives are reported.
+//! that `.await`, do I/O or take another lock while it lives are reported. A `read()` or `write()` under a `?`
+//! or with a turbofish (`rd.read()?`, `rd.read::<T>()`) is a decoder's, not a lock's.
 
 use sl_core::Span;
 use syn::spanned::Spanned;
@@ -168,16 +169,24 @@ fn guard_call(mut e: &Expr) -> Option<&syn::ExprMethodCall> {
             {
                 e = &m.receiver;
             }
+            Expr::Try(t) if decoder_read(&t.expr) => return None,
             Expr::Try(t) => e = &t.expr,
             Expr::Await(a) => e = &a.base,
-            Expr::MethodCall(m)
-                if m.args.is_empty() && GUARD_METHODS.contains(&m.method.to_string().as_str()) =>
-            {
-                return Some(m);
-            }
+            Expr::MethodCall(m) if takes_lock(m, GUARD_METHODS) => return Some(m),
             _ => return None,
         }
     }
+}
+
+/// Whether a call is a zero-argument call of one of `methods` with no turbofish
+fn takes_lock(m: &syn::ExprMethodCall, methods: &[&str]) -> bool {
+    m.args.is_empty() && m.turbofish.is_none() && methods.contains(&m.method.to_string().as_str())
+}
+
+/// Whether an expression under a `?` is a `read()` or `write()` call: a decoder's, as a lock's returns the guard,
+/// a `LockResult` (unwrapped, not `?`-ed) or a future
+fn decoder_read(e: &Expr) -> bool {
+    matches!(e, Expr::MethodCall(m) if ["read", "write"].contains(&m.method.to_string().as_str()))
 }
 
 fn pat_name(p: &Pat) -> Option<String> {
@@ -212,7 +221,7 @@ impl<'ast> Visit<'ast> for Scan<'_> {
 
     fn visit_expr_method_call(&mut self, m: &'ast syn::ExprMethodCall) {
         let name = m.method.to_string();
-        if m.args.is_empty() && LOCK_METHODS.contains(&name.as_str()) {
+        if takes_lock(m, LOCK_METHODS) {
             self.fx
                 .lock
                 .get_or_insert(m.method.span().start().line as u32);
@@ -246,6 +255,18 @@ impl<'ast> Visit<'ast> for Scan<'_> {
             }
         }
         syn::visit::visit_expr_call(self, c);
+    }
+
+    fn visit_expr_try(&mut self, t: &'ast syn::ExprTry) {
+        match &*t.expr {
+            Expr::MethodCall(m) if decoder_read(&t.expr) => {
+                self.visit_expr(&m.receiver);
+                for a in &m.args {
+                    self.visit_expr(a);
+                }
+            }
+            _ => syn::visit::visit_expr_try(self, t),
+        }
     }
 
     // a closure or async block defined here runs later, not while the guard lives

@@ -1,0 +1,4 @@
+[[finding]]
+at = "src/lib.rs:18"
+contains = "second lock is taken while guard `x`"
+confidence = "estimate"
