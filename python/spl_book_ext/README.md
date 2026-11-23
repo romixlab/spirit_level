@@ -7,6 +7,7 @@ Markdown extensions for a Zensical book's references in prose:
 - `spl_book_ext.code_refs`: `` [`Name`] `` names a public item of the book's crates as rustdoc's intra-doc links do (`fn@`, `type@` and `cfg(...)@` pick one of items sharing a path); its card shows the signature and the docs, the link opens its lines on the forge. `` [`file.rs`] `` and `` [`file.rs:section`] `` name a file or a marked section of one; the card shows its code.
 
 - `spl_book_ext.shell`: a Pygments lexer (`spl-console`) for shell sessions that colours each command, its subcommands and its flags; `extend_pygments_lang = [{ name = "console", lang = "spl-console" }]` under `pymdownx.highlight` gives it to the `console` fence.
+- `spl_book_ext.rust`: a Pygments lexer (`spl-rust`) for Rust that marks every macro call, such as `lint!(...)`, not only the standard library's; `{ name = "rust", lang = "spl-rust" }` in the same list gives it to the `rust` fence.
 
 An unknown term, item, file or section fails the build and names the page and line. Install the package at the release tag of the `spl` in use. `spl book refs` checks the glossary and writes the code index and the cards' stylesheet and script before each build; spirit_level's book page "References in prose" has the settings.
 

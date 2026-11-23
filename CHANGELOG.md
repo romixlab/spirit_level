@@ -5,6 +5,7 @@
 ### Added
 
 - Book `console` blocks colour commands, subcommands and flags (`spl_book_ext.shell`) (BOOK-8).
+- Book `rust` blocks mark every macro call, such as `lint!`, not only std's (`spl_book_ext.rust`) (BOOK-8).
 
 ### Fixed
 

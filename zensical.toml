@@ -444,7 +444,7 @@ nav = [
 extra_css = ["stylesheets/brand.css", "stylesheets/code.css"]
 
 # Zensical's default extensions, written out because a [project.markdown_extensions] table replaces them all; one
-# change: the `console` fence takes spl_book_ext's lexer, which colours each command, subcommand and flag
+# change: the `console` and `rust` fences take spl_book_ext's lexers (commands and flags coloured; every macro call)
 [project.markdown_extensions]
 abbr = {}
 admonition = {}
@@ -460,7 +460,7 @@ betterem = {}
 caret = {}
 details = {}
 emoji = { emoji_generator = "zensical.extensions.emoji.to_svg", emoji_index = "zensical.extensions.emoji.twemoji" }
-highlight = { anchor_linenums = true, line_spans = "__span", pygments_lang_class = true, extend_pygments_lang = [{ name = "console", lang = "spl-console" }] }
+highlight = { anchor_linenums = true, line_spans = "__span", pygments_lang_class = true, extend_pygments_lang = [{ name = "console", lang = "spl-console" }, { name = "rust", lang = "spl-rust" }] }
 inlinehilite = {}
 keys = {}
 magiclink = {}
