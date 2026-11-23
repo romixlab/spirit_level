@@ -2,7 +2,7 @@
 
 The `spl` command, a thin layer over the `spirit_level` library.
 
-```sh
+```bash
 spl check                    # the project here, with its spirit_level.toml
 spl check --format json      # for CI and agents
 spl check --fix              # apply the exact fixes, then check again

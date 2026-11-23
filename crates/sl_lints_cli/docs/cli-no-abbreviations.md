@@ -4,7 +4,7 @@
 
 ## Example
 
-```text
+```console
 $ tool rem --help   # today: unambiguous, runs `remove`
 Remove a thing
 ...

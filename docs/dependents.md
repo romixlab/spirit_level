@@ -61,7 +61,7 @@ A lock behind the tip means the dependent has not taken earlier changes either: 
 
 ## Output
 
-```text
+```console
 $ spl dependents
 lib against main: changed lib_io; depending on them in lib: lib_cli
 

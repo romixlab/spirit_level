@@ -4,7 +4,7 @@ Scripts and agents tell a wrong call from a failed run by the exit code: 2 means
 
 ## Example
 
-```text
+```console
 $ tool --no-such-flag; echo $?
 error: unexpected argument '--no-such-flag' found
 ...

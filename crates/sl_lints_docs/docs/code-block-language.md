@@ -13,4 +13,4 @@ An indented code block cannot name a language at all.
 
 ## How to fix
 
-Name the language after the fence: `rust`, `toml`, `sh`, `json`. Output and other text that is not code takes `text`. Turn an indented block into a fenced one.
+Name the language after the fence: `rust`, `toml`, `bash`, `json`. A shell session with `$` prompts and their output takes `console`; other output takes `text`. Turn an indented block into a fenced one.

@@ -26,7 +26,7 @@ deny X0034 tool-version
 
 Install the version the help names, with whatever installs Rust tools here. `spl tools needed --spec --missing` prints every missing or untested crate as `crate@version`, one per line:
 
-```sh
+```bash
 spl tools needed --spec --missing | xargs -r cargo binstall -y
 ```
 

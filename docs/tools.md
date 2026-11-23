@@ -142,7 +142,7 @@ Builds that cargo does itself, reported from `--message-format json`. Other tool
 
 `--missing` keeps only what is missing, outside its tested range or prints no version. `--all` lists every tool that has an adapter, without reading a project. For example, in CI:
 
-```sh
+```bash
 spl tools needed --spec --missing | xargs -r cargo binstall -y
 spl tools needed --components --missing | xargs -r rustup component add
 spl check

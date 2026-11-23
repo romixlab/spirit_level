@@ -73,7 +73,7 @@ Lint ids are kebab-case and stable. Tool adapters prefix the tool's own ids (`cl
 
 ## 8. Commands
 
-```sh
+```bash
 just            # the recipes
 just test       # nextest; `just test --changed` tests only what changed against main
 just lint       # fmt, clippy -D warnings, spl on itself at the big tier, book freshness

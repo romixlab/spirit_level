@@ -2,7 +2,7 @@
 
 ## Install
 
-```sh
+```bash
 cargo install --locked --git https://github.com/romixlab/spirit_level spirit_level_cli
 ```
 
@@ -17,7 +17,7 @@ It installs the `spl` command. Shell completion: `source <(COMPLETE=bash spl)` i
 | tens of crates, internal crates, an MSRV | `medium` |
 | a big workspace with declared layers | `big` (needs a [crate map](map.md)) |
 
-```sh
+```bash
 spl init --tier small-workspace   # writes spirit_level.toml
 spl check                         # runs it
 spl tiers                         # the ladder and add-ons, this project's marked

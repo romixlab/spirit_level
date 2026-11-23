@@ -4,7 +4,7 @@ People and agents learn a tool from its examples first. A long help that ends in
 
 ## Example
 
-```text
+```console
 $ tool task add --help
 Add a task to a project
 ...

@@ -54,7 +54,24 @@ Topic tiers stack on top of a size tier with `extends = ["medium", "ai"]`:
 | `embedded` | bare-metal firmware: interrupts, DMA, stack, flash, clocks, errata, USB, boot, power |
 | `ui`, `egui` | user interfaces: theme colours, confirmed destructive actions, no blocking on the UI thread |
 
-Each size tier is built from sets: small groups of lints by what they guard, like `panics`, `deps`, `msrv` or `clippy-pedantic`. A project takes one set before its whole tier with `extends = ["small-workspace", "msrv"]`. `spl tiers` lists them; `units-strict` and `units-paranoid` are sets beside the tiers.
+### Sets: one guard before the whole tier
+
+Each size tier is built from sets, small groups of lints by what they guard. A tier extends the one below it and adds its sets; a guard's later lints sit in its `-strict` and `-paranoid` sets:
+
+| Tier | Sets it adds |
+|---|---|
+| `small` | `panics`, `stop-gaps`, `unsafe`, `state`, `deps`, `docs`, `book`, `reading`, `prose`, `repo`, `manifest`, `cli`, `size`, `units` and more |
+| `small-workspace` | `workspace`, `state-strict` |
+| `medium` | `clippy-pedantic`, `panics-strict`, `msrv`, `licences`, `commits`, `tests`, `size-strict`, `structure`, `contracts` and more |
+| `big` | `layers`, `api`, `determinism`, `deps-strict`, `panics-paranoid`, `stop-gaps-strict`, `contracts-strict` and more |
+
+A project takes a set early by naming it beside its tier:
+
+```toml
+extends = ["small-workspace", "msrv", "clippy-pedantic"]
+```
+
+A set the tier already holds applies once, so naming it again never lowers a level. `spl tiers` lists every set with its lints; `units-strict` sits beside the tiers. The [sets page](https://spl.vhrd.tech/tiers/sets/) has each set's lints.
 
 A workspace that mixes firmware with host tools puts the `embedded` tier on the firmware crates only.
 

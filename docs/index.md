@@ -12,7 +12,7 @@ spirit_level is a linter for Rust projects of every size, from one crate to a wo
 - **Every lint documented.** Each [lint page](lints/index.md) is generated from the lint's own metadata: the rule, why, its parameters and its level in every tier.
 - **For people and for CI.** Coloured text or a JSON report, exit codes, and `--fix` where a fix is exact.
 
-```sh
+```bash
 spl init --tier small-workspace
 spl check
 ```

@@ -4,7 +4,7 @@
 
 ## Example
 
-```text
+```console
 $ tool --version
 tool 0.4.2 (a1b2c3d-dirty, commit 3 Oct 2026 18:20 UTC)
 ```

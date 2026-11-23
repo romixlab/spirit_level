@@ -60,7 +60,7 @@ The limits are `LOG_BYTES_MAX`, `SIGNALS_MAX` and `SIGNAL_BYTES_MAX` of the `vc_
 
 ## Reading the counts
 
-```sh
+```bash
 spl usage
 spl usage --unused
 spl usage --format json
