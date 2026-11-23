@@ -1,0 +1,7 @@
+[[finding]]
+at = ".github/spl-badge.svg:1"
+contains = "differs from what `spl badge` writes for the configuration (custom)"
+
+[[finding]]
+at = "README.md:3"
+contains = "no badge for spirit_level's tier at https://spl.vhrd.tech/tiers/"

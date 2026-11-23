@@ -528,3 +528,47 @@ fn badge_writes_the_same_bytes_for_the_same_configuration() {
     assert!(o.status.success(), "{}", text(&o));
     assert_eq!(w.read("docs/b.svg"), svg);
 }
+
+#[test]
+fn readme_badges_fix_writes_the_badge_and_links_the_tier() {
+    let p = Scratch::new(
+        "spl_badge_fix",
+        &[
+            ("Cargo.toml", ROOT),
+            ("crates/a/Cargo.toml", A),
+            ("crates/a/src/lib.rs", "//! a\n"),
+            ("README.md", "# a\n\nA workspace.\n"),
+            ("spirit_level.toml", "extends = \"medium\"\n"),
+        ],
+    );
+    let check = |fix| {
+        let mut args = vec!["check", "--only", "readme-badges"];
+        if fix {
+            args.push("--fix");
+        }
+        run(&p.0, &args)
+    };
+    let o = check(false);
+    let t = text(&o);
+    assert!(t.contains("there is no .github/spl-badge.svg"), "{t}");
+    assert!(
+        t.contains("no badge for spirit_level's tier at https://spl.vhrd.tech/tiers/medium/"),
+        "{t}"
+    );
+    let o = check(true);
+    assert!(o.status.success(), "{}", text(&o));
+    assert!(
+        p.read("README.md").contains(
+            "[![spirit level](.github/spl-badge.svg)](https://spl.vhrd.tech/tiers/medium/)"
+        ),
+        "{}",
+        p.read("README.md")
+    );
+    let o = check(false);
+    assert!(!text(&o).contains("readme-badges"), "{}", text(&o));
+    let printed = run(&p.0, &["badge", "--out", "-"]);
+    assert_eq!(
+        String::from_utf8_lossy(&printed.stdout),
+        p.read(".github/spl-badge.svg")
+    );
+}

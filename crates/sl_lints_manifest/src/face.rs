@@ -1,4 +1,5 @@
-//! The repo's public face: the links its manifest gives crates.io and docs.rs, and the README's badges.
+//! The repo's public face: the links its manifest gives crates.io and docs.rs, the README's badges, and the
+//! spirit_level badge `spl badge` writes.
 
 use sl_analysis::Context;
 use sl_core::{Diagnostic, Edit, Fix, Span};
@@ -150,8 +151,8 @@ struct Want {
     image: String,
     /// The image's alternative text
     alt: String,
-    /// The image it must show, or one under it; None when any image does
-    must_show: Option<String>,
+    /// The image it must show, or one under it, and what that image is, in a message; None when any image does
+    must_show: Option<(String, &'static str)>,
 }
 
 /// Whether a link names `base` or a page under it: a trailing slash, a path, a query or a fragment may follow
@@ -210,7 +211,23 @@ fn wanted(cx: &Context<'_>, site_url: Option<&str>) -> Vec<Want> {
             link: page,
             image: image.clone(),
             alt: "CI".into(),
-            must_show: Some(image),
+            must_show: Some((image, "the workflow's status")),
+        });
+    }
+    if let Some(badge) = spl_badge(cx) {
+        let book = cx.params("readme-badges").str("book").trim_end_matches('/');
+        let s = &cx.config.standing;
+        let link = s.tier.as_ref().map_or_else(
+            || format!("{book}/tiers/"),
+            |t| format!("{book}/tiers/{t}/"),
+        );
+        out.push(Want {
+            item: "badge:spirit-level".into(),
+            what: format!("spirit_level's tier at {link}"),
+            link,
+            image: badge.to_owned(),
+            alt: sl_badge::LABEL.into(),
+            must_show: Some((badge.to_owned(), "the badge `spl badge` writes")),
         });
     }
     for pkg in p
@@ -286,7 +303,11 @@ fn readme_badges(cx: &Context<'_>, site_url: Option<&str>) {
         let Some(must) = &w.must_show else {
             continue;
         };
-        if linked.iter().any(|b| targets(&b.image, must)) {
+        let (must, shows) = must;
+        if linked
+            .iter()
+            .any(|b| targets(b.image.trim_start_matches("./"), must))
+        {
             continue;
         }
         let b = linked[0];
@@ -294,17 +315,62 @@ fn readme_badges(cx: &Context<'_>, site_url: Option<&str>) {
             Diagnostic::new(
                 id,
                 &w.item,
-                format!(
-                    "the badge for {} shows {}, not the workflow's status",
-                    w.what, b.image
-                ),
+                format!("the badge for {} shows {}, not {shows}", w.what, b.image),
             )
             .span(Span::new(file, b.line))
-            .help(format!(
-                "show `{must}`: it is green while the workflow passes on the default branch"
-            )),
+            .help(format!("show `{must}`: {}", why_image(&w.item))),
         );
     }
+    if let Some(badge) = spl_badge(cx) {
+        badge_file(cx, badge);
+    }
+}
+
+/// Why a badge must show its image, in a help
+fn why_image(item: &str) -> &'static str {
+    if item == "badge:ci" {
+        "it is green while the workflow passes on the default branch"
+    } else {
+        "`spl badge` writes it from the configuration, and this lint keeps it current"
+    }
+}
+
+/// The path of the spirit_level badge when the run's configuration is the project's own `spirit_level.toml` and
+/// `badge` is set
+fn spl_badge<'c>(cx: &'c Context<'_>) -> Option<&'c str> {
+    let badge = cx.params("readme-badges").str("badge");
+    (!badge.is_empty() && cx.config.file.as_deref() == Some(sl_config::FILE)).then_some(badge)
+}
+
+/// The committed spirit_level badge is what `spl badge` writes for the configuration
+fn badge_file(cx: &Context<'_>, badge: &str) {
+    let want = sl_badge::svg(&cx.config.standing);
+    let current = cx.project.read(badge);
+    let message = match &current {
+        Some(t) if *t == want => return,
+        Some(_) => format!(
+            "{badge} differs from what `spl badge` writes for the configuration ({})",
+            cx.config.standing.label()
+        ),
+        None => {
+            format!("there is no {badge}: `spl badge` writes the README's spirit_level badge there")
+        }
+    };
+    let end = current.as_ref().map_or(0, String::len);
+    cx.emit(
+        Diagnostic::new("readme-badges", "badge-file", message)
+            .span(Span::new(badge, 1))
+            .help("run `spl badge` and commit the file")
+            .fix(Fix {
+                description: format!("write {badge}"),
+                edits: vec![Edit {
+                    file: badge.to_owned(),
+                    start: 0,
+                    end,
+                    replacement: want,
+                }],
+            }),
+    );
 }
 
 /// The 1-based line of a byte offset
