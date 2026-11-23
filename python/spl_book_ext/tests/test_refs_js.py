@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-TESTS = Path(__file__).resolve().parents[3] / "crates" / "sl_book_refs" / "tests"
+TESTS = Path(__file__).resolve().parents[3] / "crates" / "sl_book_refs" / "tests" / "refs.test.mjs"
 
 
 @pytest.mark.skipif(shutil.which("node") is None, reason="node is not installed")
