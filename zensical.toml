@@ -442,6 +442,8 @@ nav = [
 # The look: the logo (assets/logo, copied into docs/assets/logo by `just docs-assets`), its lime as the accent
 # (docs/stylesheets/brand.css), apple-touch and ICO links in docs-overrides/main.html
 extra_css = ["stylesheets/brand.css", "stylesheets/code.css"]
+# Written by `just docs-assets` (spl book stamp), not in git: the footer stamp's age from the reader's clock
+extra_javascript = ["javascripts/book-stamp-age.js"]
 
 # Zensical's default extensions, written out because a [project.markdown_extensions] table replaces them all; one
 # change: the `console` and `rust` fences take spl_book_ext's lexers (commands and flags coloured; every macro call)

@@ -7,5 +7,7 @@
 __pycache__/
 .pytest_cache/
 
-# what `just docs-assets` copies from assets/logo
+# what `just docs-assets` copies from assets/logo and writes with `spl book stamp`
 /docs/assets/logo/
+/docs/javascripts/book-stamp-age.js
+/docs-overrides/partials/stamp.html

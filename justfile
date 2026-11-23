@@ -62,8 +62,10 @@ docs: book docs-assets
 docs-build: book docs-assets
     uv run zensical build --clean --strict
 
-# Copy the logo files the book uses into docs/assets/logo (not in git)
+# What the book needs beside its pages, none of it in git: the logo files in docs/assets/logo, the footer's build
+# stamp and the script that shows its age
 docs-assets:
+    cargo run -q -p spirit_level_cli -- book stamp --name spirit_level docs-overrides/partials/stamp.html docs/javascripts/book-stamp-age.js
     mkdir -p docs/assets/logo
     cp assets/logo/mark-light.svg assets/logo/mark-dark.svg assets/logo/spirit_level-light.svg assets/logo/spirit_level-dark.svg assets/logo/icon-small.svg assets/logo/favicon.ico assets/logo/png/icon-180.png docs/assets/logo/
 

@@ -7,6 +7,7 @@
 - `spl commit-msg FILE` checks one commit message's lints fast, for a commit-msg hook (CLI-11).
 - Book `console` blocks colour commands, subcommands and flags (`spl_book_ext.shell`) (BOOK-8).
 - Book `rust` blocks mark every macro call, such as `lint!`, not only std's (`spl_book_ext.rust`) (BOOK-8).
+- Book footer shows the version, commit and build time, with the build's age (BOOK-9).
 - Book page Firmware: which crates are firmware, the `--elf` run, what each embedded lint needs (BOOK-10).
 
 ### Fixed
