@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.7.15] - 2026-11-23
+
 ### Fixed
 
 - A params-only `[lints.X]` no longer fails when only a `[[crate-tiers]]` entry's tiers enable `X` (CFG-9).
