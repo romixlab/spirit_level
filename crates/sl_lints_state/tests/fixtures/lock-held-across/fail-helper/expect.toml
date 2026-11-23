@@ -7,3 +7,13 @@ confidence = "estimate"
 at = "src/lib.rs:14"
 contains = "guard `v` (from with_state() on line 14) is held across I/O (std::fs::write)"
 confidence = "estimate"
+
+[[finding]]
+at = "src/lib.rs:20"
+contains = "from raw() on line 19"
+confidence = "estimate"
+
+[[finding]]
+at = "src/lib.rs:26"
+contains = "from locked() on line 25"
+confidence = "estimate"

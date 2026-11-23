@@ -114,6 +114,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 ## STATE - shared state (fewer-locks)
 
 - ✅ `STATE-1` Statics with interior mutability, static mut, thread_local state, lock().unwrap() counts, guards across await or I/O, nested locks.
+- ✅ `STATE-2` `helper-guard-types`: a lock helper counts only when its return type is a guard (or `Result`/`Option` of one), a method helper only on a call through a type; `self.read()` of a type with its own value-returning `read` is no lock; a channel `send` is not I/O.
 
 ## PROSE - prose and agent text
 

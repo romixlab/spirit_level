@@ -24,7 +24,7 @@ lint!(LOCK_UNWRAP, "T0002", "lock-unwrap", "state", "a crate keeps its lock().un
     params: [("max", Int, "0", "calls allowed per crate before it is reported")],
     needs: [], fix: None);
 lint!(LOCK_HELD_ACROSS, "T0001", "lock-held-across", "state", "no lock guard is held across an .await or an I/O call",
-    params: [("io", StrList, "[\"File\", \"fs\", \"Command\", \"TcpStream\", \"UdpSocket\", \"UnixStream\", \"write_all\", \"read_to_end\", \"read_to_string\", \"flush\", \"sync_all\", \"output\", \"spawn\", \"send\", \"recv\", \"block_on\", \"sleep\"]", "path segments and method names counted as I/O")],
+    params: [("io", StrList, "[\"File\", \"fs\", \"Command\", \"TcpStream\", \"UdpSocket\", \"UnixStream\", \"write_all\", \"read_to_end\", \"read_to_string\", \"flush\", \"sync_all\", \"output\", \"spawn\", \"send_to\", \"recv\", \"block_on\", \"sleep\"]", "path segments and method names counted as I/O (not `send`: a channel send is in memory, and an async one is an `.await`)")],
     needs: [], fix: None);
 lint!(NESTED_LOCKS, "T0003", "nested-locks", "state", "no second lock is taken while a guard is alive",
     params: [], needs: [], fix: None);

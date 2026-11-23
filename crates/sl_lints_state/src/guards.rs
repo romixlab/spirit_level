@@ -45,6 +45,8 @@ pub(crate) struct Guards<'a> {
     pub(crate) unwraps: Vec<Unwrap>,
     /// The functions being visited, innermost last
     frames: Vec<Frame>,
+    /// The impl being visited's own methods that return no guard ([`own_methods`])
+    own: Vec<String>,
 }
 
 /// Line and column of a call's method name: tells two calls apart
@@ -82,6 +84,7 @@ impl<'a> Guards<'a> {
             found: Vec::new(),
             unwraps: Vec::new(),
             frames: Vec::new(),
+            own: Vec::new(),
         }
     }
 
@@ -171,8 +174,9 @@ fn helper_call(
     Some((at, Some(param)))
 }
 
-/// A function of the workspace that takes a lock for its callers: it returns the guard, or hands it to one of
-/// its closure parameters (found by [`helper_call`] with any lock call, `unwrap_or_else` and `.await` included)
+/// A function of the workspace that takes a lock for its callers: it returns the guard (its return type is one,
+/// [`returns_guard`]), or hands it to one of its closure parameters (found by [`helper_call`] with any lock call,
+/// `unwrap_or_else` and `.await` included)
 pub(crate) struct Helper {
     name: String,
     /// Whether it takes `self`
@@ -185,17 +189,33 @@ pub(crate) struct Helper {
 
 impl Helper {
     /// The call, when its callee and argument count are this helper's (`self` is the first argument of a path
-    /// call to a method)
+    /// call to a method, which only a path through a type makes)
     fn call<'h, 'e>(
         &'h self,
         callee: &syn::Ident,
         args: &'e Args,
-        method_call: bool,
+        call: Callee,
     ) -> Option<HelperCall<'h, 'e>> {
-        let shift = usize::from(self.method && !method_call);
-        (*callee == self.name && (self.method || !method_call) && args.len() == self.inputs + shift)
+        let fits = match call {
+            Callee::Method => self.method,
+            Callee::TypePath => true,
+            Callee::Path => !self.method,
+        };
+        let shift = usize::from(self.method && call != Callee::Method);
+        (*callee == self.name && fits && args.len() == self.inputs + shift)
             .then(|| (self, self.closure.and_then(|c| args.iter().nth(c + shift))))
     }
+}
+
+/// How a call names its callee
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Callee {
+    /// `x.f()`
+    Method,
+    /// `Self::f(..)`, `Type::f(..)`, `<T as Trait>::f(..)`: a method or an associated function
+    TypePath,
+    /// `f(..)`, `module::f(..)`: a free function
+    Path,
 }
 
 /// The lock helpers of a file
@@ -203,7 +223,9 @@ pub(crate) fn helpers(ast: &syn::File) -> Vec<Helper> {
     struct Find(Vec<Helper>);
     impl Find {
         fn add(&mut self, sig: &syn::Signature, body: &syn::Block) {
-            if let Some((_, closure)) = helper_call(sig, body, |e| guard_call(e, LOCK_METHODS)) {
+            if let Some((_, closure)) = helper_call(sig, body, |e| guard_call(e, LOCK_METHODS))
+                && (closure.is_some() || returns_guard(&sig.output))
+            {
                 let method = sig.receiver().is_some();
                 self.0.push(Helper {
                     name: sig.ident.to_string(),
@@ -235,6 +257,35 @@ pub(crate) fn helpers(ast: &syn::File) -> Vec<Helper> {
     f.0
 }
 
+/// Wrappers a guard comes back in from a helper
+const GUARD_WRAPPERS: &[&str] = &["Result", "Option", "LockResult", "TryLockResult"];
+
+/// Whether a function's return type is a guard: a type whose name ends in `Guard` (`MutexGuard`,
+/// `RwLockReadGuard`, a crate's own), or a `Result` or `Option` of one
+fn returns_guard(out: &syn::ReturnType) -> bool {
+    fn guard(t: &syn::Type) -> bool {
+        let syn::Type::Path(p) = t else { return false };
+        let Some(last) = p.path.segments.last() else {
+            return false;
+        };
+        if last.ident.to_string().ends_with("Guard") {
+            return true;
+        }
+        let syn::PathArguments::AngleBracketed(a) = &last.arguments else {
+            return false;
+        };
+        GUARD_WRAPPERS.contains(&last.ident.to_string().as_str())
+            && a.args
+                .iter()
+                .find_map(|g| match g {
+                    syn::GenericArgument::Type(t) => Some(t),
+                    _ => None,
+                })
+                .is_some_and(guard)
+    }
+    matches!(out, syn::ReturnType::Type(_, t) if guard(t))
+}
+
 /// A helper call: the helper, and the closure argument it hands the guard to
 type HelperCall<'h, 'e> = (&'h Helper, Option<&'e Expr>);
 
@@ -251,14 +302,26 @@ fn method_helper<'h, 'e>(
     }
     helpers
         .iter()
-        .find_map(|h| h.call(&m.method, &m.args, true))
+        .find_map(|h| h.call(&m.method, &m.args, Callee::Method))
 }
 
 /// The helper a path call is to (`locked(&m)`, `Self::locked(self)`)
 fn call_helper<'h, 'e>(helpers: &'h [Helper], c: &'e syn::ExprCall) -> Option<HelperCall<'h, 'e>> {
     let Expr::Path(p) = &*c.func else { return None };
-    let callee = &p.path.segments.last()?.ident;
-    helpers.iter().find_map(|h| h.call(callee, &c.args, false))
+    let segs = &p.path.segments;
+    let callee = &segs.last()?.ident;
+    let through_type = p.qself.is_some()
+        || segs.len() >= 2
+            && segs[segs.len() - 2]
+                .ident
+                .to_string()
+                .starts_with(|c: char| c.is_ascii_uppercase());
+    let call = if through_type {
+        Callee::TypePath
+    } else {
+        Callee::Path
+    };
+    helpers.iter().find_map(|h| h.call(callee, &c.args, call))
 }
 
 /// The helper a call expression is to
@@ -298,10 +361,11 @@ fn guard_call<'e>(e: &'e Expr, methods: &[&str]) -> Option<&'e syn::ExprMethodCa
 
 /// The line and name of the guard a value expression takes: a guard method's, or a call of a helper that returns
 /// the guard
-fn guard_taken(e: &Expr, helpers: &[Helper]) -> Option<(u32, String)> {
+fn guard_taken(e: &Expr, helpers: &[Helper], own: &[String]) -> Option<(u32, String)> {
     let e = peel(e)?;
     if let Expr::MethodCall(m) = e
         && takes_lock(m, GUARD_METHODS)
+        && !own_method(m, own)
     {
         return Some((
             m.method.span().start().line as u32,
@@ -317,6 +381,30 @@ fn guard_taken(e: &Expr, helpers: &[Helper]) -> Option<(u32, String)> {
 /// Whether a call is a zero-argument call of one of `methods` with no turbofish
 fn takes_lock(m: &syn::ExprMethodCall, methods: &[&str]) -> bool {
     m.args.is_empty() && m.turbofish.is_none() && methods.contains(&m.method.to_string().as_str())
+}
+
+/// Whether a call is `self.f()` and `f` is a method of the impl being visited that returns a value, not a guard:
+/// the call resolves to it before any lock's method (`self.read()` of a type with its own `fn read(&self)`)
+fn own_method(m: &syn::ExprMethodCall, own: &[String]) -> bool {
+    matches!(&*m.receiver, Expr::Path(p) if p.path.is_ident("self"))
+        && own.iter().any(|o| m.method == o)
+}
+
+/// The zero-argument methods of an impl that return no guard
+fn own_methods(i: &syn::ItemImpl) -> Vec<String> {
+    i.items
+        .iter()
+        .filter_map(|it| match it {
+            syn::ImplItem::Fn(f)
+                if f.sig.receiver().is_some()
+                    && f.sig.inputs.len() == 1
+                    && !returns_guard(&f.sig.output) =>
+            {
+                Some(f.sig.ident.to_string())
+            }
+            _ => None,
+        })
+        .collect()
 }
 
 /// Whether an expression under a `?` is a `read()` or `write()` call: a decoder's, as a lock's returns the guard,
@@ -345,6 +433,7 @@ struct Effects {
 struct Scan<'a> {
     io: &'a [String],
     helpers: &'a [Helper],
+    own: &'a [String],
     fx: Effects,
 }
 
@@ -358,7 +447,9 @@ impl<'ast> Visit<'ast> for Scan<'_> {
 
     fn visit_expr_method_call(&mut self, m: &'ast syn::ExprMethodCall) {
         let name = m.method.to_string();
-        if takes_lock(m, LOCK_METHODS) || method_helper(self.helpers, m).is_some() {
+        if (takes_lock(m, LOCK_METHODS) && !own_method(m, self.own))
+            || method_helper(self.helpers, m).is_some()
+        {
             self.fx
                 .lock
                 .get_or_insert(m.method.span().start().line as u32);
@@ -448,6 +539,7 @@ impl Guards<'_> {
         let mut sc = Scan {
             io: self.io,
             helpers: self.helpers,
+            own: &self.own,
             fx: Effects::default(),
         };
         visit(&mut sc);
@@ -495,6 +587,12 @@ impl<'ast> Visit<'ast> for Guards<'_> {
         syn::visit::visit_expr_call(self, c);
     }
 
+    fn visit_item_impl(&mut self, i: &'ast syn::ItemImpl) {
+        let outer = std::mem::replace(&mut self.own, own_methods(i));
+        syn::visit::visit_item_impl(self, i);
+        self.own = outer;
+    }
+
     fn visit_item_fn(&mut self, f: &'ast syn::ItemFn) {
         self.enter(f.sig.ident.to_string(), &f.sig, &f.block);
         syn::visit::visit_item_fn(self, f);
@@ -512,7 +610,7 @@ impl<'ast> Visit<'ast> for Guards<'_> {
         for (i, s) in stmts.iter().enumerate() {
             let Stmt::Local(l) = s else { continue };
             let Some(init) = &l.init else { continue };
-            let Some((at, what)) = guard_taken(&init.expr, self.helpers) else {
+            let Some((at, what)) = guard_taken(&init.expr, self.helpers, &self.own) else {
                 continue;
             };
             let Some(name) = pat_name(&l.pat) else {

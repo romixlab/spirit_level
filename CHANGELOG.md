@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Lock helpers count only when they return a guard, or a `Result`/`Option` of one (STATE-2).
+- A method lock helper no longer matches a free function's call of the same name (STATE-2).
+- `lock-held-across` no longer counts a channel `send` as I/O; `send_to` stays (STATE-2).
+- `self.lock()` or `self.read()` is no lock where the type's own method of that name returns a value (STATE-2).
+
 ## [0.7.12] - 2026-11-23
 
 ### Fixed

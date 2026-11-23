@@ -7,3 +7,13 @@ confidence = "estimate"
 at = "src/lib.rs:15"
 contains = "second lock is taken while guard `v` (line 15)"
 confidence = "estimate"
+
+[[finding]]
+at = "src/lib.rs:21"
+contains = "guard `ga` (line 20)"
+confidence = "estimate"
+
+[[finding]]
+at = "src/lib.rs:28"
+contains = "guard `ga` (line 27)"
+confidence = "estimate"
