@@ -39,3 +39,7 @@
 /* TOML: keys as names of things, table headers as types */
 .md-typeset .language-toml.highlight .n { color: var(--sl-code-constant); }
 .md-typeset .language-toml.highlight .k { color: var(--sl-code-type); font-weight: 600; }
+
+/* Shell sessions (spl_book_ext's spl-console lexer): the command, its subcommands, its flags */
+.md-typeset .language-console.highlight .nf { font-weight: 600; }
+.md-typeset .language-console.highlight .nt { color: var(--sl-code-type); }

@@ -11,6 +11,10 @@ requires-python = ">=3.12"
 # Zensical brings these too; the cards highlight code as its pymdownx.highlight does
 dependencies = ["markdown>=3.7", "pymdown-extensions>=10", "pygments>=2.18"]
 
+# The `console` fence's lexer (spl_book_ext.shell), found by Pygments under the alias `spl-console`
+[project.entry-points."pygments.lexers"]
+spl-console = "spl_book_ext.shell:ConsoleLexer"
+
 [dependency-groups]
 dev = ["pytest>=8"]
 

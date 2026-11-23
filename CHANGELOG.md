@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Book `console` blocks colour commands, subcommands and flags (`spl_book_ext.shell`) (BOOK-8).
+
 ### Fixed
 
 - `spl tools needed --toolchains` names the pinned nightly a nightly tool needs, also with `--all` (TOOL-2).

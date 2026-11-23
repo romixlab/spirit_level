@@ -180,6 +180,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `BOOK-5` The book is published at spl.vhrd.tech from GitHub Actions; CI runs `just lint` and `just test`.
 - ✅ `BOOK-6` Coloured check output in the book: `<!-- spirit-level:check PATH ... -->` blocks of hand-written pages, written by `spl book docs` as HTML from the CLI's own colours; `book docs --check` fails when stale.
 - ✅ `BOOK-7` book-refs: glossary terms `[[term]]`, code links `` [`Item`] `` and file links `` [`file.rs:section`] `` in any Zensical book, each with a card; `spl book refs` writes the code index and the cards' files, the Python package `spl_book_ext` renders them; an unknown name fails the build.
+- ✅ `BOOK-8` console-lexer: `console` blocks colour each command, subcommand and flag, through `spl_book_ext.shell` (Pygments `spl-console`); the book's code takes a colour per token kind.
 
 ## TESTKIT - the golden fixture harness
 

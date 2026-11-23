@@ -4,4 +4,8 @@
 name = "spirit-level-book"
 version = "0.7.5"
 requires-python = ">=3.12"
-dependencies = ["zensical==0.0.74"]
+# spl-book-ext: the `console` fence's lexer (zensical.toml's markdown_extensions)
+dependencies = ["zensical==0.0.74", "spl-book-ext"]
+
+[tool.uv.sources]
+spl-book-ext = { path = "python/spl_book_ext" }
