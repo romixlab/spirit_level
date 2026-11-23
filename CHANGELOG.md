@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- `lock-unwrap` skips a crate's one lock helper that returns the guard or hands it to a closure (STATE-1).
+- `book-build-stamp` counts the stamp and age script that `spl book stamp` writes from a recipe or workflow (DOCS-4).
+- `unit-suffix` passes names in its new `exempt` list, by default the protocol fields `ttl` and `hop_limit` (CODE-8).
+
 ## [0.7.10] - 2026-11-23
 
 ### Added
@@ -15,9 +21,6 @@
 ### Fixed
 
 - `duplicate-versions` drops a crate reached only through dev-dependency edges, cargo-deny's own default (MAN-20).
-- `lock-unwrap` skips a crate's one lock helper that returns the guard or hands it to a closure (STATE-1).
-- `book-build-stamp` counts the stamp and age script that `spl book stamp` writes from a recipe or workflow (DOCS-4).
-- `unit-suffix` passes names in its new `exempt` list, by default the protocol fields `ttl` and `hop_limit` (CODE-8).
 
 ## [0.7.9] - 2026-11-21
 
