@@ -2,7 +2,7 @@
 
 Each `.lock().unwrap()` is a lock reached from more than one place, and a panic when another thread panicked while holding it (poison). In tpm's crates there were about 1,200 of them. A count per crate shows where shared state concentrates and whether a refactor is making it shrink.
 
-The lint counts `.lock()`, `.read()` and `.write()` with no arguments followed by `.unwrap()` or `.expect(..)`, outside test code, and reports a crate whose count passes `max`, with the first places.
+The lint counts `.lock()`, `.read()` and `.write()` with no arguments followed by `.unwrap()` or `.expect(..)`, outside test code, and reports a crate whose count passes `max`, with the first places. The crate's one lock helper does not count: a function whose only such call returns the guard, or hands it to a closure parameter (`f(&mut held)`). A second helper counts.
 
 ## How to fix
 

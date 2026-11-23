@@ -37,7 +37,35 @@ pub(crate) struct Guards<'a> {
     /// (lint, place, message)
     pub(crate) found: Vec<(&'static str, Span, String)>,
     /// `.lock().unwrap()`-style calls
-    pub(crate) unwraps: Vec<Span>,
+    pub(crate) unwraps: Vec<Unwrap>,
+    /// The functions being visited, innermost last
+    frames: Vec<Frame>,
+}
+
+/// Line and column of a call's method name: tells two calls apart
+type Pos = (usize, usize);
+
+fn pos(m: &syn::ExprMethodCall) -> Pos {
+    let at = m.method.span().start();
+    (at.line, at.column)
+}
+
+/// One `.lock().unwrap()`-style call
+pub(crate) struct Unwrap {
+    pub(crate) span: Span,
+    /// The function it is in, when that function is a lock helper: the call is its only one, and the guard is
+    /// returned or handed to a closure parameter, so the function decides what poison means for its callers
+    pub(crate) helper: Option<String>,
+    at: Pos,
+}
+
+/// A function being visited
+struct Frame {
+    name: String,
+    /// The call that makes it a helper, if any
+    helper_at: Option<Pos>,
+    /// Its own calls, as indices into `unwraps`
+    calls: Vec<usize>,
 }
 
 impl<'a> Guards<'a> {
@@ -47,8 +75,87 @@ impl<'a> Guards<'a> {
             io,
             found: Vec::new(),
             unwraps: Vec::new(),
+            frames: Vec::new(),
         }
     }
+
+    fn enter(&mut self, name: String, sig: &syn::Signature, body: &syn::Block) {
+        self.frames.push(Frame {
+            name,
+            helper_at: helper_call(sig, body),
+            calls: Vec::new(),
+        });
+    }
+
+    fn exit(&mut self) {
+        let Some(f) = self.frames.pop() else { return };
+        if let ([i], Some(at)) = (f.calls.as_slice(), f.helper_at)
+            && self.unwraps[*i].at == at
+        {
+            self.unwraps[*i].helper = Some(f.name);
+        }
+    }
+}
+
+/// The `.lock()`, `.read()` or `.write()` call under an `.unwrap()` or `.expect(..)`
+fn lock_unwrap(e: &Expr) -> Option<&syn::ExprMethodCall> {
+    let Expr::MethodCall(m) = e else { return None };
+    lock_unwrap_call(m)
+}
+
+/// [`lock_unwrap`] of a method call
+fn lock_unwrap_call(m: &syn::ExprMethodCall) -> Option<&syn::ExprMethodCall> {
+    let Expr::MethodCall(inner) = &*m.receiver else {
+        return None;
+    };
+    (["unwrap", "expect"].contains(&m.method.to_string().as_str())
+        && inner.args.is_empty()
+        && ["lock", "read", "write"].contains(&inner.method.to_string().as_str()))
+    .then_some(inner)
+}
+
+/// The call that makes a function a lock helper: its body ends in the call (the guard is returned), or binds
+/// the guard with `let` and ends in a call of one of its parameters that takes the guard (`f(&mut held)`)
+fn helper_call(sig: &syn::Signature, body: &syn::Block) -> Option<Pos> {
+    let Some(Stmt::Expr(tail, None)) = body.stmts.last() else {
+        return None;
+    };
+    if let Some(c) = lock_unwrap(tail) {
+        return Some(pos(c));
+    }
+    let Expr::Call(call) = tail else { return None };
+    let Expr::Path(f) = &*call.func else {
+        return None;
+    };
+    let f = f.path.get_ident()?;
+    let params = sig.inputs.iter().filter_map(|a| match a {
+        syn::FnArg::Typed(t) => pat_name(&t.pat),
+        syn::FnArg::Receiver(_) => None,
+    });
+    if !params.into_iter().any(|p| *f == p) {
+        return None;
+    }
+    call.args.iter().find_map(|a| {
+        let mut a = a;
+        while let Expr::Reference(syn::ExprReference { expr, .. })
+        | Expr::Paren(syn::ExprParen { expr, .. })
+        | Expr::Unary(syn::ExprUnary {
+            op: syn::UnOp::Deref(_),
+            expr,
+            ..
+        }) = a
+        {
+            a = expr;
+        }
+        let Expr::Path(arg) = a else { return None };
+        let arg = arg.path.get_ident()?;
+        body.stmts.iter().find_map(|s| match s {
+            Stmt::Local(l) if pat_name(&l.pat).is_some_and(|n| *arg == n) => {
+                l.init.as_ref().and_then(|i| lock_unwrap(&i.expr)).map(pos)
+            }
+            _ => None,
+        })
+    })
 }
 
 /// The guard method a value expression ends in, after peeling unwrap/expect/?/await
@@ -149,18 +256,31 @@ impl<'ast> Visit<'ast> for Scan<'_> {
 
 impl<'ast> Visit<'ast> for Guards<'_> {
     fn visit_expr_method_call(&mut self, m: &'ast syn::ExprMethodCall) {
-        let name = m.method.to_string();
-        if (name == "unwrap" || name == "expect")
-            && let Expr::MethodCall(inner) = &*m.receiver
-            && inner.args.is_empty()
-            && ["lock", "read", "write"].contains(&inner.method.to_string().as_str())
-        {
-            self.unwraps.push(
-                Span::new(self.file, inner.method.span().start().line as u32)
-                    .label(format!(".{}().{name}()", inner.method)),
-            );
+        if let Some(inner) = lock_unwrap_call(m) {
+            let at = pos(inner);
+            if let Some(f) = self.frames.last_mut() {
+                f.calls.push(self.unwraps.len());
+            }
+            self.unwraps.push(Unwrap {
+                span: Span::new(self.file, at.0 as u32)
+                    .label(format!(".{}().{}()", inner.method, m.method)),
+                helper: None,
+                at,
+            });
         }
         syn::visit::visit_expr_method_call(self, m);
+    }
+
+    fn visit_item_fn(&mut self, f: &'ast syn::ItemFn) {
+        self.enter(f.sig.ident.to_string(), &f.sig, &f.block);
+        syn::visit::visit_item_fn(self, f);
+        self.exit();
+    }
+
+    fn visit_impl_item_fn(&mut self, f: &'ast syn::ImplItemFn) {
+        self.enter(f.sig.ident.to_string(), &f.sig, &f.block);
+        syn::visit::visit_impl_item_fn(self, f);
+        self.exit();
     }
 
     fn visit_block(&mut self, b: &'ast syn::Block) {

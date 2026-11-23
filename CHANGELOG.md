@@ -5,6 +5,7 @@
 ### Fixed
 
 - `duplicate-versions` drops a crate reached only through dev-dependency edges, cargo-deny's own default (MAN-20).
+- `lock-unwrap` skips a crate's one lock helper that returns the guard or hands it to a closure (STATE-1).
 
 ## [0.7.9] - 2026-11-21
 

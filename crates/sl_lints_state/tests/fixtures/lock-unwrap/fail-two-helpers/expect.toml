@@ -1,0 +1,3 @@
+[[finding]]
+at = "src/lib.rs:10"
+contains = "2 lock().unwrap()-style calls (limit 0)"
