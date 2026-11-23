@@ -11,6 +11,7 @@ use sl_core::Date;
 use std::process::ExitCode;
 use vc_ui::Exit;
 
+mod badge;
 mod book;
 mod check;
 mod codes;

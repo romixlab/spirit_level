@@ -37,6 +37,7 @@ The table below is generated from each crate's `description` and its layer in th
 | Crate | Layer | Description |
 |---|---|---|
 | [`sl_core`](crates/sl_core) | core | spirit_level's shared types: lint metadata, levels, parameters, diagnostics, spans, fixes, dates and globs |
+| [`sl_badge`](crates/sl_badge) | model | The spirit_level README badge: a self-contained SVG naming the tier a repo extends and how strict its lint configuration is |
 | [`sl_board`](crates/sl_board) | model | spirit_level's model of board descriptions: board.toml through sl_board_model, stm32-data chip JSON, the MCU's nets from the PCB geometry |
 | [`sl_board_model`](crates/sl_board_model) | model | The board description board.toml: schema, loading with source spans, revisions and reworks as patches |
 | [`sl_book_refs`](crates/sl_book_refs) | model | A book's references in prose: the glossary its terms link to, and the index of public items its code links name, with the cards both show |

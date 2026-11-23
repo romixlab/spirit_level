@@ -76,6 +76,7 @@ fn env() -> Env<'static> {
         tier: &tier,
         today: Date::parse("2026-11-13").unwrap(),
         version: Some(Version(0, 3, 0)),
+        ladder: &["small", "big"],
     }
 }
 
@@ -708,4 +709,17 @@ fn book_table_names_the_crates_on_crates_io() {
         .unwrap();
     assert_eq!(c.book.on_crates_io, ["ww_tape", "ww_tape_codecs"]);
     assert!(load("extends = \"small\"\n[book]\nbogus = 1\n").is_err());
+}
+
+#[test]
+fn standing_places_the_project_between_the_size_tiers() {
+    let c = load("extends = [\"small\", \"fw\"]\n").unwrap();
+    let s = &c.standing;
+    assert_eq!(s.tier.as_deref(), Some("small"));
+    assert_eq!(s.beside, ["fw"]);
+    assert_eq!((s.on, s.total, s.scale), (2, 2, Some((1, 2))));
+    assert_eq!(s.label(), "small +1");
+    assert!((s.position() - 1.0).abs() < 1e-9);
+    let c = load("extends = \"small\"\n").unwrap();
+    assert!(c.standing.position().abs() < 1e-9);
 }

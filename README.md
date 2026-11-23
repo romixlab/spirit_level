@@ -14,6 +14,7 @@
   <a href="#licence"><img alt="License: MIT OR Apache-2.0" src="https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-373c42"></a>
   <a href="https://crates.io/crates/sl_board_model"><img alt="crates.io" src="https://img.shields.io/crates/v/sl_board_model"></a>
   <a href="https://docs.rs/sl_board_model"><img alt="docs.rs" src="https://img.shields.io/docsrs/sl_board_model"></a>
+  <a href="https://spl.vhrd.tech/tiers/big/"><img alt="spirit level" src=".github/spl-badge.svg"></a>
 </p>
 
 # spirit_level

@@ -1,0 +1,7 @@
+[[finding]]
+at = ".github/spl-badge.svg:1"
+contains = "there is no .github/spl-badge.svg"
+
+[[finding]]
+at = "README.md:3"
+contains = "shows .github/badge.svg, not the badge `spl badge` writes"

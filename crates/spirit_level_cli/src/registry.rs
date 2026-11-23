@@ -86,7 +86,8 @@ mod tests {
                 "panics",
                 "tools",
                 "usage",
-                "book"
+                "book",
+                "badge"
             ]
         );
     }

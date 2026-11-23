@@ -33,6 +33,7 @@ pub const HAND_PAGES: &[(&str, &str)] = &[
     ("Waivers", "waivers.md"),
     ("Commits and landing", "commits.md"),
     ("Output and exit codes", "output.md"),
+    ("The README badge", "badge.md"),
     ("External tools", "tools.md"),
     ("Dependents", "dependents.md"),
     ("Usage records", "usage.md"),
@@ -85,6 +86,7 @@ fn resolve(
                     day: 1,
                 },
                 version: None,
+                ladder: &[],
             };
             Config::from_tiers(&[name], &env)
                 .map(|c| (*name, c))

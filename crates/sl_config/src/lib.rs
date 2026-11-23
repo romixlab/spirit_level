@@ -61,6 +61,7 @@ mod error;
 pub mod exclude;
 pub mod map;
 mod reader;
+pub mod standing;
 
 pub use board::Board;
 pub use book::BookRefs;
@@ -72,6 +73,7 @@ pub use embedded::Embedded;
 pub use error::ConfigError;
 pub use exclude::Exclude;
 pub use map::{External, Layer, Map, MapCrate};
+pub use standing::Standing;
 
 use reader::Reader;
 use sl_core::{Date, Expiry, Level, LintMeta, ParamKind, ParamValue, Params, Version, glob};
@@ -187,6 +189,8 @@ pub struct Config {
     pub board: Board,
     /// The `[embedded]` table: task classes of firmware modules
     pub embedded: Embedded,
+    /// Where it stands among the size tiers: what `spl badge` shows
+    pub standing: Standing,
 }
 
 /// What a resolution needs to know besides the files
@@ -199,6 +203,8 @@ pub struct Env<'a> {
     pub today: Date,
     /// The project's version, for release expiries
     pub version: Option<Version>,
+    /// The size tiers, smallest first: they place a configuration's [`Standing`]
+    pub ladder: &'a [&'static str],
 }
 
 impl Config {
@@ -240,11 +246,19 @@ impl Config {
             (&source, &text),
             extends,
         )?;
+        c.standing = Standing::of(&c, env);
         Ok(c)
     }
 
     /// The configuration of shipped tiers alone, without a project file (`spl check --tier big`)
     pub fn from_tiers(tiers: &[&str], env: &Env<'_>) -> Result<Self, Vec<ConfigError>> {
+        let mut c = Self::resolve_tiers(tiers, env)?;
+        c.standing = Standing::of(&c, env);
+        Ok(c)
+    }
+
+    /// [`Config::from_tiers`] without its standing
+    fn resolve_tiers(tiers: &[&str], env: &Env<'_>) -> Result<Self, Vec<ConfigError>> {
         let mut r = Resolver::new(env, Path::new("."));
         r.record_at = 0;
         for t in tiers {
@@ -539,6 +553,7 @@ impl<'a> Resolver<'a> {
             cli: self.cli,
             board: self.board,
             embedded: self.embedded,
+            standing: Standing::default(),
         })
     }
 

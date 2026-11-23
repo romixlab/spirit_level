@@ -13,6 +13,7 @@ publish = false
 sl_analysis.workspace = true
 sl_config.workspace = true
 sl_core.workspace = true
+sl_badge.workspace = true
 sl_docs.workspace = true
 sl_model.workspace = true
 syn.workspace = true
