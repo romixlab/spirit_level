@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.7.12] - 2026-11-23
+
 ### Fixed
 
 - Files of a module inside an inline `#[cfg(test)] mod tests { .. }` count as test code (STATE-1).
