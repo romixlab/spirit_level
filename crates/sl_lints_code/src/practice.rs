@@ -42,6 +42,7 @@ pub(crate) fn run(cx: &Context<'_>, pkg: &Package) {
             contract: want_contract,
             words: units.list("words"),
             units: units.list("units"),
+            exempt: units.list("exempt"),
             methods: reads.list("methods"),
             bounds: reads.list("bounds"),
             suffix: cx.enabled(UNITS) && !cx.enabled(TYPED),
@@ -73,6 +74,8 @@ struct V<'p> {
     contract: bool,
     words: &'p [String],
     units: &'p [String],
+    /// Whole names that are not quantities, as a standard names them
+    exempt: &'p [String],
     methods: &'p [String],
     bounds: &'p [String],
     /// Whether `unit-suffix` runs: it is on and the unit does not go into the type
@@ -123,6 +126,9 @@ impl V<'_> {
             return;
         }
         let n = name.to_string();
+        if self.exempt.iter().any(|e| e.eq_ignore_ascii_case(&n)) {
+            return;
+        }
         if let Some(word) = missing_unit(&n, self.words, self.units) {
             self.found.push((
                 UNITS,

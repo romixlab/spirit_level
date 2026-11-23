@@ -4,7 +4,7 @@ A number named `timeout` may be seconds, milliseconds or ticks; the reader guess
 
 The lint runs only in a project that turned off [exact-units-quantity](C0033.md). That lint puts the unit into the type, where the compiler checks it, and a unit in the name is then redundant.
 
-The lint looks at numeric struct fields, constants and statics whose name holds a word of `words` (time and size words) but no word of `units`. It reads names only, so the finding is an estimate: a size counted in items passes with the item named (`queue_size_items`) or with the word added to `units`.
+The lint looks at numeric struct fields, constants and statics whose name holds a word of `words` (time and size words) but no word of `units`. It reads names only, so the finding is an estimate: a size counted in items passes with the item named (`queue_size_items`) or with the word added to `units`. A name in `exempt` passes whole: a protocol header field named as its standard names it (IPv4's `ttl` counts hops, not seconds).
 
 ```rust
 const READ_TIMEOUT: u64 = 500;        // reported

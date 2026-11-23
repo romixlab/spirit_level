@@ -23,3 +23,15 @@ pub struct Settings {
 mod tests {
     const DELAY: u32 = 1;
 }
+
+/// A protocol header's fields, named as the standard names them
+pub struct Ipv4Header {
+    /// Hops left, not a time
+    pub ttl: u8,
+}
+
+/// IPv6 calls the same field the hop limit
+pub struct Ipv6Header {
+    /// Hops left
+    pub hop_limit: u8,
+}
