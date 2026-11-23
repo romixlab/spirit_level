@@ -1,0 +1,6 @@
+[tier]
+description = "Library code does not print"
+
+[lints.print-in-library]
+level = "warn"
+reason = "printing is the binary's choice"

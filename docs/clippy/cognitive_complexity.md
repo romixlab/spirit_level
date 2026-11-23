@@ -14,14 +14,12 @@
 |---|---|---|---|
 | [small](../tiers/small.md) | not in the set |  |  |
 | [small-workspace](../tiers/small-workspace.md) | not in the set |  |  |
-| [medium](../tiers/medium.md) | `warn` | a function too tangled to follow in one read; complements spl's cyclomatic function-complexity | medium |
-| [big](../tiers/big.md) | `warn` | a function too tangled to follow in one read; complements spl's cyclomatic function-complexity | medium |
+| [medium](../tiers/medium.md) | `warn` | a function too tangled to follow in one read; complements spl's cyclomatic function-complexity | size-strict |
+| [big](../tiers/big.md) | `warn` | a function too tangled to follow in one read; complements spl's cyclomatic function-complexity | size-strict |
 | [ai](../tiers/ai.md) | `warn` | agents grow functions branch by branch; a tangled one is split | ai |
 | [embedded](../tiers/embedded.md) | not in the set |  |  |
 | [ui](../tiers/ui.md) | not in the set |  |  |
 | [egui](../tiers/egui.md) | not in the set |  |  |
-| [units-strict](../tiers/units-strict.md) | not in the set |  |  |
-| [units-paranoid](../tiers/units-paranoid.md) | not in the set |  |  |
 
 ## Configure
 

@@ -14,14 +14,12 @@
 |---|---|---|---|
 | [small](../tiers/small.md) | not in the set |  |  |
 | [small-workspace](../tiers/small-workspace.md) | not in the set |  |  |
-| [medium](../tiers/medium.md) | `1` | two bool parameters are a call site nobody can read; an enum or a struct says what each means | medium |
-| [big](../tiers/big.md) | `1` | two bool parameters are a call site nobody can read; an enum or a struct says what each means | medium |
+| [medium](../tiers/medium.md) | `1` | two bool parameters are a call site nobody can read; an enum or a struct says what each means | clippy-pedantic |
+| [big](../tiers/big.md) | `1` | two bool parameters are a call site nobody can read; an enum or a struct says what each means | clippy-pedantic |
 | [ai](../tiers/ai.md) | not in the set |  |  |
 | [embedded](../tiers/embedded.md) | not in the set |  |  |
 | [ui](../tiers/ui.md) | not in the set |  |  |
 | [egui](../tiers/egui.md) | not in the set |  |  |
-| [units-strict](../tiers/units-strict.md) | not in the set |  |  |
-| [units-paranoid](../tiers/units-paranoid.md) | not in the set |  |  |
 
 ## Configure
 

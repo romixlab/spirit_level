@@ -14,14 +14,12 @@
 |---|---|---|---|
 | [small](../tiers/small.md) | not in the set |  |  |
 | [small-workspace](../tiers/small-workspace.md) | not in the set |  |  |
-| [medium](../tiers/medium.md) | `warn` | the stricter idioms; the opt-outs below are the ones that are noise for most code | medium |
-| [big](../tiers/big.md) | `warn` | the stricter idioms; the opt-outs below are the ones that are noise for most code | medium |
+| [medium](../tiers/medium.md) | `warn` | the stricter idioms; the opt-outs below are the ones that are noise for most code | clippy-pedantic |
+| [big](../tiers/big.md) | `warn` | the stricter idioms; the opt-outs below are the ones that are noise for most code | clippy-pedantic |
 | [ai](../tiers/ai.md) | not in the set |  |  |
 | [embedded](../tiers/embedded.md) | not in the set |  |  |
 | [ui](../tiers/ui.md) | not in the set |  |  |
 | [egui](../tiers/egui.md) | not in the set |  |  |
-| [units-strict](../tiers/units-strict.md) | not in the set |  |  |
-| [units-paranoid](../tiers/units-paranoid.md) | not in the set |  |  |
 
 ## Configure
 

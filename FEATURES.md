@@ -53,6 +53,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `TIER-3` ai: agent files, terse output, AI-isms, stop-gap smells, agent-config hygiene; stands beside the size tiers.
 - ✅ `TIER-4` Clippy set per tier (`[clippy]` in tier files, modelled on rerun's), checked by `tier-clippy-set` (M0025) in the project's `[lints.clippy]` and `clippy.toml`.
 - ✅ `TIER-6` `elf-panic-inventory`: `spl panics --elf` lists every panic site of a release ELF (DWARF); `pan-1` holds each to `panics.toml` with a reason ([pan-1](docs/lints/F0110.md)).
+- ✅ `TIER-8` `lint-sets`: the size tiers are built from sets by guard (`tiers/sets/`); a project extends a set without its tier; a set reached twice applies once.
 - 📋 `TIER-7` `board-safe-state`: `board.toml` `safe` entries per output and `safe_state = "none"`; `flt-11` reads them instead of the function name alone.
 - ✅ `TIER-5` `board-lints`: board descriptions (`board.toml`) in the embedded tier: `brd-1`..`brd-7` against the schema, chip data and PCB nets; `[board]` table; the schema and loader `sl_board_model`, moved from embedded_bedrock, published ([Board descriptions](docs/boards.md)).
 

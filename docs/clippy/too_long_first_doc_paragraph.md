@@ -14,14 +14,12 @@
 |---|---|---|---|
 | [small](../tiers/small.md) | not in the set |  |  |
 | [small-workspace](../tiers/small-workspace.md) | not in the set |  |  |
-| [medium](../tiers/medium.md) | `warn` | the first doc paragraph is the summary rustdoc lists; one short sentence | medium |
-| [big](../tiers/big.md) | `warn` | the first doc paragraph is the summary rustdoc lists; one short sentence | medium |
+| [medium](../tiers/medium.md) | `warn` | the first doc paragraph is the summary rustdoc lists; one short sentence | clippy-pedantic |
+| [big](../tiers/big.md) | `warn` | the first doc paragraph is the summary rustdoc lists; one short sentence | clippy-pedantic |
 | [ai](../tiers/ai.md) | `warn` | agents write long doc summaries; the first paragraph is one short sentence | ai |
 | [embedded](../tiers/embedded.md) | not in the set |  |  |
 | [ui](../tiers/ui.md) | not in the set |  |  |
 | [egui](../tiers/egui.md) | not in the set |  |  |
-| [units-strict](../tiers/units-strict.md) | not in the set |  |  |
-| [units-paranoid](../tiers/units-paranoid.md) | not in the set |  |  |
 
 ## Configure
 

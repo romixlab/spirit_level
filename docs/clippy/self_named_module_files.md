@@ -14,14 +14,12 @@
 |---|---|---|---|
 | [small](../tiers/small.md) | not in the set |  |  |
 | [small-workspace](../tiers/small-workspace.md) | not in the set |  |  |
-| [medium](../tiers/medium.md) | `warn` | one module layout, mod.rs, across the workspace | medium |
-| [big](../tiers/big.md) | `warn` | one module layout, mod.rs, across the workspace | medium |
+| [medium](../tiers/medium.md) | `warn` | one module layout, mod.rs, across the workspace | clippy-pedantic |
+| [big](../tiers/big.md) | `warn` | one module layout, mod.rs, across the workspace | clippy-pedantic |
 | [ai](../tiers/ai.md) | `warn` | one module layout, mod.rs, across the workspace | ai |
 | [embedded](../tiers/embedded.md) | not in the set |  |  |
 | [ui](../tiers/ui.md) | not in the set |  |  |
 | [egui](../tiers/egui.md) | not in the set |  |  |
-| [units-strict](../tiers/units-strict.md) | not in the set |  |  |
-| [units-paranoid](../tiers/units-paranoid.md) | not in the set |  |  |
 
 ## Configure
 

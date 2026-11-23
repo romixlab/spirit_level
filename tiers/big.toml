@@ -1,5 +1,19 @@
 # Tier 4: a big workspace (rerun, zed, bevy, intent): layers declared and checked, sizes watched, everything strict.
-extends = "medium"
+
+extends = [
+  "medium",
+  "panics-paranoid",
+  "stop-gaps-strict",
+  "deps-strict",
+  "manifest-strict",
+  "repo-strict",
+  "build-strict",
+  "tests-strict",
+  "contracts-strict",
+  "layers",
+  "api",
+  "determinism",
+]
 
 [tier]
 description = "A big workspace: a crate map with layers checked edge by edge, size limits with expiring exceptions, strict conformity"
@@ -36,18 +50,6 @@ reason = "every PC and the gate build with the same compiler"
 level = "deny"
 reason = "a `cargo +nightly` in a recipe or CI bypasses the pinned toolchain"
 
-[lints.feature-docs]
-level = "warn"
-reason = "a feature without a comment cannot be chosen by a reader"
-
-[lints.justfile-simple]
-level = "warn"
-reason = "recipes call programs; logic lives in Rust where it is tested"
-
-[lints.test-lines]
-level = "warn"
-reason = "test code builds and links too"
-
 [lints.static-interior-mutability]
 level = "deny"
 reason = "every piece of mutable state has one owner; a global lock says why on the item"
@@ -56,53 +58,13 @@ reason = "every piece of mutable state has one owner; a global lock says why on 
 level = "deny"
 reason = "a guard across .await or I/O stalls every other caller for as long as the slowest peer"
 
-[lints.map-complete]
-level = "deny"
-reason = "the crate map is the source of truth: every crate in it, nothing gone"
-
-[lints.layer-edges]
-level = "deny"
-reason = "layers are declared and checked edge by edge; move a crate, never reorder layers"
-
 [lints.crate-folder-size]
 level = "deny"
 reason = "a flat crates/ past a few dozen crates groups by layer; a layer of about 100 crates by discipline"
 
-[lints.crate-folder-layer]
-level = "deny"
-reason = "the map decides the path: crates/<layer>/<crate>, a large layer by discipline, never deeper"
-
-[lints.forbidden-closure]
-level = "deny"
-reason = "some crates must never end up in a binary, however far away they arrive"
-
-[lints.external-form]
-level = "deny"
-reason = "outside projects come by git on a branch, listed once, used where their role allows"
-
-[lints.third-party-placement]
-level = "deny"
-reason = "heavy dependencies sit in one crate each"
-
 [lints.core-crate-deps]
 level = "deny"
 reason = "a _core crate holds shared types and drags nothing in"
-
-[lints.core-crate-types]
-level = "deny"
-reason = "_core crates hold only types: no I/O, threads or runtimes"
-
-[lints.crate-table]
-level = "deny"
-reason = "the crate table is generated from the manifests and the map, never written by hand"
-
-[lints.unsafe-allow-list]
-level = "deny"
-reason = "unsafe is forbidden except in the crates the map lists"
-
-[lints.map-licence]
-level = "deny"
-reason = "the map decides each layer's licence; a manifest that drifts ships under terms nobody chose"
 
 [lints.todo-macros]
 level = "deny"
@@ -112,18 +74,6 @@ reason = "no stop-gaps: a todo!() is a panic waiting in shipped code"
 level = "deny"
 reason = "an exception to a lint says why, or it outlives its reason"
 
-[lints.float-determinism]
-level = "deny"
-reason = "crates the map marks deterministic compute the same bits on every platform"
-
-[lints.random-state-hash]
-level = "deny"
-reason = "crates the map marks deterministic iterate in the same order every run"
-
-[lints.stop-gap-comments]
-level = "deny"
-reason = "no stop-gaps: a TODO or a 'for now' names its tracker id or goes"
-
 [lints.orphan-source-file]
 level = "deny"
 reason = "a file no mod reaches is never compiled or tested, yet reads like live code"
@@ -132,45 +82,9 @@ reason = "a file no mod reaches is never compiled or tested, yet reads like live
 level = "deny"
 reason = "a contract is read on every party; usize is 32 bits on some of them"
 
-[lints.contract-snapshot]
-level = "deny"
-reason = "every party of a contract knows its version and what that version looks like; a released snapshot never changes"
-
-[lints.unbounded-read]
-level = "warn"
-reason = "input from outside sets the memory a read to the end takes; candidates only, a place to look"
-
-[lints.fixme-before-land]
-level = "deny"
-reason = "a FIXME is a note for the branch; a candidate while it is in work, refused when it lands"
-
-[lints.fix-without-test]
-level = "warn"
-reason = "a bug is fixed when a test fails without the fix; a warning, since a fix is judged from its subject"
-
-[lints.agent-rules-match-lints]
-level = "warn"
-reason = "limits AGENTS.md states are the limits the lints check"
-
-[lints.dead-pub]
-level = "warn"
-reason = "rustc can't see pub items no other crate uses; in a big workspace they pile up (candidates, never fail)"
-
-[lints.pub-surface]
-level = "warn"
-reason = "in a big workspace pub is the easy way across crates; a library that is all surface keeps nothing apart"
-
-[lints.deny-bans]
-level = "deny"
-reason = "banned crates (OpenSSL, a second runtime) and duplicate versions stay out of a big graph"
-
 [lints.deny-licenses]
 level = "deny"
 reason = "every linked licence is one the project accepts, listed once in deny.toml"
-
-[lints.deny-sources]
-level = "deny"
-reason = "crates come only from the registries and git hosts deny.toml trusts"
 
 [lints.machete-unused-deps]
 level = "deny"
@@ -187,39 +101,3 @@ reason = "manifests are edited by people and by tools; one TOML formatting keeps
 [lints.cargo-msrv]
 level = "deny"
 reason = "the declared rust-version is built, so it stays true"
-
-[lints.cargo-no-std]
-level = "deny"
-reason = "a crate the map marks no_std is built for a target without std, or the promise breaks unseen"
-
-[lints.cargo-wasm]
-level = "deny"
-reason = "a crate the map marks wasm is built for wasm32, or the promise breaks unseen"
-
-[lints.semver-checks-breaking]
-level = "deny"
-reason = "a crate the map marks stable changes its API only with the version bump it needs"
-
-[lints.hakari-generate]
-level = "warn"
-reason = "a workspace-hack builds each shared dependency once; warn, as not every workspace wants one"
-
-[lints.hakari-manage-deps]
-level = "warn"
-reason = "the workspace-hack helps only the members that depend on it; warn, as adding one is each workspace's choice"
-
-[lints.compound-assert]
-level = "warn"
-reason = "assert!(a && b) is two assertions: a failure does not say which condition broke"
-
-[lints.assert-message]
-level = "warn"
-reason = "a failed assertion says in words what broke, not only the expression"
-
-# On top of medium's Clippy set: the restriction and nursery lints a big codebase wants.
-
-[clippy.lints]
-iter_over_hash_type = { level = "warn", reason = "iteration over a hash map changes order from run to run; random-state-hash reports the type" }
-float_cmp_const = { level = "warn", reason = "comparing a float to a constant exactly is almost always a bug" }
-lossy_float_literal = { level = "warn", reason = "a float literal that does not fit its type silently becomes another number" }
-imprecise_flops = { level = "warn", reason = "hypot, ln_1p and friends are more precise than the formula written out" }

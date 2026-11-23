@@ -1,0 +1,34 @@
+[tier]
+description = "The repo's files: README, CHANGELOG, AGENTS.md, justfile, pinned toolchain, tool versions"
+
+[lints.repo-files]
+level = "warn"
+reason = "every work repo carries README, AGENTS, CLAUDE, FEATURES and CHANGELOG"
+
+[lints.changelog-unreleased]
+level = "warn"
+reason = "work lands under [Unreleased]; the release step turns it into a version section"
+
+[lints.readme-badges]
+level = "warn"
+reason = "the top of the README tells a visitor whether the project passes and where its book, crate and API docs are"
+
+[lints.justfile-recipes]
+level = "warn"
+reason = "every repo answers to the same recipes: default, test, lint, install, deploy"
+
+[lints.agent-file-lines]
+level = "warn"
+reason = "agents read AGENTS.md whole every session; a long one is skimmed, not followed"
+
+[lints.tool-version]
+level = "deny"
+reason = "an external tool outside its tested range may print a shape the adapter misreads: its results cannot be trusted"
+
+[lints.toolchain-pinned]
+level = "warn"
+reason = "every PC and the gate build with the same compiler: one exact release or dated nightly, the pair spl ships"
+
+[lints.toolchain-overrides-pinned]
+level = "warn"
+reason = "a `cargo +nightly` in a recipe or CI bypasses the pinned toolchain"

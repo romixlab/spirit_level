@@ -1,0 +1,54 @@
+[tier]
+description = "Command-line tools: help, version, completion, colour, exit codes, secrets"
+
+[lints.cli-color-flag]
+level = "warn"
+reason = "--color settles what automatic colour guesses wrong, the same way in every tool; older CLIs add it when touched"
+
+[lints.cli-completion]
+level = "warn"
+reason = "completion makes a tool discoverable at the prompt; older CLIs add it when touched"
+
+[lints.cli-help-clean]
+level = "warn"
+reason = "rustdoc source in help hides the tool's description"
+
+[lints.cli-help-examples]
+level = "warn"
+reason = "a reader learns a command from its examples first; most existing CLIs lack them on many leaves"
+
+[lints.cli-help-text]
+level = "warn"
+reason = "-h is the map of a tool; an entry without a line leaves the reader guessing"
+
+[lints.cli-json-output]
+level = "allow"
+reason = "an estimate: help does not say which commands print data, so it fires on every setup command until a project lists them in exempt"
+
+[lints.cli-no-abbreviations]
+level = "warn"
+reason = "a caller's shorthand for one subcommand can silently point at a different one once a sibling is added"
+
+[lints.cli-plain-when-piped]
+level = "warn"
+reason = "colour escapes in a pipe break grep, diffs and scripts"
+
+[lints.cli-secret-flags]
+level = "warn"
+reason = "a candidate: a flag's name is a guess at its purpose, so a human reads each hit; the shell history and the process list both see a value passed on the command line"
+
+[lints.cli-standard-flags]
+level = "warn"
+reason = "short flags are habits across tools; a different meaning turns a habit into a mistake"
+
+[lints.cli-usage-error]
+level = "warn"
+reason = "a caller tells a wrong call from a failure by exit code 2"
+
+[lints.cli-version-line]
+level = "warn"
+reason = "the SHA and commit time say which build runs; older CLIs print other formats"
+
+[lints.command-registry]
+level = "warn"
+reason = "an estimate: past a handful of commands, one central list is the line every new command edits and every parallel branch conflicts on"

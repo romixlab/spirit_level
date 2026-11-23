@@ -1,0 +1,10 @@
+[tier]
+description = "Simple justfile recipes; AGENTS.md matches the lints"
+
+[lints.justfile-simple]
+level = "warn"
+reason = "recipes call programs; logic lives in Rust where it is tested"
+
+[lints.agent-rules-match-lints]
+level = "warn"
+reason = "limits AGENTS.md states are the limits the lints check"

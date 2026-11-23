@@ -1,53 +1,10 @@
 # Tier 2: a few crates in one workspace. Everything shared is declared once at the root.
-extends = "small"
+
+extends = ["small", "workspace", "state-strict"]
 
 [tier]
 description = "A small workspace: shared package keys, lints and dependencies declared once at the root and inherited"
 
-[lints.workspace-inheritance]
-level = "deny"
-reason = "edition, rust-version, licence and repository are declared once in [workspace.package]"
-
-[lints.workspace-lints]
-level = "deny"
-reason = "every crate inherits [workspace.lints], so one table is the policy"
-
-[lints.workspace-dependencies]
-level = "warn"
-reason = "one version per dependency per workspace, written once in [workspace.dependencies]"
-
-[lints.duplicate-versions]
-level = "warn"
-reason = "two versions of a crate double its build time and split its types"
-
-[lints.crate-dir-name]
-level = "warn"
-reason = "flat crates/<name>: the folder is the crate"
-
-[lints.macro-crate-suffix]
-level = "warn"
-reason = "_macros and _derive mean proc macros and nothing else"
-
 [lints.readme-per-crate]
 level = "deny"
 reason = "every crate of a workspace says what it is and what it may depend on"
-
-[lints.nested-locks]
-level = "warn"
-reason = "two locks at once need one lock order everywhere"
-
-[lints.thread-local-state]
-level = "warn"
-reason = "thread-local state is a hidden side channel between functions"
-
-[lints.crate-cycles]
-level = "warn"
-reason = "crates in a cycle cannot be built or tested apart"
-
-[lints.taplo-fmt]
-level = "warn"
-reason = "manifests are edited by people and by tools; one TOML formatting keeps their diffs about the change"
-
-[lints.ci-workflow]
-level = "warn"
-reason = "checks that only run on one PC get skipped; CI runs the repo's own checks on every push and pull request"

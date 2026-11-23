@@ -1,0 +1,6 @@
+[tier]
+description = "Dependency licences against deny.toml"
+
+[lints.deny-licenses]
+level = "warn"
+reason = "every linked licence is one the project accepts, listed once in deny.toml"

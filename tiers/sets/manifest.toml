@@ -1,0 +1,26 @@
+[tier]
+description = "Package metadata: description, licence, homepage, edition, README, the Clippy table"
+
+[lints.edition-latest]
+level = "warn"
+reason = "new code starts on the current edition"
+
+[lints.manifest-homepage]
+level = "warn"
+reason = "crates.io and docs.rs link to repository and homepage; when there is a book, it is the homepage a reader wants"
+
+[lints.package-description]
+level = "warn"
+reason = "the crate's one-line description is written once, in Cargo.toml; tables and READMEs are made from it"
+
+[lints.package-license]
+level = "warn"
+reason = "a crate without a licence cannot be reused or published"
+
+[lints.readme-per-crate]
+level = "warn"
+reason = "every crate says what it is and how to use it"
+
+[lints.tier-clippy-set]
+level = "warn"
+reason = "Clippy runs in the editor and CI from the project's own lint table; the tier says what belongs in it"

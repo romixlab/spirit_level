@@ -112,7 +112,7 @@ pub struct SampleArgs {
     /// Where to write the SVG picture
     #[arg(value_hint = clap::ValueHint::FilePath)]
     out: PathBuf,
-    /// Use shipped tiers instead of the project's configuration file (repeat to combine)
+    /// Use shipped tiers or sets instead of the project's configuration file (repeat to combine)
     #[arg(long, add = ArgValueCandidates::new(tier_candidates))]
     tier: Vec<String>,
     /// Only this lint or category (repeat for more)

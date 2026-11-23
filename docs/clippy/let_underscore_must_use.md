@@ -12,16 +12,14 @@
 
 | Tier | Level | Reason | Set in |
 |---|---|---|---|
-| [small](../tiers/small.md) | `warn` | `let _ =` on a must_use value drops an error unseen | small |
-| [small-workspace](../tiers/small-workspace.md) | `warn` | `let _ =` on a must_use value drops an error unseen | small |
-| [medium](../tiers/medium.md) | `warn` | `let _ =` on a must_use value drops an error unseen | small |
-| [big](../tiers/big.md) | `warn` | `let _ =` on a must_use value drops an error unseen | small |
+| [small](../tiers/small.md) | `warn` | `let _ =` on a must_use value drops an error unseen | panics |
+| [small-workspace](../tiers/small-workspace.md) | `warn` | `let _ =` on a must_use value drops an error unseen | panics |
+| [medium](../tiers/medium.md) | `warn` | `let _ =` on a must_use value drops an error unseen | panics |
+| [big](../tiers/big.md) | `warn` | `let _ =` on a must_use value drops an error unseen | panics |
 | [ai](../tiers/ai.md) | not in the set |  |  |
 | [embedded](../tiers/embedded.md) | not in the set |  |  |
 | [ui](../tiers/ui.md) | not in the set |  |  |
 | [egui](../tiers/egui.md) | not in the set |  |  |
-| [units-strict](../tiers/units-strict.md) | not in the set |  |  |
-| [units-paranoid](../tiers/units-paranoid.md) | not in the set |  |  |
 
 ## Configure
 

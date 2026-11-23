@@ -1,0 +1,14 @@
+[tier]
+description = "Shared state: no static mut, statics with interior mutability named, no lock held across a wait"
+
+[lints.static-mut]
+level = "deny"
+reason = "global mutable state with no synchronisation; there is always a better owner"
+
+[lints.static-interior-mutability]
+level = "warn"
+reason = "every piece of mutable state has one owner; a global lock says why"
+
+[lints.lock-held-across]
+level = "warn"
+reason = "a guard across .await or I/O stalls every other caller for as long as the slowest peer"

@@ -36,13 +36,135 @@ pub static TIERS: &[(&str, &str)] = &[
     ("embedded", include_str!("../../../tiers/embedded.toml")),
     ("ui", include_str!("../../../tiers/ui.toml")),
     ("egui", include_str!("../../../tiers/egui.toml")),
+];
+
+/// The shipped sets: small groups of lints by what they guard.
+///
+/// The ladder tiers are built from them, and a project may extend one on its own. A guard's lints that enter at a
+/// later tier sit in its `-strict` and `-paranoid` sets.
+pub static SETS: &[(&str, &str)] = &[
+    ("waivers", include_str!("../../../tiers/sets/waivers.toml")),
+    ("panics", include_str!("../../../tiers/sets/panics.toml")),
+    (
+        "stop-gaps",
+        include_str!("../../../tiers/sets/stop-gaps.toml"),
+    ),
+    ("unsafe", include_str!("../../../tiers/sets/unsafe.toml")),
+    ("state", include_str!("../../../tiers/sets/state.toml")),
+    (
+        "printing",
+        include_str!("../../../tiers/sets/printing.toml"),
+    ),
+    ("deps", include_str!("../../../tiers/sets/deps.toml")),
+    ("docs", include_str!("../../../tiers/sets/docs.toml")),
+    ("book", include_str!("../../../tiers/sets/book.toml")),
+    ("reading", include_str!("../../../tiers/sets/reading.toml")),
+    ("prose", include_str!("../../../tiers/sets/prose.toml")),
+    ("repo", include_str!("../../../tiers/sets/repo.toml")),
+    ("build", include_str!("../../../tiers/sets/build.toml")),
+    (
+        "manifest",
+        include_str!("../../../tiers/sets/manifest.toml"),
+    ),
+    ("cli", include_str!("../../../tiers/sets/cli.toml")),
+    ("size", include_str!("../../../tiers/sets/size.toml")),
+    ("units", include_str!("../../../tiers/sets/units.toml")),
+    (
+        "workspace",
+        include_str!("../../../tiers/sets/workspace.toml"),
+    ),
+    (
+        "state-strict",
+        include_str!("../../../tiers/sets/state-strict.toml"),
+    ),
+    (
+        "clippy-pedantic",
+        include_str!("../../../tiers/sets/clippy-pedantic.toml"),
+    ),
+    (
+        "waivers-strict",
+        include_str!("../../../tiers/sets/waivers-strict.toml"),
+    ),
+    (
+        "panics-strict",
+        include_str!("../../../tiers/sets/panics-strict.toml"),
+    ),
+    (
+        "printing-strict",
+        include_str!("../../../tiers/sets/printing-strict.toml"),
+    ),
+    (
+        "state-paranoid",
+        include_str!("../../../tiers/sets/state-paranoid.toml"),
+    ),
+    (
+        "licences",
+        include_str!("../../../tiers/sets/licences.toml"),
+    ),
+    ("msrv", include_str!("../../../tiers/sets/msrv.toml")),
+    ("commits", include_str!("../../../tiers/sets/commits.toml")),
+    ("tests", include_str!("../../../tiers/sets/tests.toml")),
+    (
+        "size-strict",
+        include_str!("../../../tiers/sets/size-strict.toml"),
+    ),
+    (
+        "structure",
+        include_str!("../../../tiers/sets/structure.toml"),
+    ),
+    (
+        "contracts",
+        include_str!("../../../tiers/sets/contracts.toml"),
+    ),
+    (
+        "workspace-strict",
+        include_str!("../../../tiers/sets/workspace-strict.toml"),
+    ),
+    (
+        "panics-paranoid",
+        include_str!("../../../tiers/sets/panics-paranoid.toml"),
+    ),
+    (
+        "stop-gaps-strict",
+        include_str!("../../../tiers/sets/stop-gaps-strict.toml"),
+    ),
+    (
+        "deps-strict",
+        include_str!("../../../tiers/sets/deps-strict.toml"),
+    ),
+    (
+        "manifest-strict",
+        include_str!("../../../tiers/sets/manifest-strict.toml"),
+    ),
+    (
+        "repo-strict",
+        include_str!("../../../tiers/sets/repo-strict.toml"),
+    ),
+    (
+        "build-strict",
+        include_str!("../../../tiers/sets/build-strict.toml"),
+    ),
+    (
+        "tests-strict",
+        include_str!("../../../tiers/sets/tests-strict.toml"),
+    ),
+    (
+        "contracts-strict",
+        include_str!("../../../tiers/sets/contracts-strict.toml"),
+    ),
+    ("layers", include_str!("../../../tiers/sets/layers.toml")),
+    ("api", include_str!("../../../tiers/sets/api.toml")),
+    (
+        "determinism",
+        include_str!("../../../tiers/sets/determinism.toml"),
+    ),
     (
         "units-strict",
-        include_str!("../../../tiers/units-strict.toml"),
+        include_str!("../../../tiers/sets/units-strict.toml"),
     ),
     (
         "units-paranoid",
-        include_str!("../../../tiers/units-paranoid.toml"),
+        include_str!("../../../tiers/sets/units-paranoid.toml"),
     ),
 ];
 
@@ -112,9 +234,13 @@ pub fn shift(extends: &[String], at: &At) -> Result<Shift, CheckError> {
     Ok(Shift { from, to, extends })
 }
 
-/// The text of a shipped tier
+/// The text of a shipped tier or set
 pub fn tier(name: &str) -> Option<&'static str> {
-    TIERS.iter().find(|(n, _)| *n == name).map(|(_, t)| *t)
+    TIERS
+        .iter()
+        .chain(SETS)
+        .find(|(n, _)| *n == name)
+        .map(|(_, t)| *t)
 }
 
 /// The description line of a tier (`[tier] description`)
@@ -123,6 +249,29 @@ pub fn tier_description(text: &str) -> String {
         .find_map(|l| l.trim().strip_prefix("description = "))
         .map(|d| d.trim_matches('"').to_owned())
         .unwrap_or_default()
+}
+
+/// What a shipped tier or set extends, in order: its `extends` as a string or a list
+pub fn tier_extends(text: &str) -> Vec<String> {
+    let Ok(doc) = text.parse::<toml_edit::DocumentMut>() else {
+        return Vec::new();
+    };
+    match doc.get("extends") {
+        Some(toml_edit::Item::Value(toml_edit::Value::String(s))) => vec![s.value().clone()],
+        Some(toml_edit::Item::Value(toml_edit::Value::Array(a))) => a
+            .iter()
+            .filter_map(|v| v.as_str().map(str::to_owned))
+            .collect(),
+        _ => Vec::new(),
+    }
+}
+
+/// The ladder tier that extends `set`, if any; a set no ladder tier extends stands beside them
+pub fn set_tier(set: &str) -> Option<&'static str> {
+    LADDER
+        .iter()
+        .copied()
+        .find(|t| tier(t).is_some_and(|text| tier_extends(text).iter().any(|e| e == set)))
 }
 
 /// Every registered analysis
@@ -411,10 +560,10 @@ mod tests {
     fn each_ladder_tier_extends_the_one_before() {
         for w in LADDER.windows(2) {
             let text = tier(w[1]).expect("a ladder tier is shipped");
-            assert!(
-                text.lines()
-                    .any(|l| l.trim() == format!("extends = {:?}", w[0])),
-                "{} extends {}",
+            assert_eq!(
+                tier_extends(text).first().map(String::as_str),
+                Some(w[0]),
+                "{} extends {} first",
                 w[1],
                 w[0]
             );
@@ -540,7 +689,7 @@ mod tests {
     #[test]
     fn every_tier_resolves() {
         let all = lints();
-        for (name, _) in TIERS {
+        for (name, _) in TIERS.iter().chain(SETS) {
             let env = Env {
                 lints: &all,
                 tier: &tier,
@@ -550,6 +699,55 @@ mod tests {
             if let Err(e) = Config::from_tiers(&[name], &env) {
                 panic!("tier {name}: {e:?}");
             }
+        }
+    }
+
+    #[test]
+    fn tier_and_set_names_are_unique() {
+        let mut names: Vec<&str> = TIERS.iter().chain(SETS).map(|(n, _)| *n).collect();
+        let n = names.len();
+        names.sort_unstable();
+        names.dedup();
+        assert_eq!(n, names.len(), "a set shares a name with a tier or a set");
+    }
+
+    /// A ladder tier is the tier below, its sets, and raises of lints those already turn on: every lint it names
+    /// is enabled by what it extends, and every set but the units add-ons sits in exactly one ladder tier
+    #[test]
+    fn ladder_tiers_are_unions_of_sets() {
+        let all = lints();
+        let env = Env {
+            lints: &all,
+            tier: &tier,
+            today: Date::parse("2026-11-13").unwrap(),
+            version: None,
+        };
+        for t in LADDER {
+            let text = tier(t).expect("a ladder tier is shipped");
+            let ext = tier_extends(text);
+            let ext: Vec<&str> = ext.iter().map(String::as_str).collect();
+            let below = Config::from_tiers(&ext, &env).unwrap();
+            let own = text
+                .parse::<toml_edit::DocumentMut>()
+                .expect("a shipped tier parses");
+            assert!(own.get("clippy").is_none(), "{t} sets Clippy lints itself");
+            if let Some(lints) = own.get("lints").and_then(toml_edit::Item::as_table) {
+                for (id, _) in lints {
+                    assert_ne!(
+                        below.lint(id).level,
+                        sl_core::Level::Allow,
+                        "{t} turns on {id}, which none of its sets holds"
+                    );
+                }
+            }
+        }
+        for (s, _) in SETS {
+            let n = LADDER
+                .iter()
+                .filter(|t| tier_extends(tier(t).unwrap()).iter().any(|e| e == s))
+                .count();
+            let add_on = s.starts_with("units-");
+            assert_eq!(n, usize::from(!add_on), "{s} sits in {n} ladder tiers");
         }
     }
 }

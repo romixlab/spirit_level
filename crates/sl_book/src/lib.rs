@@ -45,8 +45,35 @@ pub const HAND_PAGES: &[(&str, &str)] = &[
 /// The level and reason of every lint in every shipped tier (each tier resolved with what it extends), in the
 /// order of `spirit_level::TIERS`; an error names a shipped tier that does not resolve
 pub fn tier_levels() -> Result<Vec<(&'static str, Config)>, String> {
+    resolve(spirit_level::TIERS)
+}
+
+/// Every shipped set resolved alone, in the order of `spirit_level::SETS`
+pub fn set_levels() -> Result<Vec<(&'static str, Config)>, String> {
+    resolve(spirit_level::SETS)
+}
+
+/// The set each lint belongs to, by lint id: the set whose own file sets it
+pub fn set_of(sets: &[(&'static str, Config)]) -> BTreeMap<&'static str, &'static str> {
+    let mut out = BTreeMap::new();
+    for m in spirit_level::lints() {
+        if let Some((name, _)) = sets.iter().find(|(name, c)| {
+            c.lint(m.id)
+                .origin
+                .as_ref()
+                .is_some_and(|o| o.file == format!("tier:{name}"))
+        }) {
+            out.insert(m.id, *name);
+        }
+    }
+    out
+}
+
+fn resolve(
+    shipped: &[(&'static str, &'static str)],
+) -> Result<Vec<(&'static str, Config)>, String> {
     let lints = spirit_level::lints();
-    spirit_level::TIERS
+    shipped
         .iter()
         .map(|(name, _)| {
             let env = Env {
@@ -70,15 +97,20 @@ pub fn tier_levels() -> Result<Vec<(&'static str, Config)>, String> {
 pub fn pages() -> Result<BTreeMap<String, String>, String> {
     let lints = spirit_level::lints();
     let tiers = tier_levels()?;
+    let sets = set_levels()?;
+    let set_of = set_of(&sets);
     let mut out = BTreeMap::new();
     for m in &lints {
-        let mut page = lint_page(m, &tiers);
+        let mut page = lint_page(m, &tiers, set_of.get(m.id).copied());
         if m.code == "M0025" {
             page.push_str(&clippy::m0025_section(&tiers));
         }
         out.insert(format!("lints/{}.md", m.code), page);
     }
-    out.insert("lints/index.md".into(), lints_index(&lints, &tiers));
+    out.insert(
+        "lints/index.md".into(),
+        lints_index(&lints, &tiers, &set_of),
+    );
     for (name, kind) in clippy::entries(&tiers) {
         out.insert(clippy::path(&name), clippy::page(&name, kind, &tiers));
     }
@@ -86,6 +118,7 @@ pub fn pages() -> Result<BTreeMap<String, String>, String> {
         out.insert(format!("tiers/{name}.md"), tier_page(name, text, c, &lints));
     }
     out.insert("tiers/index.md".into(), tiers_index());
+    out.insert("tiers/sets.md".into(), sets_page(&sets, &lints));
     Ok(out)
 }
 
@@ -119,7 +152,7 @@ pub(crate) fn cell(s: &str) -> String {
 }
 
 /// One lint's page, named after its code; the id is an anchor at the top, so `<code>.md#<id>` finds it too
-pub fn lint_page(m: &LintMeta, tiers: &[(&str, Config)]) -> String {
+pub fn lint_page(m: &LintMeta, tiers: &[(&str, Config)], set: Option<&str>) -> String {
     let mut s = String::new();
     let _ = writeln!(s, "# {} {} {{ #{} }}\n", m.code, m.id, m.code);
     let _ = writeln!(s, "<a id=\"{}\"></a>\n", m.id);
@@ -128,6 +161,9 @@ pub fn lint_page(m: &LintMeta, tiers: &[(&str, Config)]) -> String {
     let _ = writeln!(s, "| Code | `{}` (stable, never reused) |", m.code);
     let _ = writeln!(s, "| Id | `{}` |", m.id);
     let _ = writeln!(s, "| Category | [{0}](index.md#{0}) |", m.category);
+    if let Some(set) = set {
+        let _ = writeln!(s, "| Set | [{set}](../tiers/sets.md#{set}) |");
+    }
     let _ = writeln!(s, "| Source | {} |", source(m));
     if let Source::Tool {
         name,
@@ -200,8 +236,8 @@ pub fn lint_page(m: &LintMeta, tiers: &[(&str, Config)]) -> String {
 }
 
 /// One lint's page for the terminal (`spl explain`): the book page without its anchors
-pub fn lint_text(m: &LintMeta, tiers: &[(&str, Config)]) -> String {
-    lint_page(m, tiers)
+pub fn lint_text(m: &LintMeta, tiers: &[(&str, Config)], set: Option<&str>) -> String {
+    lint_page(m, tiers, set)
         .replacen(&format!(" {{ #{} }}", m.code), "", 1)
         .replacen(&format!("<a id=\"{}\"></a>\n\n", m.id), "", 1)
 }
@@ -213,9 +249,13 @@ pub(crate) fn capital(s: &str) -> String {
     })
 }
 
-fn lints_index(lints: &[&LintMeta], tiers: &[(&str, Config)]) -> String {
+fn lints_index(
+    lints: &[&LintMeta],
+    tiers: &[(&str, Config)],
+    set_of: &BTreeMap<&str, &str>,
+) -> String {
     let mut s = String::from(
-        "# Lints\n\nEvery lint, grouped by category, with its stable code and its level in each shipped tier (`off`: the tier does not enable it). A project changes any of them in its `spirit_level.toml` ([configuration](../configuration.md)).\n",
+        "# Lints\n\nEvery lint, grouped by category, with its stable code, the [set](../tiers/sets.md) it belongs to and its level in each shipped tier (`off`: the tier does not enable it). A project changes any of them in its `spirit_level.toml` ([configuration](../configuration.md)).\n",
     );
     let mut cats: BTreeMap<&str, Vec<&LintMeta>> = BTreeMap::new();
     for m in lints {
@@ -223,8 +263,8 @@ fn lints_index(lints: &[&LintMeta], tiers: &[(&str, Config)]) -> String {
     }
     for (cat, ms) in cats {
         let _ = writeln!(s, "\n## {cat}\n");
-        let mut head = String::from("| Code | Lint | Rule |");
-        let mut sep = String::from("|---|---|---|");
+        let mut head = String::from("| Code | Lint | Rule | Set |");
+        let mut sep = String::from("|---|---|---|---|");
         for (n, _) in tiers {
             let _ = write!(head, " {n} |");
             sep.push_str("---|");
@@ -233,8 +273,11 @@ fn lints_index(lints: &[&LintMeta], tiers: &[(&str, Config)]) -> String {
         let mut ms = ms;
         ms.sort_by_key(|m| m.code);
         for m in ms {
+            let set = set_of
+                .get(m.id)
+                .map_or_else(String::new, |n| format!("[{n}](../tiers/sets.md#{n})"));
             let mut row = format!(
-                "| [{0}]({0}.md) | [{1}]({0}.md) | {2} |",
+                "| [{0}]({0}.md) | [{1}]({0}.md) | {2} | {set} |",
                 m.code,
                 m.id,
                 cell(m.summary)
@@ -259,16 +302,32 @@ fn tier_page(name: &str, text: &str, c: &Config, lints: &[&LintMeta]) -> String 
         "# {name}\n\n{}.\n\n",
         capital(&spirit_level::tier_description(text))
     );
-    let ext: Vec<&str> = text
-        .lines()
-        .find_map(|l| l.trim().strip_prefix("extends = "))
-        .map(|e| vec![e.trim_matches('"')])
-        .unwrap_or_default();
-    if let Some(e) = ext.first() {
-        let _ = writeln!(
-            s,
-            "Extends [{e}]({e}.md): everything below is on top of it.\n"
-        );
+    let ext = spirit_level::tier_extends(text);
+    let (sets, tiers): (Vec<&String>, Vec<&String>) = ext
+        .iter()
+        .partition(|e| spirit_level::SETS.iter().any(|(n, _)| n == e));
+    let tiers: Vec<String> = tiers.iter().map(|e| shipped_link(e)).collect();
+    let sets: Vec<String> = sets.iter().map(|e| shipped_link(e)).collect();
+    match (tiers.is_empty(), sets.is_empty()) {
+        (true, true) => {}
+        (false, true) => {
+            let _ = writeln!(
+                s,
+                "Extends {}: everything below is on top of it.\n",
+                tiers.join(", ")
+            );
+        }
+        (true, false) => {
+            let _ = writeln!(s, "Made of the sets {}.\n", sets.join(", "));
+        }
+        (false, false) => {
+            let _ = writeln!(
+                s,
+                "Extends {} and adds the sets {}; its own table only raises lints they turn on.\n",
+                tiers.join(", "),
+                sets.join(", ")
+            );
+        }
     }
     let _ = writeln!(
         s,
@@ -285,9 +344,10 @@ fn tier_page(name: &str, text: &str, c: &Config, lints: &[&LintMeta]) -> String 
         if l.level == Level::Allow {
             continue;
         }
-        let at = l.origin.as_ref().map_or(String::new(), |o| {
-            o.file.trim_start_matches("tier:").to_owned()
-        });
+        let at = l
+            .origin
+            .as_ref()
+            .map_or(String::new(), |o| shipped_link(&o.file));
         let _ = writeln!(
             s,
             "| [{0}](../lints/{0}.md) | {1} | `{2}` | {3} | {4} |",
@@ -309,7 +369,7 @@ fn clippy_set(s: &mut String, c: &Config) {
     if set.is_empty() {
         return;
     }
-    let set_in = |o: &sl_config::Origin| o.file.trim_start_matches("tier:").to_owned();
+    let set_in = |o: &sl_config::Origin| shipped_link(&o.file);
     let _ = writeln!(
         s,
         "\n## Clippy set (with what it extends)\n\nThe project turns these on in its own `[workspace.lints.clippy]` (`allow` rows are accepted opt-outs, pasted with their reason); [tier-clippy-set](../lints/M0025.md) checks it.\n\n| Clippy lint | Level | Reason | Set in |\n|---|---|---|---|"
@@ -344,9 +404,92 @@ fn clippy_set(s: &mut String, c: &Config) {
     }
 }
 
+/// Where a level was set, as a link to its tier page or its set
+fn shipped_link(file: &str) -> String {
+    let n = file.trim_start_matches("tier:");
+    if spirit_level::SETS.iter().any(|(s, _)| *s == n) {
+        format!("[{n}](sets.md#{n})")
+    } else if spirit_level::TIERS.iter().any(|(t, _)| *t == n) {
+        format!("[{n}]({n}.md)")
+    } else {
+        n.to_owned()
+    }
+}
+
+/// Every set under the ladder tier that first holds it, with its lints and Clippy lints
+fn sets_page(sets: &[(&'static str, Config)], lints: &[&LintMeta]) -> String {
+    let mut s = String::from(
+        "# Sets\n\nA set is a small group of lints by what they guard. The size tiers are built from sets: each tier extends the one below it and adds its own sets, and its own table only raises lints those sets turn on. A project extends a set on its own to take those lints before a whole bigger tier: `extends = [\"small-workspace\", \"msrv\", \"deps-strict\"]`. A set a tier already holds is applied once, so naming it again never lowers a level the tier raised.\n\nA guard's lints that enter at a later tier sit in its `-strict` and `-paranoid` sets: `panics` comes with small, `panics-strict` with medium, `panics-paranoid` with big.\n",
+    );
+    let mut ids: Vec<&LintMeta> = lints.to_vec();
+    ids.sort_by_key(|m| m.code);
+    let mut groups: Vec<(String, Vec<&(&str, Config)>)> = spirit_level::LADDER
+        .iter()
+        .map(|t| (format!("In {t}"), Vec::new()))
+        .collect();
+    groups.push(("Beside the tiers".to_owned(), Vec::new()));
+    for set in sets {
+        let i = spirit_level::set_tier(set.0)
+            .and_then(|t| spirit_level::LADDER.iter().position(|l| *l == t))
+            .unwrap_or(spirit_level::LADDER.len());
+        groups[i].1.push(set);
+    }
+    for (head, members) in groups {
+        let _ = writeln!(s, "\n## {head}");
+        for (name, c) in members {
+            let text = spirit_level::tier(name).unwrap_or_default();
+            let _ = writeln!(
+                s,
+                "\n### {name} {{ #{name} }}\n\n{}.\n",
+                capital(&spirit_level::tier_description(text))
+            );
+            let ext = spirit_level::tier_extends(text);
+            if !ext.is_empty() {
+                let l: Vec<String> = ext.iter().map(|e| format!("[{e}](#{e})")).collect();
+                let _ = writeln!(s, "Extends {}.\n", l.join(", "));
+            }
+            let own = format!("tier:{name}");
+            let mine = |o: &sl_config::Origin| o.file == own;
+            let rows: Vec<String> = ids
+                .iter()
+                .filter_map(|m| {
+                    let l = c.lint(m.id);
+                    l.origin.as_ref().filter(|o| mine(o)).map(|_| {
+                        format!(
+                            "| [{0}](../lints/{0}.md) | {1} | `{2}` |",
+                            m.code, m.id, l.level
+                        )
+                    })
+                })
+                .chain(
+                    c.clippy
+                        .lints
+                        .iter()
+                        .filter(|(_, l)| mine(&l.origin))
+                        .map(|(n, l)| {
+                            format!(
+                                "| [Clippy](../{}) | `{n}` | `{}` |",
+                                clippy::path(n),
+                                l.level
+                            )
+                        }),
+                )
+                .collect();
+            if !rows.is_empty() {
+                let _ = writeln!(
+                    s,
+                    "| Code | Lint | Level |\n|---|---|---|\n{}",
+                    rows.join("\n")
+                );
+            }
+        }
+    }
+    s
+}
+
 fn tiers_index() -> String {
     let mut s = String::from(
-        "# Tiers\n\nA tier is a TOML file of lints shipped with spirit_level. Each size tier extends the one before it; a project picks one with `extends` and adds its own settings on top. Tiers that stand beside the size tiers (like `embedded` and `ai`) are combined with one: `extends = [\"small\", \"embedded\"]`.\n\n`spl tiers` shows the ladder and marks the tiers a project extends. `spl check --next` checks a project at the next size tier, `spl check --at TIER` at any, both with the project's own overrides and exceptions and without writing anything.\n\n| Tier | What it is for |\n|---|---|\n",
+        "# Tiers\n\nA tier is a TOML file of lints shipped with spirit_level. Each size tier extends the one before it; a project picks one with `extends` and adds its own settings on top. Each size tier is built from [sets](sets.md), small groups of lints by what they guard, and a project may extend a set on its own. Tiers that stand beside the size tiers (like `embedded` and `ai`) are combined with one: `extends = [\"small\", \"embedded\"]`.\n\n`spl tiers` shows the ladder and marks the tiers a project extends. `spl check --next` checks a project at the next size tier, `spl check --at TIER` at any, both with the project's own overrides and exceptions and without writing anything.\n\n| Tier | What it is for |\n|---|---|\n",
     );
     for (n, t) in spirit_level::TIERS {
         let _ = writeln!(
@@ -368,6 +511,7 @@ pub fn nav() -> std::io::Result<String> {
     for (n, _) in spirit_level::TIERS {
         let _ = writeln!(s, "        \"tiers/{n}.md\",");
     }
+    let _ = writeln!(s, "        \"tiers/sets.md\",");
     let _ = writeln!(
         s,
         "    ] }},\n    {{ \"Lints\" = [\n        \"lints/index.md\","

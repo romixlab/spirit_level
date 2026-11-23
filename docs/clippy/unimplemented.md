@@ -12,16 +12,14 @@
 
 | Tier | Level | Reason | Set in |
 |---|---|---|---|
-| [small](../tiers/small.md) | `warn` | no stop-gaps: an unimplemented!() is a panic waiting in shipped code | small |
-| [small-workspace](../tiers/small-workspace.md) | `warn` | no stop-gaps: an unimplemented!() is a panic waiting in shipped code | small |
-| [medium](../tiers/medium.md) | `warn` | no stop-gaps: an unimplemented!() is a panic waiting in shipped code | small |
-| [big](../tiers/big.md) | `warn` | no stop-gaps: an unimplemented!() is a panic waiting in shipped code | small |
+| [small](../tiers/small.md) | `warn` | no stop-gaps: an unimplemented!() is a panic waiting in shipped code | stop-gaps |
+| [small-workspace](../tiers/small-workspace.md) | `warn` | no stop-gaps: an unimplemented!() is a panic waiting in shipped code | stop-gaps |
+| [medium](../tiers/medium.md) | `warn` | no stop-gaps: an unimplemented!() is a panic waiting in shipped code | stop-gaps |
+| [big](../tiers/big.md) | `warn` | no stop-gaps: an unimplemented!() is a panic waiting in shipped code | stop-gaps |
 | [ai](../tiers/ai.md) | not in the set |  |  |
 | [embedded](../tiers/embedded.md) | not in the set |  |  |
 | [ui](../tiers/ui.md) | not in the set |  |  |
 | [egui](../tiers/egui.md) | not in the set |  |  |
-| [units-strict](../tiers/units-strict.md) | not in the set |  |  |
-| [units-paranoid](../tiers/units-paranoid.md) | not in the set |  |  |
 
 ## Configure
 

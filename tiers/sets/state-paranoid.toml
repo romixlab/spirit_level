@@ -1,0 +1,6 @@
+[tier]
+description = "Where shared state concentrates: lock().unwrap() counted per crate"
+
+[lints.lock-unwrap]
+level = "warn"
+reason = "the count of lock().unwrap() per crate shows where shared state concentrates"

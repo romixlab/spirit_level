@@ -1,0 +1,16 @@
+[tier]
+description = "Deterministic results: libm floats, fixed-seed hashing, exact float literals and comparisons"
+
+[lints.float-determinism]
+level = "deny"
+reason = "crates the map marks deterministic compute the same bits on every platform"
+
+[lints.random-state-hash]
+level = "deny"
+reason = "crates the map marks deterministic iterate in the same order every run"
+
+[clippy.lints]
+iter_over_hash_type = { level = "warn", reason = "iteration over a hash map changes order from run to run; random-state-hash reports the type" }
+float_cmp_const = { level = "warn", reason = "comparing a float to a constant exactly is almost always a bug" }
+lossy_float_literal = { level = "warn", reason = "a float literal that does not fit its type silently becomes another number" }
+imprecise_flops = { level = "warn", reason = "hypot, ln_1p and friends are more precise than the formula written out" }

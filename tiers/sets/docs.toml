@@ -1,0 +1,10 @@
+[tier]
+description = "API docs: crate docs, cargo doc without warnings"
+
+[lints.cargo-doc]
+level = "warn"
+reason = "broken intra-doc links and tags render wrong on docs.rs and in the IDE"
+
+[lints.crate-docs]
+level = "warn"
+reason = "rustdoc's front page of the crate is its crate-level docs"

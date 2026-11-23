@@ -20,8 +20,6 @@
 | [embedded](../tiers/embedded.md) | `warn` | a loop that never ends returns `!`, so the hang is a type, not a surprise | embedded |
 | [ui](../tiers/ui.md) | not in the set |  |  |
 | [egui](../tiers/egui.md) | not in the set |  |  |
-| [units-strict](../tiers/units-strict.md) | not in the set |  |  |
-| [units-paranoid](../tiers/units-paranoid.md) | not in the set |  |  |
 
 ## Configure
 

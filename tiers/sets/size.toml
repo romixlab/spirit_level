@@ -1,0 +1,10 @@
+[tier]
+description = "Function size and complexity"
+
+[lints.function-lines]
+level = "warn"
+reason = "a function longer than a screen is changed without being read whole"
+
+[lints.function-complexity]
+level = "warn"
+reason = "more paths than can be tested or held in one's head"

@@ -1,0 +1,10 @@
+[tier]
+description = "A small public surface and no dead public items"
+
+[lints.pub-surface]
+level = "warn"
+reason = "in a big workspace pub is the easy way across crates; a library that is all surface keeps nothing apart"
+
+[lints.dead-pub]
+level = "warn"
+reason = "rustc can't see pub items no other crate uses; in a big workspace they pile up (candidates, never fail)"

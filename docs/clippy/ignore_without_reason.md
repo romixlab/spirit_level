@@ -12,16 +12,14 @@
 
 | Tier | Level | Reason | Set in |
 |---|---|---|---|
-| [small](../tiers/small.md) | `warn` | an ignored test says why, or nobody knows when it may run again | small |
-| [small-workspace](../tiers/small-workspace.md) | `warn` | an ignored test says why, or nobody knows when it may run again | small |
-| [medium](../tiers/medium.md) | `warn` | an ignored test says why, or nobody knows when it may run again | small |
-| [big](../tiers/big.md) | `warn` | an ignored test says why, or nobody knows when it may run again | small |
+| [small](../tiers/small.md) | `warn` | an ignored test says why, or nobody knows when it may run again | stop-gaps |
+| [small-workspace](../tiers/small-workspace.md) | `warn` | an ignored test says why, or nobody knows when it may run again | stop-gaps |
+| [medium](../tiers/medium.md) | `warn` | an ignored test says why, or nobody knows when it may run again | stop-gaps |
+| [big](../tiers/big.md) | `warn` | an ignored test says why, or nobody knows when it may run again | stop-gaps |
 | [ai](../tiers/ai.md) | not in the set |  |  |
 | [embedded](../tiers/embedded.md) | not in the set |  |  |
 | [ui](../tiers/ui.md) | not in the set |  |  |
 | [egui](../tiers/egui.md) | not in the set |  |  |
-| [units-strict](../tiers/units-strict.md) | not in the set |  |  |
-| [units-paranoid](../tiers/units-paranoid.md) | not in the set |  |  |
 
 ## Configure
 

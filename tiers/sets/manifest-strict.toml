@@ -1,0 +1,6 @@
+[tier]
+description = "Every cargo feature documented"
+
+[lints.feature-docs]
+level = "warn"
+reason = "a feature without a comment cannot be chosen by a reader"

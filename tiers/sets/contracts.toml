@@ -1,0 +1,6 @@
+[tier]
+description = "Types that cross a boundary have sized integers"
+
+[lints.sized-ints-in-contracts]
+level = "warn"
+reason = "a contract is read on every party; usize is 32 bits on some of them"

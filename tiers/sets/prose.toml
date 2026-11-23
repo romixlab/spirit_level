@@ -1,0 +1,30 @@
+[tier]
+description = "Wording: terms, abbreviations, plain sentences, spelling, short CHANGELOG entries"
+
+[lints.abbreviation-first-use]
+level = "warn"
+reason = "a reader arrives on any page: an abbreviation is one every reader knows, or the book shows its long form on hover"
+
+[lints.passive-voice]
+level = "warn"
+reason = "a passive sentence hides who acts; a page of them reads as things that happen on their own"
+
+[lints.reading-ease]
+level = "warn"
+reason = "long sentences of long words are read slowly and understood less"
+
+[lints.term-before-definition]
+level = "warn"
+reason = "a term used before its definition is guessed at, and a wrong guess is read into every sentence until then"
+
+[lints.term-synonyms]
+level = "warn"
+reason = "a reader takes two names for two things and looks for a difference that is not there"
+
+[lints.typos-misspelling]
+level = "warn"
+reason = "a misspelled identifier is copied to every call site; typos has almost no false positives"
+
+[lints.changelog-entry-length]
+level = "warn"
+reason = "a CHANGELOG is a list: one short line per change"

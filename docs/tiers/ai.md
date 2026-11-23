@@ -8,44 +8,44 @@ Use it with `extends = "ai"` in `spirit_level.toml`.
 
 | Code | Lint | Level | Reason | Set in |
 |---|---|---|---|---|
-| [A0001](../lints/A0001.md) | agent-config-permissions | `deny` | committed settings apply to every agent; a blanket grant lets any of them run anything | ai |
-| [A0002](../lints/A0002.md) | agent-config-secrets | `deny` | a committed key is public to every reader and stays in history | ai |
-| [A0003](../lints/A0003.md) | agent-session-files | `deny` | transcripts and per-person agent files hold private context and secrets | ai |
-| [A0004](../lints/A0004.md) | leftover-files | `deny` | merge, editor and scratch leftovers and session notes do not belong in history | ai |
-| [A0005](../lints/A0005.md) | commented-out-code | `deny` | git keeps the old code; commented-out code is a decision not taken | ai |
-| [A0006](../lints/A0006.md) | dead-features | `warn` | a feature that enables nothing and gates nothing is left over | ai |
-| [A0007](../lints/A0007.md) | lint-table-allow-reason | `deny` | a lint allowed for a whole crate in Cargo.toml says why | ai |
-| [A0008](../lints/A0008.md) | near-duplicate-fns | `warn` | a rewrite that keeps the old function leaves two copies to fix | ai |
-| [A0009](../lints/A0009.md) | near-duplicate-modules | `deny` | a rewrite that keeps the old module is not finished | ai |
-| [A0010](../lints/A0010.md) | stop-gap-comments | `deny` | a TODO or a 'for now' marks a path the final design throws away; tracked work names its id | ai |
-| [A0011](../lints/A0011.md) | fixme-before-land | `deny` | an agent may leave itself a FIXME on its branch; the landing refuses it | ai |
-| [A0012](../lints/A0012.md) | large-blobs | `warn` | a large tracked file stays in every clone forever; agents commit dumps and binaries with git add -A | ai |
-| [C0002](../lints/C0002.md) | allow-without-reason | `deny` | an allowed lint says why, so it can be turned back on | ai |
-| [C0008](../lints/C0008.md) | todo-macros | `deny` | todo!() and unimplemented!() are stop-gaps that compile | ai |
-| [C0018](../lints/C0018.md) | unit-suffix | `warn` | agents write units last in names from the start; a warning, since it reads names only and fires widely in older code | ai |
-| [C0019](../lints/C0019.md) | unbounded-read | `warn` | input from outside sets the memory a read to the end takes; candidates only, a place to look | ai |
-| [M0018](../lints/M0018.md) | repo-files | `deny` | AGENTS.md holds the rules every agent reads; CLAUDE.md points to it | ai |
-| [P0001](../lints/P0001.md) | agent-file-lines | `deny` | agents read the file whole every session; a long one is skimmed, not followed | ai |
-| [P0002](../lints/P0002.md) | agent-file-links | `deny` | an agent that follows a dead link guesses or stops | ai |
-| [P0003](../lints/P0003.md) | agent-rules-match-lints | `deny` | a stated limit the lints check differently teaches agents a rule the repo does not hold | ai |
-| [P0004](../lints/P0004.md) | claude-md-duplicate | `deny` | two copies of the rules drift apart | ai |
-| [P0005](../lints/P0005.md) | commit-body-lines | `warn` | a body holds why, not a retelling of the diff | ai |
-| [P0006](../lints/P0006.md) | commit-prose | `warn` | commit messages follow the prose rules of the docs | ai |
-| [P0007](../lints/P0007.md) | commit-subject-length | `deny` | the subject is what one-line logs and reviews show | ai |
-| [P0008](../lints/P0008.md) | changelog-describes-diff | `warn` | an entry says what changed for the user; the diff already shows the files | ai |
-| [P0009](../lints/P0009.md) | changelog-entry-length | `deny` | a CHANGELOG is a list: one line per change | ai |
-| [P0010](../lints/P0010.md) | emoji | `warn` | emoji do not grep, diff or render the same everywhere | ai |
-| [P0011](../lints/P0011.md) | filler-phrases | `deny` | filler adds words and no meaning | ai |
-| [P0012](../lints/P0012.md) | narration | `deny` | docs and comments state facts, not the conversation that produced them | ai |
-| [P0013](../lints/P0013.md) | paragraph-sentences | `warn` | a paragraph holds one thought in up to five sentences; more facts are a list | ai |
-| [P0014](../lints/P0014.md) | restating-comments | `warn` | a comment says what the code cannot | ai |
-| [P0015](../lints/P0015.md) | sentence-words | `warn` | short sentences are read once and understood | ai |
-| [P0016](../lints/P0016.md) | thinking-comments | `deny` | a comment holds the conclusion, not the reasoning that led to it | ai |
-| [P0017](../lints/P0017.md) | fixes-tag | `deny` | an agent copies the culprit's hash and subject from git; a wrong one sends the next reader astray | ai |
-| [P0018](../lints/P0018.md) | fix-without-test | `warn` | an agent writes the failing test first; a warning, since a fix is judged from its subject | ai |
-| [P0019](../lints/P0019.md) | commit-tested-line | `warn` | an agent says how it tested, or that it did not; a warning while branches begun before the rule land | ai |
-| [P0020](../lints/P0020.md) | commit-mixed-move | `warn` | a move edited in the same commit cuts every line's history; a warning, since it judges lines by their start | ai |
-| [P0021](../lints/P0021.md) | url-tracking-params | `warn` | a link pasted from a browser or a chat app carries an id that tells the reader nothing and goes stale | ai |
+| [A0001](../lints/A0001.md) | agent-config-permissions | `deny` | committed settings apply to every agent; a blanket grant lets any of them run anything | [ai](ai.md) |
+| [A0002](../lints/A0002.md) | agent-config-secrets | `deny` | a committed key is public to every reader and stays in history | [ai](ai.md) |
+| [A0003](../lints/A0003.md) | agent-session-files | `deny` | transcripts and per-person agent files hold private context and secrets | [ai](ai.md) |
+| [A0004](../lints/A0004.md) | leftover-files | `deny` | merge, editor and scratch leftovers and session notes do not belong in history | [ai](ai.md) |
+| [A0005](../lints/A0005.md) | commented-out-code | `deny` | git keeps the old code; commented-out code is a decision not taken | [ai](ai.md) |
+| [A0006](../lints/A0006.md) | dead-features | `warn` | a feature that enables nothing and gates nothing is left over | [ai](ai.md) |
+| [A0007](../lints/A0007.md) | lint-table-allow-reason | `deny` | a lint allowed for a whole crate in Cargo.toml says why | [ai](ai.md) |
+| [A0008](../lints/A0008.md) | near-duplicate-fns | `warn` | a rewrite that keeps the old function leaves two copies to fix | [ai](ai.md) |
+| [A0009](../lints/A0009.md) | near-duplicate-modules | `deny` | a rewrite that keeps the old module is not finished | [ai](ai.md) |
+| [A0010](../lints/A0010.md) | stop-gap-comments | `deny` | a TODO or a 'for now' marks a path the final design throws away; tracked work names its id | [ai](ai.md) |
+| [A0011](../lints/A0011.md) | fixme-before-land | `deny` | an agent may leave itself a FIXME on its branch; the landing refuses it | [ai](ai.md) |
+| [A0012](../lints/A0012.md) | large-blobs | `warn` | a large tracked file stays in every clone forever; agents commit dumps and binaries with git add -A | [ai](ai.md) |
+| [C0002](../lints/C0002.md) | allow-without-reason | `deny` | an allowed lint says why, so it can be turned back on | [ai](ai.md) |
+| [C0008](../lints/C0008.md) | todo-macros | `deny` | todo!() and unimplemented!() are stop-gaps that compile | [ai](ai.md) |
+| [C0018](../lints/C0018.md) | unit-suffix | `warn` | agents write units last in names from the start; a warning, since it reads names only and fires widely in older code | [ai](ai.md) |
+| [C0019](../lints/C0019.md) | unbounded-read | `warn` | input from outside sets the memory a read to the end takes; candidates only, a place to look | [ai](ai.md) |
+| [M0018](../lints/M0018.md) | repo-files | `deny` | AGENTS.md holds the rules every agent reads; CLAUDE.md points to it | [ai](ai.md) |
+| [P0001](../lints/P0001.md) | agent-file-lines | `deny` | agents read the file whole every session; a long one is skimmed, not followed | [ai](ai.md) |
+| [P0002](../lints/P0002.md) | agent-file-links | `deny` | an agent that follows a dead link guesses or stops | [ai](ai.md) |
+| [P0003](../lints/P0003.md) | agent-rules-match-lints | `deny` | a stated limit the lints check differently teaches agents a rule the repo does not hold | [ai](ai.md) |
+| [P0004](../lints/P0004.md) | claude-md-duplicate | `deny` | two copies of the rules drift apart | [ai](ai.md) |
+| [P0005](../lints/P0005.md) | commit-body-lines | `warn` | a body holds why, not a retelling of the diff | [ai](ai.md) |
+| [P0006](../lints/P0006.md) | commit-prose | `warn` | commit messages follow the prose rules of the docs | [ai](ai.md) |
+| [P0007](../lints/P0007.md) | commit-subject-length | `deny` | the subject is what one-line logs and reviews show | [ai](ai.md) |
+| [P0008](../lints/P0008.md) | changelog-describes-diff | `warn` | an entry says what changed for the user; the diff already shows the files | [ai](ai.md) |
+| [P0009](../lints/P0009.md) | changelog-entry-length | `deny` | a CHANGELOG is a list: one line per change | [ai](ai.md) |
+| [P0010](../lints/P0010.md) | emoji | `warn` | emoji do not grep, diff or render the same everywhere | [ai](ai.md) |
+| [P0011](../lints/P0011.md) | filler-phrases | `deny` | filler adds words and no meaning | [ai](ai.md) |
+| [P0012](../lints/P0012.md) | narration | `deny` | docs and comments state facts, not the conversation that produced them | [ai](ai.md) |
+| [P0013](../lints/P0013.md) | paragraph-sentences | `warn` | a paragraph holds one thought in up to five sentences; more facts are a list | [ai](ai.md) |
+| [P0014](../lints/P0014.md) | restating-comments | `warn` | a comment says what the code cannot | [ai](ai.md) |
+| [P0015](../lints/P0015.md) | sentence-words | `warn` | short sentences are read once and understood | [ai](ai.md) |
+| [P0016](../lints/P0016.md) | thinking-comments | `deny` | a comment holds the conclusion, not the reasoning that led to it | [ai](ai.md) |
+| [P0017](../lints/P0017.md) | fixes-tag | `deny` | an agent copies the culprit's hash and subject from git; a wrong one sends the next reader astray | [ai](ai.md) |
+| [P0018](../lints/P0018.md) | fix-without-test | `warn` | an agent writes the failing test first; a warning, since a fix is judged from its subject | [ai](ai.md) |
+| [P0019](../lints/P0019.md) | commit-tested-line | `warn` | an agent says how it tested, or that it did not; a warning while branches begun before the rule land | [ai](ai.md) |
+| [P0020](../lints/P0020.md) | commit-mixed-move | `warn` | a move edited in the same commit cuts every line's history; a warning, since it judges lines by their start | [ai](ai.md) |
+| [P0021](../lints/P0021.md) | url-tracking-params | `warn` | a link pasted from a browser or a chat app carries an id that tells the reader nothing and goes stale | [ai](ai.md) |
 
 ## Clippy set (with what it extends)
 
@@ -53,20 +53,20 @@ The project turns these on in its own `[workspace.lints.clippy]` (`allow` rows a
 
 | Clippy lint | Level | Reason | Set in |
 |---|---|---|---|
-| [`allow_attributes`](../clippy/allow_attributes.md) | `warn` | #[expect] fails once the lint stops firing, so an exception cannot outlive its cause | ai |
-| [`cognitive_complexity`](../clippy/cognitive_complexity.md) | `warn` | agents grow functions branch by branch; a tangled one is split | ai |
-| [`print_stderr`](../clippy/print_stderr.md) | `warn` | agents leave debugging prints behind | ai |
-| [`print_stdout`](../clippy/print_stdout.md) | `warn` | agents leave debugging prints behind | ai |
-| [`self_named_module_files`](../clippy/self_named_module_files.md) | `warn` | one module layout, mod.rs, across the workspace | ai |
-| [`str_to_string`](../clippy/str_to_string.md) | `warn` | to_owned says what happens: a copy of a borrowed str | ai |
-| [`too_long_first_doc_paragraph`](../clippy/too_long_first_doc_paragraph.md) | `warn` | agents write long doc summaries; the first paragraph is one short sentence | ai |
-| [`use_self`](../clippy/use_self.md) | `warn` | Self follows a rename | ai |
+| [`allow_attributes`](../clippy/allow_attributes.md) | `warn` | #[expect] fails once the lint stops firing, so an exception cannot outlive its cause | [ai](ai.md) |
+| [`cognitive_complexity`](../clippy/cognitive_complexity.md) | `warn` | agents grow functions branch by branch; a tangled one is split | [ai](ai.md) |
+| [`print_stderr`](../clippy/print_stderr.md) | `warn` | agents leave debugging prints behind | [ai](ai.md) |
+| [`print_stdout`](../clippy/print_stdout.md) | `warn` | agents leave debugging prints behind | [ai](ai.md) |
+| [`self_named_module_files`](../clippy/self_named_module_files.md) | `warn` | one module layout, mod.rs, across the workspace | [ai](ai.md) |
+| [`str_to_string`](../clippy/str_to_string.md) | `warn` | to_owned says what happens: a copy of a borrowed str | [ai](ai.md) |
+| [`too_long_first_doc_paragraph`](../clippy/too_long_first_doc_paragraph.md) | `warn` | agents write long doc summaries; the first paragraph is one short sentence | [ai](ai.md) |
+| [`use_self`](../clippy/use_self.md) | `warn` | Self follows a rename | [ai](ai.md) |
 
 `clippy.toml` (an integer is a limit the project may lower):
 
 | Setting | Value | Reason | Set in |
 |---|---|---|---|
-| [`cognitive-complexity-threshold`](../clippy/cognitive-complexity-threshold.md) | `20` | set on samples: 17 read fine, 21 and 25 were too long; spl's function-complexity (cyclomatic, 15) counts paths | ai |
+| [`cognitive-complexity-threshold`](../clippy/cognitive-complexity-threshold.md) | `20` | set on samples: 17 read fine, 21 and 25 were too long; spl's function-complexity (cyclomatic, 15) counts paths | [ai](ai.md) |
 
 ## The file
 

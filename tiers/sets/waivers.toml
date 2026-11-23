@@ -1,0 +1,14 @@
+[tier]
+description = "Waivers and lint exceptions: valid, used, with a reason"
+
+[lints.waiver-invalid]
+level = "deny"
+reason = "a waiver without a reason, for an unknown lint, or expired hides a finding without saying why"
+
+[lints.waiver-unused]
+level = "warn"
+reason = "a waiver that allows nothing is left over from changed code"
+
+[lints.allow-without-reason]
+level = "warn"
+reason = "an exception to a lint says why, or it outlives its reason"

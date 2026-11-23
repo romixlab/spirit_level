@@ -1,0 +1,9 @@
+[tier]
+description = "No printing outside the binary's one place, Clippy's side of it"
+
+[clippy.lints]
+print_stdout = { level = "warn", reason = "printing is the binary's choice, written in one place" }
+print_stderr = { level = "warn", reason = "printing is the binary's choice, written in one place" }
+
+[clippy.config]
+allow-print-in-tests = { value = true, reason = "a test may print what it saw" }

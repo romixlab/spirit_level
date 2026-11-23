@@ -1,0 +1,10 @@
+[tier]
+description = "Stop-gap comments and FIXMEs never land"
+
+[lints.stop-gap-comments]
+level = "deny"
+reason = "no stop-gaps: a TODO or a 'for now' names its tracker id or goes"
+
+[lints.fixme-before-land]
+level = "deny"
+reason = "a FIXME is a note for the branch; a candidate while it is in work, refused when it lands"

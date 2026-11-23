@@ -1,0 +1,42 @@
+[tier]
+description = "The Zensical book: navigation, titles, admonitions, build stamp, deploy"
+
+[lints.admonition-syntax]
+level = "deny"
+reason = "an unknown type loses its colour and a body indented less than four spaces renders outside the box"
+
+[lints.book-build-stamp]
+level = "warn"
+reason = "without a version, commit and age in the footer, a reader cannot tell which build they are looking at"
+
+[lints.book-deploy]
+level = "warn"
+reason = "a book published by hand falls behind main, and a broken page goes live; one workflow builds it strict and deploys it"
+
+[lints.glossary-terms]
+level = "warn"
+reason = "a reader arriving in a section finds a term's definition only where the section marks it"
+
+[lints.nav-entries]
+level = "deny"
+reason = "a navigation entry that names no page renders as a link that leads nowhere, and the build does not fail"
+
+[lints.orphan-pages]
+level = "warn"
+reason = "a page nobody reaches is published, unread and left to go stale"
+
+[lints.page-title]
+level = "warn"
+reason = "a page without a title is shown under its file name"
+
+[lints.readme-index-clash]
+level = "deny"
+reason = "Zensical does not say which of README.md and index.md it builds when a folder holds both"
+
+[lints.theme-feature-conflicts]
+level = "deny"
+reason = "Zensical does not support the conflicting features together, and builds neither error nor warn about it"
+
+[lints.zensical-keys]
+level = "deny"
+reason = "Zensical ignores a key it does not know, silently; a typo in zensical.toml never fails the build"

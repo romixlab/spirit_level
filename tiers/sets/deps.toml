@@ -1,0 +1,30 @@
+[tier]
+description = "Dependencies: pure Rust, default features off, no pins or paths outside the workspace, advisories, unused ones"
+
+[lints.default-features-off]
+level = "warn"
+reason = "dependencies are added with default-features = false and only the features in use"
+
+[lints.git-dependency-pins]
+level = "warn"
+reason = "git dependencies follow a branch; Cargo.lock fixes the commit"
+
+[lints.no-sys-crates]
+level = "deny"
+reason = "pure-Rust crates only: no bundled C, no -sys bindings without a written reason"
+
+[lints.patch-outside-workspace]
+level = "deny"
+reason = "a committed patch into a sibling checkout builds differently on every machine; it lives in an ignored .cargo/config.toml"
+
+[lints.path-outside-workspace]
+level = "deny"
+reason = "a path into a sibling checkout builds differently on every PC"
+
+[lints.deny-advisories]
+level = "warn"
+reason = "a dependency with a known vulnerability is a risk taken unseen; needs no deny.toml"
+
+[lints.machete-unused-deps]
+level = "warn"
+reason = "an unused dependency costs build time, audit and lockfile churn for nothing"

@@ -1,4 +1,4 @@
-//! `spl lints` and `spl tiers`: the shipped lints with their levels, and the shipped tiers
+//! `spl lints` and `spl tiers`: the shipped lints with their levels and sets, and the shipped tiers and sets
 
 use crate::Format;
 use crate::registry::{Registered, Run};
@@ -6,7 +6,7 @@ use sl_core::Level;
 use std::path::{Path, PathBuf};
 use vc_ui::{DIM, Exit, HEADING, ID, NEXT, OK, Paint};
 
-/// List every lint with its level in each shipped tier
+/// List every lint with its set and its level in each shipped tier
 #[derive(clap::Parser)]
 #[command(
     name = "lints",
@@ -27,12 +27,12 @@ impl Run for Lints {
     }
 }
 
-/// Show the tier ladder and the add-on tiers, marking the ones this project extends
+/// Show the tier ladder, the add-on tiers and the sets, marking the ones this project extends
 #[derive(clap::Parser)]
 #[command(
     name = "tiers",
     display_order = 4,
-    after_help = "Examples:\n  spl tiers\n  spl tiers ../other_repo\n\nThe ladder's tiers extend each other, small to big; a project extends one of them and any add-ons beside it\n(extends = [\"medium\", \"ai\"]). `spl check --next` checks a project at the next rung, `--at TIER` at any."
+    after_help = "Examples:\n  spl tiers\n  spl tiers ../other_repo\n\nThe ladder's tiers extend each other, small to big; a project extends one of them and any add-ons or sets beside it\n(extends = [\"medium\", \"ai\", \"layers\"]). Each ladder tier is built from sets: small groups of lints by what they guard. `spl check --next` checks a project at the next rung, `--at TIER` at any."
 )]
 pub(crate) struct Tiers {
     /// The project whose tiers to mark
@@ -50,6 +50,7 @@ impl Run for Tiers {
 
 fn list_lints(format: Format) -> Result<Exit, String> {
     let tiers = sl_book::tier_levels()?;
+    let set_of = sl_book::set_of(&sl_book::set_levels()?);
     let mut lints = spirit_level::lints();
     lints.sort_by_key(|m| m.code);
     match format {
@@ -61,15 +62,21 @@ fn list_lints(format: Format) -> Result<Exit, String> {
                         .iter()
                         .map(|(n, c)| (n.to_string(), c.lint(m.id).level.name().into()))
                         .collect();
-                    serde_json::json!({"code": m.code, "id": m.id, "category": m.category, "summary": m.summary, "levels": levels, "meta": m})
+                    serde_json::json!({"code": m.code, "id": m.id, "category": m.category, "set": set_of.get(m.id), "summary": m.summary, "levels": levels, "meta": m})
                 })
                 .collect();
             println!("{}", serde_json::to_string_pretty(&v).unwrap_or_default());
         }
         Format::Text => {
             let w = lints.iter().map(|m| m.id.len()).max().unwrap_or(10);
+            let ws = set_of.values().map(|s| s.len()).max().unwrap_or(3);
             let names: Vec<String> = tiers.iter().map(|(n, _)| format!("{n:>6}")).collect();
-            println!("code   {:w$}  {}  rule", "lint", names.join(" "));
+            println!(
+                "code   {:w$}  {:ws$}  {}  rule",
+                "lint",
+                "set",
+                names.join(" ")
+            );
             for m in &lints {
                 let lv: Vec<String> = tiers
                     .iter()
@@ -79,7 +86,14 @@ fn list_lints(format: Format) -> Result<Exit, String> {
                         format!("{s:>width$}", width = n.len().max(6))
                     })
                     .collect();
-                println!("{}  {:w$}  {}  {}", m.code, m.id, lv.join(" "), m.summary);
+                let set = set_of.get(m.id).copied().unwrap_or("-");
+                println!(
+                    "{}  {:w$}  {set:ws$}  {}  {}",
+                    m.code,
+                    m.id,
+                    lv.join(" "),
+                    m.summary
+                );
             }
         }
     }
@@ -88,10 +102,20 @@ fn list_lints(format: Format) -> Result<Exit, String> {
 
 fn tiers(path: &Path) -> Result<Exit, String> {
     let levels = sl_book::tier_levels()?;
+    let sets = sl_book::set_levels()?;
     let enabled = |name: &str| {
-        levels.iter().find(|(n, _)| *n == name).map_or(0, |(_, c)| {
-            c.lints.values().filter(|l| l.level != Level::Allow).count()
-        })
+        levels
+            .iter()
+            .chain(&sets)
+            .find(|(n, _)| *n == name)
+            .map_or(0, |(_, c)| {
+                c.lints.values().filter(|l| l.level != Level::Allow).count()
+                    + c.clippy
+                        .lints
+                        .values()
+                        .filter(|l| l.level != Level::Allow)
+                        .count()
+            })
     };
     let own = sl_model::Project::load(path)
         .map_err(|e| e.to_string())
@@ -135,6 +159,28 @@ fn tiers(path: &Path) -> Result<Exit, String> {
         .filter(|(n, _)| !spirit_level::LADDER.contains(n))
     {
         row(n, t);
+    }
+    println!(
+        "{}",
+        p.paint(
+            HEADING,
+            "sets: what a tier is built from, or beside one, extends = [\"small-workspace\", \"msrv\"]"
+        )
+    );
+    for rung in spirit_level::LADDER.iter().map(Some).chain([None]) {
+        println!(
+            "  {}",
+            p.paint(
+                DIM,
+                &rung.map_or_else(|| "beside the tiers".to_owned(), |r| format!("in {r}"))
+            )
+        );
+        for (n, t) in spirit_level::SETS
+            .iter()
+            .filter(|(n, _)| spirit_level::set_tier(n) == rung.copied())
+        {
+            row(n, t);
+        }
     }
     match &own {
         Ok(c) => {

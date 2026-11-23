@@ -12,16 +12,14 @@
 
 | Tier | Level | Reason | Set in |
 |---|---|---|---|
-| [small](../tiers/small.md) | `warn` | every unsafe block says in a SAFETY: comment why it is sound | small |
-| [small-workspace](../tiers/small-workspace.md) | `warn` | every unsafe block says in a SAFETY: comment why it is sound | small |
-| [medium](../tiers/medium.md) | `warn` | every unsafe block says in a SAFETY: comment why it is sound | small |
-| [big](../tiers/big.md) | `warn` | every unsafe block says in a SAFETY: comment why it is sound | small |
+| [small](../tiers/small.md) | `warn` | every unsafe block says in a SAFETY: comment why it is sound | unsafe |
+| [small-workspace](../tiers/small-workspace.md) | `warn` | every unsafe block says in a SAFETY: comment why it is sound | unsafe |
+| [medium](../tiers/medium.md) | `warn` | every unsafe block says in a SAFETY: comment why it is sound | unsafe |
+| [big](../tiers/big.md) | `warn` | every unsafe block says in a SAFETY: comment why it is sound | unsafe |
 | [ai](../tiers/ai.md) | not in the set |  |  |
 | [embedded](../tiers/embedded.md) | `deny` | firmware is full of unsafe; every block says in a SAFETY: comment why it is sound | embedded |
 | [ui](../tiers/ui.md) | not in the set |  |  |
 | [egui](../tiers/egui.md) | not in the set |  |  |
-| [units-strict](../tiers/units-strict.md) | not in the set |  |  |
-| [units-paranoid](../tiers/units-paranoid.md) | not in the set |  |  |
 
 ## Configure
 

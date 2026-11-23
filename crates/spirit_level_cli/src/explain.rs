@@ -35,7 +35,8 @@ fn explain(lint: &str) -> Result<Exit, String> {
     let m = spirit_level::lint(lint)
         .ok_or_else(|| format!("no lint {lint} (`spl lints` lists them)"))?;
     let tiers = sl_book::tier_levels()?;
-    print!("{}", sl_book::lint_text(m, &tiers));
+    let set = sl_book::set_of(&sl_book::set_levels()?).get(m.id).copied();
+    print!("{}", sl_book::lint_text(m, &tiers, set));
     Ok(Exit::SUCCESS)
 }
 

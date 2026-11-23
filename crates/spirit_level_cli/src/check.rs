@@ -32,7 +32,7 @@ pub(crate) struct Check {
     /// A configuration file instead of `<root>/spirit_level.toml`
     #[arg(long)]
     config: Option<PathBuf>,
-    /// Use shipped tiers instead of a configuration file (repeat to combine)
+    /// Use shipped tiers or sets instead of a configuration file (repeat to combine)
     #[arg(long, add = ArgValueCandidates::new(tier_candidates))]
     tier: Vec<String>,
     /// Check at this ladder tier instead of the project's own, keeping its overrides and exceptions; a summary

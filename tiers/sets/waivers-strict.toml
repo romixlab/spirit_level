@@ -1,0 +1,5 @@
+[tier]
+description = "Lint exceptions as #[expect], which fails once the lint stops firing"
+
+[clippy.lints]
+allow_attributes = { level = "warn", reason = "#[expect] fails once the lint stops firing, so an exception cannot outlive its cause" }

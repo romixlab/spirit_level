@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+### Added
+
+- Lint sets by guard (`panics`, `deps`, `msrv`, `clippy-pedantic`...): size tiers are their union; extend one alone (TIER-8).
+
+### Changed
+
+- `units-strict` and `units-paranoid` are sets; `extends` applies a tier or set reached twice only once (TIER-8).
+
 ### Fixed
 
 - `duplicate-versions` drops a crate reached only through dev-dependency edges, cargo-deny's own default (MAN-20).

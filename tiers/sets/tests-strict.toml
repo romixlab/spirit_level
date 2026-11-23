@@ -1,0 +1,10 @@
+[tier]
+description = "Fixes come with tests; test files stay small"
+
+[lints.fix-without-test]
+level = "warn"
+reason = "a bug is fixed when a test fails without the fix; a warning, since a fix is judged from its subject"
+
+[lints.test-lines]
+level = "warn"
+reason = "test code builds and links too"

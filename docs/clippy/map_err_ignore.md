@@ -12,16 +12,14 @@
 
 | Tier | Level | Reason | Set in |
 |---|---|---|---|
-| [small](../tiers/small.md) | `warn` | `map_err(\|_\| ...)` throws the cause away; wrap it as the source | small |
-| [small-workspace](../tiers/small-workspace.md) | `warn` | `map_err(\|_\| ...)` throws the cause away; wrap it as the source | small |
-| [medium](../tiers/medium.md) | `warn` | `map_err(\|_\| ...)` throws the cause away; wrap it as the source | small |
-| [big](../tiers/big.md) | `warn` | `map_err(\|_\| ...)` throws the cause away; wrap it as the source | small |
+| [small](../tiers/small.md) | `warn` | `map_err(\|_\| ...)` throws the cause away; wrap it as the source | panics |
+| [small-workspace](../tiers/small-workspace.md) | `warn` | `map_err(\|_\| ...)` throws the cause away; wrap it as the source | panics |
+| [medium](../tiers/medium.md) | `warn` | `map_err(\|_\| ...)` throws the cause away; wrap it as the source | panics |
+| [big](../tiers/big.md) | `warn` | `map_err(\|_\| ...)` throws the cause away; wrap it as the source | panics |
 | [ai](../tiers/ai.md) | not in the set |  |  |
 | [embedded](../tiers/embedded.md) | not in the set |  |  |
 | [ui](../tiers/ui.md) | not in the set |  |  |
 | [egui](../tiers/egui.md) | not in the set |  |  |
-| [units-strict](../tiers/units-strict.md) | not in the set |  |  |
-| [units-paranoid](../tiers/units-paranoid.md) | not in the set |  |  |
 
 ## Configure
 

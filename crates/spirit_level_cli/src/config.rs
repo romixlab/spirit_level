@@ -46,7 +46,7 @@ pub(crate) struct Init {
     /// The project directory
     #[arg(default_value = ".")]
     path: PathBuf,
-    /// The tier to extend
+    /// The tier to extend, and sets beside it (repeat to combine)
     #[arg(long, default_value = "small", add = ArgValueCandidates::new(tier_candidates))]
     tier: Vec<String>,
 }

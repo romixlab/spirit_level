@@ -72,6 +72,7 @@ fn lint_candidates() -> Vec<CompletionCandidate> {
 fn tier_candidates() -> Vec<CompletionCandidate> {
     spirit_level::TIERS
         .iter()
+        .chain(spirit_level::SETS)
         .map(|(n, t)| {
             CompletionCandidate::new(*n).help(Some(spirit_level::tier_description(t).into()))
         })

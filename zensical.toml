@@ -40,8 +40,7 @@ nav = [
         "tiers/embedded.md",
         "tiers/ui.md",
         "tiers/egui.md",
-        "tiers/units-strict.md",
-        "tiers/units-paranoid.md",
+        "tiers/sets.md",
     ] },
     { "Lints" = [
         "lints/index.md",

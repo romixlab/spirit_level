@@ -14,14 +14,12 @@
 |---|---|---|---|
 | [small](../tiers/small.md) | not in the set |  |  |
 | [small-workspace](../tiers/small-workspace.md) | not in the set |  |  |
-| [medium](../tiers/medium.md) | `allow` | keywords and categories matter only for published crates; package-description covers the rest | medium |
-| [big](../tiers/big.md) | `allow` | keywords and categories matter only for published crates; package-description covers the rest | medium |
+| [medium](../tiers/medium.md) | `allow` | keywords and categories matter only for published crates; package-description covers the rest | clippy-pedantic |
+| [big](../tiers/big.md) | `allow` | keywords and categories matter only for published crates; package-description covers the rest | clippy-pedantic |
 | [ai](../tiers/ai.md) | not in the set |  |  |
 | [embedded](../tiers/embedded.md) | not in the set |  |  |
 | [ui](../tiers/ui.md) | not in the set |  |  |
 | [egui](../tiers/egui.md) | not in the set |  |  |
-| [units-strict](../tiers/units-strict.md) | not in the set |  |  |
-| [units-paranoid](../tiers/units-paranoid.md) | not in the set |  |  |
 
 ## Configure
 

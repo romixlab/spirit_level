@@ -1,0 +1,18 @@
+[tier]
+description = "Panics and lost errors: no bare unwrap, no exit, no dropped error cause"
+
+[lints.float-partial-cmp-unwrap]
+level = "warn"
+reason = "partial_cmp(..).unwrap() panics on the first NaN; total_cmp orders every float"
+
+[clippy.lints]
+unwrap_used = { level = "warn", reason = "a panic says what failed (expect with a message), or the error is returned" }
+get_unwrap = { level = "warn", reason = "`.get(i).unwrap()` is indexing with a worse message: index, or handle the None" }
+exit = { level = "warn", reason = "process::exit skips every destructor; main returns instead" }
+fallible_impl_from = { level = "warn", reason = "a From that can panic is a TryFrom" }
+map_err_ignore = { level = "warn", reason = "`map_err(|_| ...)` throws the cause away; wrap it as the source" }
+let_underscore_must_use = { level = "warn", reason = "`let _ =` on a must_use value drops an error unseen" }
+debug_assert_with_mut_call = { level = "warn", reason = "a debug_assert! that calls a &mut method makes debug and release builds behave differently" }
+
+[clippy.config]
+allow-unwrap-in-tests = { value = true, reason = "a test that unwraps fails at the unwrap, which is what a test should do" }

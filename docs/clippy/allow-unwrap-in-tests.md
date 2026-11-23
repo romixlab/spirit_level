@@ -12,16 +12,14 @@
 
 | Tier | Value | Reason | Set in |
 |---|---|---|---|
-| [small](../tiers/small.md) | `true` | a test that unwraps fails at the unwrap, which is what a test should do | small |
-| [small-workspace](../tiers/small-workspace.md) | `true` | a test that unwraps fails at the unwrap, which is what a test should do | small |
-| [medium](../tiers/medium.md) | `true` | a test that unwraps fails at the unwrap, which is what a test should do | small |
-| [big](../tiers/big.md) | `true` | a test that unwraps fails at the unwrap, which is what a test should do | small |
+| [small](../tiers/small.md) | `true` | a test that unwraps fails at the unwrap, which is what a test should do | panics |
+| [small-workspace](../tiers/small-workspace.md) | `true` | a test that unwraps fails at the unwrap, which is what a test should do | panics |
+| [medium](../tiers/medium.md) | `true` | a test that unwraps fails at the unwrap, which is what a test should do | panics |
+| [big](../tiers/big.md) | `true` | a test that unwraps fails at the unwrap, which is what a test should do | panics |
 | [ai](../tiers/ai.md) | not in the set |  |  |
 | [embedded](../tiers/embedded.md) | not in the set |  |  |
 | [ui](../tiers/ui.md) | not in the set |  |  |
 | [egui](../tiers/egui.md) | not in the set |  |  |
-| [units-strict](../tiers/units-strict.md) | not in the set |  |  |
-| [units-paranoid](../tiers/units-paranoid.md) | not in the set |  |  |
 
 ## Configure
 

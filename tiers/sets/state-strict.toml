@@ -1,0 +1,10 @@
+[tier]
+description = "Shared state beyond state: nested locks and thread-local state"
+
+[lints.nested-locks]
+level = "warn"
+reason = "two locks at once need one lock order everywhere"
+
+[lints.thread-local-state]
+level = "warn"
+reason = "thread-local state is a hidden side channel between functions"

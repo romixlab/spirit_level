@@ -1,0 +1,42 @@
+[tier]
+description = "The crate map: layers checked edge by edge, folders, licences, unsafe and third-party crates placed"
+
+[lints.core-crate-types]
+level = "deny"
+reason = "_core crates hold only types: no I/O, threads or runtimes"
+
+[lints.crate-folder-layer]
+level = "deny"
+reason = "the map decides the path: crates/<layer>/<crate>, a large layer by discipline, never deeper"
+
+[lints.crate-table]
+level = "deny"
+reason = "the crate table is generated from the manifests and the map, never written by hand"
+
+[lints.external-form]
+level = "deny"
+reason = "outside projects come by git on a branch, listed once, used where their role allows"
+
+[lints.forbidden-closure]
+level = "deny"
+reason = "some crates must never end up in a binary, however far away they arrive"
+
+[lints.layer-edges]
+level = "deny"
+reason = "layers are declared and checked edge by edge; move a crate, never reorder layers"
+
+[lints.map-complete]
+level = "deny"
+reason = "the crate map is the source of truth: every crate in it, nothing gone"
+
+[lints.map-licence]
+level = "deny"
+reason = "the map decides each layer's licence; a manifest that drifts ships under terms nobody chose"
+
+[lints.third-party-placement]
+level = "deny"
+reason = "heavy dependencies sit in one crate each"
+
+[lints.unsafe-allow-list]
+level = "deny"
+reason = "unsafe is forbidden except in the crates the map lists"

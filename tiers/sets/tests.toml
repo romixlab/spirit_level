@@ -1,0 +1,18 @@
+[tier]
+description = "Test layout: test binaries, fuzz corpora replayed, test support gated, compile-fail tests for macros"
+
+[lints.test-binaries]
+level = "warn"
+reason = "each integration-test binary links the library again; one tests/it binary links it once"
+
+[lints.fuzz-corpus-test]
+level = "warn"
+reason = "a fuzz target's interesting inputs are a regression suite only once they are in git and replayed on every ordinary test run"
+
+[lints.test-support-gated]
+level = "warn"
+reason = "fakes and test helpers never ship: cfg(test), a test-support feature from dev-dependencies, or a test crate"
+
+[lints.macro-compile-fail]
+level = "warn"
+reason = "a proc macro must refuse bad input with a clear error, and only compile-fail cases show that"

@@ -14,14 +14,12 @@
 |---|---|---|---|
 | [small](../tiers/small.md) | not in the set |  |  |
 | [small-workspace](../tiers/small-workspace.md) | not in the set |  |  |
-| [medium](../tiers/medium.md) | `allow` | paths printed with {:?} quote themselves, which helps with spaces | medium |
-| [big](../tiers/big.md) | `allow` | paths printed with {:?} quote themselves, which helps with spaces | medium |
+| [medium](../tiers/medium.md) | `allow` | paths printed with {:?} quote themselves, which helps with spaces | clippy-pedantic |
+| [big](../tiers/big.md) | `allow` | paths printed with {:?} quote themselves, which helps with spaces | clippy-pedantic |
 | [ai](../tiers/ai.md) | not in the set |  |  |
 | [embedded](../tiers/embedded.md) | not in the set |  |  |
 | [ui](../tiers/ui.md) | not in the set |  |  |
 | [egui](../tiers/egui.md) | not in the set |  |  |
-| [units-strict](../tiers/units-strict.md) | not in the set |  |  |
-| [units-paranoid](../tiers/units-paranoid.md) | not in the set |  |  |
 
 ## Configure
 

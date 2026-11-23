@@ -1,0 +1,10 @@
+[tier]
+description = "Commit messages: subject length, the Fixes: tag"
+
+[lints.commit-subject-length]
+level = "warn"
+reason = "the subject is what one-line logs and reviews show"
+
+[lints.fixes-tag]
+level = "warn"
+reason = "a Fixes: trailer that points nowhere is worse than none; it fires only where one is written"

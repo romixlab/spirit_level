@@ -1,0 +1,22 @@
+[tier]
+description = "Workspace structure: no module cycles or orphan files, small _core crates, libraries called as libraries, build info read once"
+
+[lints.module-graph-scc]
+level = "warn"
+reason = "a module cycle holding most of a crate can't be split into crates; cut it while it is small"
+
+[lints.orphan-source-file]
+level = "warn"
+reason = "a file no mod reaches is never compiled or tested, yet reads like live code"
+
+[lints.core-crate-deps]
+level = "warn"
+reason = "a _core crate holds shared types and drags nothing in"
+
+[lints.cli-subprocess]
+level = "deny"
+reason = "components call each other as libraries, not through their CLIs"
+
+[lints.build-info-env]
+level = "warn"
+reason = "build info compiled into libraries recompiles them on every commit; the binary sets it once"

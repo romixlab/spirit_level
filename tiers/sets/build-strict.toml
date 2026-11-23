@@ -1,0 +1,10 @@
+[tier]
+description = "no_std and wasm crates build for their targets"
+
+[lints.cargo-no-std]
+level = "deny"
+reason = "a crate the map marks no_std is built for a target without std, or the promise breaks unseen"
+
+[lints.cargo-wasm]
+level = "deny"
+reason = "a crate the map marks wasm is built for wasm32, or the promise breaks unseen"

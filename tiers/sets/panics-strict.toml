@@ -1,0 +1,13 @@
+[tier]
+description = "Panics in libraries: errors returned, panics documented, error enums kept small"
+
+[lints.panic-in-library]
+level = "warn"
+reason = "a library returns errors for what can fail and says why where it panics; warn until tpm_cli, wire_weaver and embedded_bedrock are under 50 findings each, then deny"
+
+[lints.error-enum-growth]
+level = "warn"
+reason = "a flat error enum grows a variant per failure and loses the source errors; wrap them by layer"
+
+[clippy.lints]
+missing_panics_doc = { level = "warn", reason = "a public function that can panic says when in a # Panics section; the docs keep up with the asserts" }

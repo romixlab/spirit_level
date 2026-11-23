@@ -1,0 +1,18 @@
+[tier]
+description = "Build profiles and build scripts: debug info, no LTO in test and deploy, no clock"
+
+[lints.dev-debug-off]
+level = "warn"
+reason = "full debug info on every dev build is cargo's default; CARGO_PROFILE_DEV_DEBUG turns it on for the one run that needs it"
+
+[lints.profile-defaults]
+level = "warn"
+reason = "split debug info and an incremental deploy profile: measured large build-time wins"
+
+[lints.profile-no-lto]
+level = "warn"
+reason = "LTO in the loop's profiles turns a link of a second into minutes; it belongs in a release profile"
+
+[lints.build-script-clock]
+level = "warn"
+reason = "a clock read makes the build unreproducible; a hardcoded .git path breaks in a worktree checkout"

@@ -1,0 +1,46 @@
+[tier]
+description = "Pages as a reader meets them: length, headings, figures, prose runs, links"
+
+[lints.code-block-language]
+level = "warn"
+reason = "the language selects the highlighting and tells the reader what the block is"
+
+[lints.code-wall]
+level = "warn"
+reason = "code without prose leaves the reader to guess what it shows"
+
+[lints.heading-words]
+level = "warn"
+reason = "headings are scanned to find a section; a sentence is read slowly"
+
+[lints.image-alt]
+level = "warn"
+reason = "an image without alternative text tells a screen reader, a search engine and a broken link nothing"
+
+[lints.page-figures]
+level = "warn"
+reason = "a guide that explains a mechanism in words alone is skimmed; a figure shows it whole"
+
+[lints.page-headings]
+level = "warn"
+reason = "a long page without sections gives the reader no map"
+
+[lints.page-reading-time]
+level = "warn"
+reason = "a guide longer than one sitting is left half read"
+
+[lints.paragraph-run-words]
+level = "warn"
+reason = "short paragraphs under many headings are still a wall of text when nothing else sits between them"
+
+[lints.prose-per-element]
+level = "warn"
+reason = "a page of sentences with little else between them is skimmed; the reader needs something to look at"
+
+[lints.prose-run-words]
+level = "warn"
+reason = "a long stretch of prose with no heading, figure, table or code block is skimmed, not read"
+
+[lints.page-links]
+level = "deny"
+reason = "a link to a page that moved or never existed, or to the built site, leads a reader nowhere"

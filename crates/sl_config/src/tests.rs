@@ -146,6 +146,14 @@ fn tiers_extend_and_project_overrides() {
     assert_eq!(c.extends, vec!["big"]);
 }
 
+/// `big` raises a lint `small` turns on; extending `small` again after `big` does not undo the raise
+#[test]
+fn a_tier_reached_again_is_applied_once() {
+    let c = load("extends = [\"big\", \"small\"]\n").unwrap();
+    assert_eq!(c.lint("readme-per-crate").level, Level::Deny);
+    assert_eq!(c.extends, vec!["big", "small"]);
+}
+
 #[test]
 fn unknown_keys_lints_and_params_fail_loudly() {
     let m = messages(load(

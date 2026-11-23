@@ -52,7 +52,8 @@ Topic tiers stack on top of a size tier with `extends = ["medium", "ai"]`:
 | `ai` | code and docs written with agents: stop-gap comments, near-duplicate functions, committed transcripts and secrets |
 | `embedded` | bare-metal firmware: interrupts, DMA, stack, flash, clocks, errata, USB, boot, power |
 | `ui`, `egui` | user interfaces: theme colours, confirmed destructive actions, no blocking on the UI thread |
-| `units-strict`, `units-paranoid` | plain numbers moved into typed units, up to the locals inside function bodies |
+
+Each size tier is built from sets: small groups of lints by what they guard, like `panics`, `deps`, `msrv` or `clippy-pedantic`. A project takes one set before its whole tier with `extends = ["small-workspace", "msrv"]`. `spl tiers` lists them; `units-strict` and `units-paranoid` are sets beside the tiers.
 
 A workspace that mixes firmware with host tools puts the `embedded` tier on the firmware crates only.
 

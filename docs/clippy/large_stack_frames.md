@@ -20,8 +20,6 @@
 | [embedded](../tiers/embedded.md) | `warn` | a large frame overflows a small stack with no guard page | embedded |
 | [ui](../tiers/ui.md) | not in the set |  |  |
 | [egui](../tiers/egui.md) | not in the set |  |  |
-| [units-strict](../tiers/units-strict.md) | not in the set |  |  |
-| [units-paranoid](../tiers/units-paranoid.md) | not in the set |  |  |
 
 ## Configure
 

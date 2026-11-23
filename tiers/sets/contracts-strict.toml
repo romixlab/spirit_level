@@ -1,0 +1,10 @@
+[tier]
+description = "Contract schemas snapshotted; breaking changes found by cargo-semver-checks"
+
+[lints.contract-snapshot]
+level = "deny"
+reason = "every party of a contract knows its version and what that version looks like; a released snapshot never changes"
+
+[lints.semver-checks-breaking]
+level = "deny"
+reason = "a crate the map marks stable changes its API only with the version bump it needs"

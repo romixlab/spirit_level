@@ -1,0 +1,20 @@
+[tier]
+description = "Module, crate and crates/ folder size; cognitive complexity"
+
+[lints.module-lines]
+level = "warn"
+reason = "a file of thousands of lines holds several subjects and collects every edit"
+
+[lints.crate-lines]
+level = "warn"
+reason = "split a crate before it passes ~20,000 lines: one crate is one serial compile step"
+
+[lints.crate-folder-size]
+level = "warn"
+reason = "a flat crates/ past a few dozen crates groups by layer; a layer of about 100 crates by discipline"
+
+[clippy.lints]
+cognitive_complexity = { level = "warn", reason = "a function too tangled to follow in one read; complements spl's cyclomatic function-complexity" }
+
+[clippy.config]
+cognitive-complexity-threshold = { value = 20, reason = "set on samples: 17 read fine, 21 and 25 were too long; spl's function-complexity (cyclomatic, 15) counts paths" }

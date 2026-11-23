@@ -1,0 +1,12 @@
+[tier]
+description = "Stop-gaps in code: todo!, unimplemented!, dbg!, ignored tests without a reason"
+
+[lints.todo-macros]
+level = "warn"
+reason = "no stop-gaps: a todo!() is a panic waiting in shipped code"
+
+[clippy.lints]
+todo = { level = "warn", reason = "no stop-gaps: a todo!() is a panic waiting in shipped code" }
+unimplemented = { level = "warn", reason = "no stop-gaps: an unimplemented!() is a panic waiting in shipped code" }
+dbg_macro = { level = "warn", reason = "debugging output left behind" }
+ignore_without_reason = { level = "warn", reason = "an ignored test says why, or nobody knows when it may run again" }

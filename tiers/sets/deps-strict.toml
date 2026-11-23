@@ -1,0 +1,18 @@
+[tier]
+description = "Dependency bans and sources against deny.toml; the workspace-hack crate kept current"
+
+[lints.deny-bans]
+level = "deny"
+reason = "banned crates (OpenSSL, a second runtime) and duplicate versions stay out of a big graph"
+
+[lints.deny-sources]
+level = "deny"
+reason = "crates come only from the registries and git hosts deny.toml trusts"
+
+[lints.hakari-generate]
+level = "warn"
+reason = "a workspace-hack builds each shared dependency once; warn, as not every workspace wants one"
+
+[lints.hakari-manage-deps]
+level = "warn"
+reason = "the workspace-hack helps only the members that depend on it; warn, as adding one is each workspace's choice"

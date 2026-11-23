@@ -1,0 +1,10 @@
+[tier]
+description = "The MSRV declared and checked"
+
+[lints.rust-version-set]
+level = "warn"
+reason = "the MSRV is declared so it can be checked"
+
+[lints.cargo-msrv]
+level = "warn"
+reason = "the declared rust-version is built, so it stays true"

@@ -76,7 +76,7 @@ pub use map::{External, Layer, Map, MapCrate};
 use reader::Reader;
 use sl_core::{Date, Expiry, Level, LintMeta, ParamKind, ParamValue, Params, Version, glob};
 use sl_model::TomlFile;
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 use toml_edit::Value;
 
@@ -469,6 +469,9 @@ struct Resolver<'a> {
     /// What the project file extends instead of its own `extends`, when set
     project_extends: Option<Vec<String>>,
     stack: Vec<String>,
+    /// Every tier, set and file applied so far: one reached again through another `extends` is not applied twice,
+    /// so a set a tier already holds does not undo the tier's raises
+    applied: BTreeSet<String>,
     /// The depth at which an extended name is a top-level one (1 under a project file, 0 for bare tiers)
     record_at: usize,
     errs: Vec<ConfigError>,
@@ -511,6 +514,7 @@ impl<'a> Resolver<'a> {
             extends: Vec::new(),
             project_extends: None,
             stack: Vec::new(),
+            applied: BTreeSet::new(),
             record_at: 1,
             errs: Vec::new(),
         }
@@ -561,6 +565,9 @@ impl<'a> Resolver<'a> {
         }
         if self.stack.len() == self.record_at {
             self.extends.push(name.to_owned());
+        }
+        if !self.applied.insert(key) {
+            return;
         }
         if is_path {
             let path = dir.join(name);

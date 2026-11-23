@@ -12,16 +12,14 @@
 
 | Tier | Level | Reason | Set in |
 |---|---|---|---|
-| [small](../tiers/small.md) | `warn` | debugging output left behind | small |
-| [small-workspace](../tiers/small-workspace.md) | `warn` | debugging output left behind | small |
-| [medium](../tiers/medium.md) | `warn` | debugging output left behind | small |
-| [big](../tiers/big.md) | `warn` | debugging output left behind | small |
+| [small](../tiers/small.md) | `warn` | debugging output left behind | stop-gaps |
+| [small-workspace](../tiers/small-workspace.md) | `warn` | debugging output left behind | stop-gaps |
+| [medium](../tiers/medium.md) | `warn` | debugging output left behind | stop-gaps |
+| [big](../tiers/big.md) | `warn` | debugging output left behind | stop-gaps |
 | [ai](../tiers/ai.md) | not in the set |  |  |
 | [embedded](../tiers/embedded.md) | not in the set |  |  |
 | [ui](../tiers/ui.md) | not in the set |  |  |
 | [egui](../tiers/egui.md) | not in the set |  |  |
-| [units-strict](../tiers/units-strict.md) | not in the set |  |  |
-| [units-paranoid](../tiers/units-paranoid.md) | not in the set |  |  |
 
 ## Configure
 

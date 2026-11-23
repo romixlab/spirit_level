@@ -1,0 +1,6 @@
+[tier]
+description = "Internal crates are not published"
+
+[lints.publish-false]
+level = "warn"
+reason = "internal crates are a build unit, not an API; only listed crates are published"

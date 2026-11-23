@@ -1,0 +1,40 @@
+[tier]
+description = "Clippy's pedantic and cargo groups with the opt-outs that are noise, and the idioms beside them"
+
+[clippy.lints]
+pedantic = { level = "warn", reason = "the stricter idioms; the opt-outs below are the ones that are noise for most code" }
+cargo = { level = "warn", reason = "manifest hygiene: feature names, wildcard versions" }
+str_to_string = { level = "warn", reason = "to_owned says what happens: a copy of a borrowed str" }
+use_self = { level = "warn", reason = "Self follows a rename" }
+self_named_module_files = { level = "warn", reason = "one module layout, mod.rs, across the workspace" }
+too_long_first_doc_paragraph = { level = "warn", reason = "the first doc paragraph is the summary rustdoc lists; one short sentence" }
+assigning_clones = { level = "allow", reason = "clone_into reads backwards" }
+cast_lossless = { level = "allow", reason = "a widening `as` cast loses nothing, and From is longer for no gain" }
+cast_possible_truncation = { level = "allow", reason = "too noisy: most casts are of values known to fit" }
+cast_precision_loss = { level = "allow", reason = "too noisy: integer to float for display and statistics is the common case" }
+cast_sign_loss = { level = "allow", reason = "too noisy: most casts are of values known to be non-negative" }
+default_trait_access = { level = "allow", reason = "Default::default() is clear where the type is written beside it" }
+float_cmp = { level = "allow", reason = "exact float comparisons are usually intended; float_cmp_const stays on in big" }
+implicit_hasher = { level = "allow", reason = "a BuildHasher type parameter on public functions is not worth it" }
+inline_always = { level = "allow", reason = "#[inline(always)] is written where it was measured" }
+items_after_statements = { level = "allow", reason = "a helper item next to its only use reads better" }
+many_single_char_names = { level = "allow", reason = "r, g, b and x, y, z are fine" }
+map_unwrap_or = { level = "allow", reason = "`.map(f).unwrap_or(x)` often reads better than map_or" }
+missing_errors_doc = { level = "allow", reason = "the error type documents its cases" }
+must_use_candidate = { level = "allow", reason = "thousands of hits; must_use goes where ignoring the value is a bug" }
+needless_raw_string_hashes = { level = "allow", reason = "r#\"...\"# keeps a string editable when a quote is added" }
+redundant_closure_for_method_calls = { level = "allow", reason = "a closure is often clearer than a path to a method" }
+return_self_not_must_use = { level = "allow", reason = "thousands of hits on builders" }
+similar_names = { level = "allow", reason = "too many false positives: encoder and encoded are different things" }
+struct_excessive_bools = { level = "allow", reason = "a struct of flags is often just that" }
+struct_field_names = { level = "allow", reason = "a field named after its struct is often the clearest name" }
+trivially_copy_pass_by_ref = { level = "allow", reason = "passing small Copy types by reference is harmless" }
+unnecessary_debug_formatting = { level = "allow", reason = "paths printed with {:?} quote themselves, which helps with spaces" }
+unreadable_literal = { level = "allow", reason = "addresses and magic numbers are written as their sources write them" }
+used_underscore_binding = { level = "allow", reason = "an underscore binding used in one cfg is common" }
+too_many_lines = { level = "allow", reason = "spl's function-lines measures function length, with a limit per crate and expiring exceptions" }
+cargo_common_metadata = { level = "allow", reason = "keywords and categories matter only for published crates; package-description covers the rest" }
+multiple_crate_versions = { level = "allow", reason = "spl's duplicate-versions checks this, with deny.toml's skip list" }
+
+[clippy.config]
+max-fn-params-bools = { value = 1, reason = "two bool parameters are a call site nobody can read; an enum or a struct says what each means" }

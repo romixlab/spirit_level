@@ -1,16 +1,24 @@
 # Tier 3: a medium workspace (wire_weaver's size): internal crates, MSRV, strict dependency rules.
-extends = "small-workspace"
+
+extends = [
+  "small-workspace",
+  "clippy-pedantic",
+  "waivers-strict",
+  "panics-strict",
+  "printing-strict",
+  "state-paranoid",
+  "licences",
+  "msrv",
+  "commits",
+  "tests",
+  "size-strict",
+  "structure",
+  "contracts",
+  "workspace-strict",
+]
 
 [tier]
 description = "A medium workspace: internal crates unpublished, MSRV declared, dependency rules strict"
-
-[lints.rust-version-set]
-level = "warn"
-reason = "the MSRV is declared so it can be checked"
-
-[lints.publish-false]
-level = "warn"
-reason = "internal crates are a build unit, not an API; only listed crates are published"
 
 [lints.workspace-dependencies]
 level = "deny"
@@ -20,66 +28,13 @@ reason = "one version per dependency per workspace, written once in [workspace.d
 level = "deny"
 reason = "git dependencies follow a branch; a pin hides a break until it is old"
 
-[lints.module-lines]
-level = "warn"
-reason = "a file of thousands of lines holds several subjects and collects every edit"
-
-[lints.crate-lines]
-level = "warn"
-reason = "split a crate before it passes ~20,000 lines: one crate is one serial compile step"
-
-[lints.crate-folder-size]
-level = "warn"
-reason = "a flat crates/ past a few dozen crates groups by layer; a layer of about 100 crates by discipline"
-
-[lints.lock-unwrap]
-level = "warn"
-reason = "the count of lock().unwrap() per crate shows where shared state concentrates"
-
 [lints.crate-cycles]
 level = "deny"
 reason = "crates in a cycle cannot be built or tested apart"
 
-[lints.core-crate-deps]
-level = "warn"
-reason = "a _core crate holds shared types and drags nothing in"
-
-[lints.panic-in-library]
-level = "warn"
-reason = "a library returns errors for what can fail and says why where it panics; warn until tpm_cli, wire_weaver and embedded_bedrock are under 50 findings each, then deny"
-
-[lints.cli-subprocess]
-level = "deny"
-reason = "components call each other as libraries, not through their CLIs"
-
-[lints.commit-subject-length]
-level = "warn"
-reason = "the subject is what one-line logs and reviews show"
-
-[lints.fixes-tag]
-level = "warn"
-reason = "a Fixes: trailer that points nowhere is worse than none; it fires only where one is written"
-
-[lints.module-graph-scc]
-level = "warn"
-reason = "a module cycle holding most of a crate can't be split into crates; cut it while it is small"
-
-
-[lints.error-enum-growth]
-level = "warn"
-reason = "a flat error enum grows a variant per failure and loses the source errors; wrap them by layer"
-
 [lints.deny-advisories]
 level = "deny"
 reason = "a vulnerable dependency is updated, or its advisory ignored with a reason in deny.toml"
-
-[lints.deny-licenses]
-level = "warn"
-reason = "every linked licence is one the project accepts, listed once in deny.toml"
-
-[lints.cargo-msrv]
-level = "warn"
-reason = "the declared rust-version is built, so it stays true"
 
 [lints.cargo-doc]
 level = "deny"
@@ -88,36 +43,6 @@ reason = "the docs of internal crates are the map of the code; they build withou
 [lints.tier-clippy-set]
 level = "deny"
 reason = "the Clippy set is the lint policy of every crate; a gap in it is a gap in the policy"
-
-[lints.test-binaries]
-level = "warn"
-reason = "each integration-test binary links the library again; one tests/it binary links it once"
-
-[lints.build-info-env]
-level = "warn"
-reason = "build info compiled into libraries recompiles them on every commit; the binary sets it once"
-
-[lints.test-support-gated]
-level = "warn"
-reason = "fakes and test helpers never ship: cfg(test), a test-support feature from dev-dependencies, or a test crate"
-
-[lints.macro-compile-fail]
-level = "warn"
-reason = "a proc macro must refuse bad input with a clear error, and only compile-fail cases show that"
-
-[lints.fuzz-corpus-test]
-level = "warn"
-reason = "a fuzz target's interesting inputs are a regression suite only once they are in git and replayed on every ordinary test run"
-
-[lints.orphan-source-file]
-level = "warn"
-reason = "a file no mod reaches is never compiled or tested, yet reads like live code"
-
-[lints.sized-ints-in-contracts]
-level = "warn"
-reason = "a contract is read on every party; usize is 32 bits on some of them"
-
-# CLIs: the defects that are rare and plain fail the run
 
 [lints.cli-help-clean]
 level = "deny"
@@ -134,53 +59,3 @@ reason = "a caller tells a wrong call from a failure by exit code 2; clap gives 
 [lints.cli-no-abbreviations]
 level = "deny"
 reason = "clap defaults to exact subcommand names for free; turning inference on is a choice, not an accident"
-
-# On top of small's Clippy set: pedantic and cargo, with the opt-outs rerun found to be noise (each with its reason),
-# and the restriction and nursery lints a workspace of this size wants.
-
-[clippy.lints]
-pedantic = { level = "warn", reason = "the stricter idioms; the opt-outs below are the ones that are noise for most code" }
-cargo = { level = "warn", reason = "manifest hygiene: feature names, wildcard versions" }
-allow_attributes = { level = "warn", reason = "#[expect] fails once the lint stops firing, so an exception cannot outlive its cause" }
-print_stdout = { level = "warn", reason = "printing is the binary's choice, written in one place" }
-print_stderr = { level = "warn", reason = "printing is the binary's choice, written in one place" }
-str_to_string = { level = "warn", reason = "to_owned says what happens: a copy of a borrowed str" }
-use_self = { level = "warn", reason = "Self follows a rename" }
-self_named_module_files = { level = "warn", reason = "one module layout, mod.rs, across the workspace" }
-too_long_first_doc_paragraph = { level = "warn", reason = "the first doc paragraph is the summary rustdoc lists; one short sentence" }
-missing_panics_doc = { level = "warn", reason = "a public function that can panic says when in a # Panics section; the docs keep up with the asserts" }
-cognitive_complexity = { level = "warn", reason = "a function too tangled to follow in one read; complements spl's cyclomatic function-complexity" }
-# opt-outs of pedantic
-assigning_clones = { level = "allow", reason = "clone_into reads backwards" }
-cast_lossless = { level = "allow", reason = "a widening `as` cast loses nothing, and From is longer for no gain" }
-cast_possible_truncation = { level = "allow", reason = "too noisy: most casts are of values known to fit" }
-cast_precision_loss = { level = "allow", reason = "too noisy: integer to float for display and statistics is the common case" }
-cast_sign_loss = { level = "allow", reason = "too noisy: most casts are of values known to be non-negative" }
-default_trait_access = { level = "allow", reason = "Default::default() is clear where the type is written beside it" }
-float_cmp = { level = "allow", reason = "exact float comparisons are usually intended; float_cmp_const stays on in big" }
-implicit_hasher = { level = "allow", reason = "a BuildHasher type parameter on public functions is not worth it" }
-inline_always = { level = "allow", reason = "#[inline(always)] is written where it was measured" }
-items_after_statements = { level = "allow", reason = "a helper item next to its only use reads better" }
-many_single_char_names = { level = "allow", reason = "r, g, b and x, y, z are fine" }
-map_unwrap_or = { level = "allow", reason = "`.map(f).unwrap_or(x)` often reads better than map_or" }
-missing_errors_doc = { level = "allow", reason = "the error type documents its cases" }
-must_use_candidate = { level = "allow", reason = "thousands of hits; must_use goes where ignoring the value is a bug" }
-needless_raw_string_hashes = { level = "allow", reason = "r#\"...\"# keeps a string editable when a quote is added" }
-redundant_closure_for_method_calls = { level = "allow", reason = "a closure is often clearer than a path to a method" }
-return_self_not_must_use = { level = "allow", reason = "thousands of hits on builders" }
-similar_names = { level = "allow", reason = "too many false positives: encoder and encoded are different things" }
-struct_excessive_bools = { level = "allow", reason = "a struct of flags is often just that" }
-struct_field_names = { level = "allow", reason = "a field named after its struct is often the clearest name" }
-trivially_copy_pass_by_ref = { level = "allow", reason = "passing small Copy types by reference is harmless" }
-unnecessary_debug_formatting = { level = "allow", reason = "paths printed with {:?} quote themselves, which helps with spaces" }
-unreadable_literal = { level = "allow", reason = "addresses and magic numbers are written as their sources write them" }
-used_underscore_binding = { level = "allow", reason = "an underscore binding used in one cfg is common" }
-too_many_lines = { level = "allow", reason = "spl's function-lines measures function length, with a limit per crate and expiring exceptions" }
-# opt-outs of cargo
-cargo_common_metadata = { level = "allow", reason = "keywords and categories matter only for published crates; package-description covers the rest" }
-multiple_crate_versions = { level = "allow", reason = "spl's duplicate-versions checks this, with deny.toml's skip list" }
-
-[clippy.config]
-cognitive-complexity-threshold = { value = 20, reason = "set on samples: 17 read fine, 21 and 25 were too long; spl's function-complexity (cyclomatic, 15) counts paths" }
-allow-print-in-tests = { value = true, reason = "a test may print what it saw" }
-max-fn-params-bools = { value = 1, reason = "two bool parameters are a call site nobody can read; an enum or a struct says what each means" }

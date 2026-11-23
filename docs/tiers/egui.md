@@ -10,24 +10,24 @@ Use it with `extends = "egui"` in `spirit_level.toml`.
 
 | Code | Lint | Level | Reason | Set in |
 |---|---|---|---|---|
-| [U0001](../lints/U0001.md) | ui-raw-spawn | `warn` | work started outside the spawn wrapper has no name, no crash report and no repaint; vhrd_egui has no wrapper yet, so warn | egui |
-| [U0002](../lints/U0002.md) | ui-blocking-call | `warn` | a blocking call in a function that draws or updates the UI freezes the window; an estimate, without types | egui |
-| [U0003](../lints/U0003.md) | ui-colour-literal | `warn` | colours come from ve_theme's tokens (`ui.tokens().colors`), which follow the light and dark theme | egui |
-| [U0004](../lints/U0004.md) | ui-size-literal | `warn` | spacing, radii, strokes and type come from ve_theme's tokens (`space`, `radius`, `stroke`, `type_scale`); widths are learned with ve_dash's steady_width | egui |
-| [U0005](../lints/U0005.md) | ui-disabled-without-reason | `warn` | a disabled egui widget shows only on_disabled_hover_text; on_hover_text stays silent on it | egui |
-| [U0006](../lints/U0006.md) | ui-destructive-unconfirmed | `warn` | one tap must not throw work away: an egui::Modal asks first, or the edit can be undone | egui |
-| [U0007](../lints/U0007.md) | ui-more-count | `warn` | "N more" hides items the person may need; a fold (ve_basics::fold_rest) shows them on demand | egui |
-| [U0008](../lints/U0008.md) | ui-label-punctuation | `deny` | one way to write the ellipsis and button labels; certain, rare, and `spl check --fix` applies it | egui |
-| [U0009](../lints/U0009.md) | ui-debug-text | `warn` | Rust's debug form is for developers; a person reads what happened and what to do | egui |
-| [U0010](../lints/U0010.md) | egui-shared-theme | `warn` | every app looks alike when it installs ve_theme; an app that does not is an app of its own | egui |
-| [U0011](../lints/U0011.md) | egui-status-glyph | `deny` | a glyph in a label takes the text colour; ve_theme::status_icon paints it in its tone with a tooltip | egui |
-| [U0012](../lints/U0012.md) | egui-id-in-loop | `warn` | widgets that share an id share their state, and egui reports the clash on screen | egui |
-| [U0013](../lints/U0013.md) | egui-repaint-every-frame | `warn` | an unconditional repaint request keeps the app drawing at full rate and burns a core while idle | egui |
-| [U0014](../lints/U0014.md) | ui-unwrap-external-data | `warn` | panic-in-library skips binary crates; a UI app's bad file, parse or connection still deserves an error, not a crash; an estimate, since the chain may be known good or already checked | ui |
-| [U0015](../lints/U0015.md) | egui-panel-api | `warn` | panel and App code written for an older egui keeps compiling under a deprecation warning, then breaks on the next bump; an estimate, without type information | egui |
-| [U0016](../lints/U0016.md) | egui-checklist-menu | `warn` | a menu_button closes on the first tick inside it; ve_basics::Checklist keeps it open for several | egui |
-| [U0017](../lints/U0017.md) | ui-tooltip-repeats-label | `warn` | a tooltip that only repeats the label cost the person a hover for nothing; certain, since the match is exact | egui |
-| [U0019](../lints/U0019.md) | ui-hover-text | `warn` | an icon-only button with no tooltip has no words at all; a candidate, since a short label may be a real word or get help another way | egui |
+| [U0001](../lints/U0001.md) | ui-raw-spawn | `warn` | work started outside the spawn wrapper has no name, no crash report and no repaint; vhrd_egui has no wrapper yet, so warn | [egui](egui.md) |
+| [U0002](../lints/U0002.md) | ui-blocking-call | `warn` | a blocking call in a function that draws or updates the UI freezes the window; an estimate, without types | [egui](egui.md) |
+| [U0003](../lints/U0003.md) | ui-colour-literal | `warn` | colours come from ve_theme's tokens (`ui.tokens().colors`), which follow the light and dark theme | [egui](egui.md) |
+| [U0004](../lints/U0004.md) | ui-size-literal | `warn` | spacing, radii, strokes and type come from ve_theme's tokens (`space`, `radius`, `stroke`, `type_scale`); widths are learned with ve_dash's steady_width | [egui](egui.md) |
+| [U0005](../lints/U0005.md) | ui-disabled-without-reason | `warn` | a disabled egui widget shows only on_disabled_hover_text; on_hover_text stays silent on it | [egui](egui.md) |
+| [U0006](../lints/U0006.md) | ui-destructive-unconfirmed | `warn` | one tap must not throw work away: an egui::Modal asks first, or the edit can be undone | [egui](egui.md) |
+| [U0007](../lints/U0007.md) | ui-more-count | `warn` | "N more" hides items the person may need; a fold (ve_basics::fold_rest) shows them on demand | [egui](egui.md) |
+| [U0008](../lints/U0008.md) | ui-label-punctuation | `deny` | one way to write the ellipsis and button labels; certain, rare, and `spl check --fix` applies it | [egui](egui.md) |
+| [U0009](../lints/U0009.md) | ui-debug-text | `warn` | Rust's debug form is for developers; a person reads what happened and what to do | [egui](egui.md) |
+| [U0010](../lints/U0010.md) | egui-shared-theme | `warn` | every app looks alike when it installs ve_theme; an app that does not is an app of its own | [egui](egui.md) |
+| [U0011](../lints/U0011.md) | egui-status-glyph | `deny` | a glyph in a label takes the text colour; ve_theme::status_icon paints it in its tone with a tooltip | [egui](egui.md) |
+| [U0012](../lints/U0012.md) | egui-id-in-loop | `warn` | widgets that share an id share their state, and egui reports the clash on screen | [egui](egui.md) |
+| [U0013](../lints/U0013.md) | egui-repaint-every-frame | `warn` | an unconditional repaint request keeps the app drawing at full rate and burns a core while idle | [egui](egui.md) |
+| [U0014](../lints/U0014.md) | ui-unwrap-external-data | `warn` | panic-in-library skips binary crates; a UI app's bad file, parse or connection still deserves an error, not a crash; an estimate, since the chain may be known good or already checked | [ui](ui.md) |
+| [U0015](../lints/U0015.md) | egui-panel-api | `warn` | panel and App code written for an older egui keeps compiling under a deprecation warning, then breaks on the next bump; an estimate, without type information | [egui](egui.md) |
+| [U0016](../lints/U0016.md) | egui-checklist-menu | `warn` | a menu_button closes on the first tick inside it; ve_basics::Checklist keeps it open for several | [egui](egui.md) |
+| [U0017](../lints/U0017.md) | ui-tooltip-repeats-label | `warn` | a tooltip that only repeats the label cost the person a hover for nothing; certain, since the match is exact | [egui](egui.md) |
+| [U0019](../lints/U0019.md) | ui-hover-text | `warn` | an icon-only button with no tooltip has no words at all; a candidate, since a short label may be a real word or get help another way | [egui](egui.md) |
 
 ## The file
 

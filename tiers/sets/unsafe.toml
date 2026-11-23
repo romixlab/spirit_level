@@ -1,0 +1,8 @@
+[tier]
+description = "Unsafe code: every unsafe block says why it is sound"
+
+[clippy.lints]
+undocumented_unsafe_blocks = { level = "warn", reason = "every unsafe block says in a SAFETY: comment why it is sound" }
+unnecessary_safety_doc = { level = "warn", reason = "a # Safety section on a safe function sends readers looking for a contract that is not there" }
+as_ptr_cast_mut = { level = "warn", reason = "`as_ptr() as *mut` writes through a shared borrow: undefined behaviour" }
+mem_forget = { level = "warn", reason = "forget leaks the value and skips Drop; ManuallyDrop says it on purpose" }

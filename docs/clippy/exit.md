@@ -12,16 +12,14 @@
 
 | Tier | Level | Reason | Set in |
 |---|---|---|---|
-| [small](../tiers/small.md) | `warn` | process::exit skips every destructor; main returns instead | small |
-| [small-workspace](../tiers/small-workspace.md) | `warn` | process::exit skips every destructor; main returns instead | small |
-| [medium](../tiers/medium.md) | `warn` | process::exit skips every destructor; main returns instead | small |
-| [big](../tiers/big.md) | `warn` | process::exit skips every destructor; main returns instead | small |
+| [small](../tiers/small.md) | `warn` | process::exit skips every destructor; main returns instead | panics |
+| [small-workspace](../tiers/small-workspace.md) | `warn` | process::exit skips every destructor; main returns instead | panics |
+| [medium](../tiers/medium.md) | `warn` | process::exit skips every destructor; main returns instead | panics |
+| [big](../tiers/big.md) | `warn` | process::exit skips every destructor; main returns instead | panics |
 | [ai](../tiers/ai.md) | not in the set |  |  |
 | [embedded](../tiers/embedded.md) | not in the set |  |  |
 | [ui](../tiers/ui.md) | not in the set |  |  |
 | [egui](../tiers/egui.md) | not in the set |  |  |
-| [units-strict](../tiers/units-strict.md) | not in the set |  |  |
-| [units-paranoid](../tiers/units-paranoid.md) | not in the set |  |  |
 
 ## Configure
 
