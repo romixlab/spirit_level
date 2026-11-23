@@ -12,6 +12,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `CFG-6` `foreign-map-keys`: `[map-file] foreign` names the key paths the map's owner checks; spl leaves them unread, and a typo in an spl key stays an error.
 - ✅ `CFG-7` `per-crate-tiers`: `[[crate-tiers]]` and the map key `tiers` hold chosen crates to more tiers; their levels and parameters resolve per crate.
 - ✅ `CFG-8` `exclude-code`: `[[exclude]]` leaves crates or paths out of every lint until a required expiry; the report counts what it left out; workspace-level lints compute on the crates that are checked ([configuration](docs/configuration.md#leaving-code-out)).
+- ✅ `CFG-9` `crate-tiers-params-only`: a `[lints.X]` override with parameters but no level is valid when a `[[crate-tiers]]` entry's tiers enable `X`, not only when the project's own `extends` does.
 
 ## ENG - engine and output
 

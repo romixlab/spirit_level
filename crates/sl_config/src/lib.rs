@@ -237,6 +237,7 @@ impl Config {
         r.project_extends = extends.map(<[String]>::to_vec);
         r.layer(&source, text.clone(), true);
         let entries = std::mem::take(&mut r.tier_entries);
+        let pending = std::mem::take(&mut r.pending_level);
         let mut c = r.finish(Some(rel))?;
         c.crate_tiers = crate_tiers(
             c.map.as_ref(),
@@ -246,6 +247,10 @@ impl Config {
             (&source, &text),
             extends,
         )?;
+        let pending_errs = check_pending(&pending, &c);
+        if !pending_errs.is_empty() {
+            return Err(pending_errs);
+        }
         c.standing = Standing::of(&c, env);
         Ok(c)
     }
@@ -462,6 +467,43 @@ fn unknown_tier(name: &str) -> String {
     )
 }
 
+/// A lint set with no level, and no tier (directly extended, or of a `[[crate-tiers]]` entry) that enables it
+fn no_level_msg(id: &str, checked_crate_tiers: &[Vec<String>]) -> String {
+    if checked_crate_tiers.is_empty() {
+        format!(
+            "lints.{id} sets no level and no tier it extends enables {id}: add level = \"warn\" or \"deny\""
+        )
+    } else {
+        let tiers = checked_crate_tiers
+            .iter()
+            .map(|t| format!("{t:?}"))
+            .collect::<Vec<_>>()
+            .join(", ");
+        format!(
+            "lints.{id} sets no level, and neither a tier it extends nor crate-tiers {tiers} enables {id}: add level = \"warn\" or \"deny\""
+        )
+    }
+}
+
+/// Resolves every lint left pending because a `[[crate-tiers]]` entry might enable it: an error for one that
+/// no group of [`Config::crate_tiers`] actually turns on, naming the tiers checked
+fn check_pending(pending: &[(String, Origin)], c: &Config) -> Vec<ConfigError> {
+    let enabled = |id: &str| {
+        c.lints.get(id).is_some_and(|l| l.level > Level::Allow)
+            || c.crate_tiers
+                .iter()
+                .any(|t| t.lints.get(id).is_some_and(|l| l.level > Level::Allow))
+    };
+    pending
+        .iter()
+        .filter(|(id, _)| !enabled(id))
+        .map(|(id, origin)| {
+            let tiers: Vec<Vec<String>> = c.crate_tiers.iter().map(|t| t.tiers.clone()).collect();
+            ConfigError::new(&origin.file, origin.line, no_level_msg(id, &tiers))
+        })
+        .collect()
+}
+
 struct Resolver<'a> {
     env: &'a Env<'a>,
     root: PathBuf,
@@ -489,6 +531,9 @@ struct Resolver<'a> {
     /// The depth at which an extended name is a top-level one (1 under a project file, 0 for bare tiers)
     record_at: usize,
     errs: Vec<ConfigError>,
+    /// A lint override with no level and no tier enabling it yet, while a `[[crate-tiers]]` entry exists that
+    /// might: checked again once the crate-tiers groups are resolved ([`check_pending`])
+    pending_level: Vec<(String, Origin)>,
 }
 
 impl<'a> Resolver<'a> {
@@ -531,6 +576,7 @@ impl<'a> Resolver<'a> {
             applied: BTreeSet::new(),
             record_at: 1,
             errs: Vec::new(),
+            pending_level: Vec::new(),
         }
     }
 
@@ -651,6 +697,12 @@ impl<'a> Resolver<'a> {
             t.opt_str("description", &mut errs);
             t.finish(&mut errs);
         }
+        if !tier {
+            // read before the lints table: a param-only override may rely on one of these tiers
+            for t in tables(&mut r, "crate-tiers", &mut errs) {
+                self.tier_entry(t, &dir, &mut errs);
+            }
+        }
         if let Some(lints) = r.table("lints", &mut errs) {
             self.lints_table(lints, project || !tier, &mut errs);
         }
@@ -672,9 +724,6 @@ impl<'a> Resolver<'a> {
         }
         for t in tables(r, "exclude", errs) {
             self.exclude(t, errs);
-        }
-        for t in tables(r, "crate-tiers", errs) {
-            self.tier_entry(t, dir, errs);
         }
         if let Some(m) = r.table("map", errs) {
             self.map = Some(Map::read(m, errs));
@@ -790,11 +839,16 @@ impl<'a> Resolver<'a> {
                 continue;
             };
             if level.is_none() && s.origin.is_none() {
-                errs.push(ConfigError::new(
-                    &origin.file,
-                    origin.line,
-                    format!("lints.{id} sets no level and no tier it extends enables {id}: add level = \"warn\" or \"deny\""),
-                ));
+                if self.tier_entries.is_empty() {
+                    errs.push(ConfigError::new(
+                        &origin.file,
+                        origin.line,
+                        no_level_msg(id, &[]),
+                    ));
+                } else {
+                    // a crate-tiers entry may still enable it for its crates; checked once those are resolved
+                    self.pending_level.push((id.to_owned(), origin.clone()));
+                }
             }
             if let Some(l) = level {
                 s.level = l;

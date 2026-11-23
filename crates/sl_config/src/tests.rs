@@ -66,6 +66,7 @@ fn tier(name: &str) -> Option<&'static str> {
         "fw" => Some(
             "[lints.crate-lines]\nlevel = \"deny\"\nwarn-above = 64\nreason = \"flash is small\"\n",
         ),
+        "ui" => Some("[tier]\ndescription = \"ui\"\n"),
         _ => None,
     }
 }
@@ -632,6 +633,32 @@ fn map_key_tiers_and_entries_combine() {
     );
     assert_eq!(c.level("readme-per-crate", Some("b"), None).0, Level::Deny);
     assert_eq!(c.level("readme-per-crate", Some("c"), None).0, Level::Warn);
+}
+
+/// A project's `[lints.X]` may set only parameters when a `[[crate-tiers]]` entry's tiers enable the lint,
+/// even though the project's own `extends` does not
+#[test]
+fn crate_tiers_may_carry_a_params_only_override() {
+    let c = load(
+        "extends = \"small\"\n[[crate-tiers]]\ntiers = [\"fw\"]\ncrates = [\"a\"]\nreason = \"the firmware\"\n[lints.crate-lines]\nwarn-above = 50\nreason = \"tight flash\"\n",
+    )
+    .unwrap();
+    assert_eq!(c.level("crate-lines", Some("a"), None).0, Level::Deny);
+    assert_eq!(c.params_for("crate-lines", "a").int("warn-above"), 50);
+    assert_eq!(c.level("crate-lines", None, None).0, Level::Allow);
+}
+
+/// A `[[crate-tiers]]` entry exists, but none of its tiers enable the overridden lint: still an error
+#[test]
+fn a_lint_no_crate_tiers_enables_either_still_needs_a_level() {
+    let m = messages(load(
+        "extends = \"small\"\n[[crate-tiers]]\ntiers = [\"ui\"]\ncrates = [\"a\"]\nreason = \"the ui\"\n[lints.crate-lines]\nreason = \"r\"\nwarn-above = 3\n",
+    ));
+    assert!(
+        m.iter()
+            .any(|s| s.contains("sets no level") && s.contains("crate-tiers") && s.contains("ui")),
+        "{m:?}"
+    );
 }
 
 #[test]

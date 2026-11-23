@@ -134,6 +134,7 @@ With a crate map, the map key `tiers` says the same per crate: `foo_fw = { layer
 - For a finding about such a crate, levels and parameters are resolved as if the project file extended its tiers after its own `extends`. The project's `[lints]` and `[[exceptions]]` still apply on top.
 - A finding about any other crate, or about no crate, keeps the project's level. A lint that only a crate's tiers enable runs, and its findings elsewhere are allowed.
 - A tier is a shipped name or a path to a `.toml` file, as in `extends`. An entry needs `tiers`, `crates` and a `reason`; an unknown tier is an error.
+- A `[lints.X]` override may set only parameters, with no `level`, when a `[[crate-tiers]]` entry's tiers enable `X`; a lint no tier at all enables, directly or through such an entry, still needs a `level`.
 - `spl config` lists each set of crates with the lints whose level differs for them.
 
 ## Tables beside the lints
