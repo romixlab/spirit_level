@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.7.11] - 2026-11-23
+
 ### Fixed
 
 - `lock-unwrap` skips a crate's one lock helper that returns the guard or hands it to a closure (STATE-1).
