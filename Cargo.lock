@@ -1036,6 +1036,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "sl_badge"
+version = "0.7.12"
+dependencies = [
+ "sl_config",
+]
+
+[[package]]
 name = "sl_board"
 version = "0.7.12"
 dependencies = [
@@ -1270,6 +1277,7 @@ name = "sl_lints_manifest"
 version = "0.7.12"
 dependencies = [
  "sl_analysis",
+ "sl_badge",
  "sl_config",
  "sl_core",
  "sl_docs",
@@ -1602,6 +1610,7 @@ dependencies = [
  "inventory",
  "rustix 1.1.6",
  "serde_json",
+ "sl_badge",
  "sl_book",
  "sl_config",
  "sl_core",

@@ -1,0 +1,16 @@
+[package]
+name = "sl_badge"
+description = "The spirit_level README badge: a self-contained SVG naming the tier a repo extends and how strict its lint configuration is"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+publish = false
+
+[dependencies]
+sl_config.workspace = true
+
+[lints]
+workspace = true
