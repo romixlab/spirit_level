@@ -41,10 +41,11 @@ panic-fixture:
 
 # Install every adapter's tool that is missing or outside its tested range, with cargo-binstall: the tool fixtures
 # run them all and fail on a missing one (cargo-udeps also needs the pinned nightly); then this repo's MSRV
-# toolchain and cross targets with rustup; then list them
+# toolchain, the pinned nightly and cross targets with rustup; then list them
 tools:
     cargo run -q -p spirit_level_cli -- tools needed --all --spec --missing | xargs -r cargo binstall -y
     cargo run -q -p spirit_level_cli -- tools needed --toolchains --missing | xargs -r -n1 rustup toolchain install --profile minimal
+    cargo run -q -p spirit_level_cli -- tools needed --all --toolchains --missing | xargs -r -n1 rustup toolchain install --profile minimal
     cargo run -q -p spirit_level_cli -- tools needed --targets --missing | xargs -r rustup target add
     cargo run -q -p spirit_level_cli -- tools needed --all
 

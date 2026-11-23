@@ -59,7 +59,7 @@ pub struct NeededArgs {
     #[arg(default_value = ".")]
     path: PathBuf,
     /// Every tool that has an adapter, not only the project's; no project is read
-    #[arg(long, conflicts_with_all = ["toolchains", "targets"])]
+    #[arg(long, conflicts_with = "targets")]
     all: bool,
     /// Only what is missing, outside its tested range or prints no version
     #[arg(long)]

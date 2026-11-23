@@ -295,13 +295,18 @@ fn toolchains_name_the_pinned_nightly_of_a_nightly_tool() {
         "[lints.udeps-unused-deps]\nlevel = \"warn\"\nreason = \"r\"\n",
         &[("cargo-udeps", "echo 'cargo-udeps 0.1.61'")],
     );
-    let o = s.spl(&["tools", "needed", "--toolchains", "--missing"]);
-    assert_eq!(
-        stdout(&o),
-        format!("{}\n", sl_core::PINNED_NIGHTLY),
-        "{}",
-        all(&o)
-    );
+    for args in [
+        &["tools", "needed", "--toolchains", "--missing"][..],
+        &["tools", "needed", "--all", "--toolchains", "--missing"],
+    ] {
+        let o = s.spl(args);
+        assert_eq!(
+            stdout(&o),
+            format!("{}\n", sl_core::PINNED_NIGHTLY),
+            "{}",
+            all(&o)
+        );
+    }
 }
 
 #[test]
