@@ -40,6 +40,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `CLI-7` spl's commands register themselves per module (inventory); the root command, completion and usage signals come from the registry.
 - ✅ `CLI-8` `progress-display`: `spl check`, `pages` and `dependents` draw progress on stderr at a terminal (analyses done of planned, each running analysis with its tools and time) and clear it; `--progress auto|always|never`; the engine reports typed `sl_engine::Event`s ([output](docs/output.md#progress)).
 - ✅ `CLI-9` Tier ladder: `spl tiers` marks the tiers a project extends; `spl check --next` and `--at TIER` check one rung away with the project's overrides, a per-lint summary first.
+- ✅ `CLI-10` `spl badge`: a self-contained SVG README badge with the tier the project extends (`medium +2`) and a level vial whose bubble and colour show the share of lints turned on, between small and big; `readme-badges` asks for it linking the tier's book page and keeps the committed file current ([README badge](docs/badge.md)).
 
 ## DEP - dependents (crater-lite)
 
