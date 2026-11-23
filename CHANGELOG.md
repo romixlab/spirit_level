@@ -7,10 +7,15 @@
 - `spl commit-msg FILE` checks one commit message's lints fast, for a commit-msg hook (CLI-11).
 - Book `console` blocks colour commands, subcommands and flags (`spl_book_ext.shell`) (BOOK-8).
 - Book `rust` blocks mark every macro call, such as `lint!`, not only std's (`spl_book_ext.rust`) (BOOK-8).
+- Book page Firmware: which crates are firmware, the `--elf` run, what each embedded lint needs (BOOK-10).
 
 ### Fixed
 
 - `spl tools needed --toolchains` names the pinned nightly a nightly tool needs, also with `--all` (TOOL-2).
+
+### Removed
+
+- Book page "Migrating from bedrock-lint" (BOOK-10).
 
 ## [0.7.15] - 2026-11-23
 

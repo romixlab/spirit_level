@@ -182,6 +182,7 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `BOOK-6` Coloured check output in the book: `<!-- spirit-level:check PATH ... -->` blocks of hand-written pages, written by `spl book docs` as HTML from the CLI's own colours; `book docs --check` fails when stale.
 - ✅ `BOOK-7` book-refs: glossary terms `[[term]]`, code links `` [`Item`] `` and file links `` [`file.rs:section`] `` in any Zensical book, each with a card; `spl book refs` writes the code index and the cards' files, the Python package `spl_book_ext` renders them; an unknown name fails the build.
 - ✅ `BOOK-8` console-lexer: `console` blocks colour each command, subcommand and flag, through `spl_book_ext.shell` (Pygments `spl-console`); `rust` blocks mark every macro call (`spl_book_ext.rust`, `spl-rust`); the book's code takes a colour per token kind.
+- ✅ `BOOK-10` firmware-page: the Firmware page says which crates count as firmware and what the embedded lints need; it replaces the bedrock-lint migration guide.
 
 ## TESTKIT - the golden fixture harness
 
