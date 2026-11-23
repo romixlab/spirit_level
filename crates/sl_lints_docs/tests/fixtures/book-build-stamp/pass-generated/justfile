@@ -1,0 +1,3 @@
+# Writes the footer stamp and its age script, not in git
+book-refs:
+    spl book stamp --name fx overrides/partials/stamp.html docs/javascripts/book-stamp-age.js
