@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.7.14] - 2026-11-23
+
 ### Added
 
 - `spl badge` writes a self-contained SVG README badge: the tier, and a vial showing how strict the configuration is (CLI-10).
