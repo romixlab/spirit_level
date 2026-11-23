@@ -113,9 +113,11 @@ lint!(CI_WORKFLOW, "M0032", "ci-workflow", "repo", "the repo has a CI workflow a
     params: [("path", Str, "\".github/workflows/ci.yml\"", "the CI workflow, relative to the root")], needs: [], fix: None);
 lint!(MANIFEST_HOMEPAGE, "M0033", "manifest-homepage", "manifest", "the shared package keys set repository, and homepage is the book's site_url when it has one",
     params: [], needs: [], fix: Exact);
-lint!(README_BADGES, "M0034", "readme-badges", "repo", "the README carries a badge for the book, CI and every published crate, each linking to its target",
+lint!(README_BADGES, "M0034", "readme-badges", "repo", "the README carries a badge for the book, CI, every published crate and spirit_level, each linking to its target",
     params: [("file", Str, "\"README.md\"", "the README, relative to the root"),
-             ("workflow", Str, "\".github/workflows/ci.yml\"", "the CI workflow whose status badge the README shows")],
+             ("workflow", Str, "\".github/workflows/ci.yml\"", "the CI workflow whose status badge the README shows"),
+             ("badge", Str, "\".github/spl-badge.svg\"", "where `spl badge` writes the spirit_level badge the README shows; empty: no such badge"),
+             ("book", Str, "\"https://spl.vhrd.tech\"", "the spirit_level book the badge links to, at the page of the tier")],
     needs: [], fix: Exact);
 lint!(BINARY_NAME_CHARS, "M0035", "binary-name-chars", "manifest", "every binary's name, explicit or implicit, uses only an allowed set of characters",
     params: [("chars", Str, "\"a-z0-9\"", "characters a binary name may use: literals and a-z-style ranges")],

@@ -505,3 +505,26 @@ fn long_help_is_the_about_not_a_flattened_struct_s_rustdoc() {
     assert!(out.starts_with("A linter for Rust projects"), "{out}");
     assert!(!out.contains("```"), "{out}");
 }
+
+#[test]
+fn badge_writes_the_same_bytes_for_the_same_configuration() {
+    let w = workspace("extends = [\"medium\", \"ai\", \"units-strict\"]\n");
+    let o = run(&w.0, &["badge"]);
+    assert!(o.status.success(), "{}", text(&o));
+    assert!(
+        text(&o).starts_with("wrote .github/spl-badge.svg: medium +2, "),
+        "{}",
+        text(&o)
+    );
+    let svg = w.read(".github/spl-badge.svg");
+    assert!(
+        svg.starts_with("<svg xmlns=\"http://www.w3.org/2000/svg\""),
+        "{svg}"
+    );
+    assert!(svg.contains(">medium +2</text>"), "{svg}");
+    let printed = run(&w.0, &["badge", "--out", "-"]);
+    assert_eq!(String::from_utf8_lossy(&printed.stdout), svg);
+    let o = run(&w.0, &["badge", "--out", "docs/b.svg"]);
+    assert!(o.status.success(), "{}", text(&o));
+    assert_eq!(w.read("docs/b.svg"), svg);
+}
