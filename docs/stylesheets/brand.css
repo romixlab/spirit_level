@@ -102,3 +102,8 @@
 .sl-term-d { opacity: 0.65; }
 .sl-term-i { font-style: italic; }
 .sl-term-u { text-decoration: underline; }
+
+/* The copy button copies a console block's commands: prompts and output stay on the page */
+.highlight code[data-md-copying] :is(.gp, .go) {
+  display: none;
+}

@@ -60,10 +60,10 @@ The limits are `LOG_BYTES_MAX`, `SIGNALS_MAX` and `SIGNAL_BYTES_MAX` of the `vc_
 
 ## Reading the counts
 
-```bash
-spl usage
-spl usage --unused
-spl usage --format json
+```console
+$ spl usage
+$ spl usage --unused
+$ spl usage --format json
 ```
 
 `spl usage` lists every command and flag of this version of spl in the order of its help, with the runs in all and per source and the last day. One never used shows `0` and `never`. A signal from the records that this version no longer has comes last, marked `(not in this version)`.

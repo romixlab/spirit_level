@@ -2,8 +2,8 @@
 
 ## Install
 
-```bash
-cargo install --locked --git https://github.com/romixlab/spirit_level spirit_level_cli
+```console
+$ cargo install --locked --git https://github.com/romixlab/spirit_level spirit_level_cli
 ```
 
 It installs the `spl` command. Shell completion: `source <(COMPLETE=bash spl)` in `~/.bashrc` (zsh and fish alike).
@@ -17,13 +17,13 @@ It installs the `spl` command. Shell completion: `source <(COMPLETE=bash spl)` i
 | tens of crates, internal crates, an MSRV | `medium` |
 | a big workspace with declared layers | `big` (needs a [crate map](map.md)) |
 
-```bash
-spl init --tier small-workspace   # writes spirit_level.toml
-spl check                         # runs it
-spl tiers                         # the ladder and add-ons, this project's marked
-spl check --next                  # a look at the next tier up, with this project's overrides
-spl check --at big                # the same at any ladder tier; nothing is written
-spl check --tier big              # the shipped tier alone, without the project's file
+```console
+$ spl init --tier small-workspace   # writes spirit_level.toml
+$ spl check                         # runs it
+$ spl tiers                         # the ladder and add-ons, this project's marked
+$ spl check --next                  # a look at the next tier up, with this project's overrides
+$ spl check --at big                # the same at any ladder tier; nothing is written
+$ spl check --tier big              # the shipped tier alone, without the project's file
 ```
 
 `--next` and `--at` start with one line per lint that has findings: how many, its level there, and its level at the project's own tier (`off, new` or `warn, raised`). The findings follow.
