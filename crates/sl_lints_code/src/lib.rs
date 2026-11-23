@@ -68,6 +68,7 @@ lint!(UNIT_SUFFIX, "C0018", "unit-suffix", "code", "a numeric field or constant 
     params: [
         ("words", StrList, "[\"timeout\", \"delay\", \"interval\", \"period\", \"latency\", \"ttl\", \"backoff\", \"elapsed\", \"deadline\", \"size\"]", "name words that say a time or a size"),
         ("units", StrList, "[\"ns\", \"us\", \"ms\", \"s\", \"sec\", \"secs\", \"seconds\", \"nanos\", \"micros\", \"millis\", \"min\", \"mins\", \"minutes\", \"h\", \"hours\", \"days\", \"ticks\", \"cycles\", \"bytes\", \"b\", \"kb\", \"kib\", \"mb\", \"mib\", \"gb\", \"gib\", \"bits\", \"words\", \"pages\", \"sectors\", \"blocks\", \"count\", \"items\", \"entries\", \"elements\", \"chars\", \"lines\", \"samples\", \"frames\", \"px\", \"pt\", \"mm\"]", "name words that are units; one anywhere in the name is enough"),
+        ("exempt", StrList, "[\"ttl\", \"hop_limit\"]", "whole names a standard gives a field that counts no time or size (IPv4's `ttl` and IPv6's `hop_limit` count hops)"),
     ],
     needs: [], fix: None);
 lint!(UNBOUNDED_READ, "C0019", "unbounded-read", "code", "a read to the end of a stream is bounded with take()",

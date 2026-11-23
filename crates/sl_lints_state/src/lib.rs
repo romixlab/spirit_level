@@ -63,7 +63,7 @@ impl Analysis for State {
         let tl_types = cx.params("thread-local-state").list("types").to_vec();
         let io = cx.params("lock-held-across").list("io").to_vec();
         for pkg in &p.packages {
-            let mut unwraps: Vec<Span> = Vec::new();
+            let mut unwraps: Vec<guards::Unwrap> = Vec::new();
             for f in p
                 .sources(pkg)
                 .iter()
@@ -98,6 +98,10 @@ impl Analysis for State {
                     );
                 }
             }
+            // the crate's one lock helper decides what poison means: the fix the help asks for, not a finding
+            if let Some(i) = unwraps.iter().position(|u| u.helper.is_some()) {
+                unwraps.remove(i);
+            }
             let max = cx.params_for("lock-unwrap", pkg).count("max");
             if unwraps.len() > max {
                 let n = unwraps.len();
@@ -109,8 +113,8 @@ impl Analysis for State {
                 .krate(&pkg.name)
                 .metric("calls", n as f64, Some(max as f64))
                 .help("each is a lock reached by many callers and a panic on poison; give the state one owner, or take kept locks through one helper that recovers from poison");
-                for s in unwraps.into_iter().take(20) {
-                    d = d.span(s);
+                for u in unwraps.into_iter().take(20) {
+                    d = d.span(u.span);
                 }
                 cx.emit(d);
             }

@@ -74,35 +74,47 @@ fn nav_entries(cx: &Context<'_>, book: &Book) {
     }
 }
 
-/// The committed sources that could carry a build stamp: the theme's override partial, every `extra_javascript`
-/// file, and the built site's home page when it is there
+/// The sources that could carry a build stamp: the theme's override partial, every `extra_javascript` file, the
+/// built site's home page when it is there, and the files `spl book stamp` writes from a just recipe or a workflow
+/// (the stamp partial under the theme's `custom_dir`, the age script when it is registered as `extra_javascript`)
 fn build_stamp(cx: &Context<'_>, root: &Path, book: &Book) {
     let id = "book-build-stamp";
     let p = cx.params(id);
     let partial = p.str("partial");
     let marker = p.str("marker").to_lowercase();
     let age_marker = p.str("age-marker").to_lowercase();
-    let mut sources = Vec::new();
-    if let Some(dir) = &book.overrides_dir {
-        let rel = format!("{dir}/{partial}");
+    // (file, carries the stamp, carries its age)
+    let mut sources: Vec<(String, bool, bool)> = Vec::new();
+    let mut read = |rel: String| {
         if let Some(text) = walk::read_page(root, &rel) {
-            sources.push((rel, text));
+            let text = text.to_lowercase();
+            sources.push((rel, text.contains(&marker), text.contains(&age_marker)));
         }
+    };
+    if let Some(dir) = &book.overrides_dir {
+        read(format!("{dir}/{partial}"));
     }
     for js in &book.extra_javascript {
-        let rel = book.rel(js);
-        if let Some(text) = walk::read_page(root, &rel) {
-            sources.push((rel, text));
+        read(book.rel(js));
+    }
+    read(format!("{}/index.html", book.site_dir));
+    for (stamp, script) in stamp_writes(root) {
+        if book
+            .overrides_dir
+            .as_ref()
+            .is_some_and(|d| stamp.starts_with(&format!("{d}/")))
+        {
+            sources.push((stamp, true, false));
+        }
+        if book
+            .extra_javascript
+            .iter()
+            .any(|js| book.rel(js) == script)
+        {
+            sources.push((script, false, true));
         }
     }
-    let index = format!("{}/index.html", book.site_dir);
-    if let Some(text) = walk::read_page(root, &index) {
-        sources.push((index, text));
-    }
-    let Some((stamp_file, _)) = sources
-        .iter()
-        .find(|(_, text)| text.to_lowercase().contains(&marker))
-    else {
+    let Some((stamp_file, ..)) = sources.iter().find(|s| s.1) else {
         cx.emit(
             Diagnostic::new(
                 id,
@@ -118,10 +130,7 @@ fn build_stamp(cx: &Context<'_>, root: &Path, book: &Book) {
         );
         return;
     };
-    if !sources
-        .iter()
-        .any(|(_, text)| text.to_lowercase().contains(&age_marker))
-    {
+    if !sources.iter().any(|s| s.2) {
         cx.emit(
             Diagnostic::new(
                 id,
@@ -135,6 +144,42 @@ fn build_stamp(cx: &Context<'_>, root: &Path, book: &Book) {
             ),
         );
     }
+}
+
+/// The files `spl book stamp` writes from the project's just recipes and workflows: (stamp partial, age script),
+/// its two positional arguments, relative to the project root
+fn stamp_writes(root: &Path) -> Vec<(String, String)> {
+    let mut commands: Vec<Vec<String>> = Justfile::read(root)
+        .into_iter()
+        .flat_map(|j| j.recipes)
+        .flat_map(|r| r.body)
+        .flat_map(|l| workflow::commands(&l))
+        .collect();
+    for w in Workflow::all(root).into_iter().flatten() {
+        commands.extend(w.commands().map(|(_, c)| c));
+    }
+    commands
+        .iter()
+        .filter_map(|c| {
+            let at = c.windows(3).position(|w| {
+                w[0].rsplit('/').next() == Some("spl") && w[1] == "book" && w[2] == "stamp"
+            })?;
+            // every flag of `spl book stamp` takes a value: `--name X` or `--name=X`
+            let mut words = c[at + 3..].iter();
+            let mut args = Vec::new();
+            while let Some(w) = words.next() {
+                if w.starts_with('-') {
+                    if !w.contains('=') {
+                        words.next();
+                    }
+                } else {
+                    args.push(w.trim_start_matches("./").to_owned());
+                }
+            }
+            let [stamp, script] = <[String; 2]>::try_from(args).ok()?;
+            Some((stamp, script))
+        })
+        .collect()
 }
 
 /// Whether a command builds the book strict: `zensical build` or `mkdocs build` with `--strict`
