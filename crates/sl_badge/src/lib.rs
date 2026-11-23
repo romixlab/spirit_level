@@ -148,6 +148,24 @@ fn colour(p: f64) -> String {
     format!("#{:02x}{:02x}{:02x}", mix(0), mix(1), mix(2))
 }
 
+/// The tier label a badge written by [`svg`] shows (`medium +2`), or None for another file
+pub fn label(svg: &str) -> Option<String> {
+    if !svg.contains(&format!(">{LABEL}</text>")) {
+        return None;
+    }
+    let body = svg.trim_end().strip_suffix("</text></g></svg>")?;
+    let start = body.rfind('>')? + 1;
+    Some(unescape(&body[start..]))
+}
+
+/// The text [`escape`] escaped
+fn unescape(text: &str) -> String {
+    text.replace("&lt;", "<")
+        .replace("&gt;", ">")
+        .replace("&quot;", "\"")
+        .replace("&amp;", "&")
+}
+
 /// A text escaped for XML content and attributes
 fn escape(text: &str) -> String {
     text.replace('&', "&amp;")
@@ -203,5 +221,13 @@ mod tests {
     fn text_is_escaped() {
         let a = svg(&standing("a<b", &[], 0));
         assert!(a.contains(">a&lt;b</text>"), "{a}");
+        assert_eq!(label(&a).as_deref(), Some("a<b"));
+    }
+
+    #[test]
+    fn label_reads_the_tier_back() {
+        let a = svg(&standing("medium", &["ai"], 150));
+        assert_eq!(label(&a).as_deref(), Some("medium +1"));
+        assert_eq!(label("<svg/>"), None);
     }
 }

@@ -1,6 +1,6 @@
 [[finding]]
 at = ".github/spl-badge.svg:1"
-contains = "differs from what `spl badge` writes for the configuration (custom)"
+contains = "shows the tier medium, and the configuration is custom"
 
 [[finding]]
 at = "README.md:3"

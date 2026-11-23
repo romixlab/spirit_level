@@ -12,7 +12,7 @@ What the README must carry follows from what the repo has, read from its own fil
 | a published crate with a library | `https://docs.rs/NAME` | any |
 | its own `spirit_level.toml` (parameter `badge` not empty) | the book's page of the tier it extends (`https://spl.vhrd.tech/tiers/medium/`, parameter `book`) | the file `badge`, `.github/spl-badge.svg` |
 
-The spirit_level badge is the one [`spl badge`](../badge.md) writes. The committed file must hold exactly what `spl badge` writes for the configuration: a badge that no longer shows the tier or how strict the configuration is, after a change to `spirit_level.toml` or a new release of spirit_level, is a finding too.
+The spirit_level badge is the one [`spl badge`](../badge.md) writes. The committed file must show the tier `spl badge` writes for the configuration, with the same `+N`: a badge whose text no longer matches `spirit_level.toml` is a finding too. Its bubble and colour are not compared: they move when a release of spirit_level adds lints, without any change to the configuration.
 
 A badge is a linked image: `[![alt](image)](link)` in Markdown, or `<a href="link"><img src="image"></a>` in HTML. A link may go deeper than the address in the table (`https://docs.rs/NAME/latest/NAME/`) or carry a query (`?query=branch%3Amain`). Badges in code blocks and HTML comments do not count.
 
@@ -26,4 +26,4 @@ A badge is a linked image: `[![alt](image)](link)` in Markdown, or `<a href="lin
 
 ## How to fix
 
-Add the badge the finding names. `spl check --fix` inserts it after the README's existing badges, in their form (Markdown or HTML). Without any badges, each one goes in a block of its own before the first paragraph, after a title, a logo or an HTML header; put them on consecutive lines to show them in one row. A CI badge that shows another image is changed by hand to show the workflow's `badge.svg`. `--fix` also writes the spirit_level badge where it is missing or stale; `spl badge` does the same alone. Set `badge = ""` for a repo that shows no spirit_level badge.
+Add the badge the finding names. `spl check --fix` inserts it after the README's existing badges, in their form (Markdown or HTML). Without any badges, each one goes in a block of its own before the first paragraph, after a title, a logo or an HTML header; put them on consecutive lines to show them in one row. A CI badge that shows another image is changed by hand to show the workflow's `badge.svg`. `--fix` also writes the spirit_level badge where it is missing or shows another tier, and rewrites the whole file, bubble and colour included; `spl badge` does the same alone. Set `badge = ""` for a repo that shows no spirit_level badge.

@@ -5,7 +5,7 @@
 ### Added
 
 - `spl badge` writes a self-contained SVG README badge: the tier, and a vial showing how strict the configuration is (CLI-10).
-- `readme-badges` asks for the spirit_level badge linking the tier's book page and reports a stale SVG (CLI-10).
+- `readme-badges` asks for the spirit_level badge linking the tier's book page and reports an SVG showing another tier (CLI-10).
 
 ## [0.7.12] - 2026-11-23
 

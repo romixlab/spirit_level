@@ -34,6 +34,6 @@ The README links it to the book's page of the tier:
 
 The badge is a self-contained SVG. It loads no font, no script and nothing from the network: text widths come from a built-in Verdana width table, as shields.io measures them. It reads on light and dark READMEs alike, and its edge follows the reader's colour scheme.
 
-The same configuration always gives the same bytes. [readme-badges](lints/M0034.md) reports a README without the badge and a committed badge that differs from what `spl badge` writes, for example after a change to `spirit_level.toml` or a release of spirit_level that changes the tiers. `spl check --fix` writes the file and inserts the link.
+The same configuration always gives the same bytes. [readme-badges](lints/M0034.md) reports a README without the badge and a committed badge whose text differs from what `spl badge` writes: another tier or another `+N`, after a change to `spirit_level.toml`. A bubble or colour that moved is not a finding: they follow spirit_level's own lint counts, which change with its releases, so a committed badge stays valid until the configuration changes. `spl check --fix` writes the whole file, bubble included, and inserts the link; `spl badge` refreshes the bubble at any time.
 
 The lint's parameters set the file (`badge`, empty for no badge) and the book it links to (`book`). `spl badge` writes to `badge` by default.

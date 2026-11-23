@@ -342,16 +342,22 @@ fn spl_badge<'c>(cx: &'c Context<'_>) -> Option<&'c str> {
     (!badge.is_empty() && cx.config.file.as_deref() == Some(sl_config::FILE)).then_some(badge)
 }
 
-/// The committed `spirit_level` badge is what `spl badge` writes for the configuration
+/// The committed `spirit_level` badge shows the tier `spl badge` writes for the configuration. Its bubble and colour
+/// may lag: they move with `spirit_level`'s own lint counts, not only with the configuration.
 fn badge_file(cx: &Context<'_>, badge: &str) {
     let want = sl_badge::svg(&cx.config.standing);
+    let label = cx.config.standing.label();
     let current = cx.project.read(badge);
     let message = match &current {
-        Some(t) if *t == want => return,
-        Some(_) => format!(
-            "{badge} differs from what `spl badge` writes for the configuration ({})",
-            cx.config.standing.label()
-        ),
+        Some(t) if sl_badge::label(t).as_deref() == Some(label.as_str()) => return,
+        Some(t) => match sl_badge::label(t) {
+            Some(shown) => {
+                format!("{badge} shows the tier {shown}, and the configuration is {label}")
+            }
+            None => {
+                format!("{badge} is not a badge `spl badge` writes; the configuration is {label}")
+            }
+        },
         None => {
             format!("there is no {badge}: `spl badge` writes the README's spirit_level badge there")
         }
