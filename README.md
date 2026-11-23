@@ -10,7 +10,6 @@
 <p align="center">
   <a href="https://spl.vhrd.tech"><img alt="Book" src="https://img.shields.io/badge/book-spl.vhrd.tech-65a30d"></a>
   <a href="https://github.com/romixlab/spirit_level/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/romixlab/spirit_level/actions/workflows/ci.yml/badge.svg"></a>
-  <a href="https://github.com/romixlab/spirit_level/actions/workflows/docs.yml"><img alt="Book build" src="https://github.com/romixlab/spirit_level/actions/workflows/docs.yml/badge.svg"></a>
   <a href="#licence"><img alt="License: MIT OR Apache-2.0" src="https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-373c42"></a>
   <a href="https://crates.io/crates/sl_board_model"><img alt="crates.io" src="https://img.shields.io/crates/v/sl_board_model"></a>
   <a href="https://docs.rs/sl_board_model"><img alt="docs.rs" src="https://img.shields.io/docsrs/sl_board_model"></a>

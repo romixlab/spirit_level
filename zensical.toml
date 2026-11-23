@@ -481,7 +481,7 @@ features = [
     "navigation.footer",
     "navigation.indexes",
     "navigation.path",
-    "navigation.sections",
+    "navigation.prune",
     "navigation.top",
     "search.highlight",
 ]
