@@ -289,6 +289,22 @@ fn all_lists_every_tool_and_components_apart() {
 }
 
 #[test]
+fn toolchains_name_the_pinned_nightly_of_a_nightly_tool() {
+    let s = Setup::with_config(
+        "nightly",
+        "[lints.udeps-unused-deps]\nlevel = \"warn\"\nreason = \"r\"\n",
+        &[("cargo-udeps", "echo 'cargo-udeps 0.1.61'")],
+    );
+    let o = s.spl(&["tools", "needed", "--toolchains", "--missing"]);
+    assert_eq!(
+        stdout(&o),
+        format!("{}\n", sl_core::PINNED_NIGHTLY),
+        "{}",
+        all(&o)
+    );
+}
+
+#[test]
 fn check_reports_an_untested_tool_and_names_the_install_of_a_missing_one() {
     let s = mixed("check");
     let o = s.spl(&["check", "--format", "json"]);

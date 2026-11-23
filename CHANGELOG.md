@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- `spl tools needed --toolchains` names the pinned nightly a nightly tool needs, so `just tools` installs it (TOOL-2).
+
 ## [0.7.15] - 2026-11-23
 
 ### Fixed

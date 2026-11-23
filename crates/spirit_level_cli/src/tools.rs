@@ -70,7 +70,8 @@ pub struct NeededArgs {
     /// One rustup component per line, for `rustup component add`
     #[arg(long)]
     components: bool,
-    /// One toolchain per line (the members' rust-versions, for `cargo-msrv`), for `rustup toolchain install`
+    /// One toolchain per line (the members' rust-versions, for `cargo-msrv`, and the pinned nightly of a nightly
+    /// tool), for `rustup toolchain install`
     #[arg(long)]
     toolchains: bool,
     /// One target per line (`cargo-no-std`, `cargo-wasm`), for `rustup target add`
@@ -195,7 +196,6 @@ impl Needed {
         self.tools.retain(Tool::wanted);
         self.toolchains.retain(|t| t.missing.is_some());
         self.targets.retain(|t| t.installed == Some(false));
-        self.nightly_missing &= self.tools.iter().any(|t| t.found.pin.nightly);
     }
 
     /// Whether something needed is not there at all
@@ -233,7 +233,14 @@ fn needed(a: &NeededArgs) -> Result<Exit, String> {
             PinKind::Crate { .. } => None,
         }))
     } else if a.toolchains {
-        lines(n.toolchains.iter().map(|t| t.version.clone()))
+        let nightly =
+            n.nightly_missing || (!a.missing && n.tools.iter().any(|t| t.found.pin.nightly));
+        lines(
+            n.toolchains
+                .iter()
+                .map(|t| t.version.clone())
+                .chain(nightly.then(|| n.nightly.clone())),
+        )
     } else if a.targets {
         lines(n.targets.iter().map(|t| t.name.clone()))
     } else if a.json {
