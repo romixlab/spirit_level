@@ -11,9 +11,6 @@ use sl_config::Standing;
 /// The text of the left side
 pub const LABEL: &str = "spirit level";
 
-/// Where `spl badge` writes the badge and `readme-badges` looks for it, relative to the repo's root
-pub const PATH_DEFAULT: &str = ".github/spl-badge.svg";
-
 /// The badge's height, px
 const HEIGHT_PX: u32 = 20;
 /// The space left and right of a text, in tenths of a px

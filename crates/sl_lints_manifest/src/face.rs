@@ -1,5 +1,5 @@
 //! The repo's public face: the links its manifest gives crates.io and docs.rs, the README's badges, and the
-//! spirit_level badge `spl badge` writes.
+//! `spirit_level` badge `spl badge` writes.
 
 use sl_analysis::Context;
 use sl_core::{Diagnostic, Edit, Fix, Span};
@@ -335,14 +335,14 @@ fn why_image(item: &str) -> &'static str {
     }
 }
 
-/// The path of the spirit_level badge when the run's configuration is the project's own `spirit_level.toml` and
+/// The path of the `spirit_level` badge when the run's configuration is the project's own `spirit_level.toml` and
 /// `badge` is set
 fn spl_badge<'c>(cx: &'c Context<'_>) -> Option<&'c str> {
     let badge = cx.params("readme-badges").str("badge");
     (!badge.is_empty() && cx.config.file.as_deref() == Some(sl_config::FILE)).then_some(badge)
 }
 
-/// The committed spirit_level badge is what `spl badge` writes for the configuration
+/// The committed `spirit_level` badge is what `spl badge` writes for the configuration
 fn badge_file(cx: &Context<'_>, badge: &str) {
     let want = sl_badge::svg(&cx.config.standing);
     let current = cx.project.read(badge);
