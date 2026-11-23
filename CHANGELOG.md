@@ -6,6 +6,7 @@
 
 - Files of a module inside an inline `#[cfg(test)] mod tests { .. }` count as test code (STATE-1).
 - `nested-locks` and `lock-held-across` skip a decoder's `read()?` and `read::<T>()`: not a lock (STATE-1).
+- `nested-locks` and `lock-held-across` follow guards taken through a workspace's lock helpers (STATE-1).
 
 ## [0.7.11] - 2026-11-23
 

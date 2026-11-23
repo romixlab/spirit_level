@@ -62,6 +62,18 @@ impl Analysis for State {
         let atomics = cx.params("static-interior-mutability").bool("atomics");
         let tl_types = cx.params("thread-local-state").list("types").to_vec();
         let io = cx.params("lock-held-across").list("io").to_vec();
+        // a helper in one crate takes the guard for callers in every crate
+        let helpers: Vec<guards::Helper> = p
+            .packages
+            .iter()
+            .flat_map(|pkg| {
+                p.sources(pkg)
+                    .iter()
+                    .filter(|f| f.kind == FileKind::Src && !p.is_test_file(pkg, f))
+            })
+            .filter_map(|f| f.ast().ok())
+            .flat_map(|ast| guards::helpers(&without_tests(ast)))
+            .collect();
         for pkg in &p.packages {
             let mut unwraps: Vec<guards::Unwrap> = Vec::new();
             for f in p
@@ -81,7 +93,7 @@ impl Analysis for State {
                     tl_types: &tl_types,
                 };
                 v.visit_file(&ast);
-                let mut g = guards::Guards::new(&f.rel, &io);
+                let mut g = guards::Guards::new(&f.rel, &io, &helpers);
                 g.visit_file(&ast);
                 unwraps.extend(g.unwraps);
                 for (lint, s, msg) in g.found {

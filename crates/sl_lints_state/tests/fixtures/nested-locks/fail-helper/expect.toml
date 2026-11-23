@@ -1,0 +1,9 @@
+[[finding]]
+at = "src/lib.rs:9"
+contains = "second lock is taken while guard `ga` (line 8)"
+confidence = "estimate"
+
+[[finding]]
+at = "src/lib.rs:15"
+contains = "second lock is taken while guard `v` (line 15)"
+confidence = "estimate"

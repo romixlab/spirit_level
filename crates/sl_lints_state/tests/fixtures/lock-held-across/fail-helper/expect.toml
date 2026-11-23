@@ -1,0 +1,9 @@
+[[finding]]
+at = "src/lib.rs:9"
+contains = "guard `g` (from locked() on line 8) is held across I/O (std::fs::write)"
+confidence = "estimate"
+
+[[finding]]
+at = "src/lib.rs:14"
+contains = "guard `v` (from with_state() on line 14) is held across I/O (std::fs::write)"
+confidence = "estimate"
