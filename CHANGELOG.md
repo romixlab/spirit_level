@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.7.10] - 2026-11-23
+
 ### Added
 
 - Lint sets by guard (`panics`, `deps`, `msrv`, `clippy-pedantic`...): size tiers are their union; extend one alone (TIER-8).
