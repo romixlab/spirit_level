@@ -1,0 +1,3 @@
+[[finding]]
+at = "src/tests/captures.rs:6"
+contains = "1 lock().unwrap()-style calls (limit 0)"

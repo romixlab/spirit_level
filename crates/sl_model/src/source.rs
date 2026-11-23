@@ -95,9 +95,10 @@ impl SourceFile {
     }
 }
 
-/// Collects the module paths of `#[cfg(test)] mod name;` declarations (out-of-line test modules) under `module`,
-/// and, for those with `#[path = "..."]`, the file as `file:<path in package>` (relative to the declaring file's
-/// directory, `file_dir`)
+/// Collects the module paths of `#[cfg(test)] mod name;` declarations (out-of-line test modules) and of inline
+/// `#[cfg(test)] mod name { .. }` modules (whose `mod child;` files are test code too) under `module`, and, for
+/// those with `#[path = "..."]`, the file as `file:<path in package>` (relative to the declaring file's directory,
+/// `file_dir`)
 pub(crate) fn cfg_test_mods(
     items: &[syn::Item],
     module: &str,
@@ -149,7 +150,8 @@ pub(crate) fn cfg_test_mods(
                 }
                 out.push(path);
             }
-            Some((_, inner)) if !test => cfg_test_mods(inner, &path, file_dir, out),
+            Some(_) if test => out.push(path),
+            Some((_, inner)) => cfg_test_mods(inner, &path, file_dir, out),
             _ => {}
         }
     }
@@ -214,5 +216,16 @@ mod tests {
         assert!(f.ast().is_ok());
         let f = SourceFile::from_text("t/src/lib.rs", "t", "src/lib.rs", "fn (".into());
         assert!(f.ast().unwrap_err().starts_with("t/src/lib.rs:1:"));
+    }
+
+    #[test]
+    fn test_modules() {
+        let ast: syn::File = syn::parse_str(
+            "#[cfg(test)] mod a; #[cfg(test)] mod t { mod c; } mod lib { #[cfg(test)] mod d { mod e; } mod f; }",
+        )
+        .expect("parses");
+        let mut out = Vec::new();
+        cfg_test_mods(&ast.items, "", "", &mut out);
+        assert_eq!(out, ["a", "t", "lib::d"]);
     }
 }

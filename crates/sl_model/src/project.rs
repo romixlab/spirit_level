@@ -445,8 +445,8 @@ impl Project {
         })
     }
 
-    /// Whether a file is test code: under tests/, benches/ or examples/, or a module declared with
-    /// `#[cfg(test)] mod name;` (and everything below it)
+    /// Whether a file is test code: under tests/, benches/ or examples/, or a module under a
+    /// `#[cfg(test)] mod name;` or an inline `#[cfg(test)] mod name { mod child; }`
     pub fn is_test_file(&self, pkg: &Package, f: &SourceFile) -> bool {
         if f.kind.is_test_like() {
             return true;
