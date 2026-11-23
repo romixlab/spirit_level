@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.7.13] - 2026-11-23
+
 ### Fixed
 
 - Lock helpers count only when they return a guard, or a `Result`/`Option` of one (STATE-2).
