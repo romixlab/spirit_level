@@ -87,7 +87,8 @@ mod tests {
                 "tools",
                 "usage",
                 "book",
-                "badge"
+                "badge",
+                "commit-msg"
             ]
         );
     }

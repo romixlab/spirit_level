@@ -15,6 +15,7 @@ mod badge;
 mod book;
 mod check;
 mod codes;
+mod commit_msg;
 mod config;
 mod dependents;
 mod explain;

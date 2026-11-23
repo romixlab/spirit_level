@@ -1619,6 +1619,7 @@ dependencies = [
  "sl_firmware",
  "sl_lints_docs",
  "sl_lints_embedded",
+ "sl_lints_prose",
  "sl_model",
  "sl_report",
  "sl_tools",

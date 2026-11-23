@@ -13,6 +13,11 @@ mod text;
 mod tracking;
 mod units;
 
+/// The message-only findings, pure of project or git history: `spl commit-msg` checks one message with these
+/// before it is a commit.
+pub use commits::{body_diagnostic, subject_diagnostic};
+pub use hygiene::tested_diagnostic;
+
 use sl_analysis::{Analysis, Context, lint};
 use sl_core::{LintMeta, Need};
 

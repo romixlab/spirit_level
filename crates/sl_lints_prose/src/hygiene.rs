@@ -23,16 +23,23 @@ pub(crate) fn run(cx: &Context<'_>) {
     }
 }
 
-fn tested(cx: &Context<'_>, c: &Commit) {
-    let key = cx.params("commit-tested-line").str("trailer");
+/// The `commit-tested-line` finding of `c`, pure like [`crate::commits::subject_diagnostic`].
+pub fn tested_diagnostic(c: &Commit, key: &str) -> Option<Diagnostic> {
     if c.trailers(key).any(|t| !t.value.is_empty()) {
-        return;
+        return None;
     }
-    cx.emit(
+    Some(
         Diagnostic::new("commit-tested-line", format!("commit:{}", c.subject), format!("no `{key}:` line says how the commit was tested: {}", c.subject))
             .span(Span::new(c.file(), 1))
             .help(format!("end the message with `{key}: <what ran>` (`just test --changed`, a reproducer); nothing ran: `{key}: not tested`, and what could not be done")),
-    );
+    )
+}
+
+fn tested(cx: &Context<'_>, c: &Commit) {
+    let key = cx.params("commit-tested-line").str("trailer");
+    if let Some(d) = tested_diagnostic(c, key) {
+        cx.emit(d);
+    }
 }
 
 /// Whether a changed line only names paths: a `use`, a `mod`, or a line that mentions a module path

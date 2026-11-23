@@ -1,6 +1,7 @@
 //! The integration tests of `spl`, one binary: each module drives the built binary.
 
 mod cli;
+mod commit_msg;
 mod elf;
 #[cfg(unix)]
 mod progress;

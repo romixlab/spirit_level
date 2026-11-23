@@ -71,40 +71,51 @@ pub(crate) fn run(cx: &Context<'_>) {
     }
 }
 
+/// The `commit-subject-length` finding of `c`, pure: no project or git read, so `spl commit-msg` can call it on a
+/// message that is not committed yet.
+pub fn subject_diagnostic(c: &Commit, max: usize) -> Option<Diagnostic> {
+    let n = c.subject.chars().count();
+    (n > max).then(|| {
+        Diagnostic::new(
+            "commit-subject-length",
+            format!("commit:{}", c.subject),
+            format!(
+                "commit subject of {n} characters (limit {max}): {}",
+                c.subject
+            ),
+        )
+        .span(span(c, 1))
+        .metric("chars", n as f64, Some(max as f64))
+        .help("name the change in the subject; details go in the body")
+    })
+}
+
 fn subject(cx: &Context<'_>, c: &Commit) {
     let max = cx.params("commit-subject-length").count("max-chars");
-    let n = c.subject.chars().count();
-    if n > max {
-        cx.emit(
-            Diagnostic::new(
-                "commit-subject-length",
-                format!("commit:{}", c.subject),
-                format!(
-                    "commit subject of {n} characters (limit {max}): {}",
-                    c.subject
-                ),
-            )
-            .span(span(c, 1))
-            .metric("chars", n as f64, Some(max as f64))
-            .help("name the change in the subject; details go in the body"),
-        );
+    if let Some(d) = subject_diagnostic(c, max) {
+        cx.emit(d);
     }
+}
+
+/// The `commit-body-lines` finding of `c`, pure like [`subject_diagnostic`].
+pub fn body_diagnostic(c: &Commit, max: usize) -> Option<Diagnostic> {
+    let n = c.body.len();
+    (n > max).then(|| {
+        Diagnostic::new(
+            "commit-body-lines",
+            format!("commit:{}", c.subject),
+            format!("commit body of {n} lines (limit {max}): {}", c.subject),
+        )
+        .span(span(c, 3))
+        .metric("lines", n as f64, Some(max as f64))
+        .help("keep what the diff cannot say: why, and what the reader must do")
+    })
 }
 
 fn body(cx: &Context<'_>, c: &Commit) {
     let max = cx.params("commit-body-lines").count("max-lines");
-    let n = c.body.len();
-    if n > max {
-        cx.emit(
-            Diagnostic::new(
-                "commit-body-lines",
-                format!("commit:{}", c.subject),
-                format!("commit body of {n} lines (limit {max}): {}", c.subject),
-            )
-            .span(span(c, 3))
-            .metric("lines", n as f64, Some(max as f64))
-            .help("keep what the diff cannot say: why, and what the reader must do"),
-        );
+    if let Some(d) = body_diagnostic(c, max) {
+        cx.emit(d);
     }
 }
 

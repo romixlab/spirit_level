@@ -430,9 +430,12 @@ fn untested_tools(tools: &Tools, ran: &[String], lints: &[&'static LintMeta]) ->
     out
 }
 
-/// Sets each finding's level from the config and its scoped exceptions; an excepted finding keeps
-/// the lint's level and records the exception's reason
-fn apply_levels(diagnostics: &mut [Diagnostic], config: &Config) {
+/// Sets each finding's level from the config and its scoped exceptions; an excepted finding keeps the lint's
+/// level and records the exception's reason.
+///
+/// `spl commit-msg` calls this directly: a lint it runs outside a full [`run`] still fails by the project's own
+/// waivers and levels.
+pub fn apply_levels(diagnostics: &mut [Diagnostic], config: &Config) {
     for d in diagnostics {
         let path = d.primary().map(|s| s.file.clone());
         let (level, exc) = config.level(&d.lint, d.krate.as_deref(), path.as_deref());

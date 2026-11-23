@@ -27,6 +27,7 @@ sl_dependents.workspace = true
 sl_firmware.workspace = true
 sl_lints_docs.workspace = true
 sl_lints_embedded.workspace = true
+sl_lints_prose.workspace = true
 sl_engine.workspace = true
 sl_model.workspace = true
 sl_report.workspace = true
