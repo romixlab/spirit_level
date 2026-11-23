@@ -394,6 +394,7 @@ pub fn config(project: &Project, opts: &Options) -> Result<Config, CheckError> {
         tier: &tier,
         today: opts.today,
         version: project.version,
+        ladder: LADDER,
     };
     let config = if let Some(at) = &opts.at {
         let own = Config::load(&project.root, opts.config.as_deref(), &env)
@@ -673,6 +674,7 @@ mod tests {
             tier: &tier,
             today: Date::parse("2026-11-13").unwrap(),
             version: None,
+            ladder: LADDER,
         };
         for size in ["small", "medium", "big"] {
             let alone = Config::from_tiers(&[size], &env).unwrap();
@@ -695,6 +697,7 @@ mod tests {
                 tier: &tier,
                 today: Date::parse("2026-11-13").unwrap(),
                 version: None,
+                ladder: LADDER,
             };
             if let Err(e) = Config::from_tiers(&[name], &env) {
                 panic!("tier {name}: {e:?}");
@@ -721,6 +724,7 @@ mod tests {
             tier: &tier,
             today: Date::parse("2026-11-13").unwrap(),
             version: None,
+            ladder: LADDER,
         };
         for t in LADDER {
             let text = tier(t).expect("a ladder tier is shipped");

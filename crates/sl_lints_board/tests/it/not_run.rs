@@ -21,6 +21,7 @@ fn missing_chip_data_and_pcb_are_not_run() {
         tier: &none,
         today,
         version: None,
+        ladder: &[],
     };
     let file = std::env::temp_dir().join(format!(
         "sl_lints_board_not_run_{}.toml",

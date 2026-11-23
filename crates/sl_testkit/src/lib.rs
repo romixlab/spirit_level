@@ -307,6 +307,7 @@ fn run_project(analysis: &dyn Analysis, c: &Case<'_>) -> Result<Option<String>, 
         tier: &none,
         today,
         version: project.version,
+        ladder: &[],
     };
     let config = case_config(c, &env)?;
     let report = sl_engine::run(

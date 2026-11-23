@@ -85,6 +85,7 @@ fn resolve(
                     day: 1,
                 },
                 version: None,
+                ladder: &[],
             };
             Config::from_tiers(&[name], &env)
                 .map(|c| (*name, c))
