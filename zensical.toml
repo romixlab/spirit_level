@@ -441,7 +441,7 @@ nav = [
 
 # The look: the logo (assets/logo, copied into docs/assets/logo by `just docs-assets`), its lime as the accent
 # (docs/stylesheets/brand.css), apple-touch and ICO links in docs-overrides/main.html
-extra_css = ["stylesheets/brand.css"]
+extra_css = ["stylesheets/brand.css", "stylesheets/code.css"]
 
 [project.theme]
 custom_dir = "docs-overrides"
