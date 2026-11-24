@@ -54,5 +54,7 @@ jobs:
       - uses: taiki-e/install-action@v2
         with:
           tool: just,cargo-binstall,cargo-nextest
+      # sl_book's search test builds the book through uv (node, which searches it, is on the runner)
+      - uses: astral-sh/setup-uv@v10.2.0
       - run: just tools
       - run: just test
