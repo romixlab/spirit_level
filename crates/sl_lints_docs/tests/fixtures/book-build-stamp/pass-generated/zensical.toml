@@ -1,7 +1,7 @@
 [project]
 site_name = "fx"
-# javascripts/book-stamp-age.js is written by `just book-refs` (spl book stamp), not in git
-extra_javascript = ["javascripts/book-stamp-age.js"]
+# javascripts/vz-stamp-age.js is written by `just book-prep` (vz stamp), not in git
+extra_javascript = ["javascripts/vz-stamp-age.js"]
 
 [project.theme]
 custom_dir = "overrides"

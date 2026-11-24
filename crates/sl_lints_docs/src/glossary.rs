@@ -1,5 +1,5 @@
-//! `glossary-terms`: a book whose pages mark glossary terms (`[[piece]]`, the `spl_book_ext.glossary` extension)
-//! marks each term once in every section that uses it, at its first use there.
+//! `glossary-terms`: a book whose pages mark glossary terms (`[[piece]]`, the book kit's `vhrd_zensical.glossary`
+//! extension) marks each term once in every section that uses it, at its first use there.
 //!
 //! A reader arrives in any section, from search or a link, and finds the card of each term where the section
 //! first uses it. Marking every occurrence would underline half of every page, so one mark per section is the rule.
@@ -8,22 +8,36 @@
 
 use crate::GLOSSARY_TERMS;
 use sl_analysis::Context;
-use sl_book_refs::Settings;
-use sl_book_refs::glossary::Glossary;
 use sl_core::{Confidence, Diagnostic, Span};
 use sl_docs::page::{Item, MarkKind};
 use sl_docs::{Book, Page, Selection};
 use std::collections::{BTreeMap, BTreeSet};
+use vz_core::glossary::Glossary;
 
 pub(crate) fn run(cx: &Context<'_>, book: &Book) {
     let id = GLOSSARY_TERMS.id;
     if !cx.enabled(id) {
         return;
     }
-    let Some(g) = Settings::from_extensions(|n| book.extension(n)).glossary else {
+    let g = match book.kit() {
+        Ok(settings) => settings.glossary,
+        Err(e) => {
+            cx.emit(
+                Diagnostic::new(
+                    id,
+                    format!("file:{}", book.file_rel),
+                    format!("the book kit's settings do not read: {e}"),
+                )
+                .span(Span::new(book.file_rel.clone(), 1))
+                .help("fix the setting: the book's build fails on it too"),
+            );
+            return;
+        }
+    };
+    let Some(g) = g else {
         return;
     };
-    let glossary = match Glossary::read(&cx.project.root.join(&g.file)) {
+    let glossary = match sl_docs::kit::read_glossary(&cx.project.root, &g.file) {
         Ok(glossary) => glossary,
         Err(e) => {
             cx.emit(

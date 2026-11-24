@@ -143,8 +143,9 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 - ✅ `DOCS-12` figures-and-paragraph-runs: `page-figures` (D0023) wants a figure per so many words of a guide; `paragraph-run-words` (D0024) limits paragraphs in a row under headings; `prose-per-element` (D0025) limits a page's prose per list, figure, table or code block; diagram blocks and inline SVG are figures; `spl pages` shows both.
 - ✅ `DOCS-13` docs-records: changelogs, feature trackers and agent files are records (`[docs] records`), no longer skipped; lints that assume a page read from its start leave them out.
 - ✅ `DOCS-14` glossary-terms: a book that marks glossary terms marks each once in every section that uses it (`glossary-terms`, D0026).
-- ✅ `DOCS-15` abbreviations-on-hover: `abbreviation-first-use` takes two lists, `known` (plain) and `long-forms` (shown on hover by `spl_book_ext.abbreviations`); it flags an abbreviation in neither and prose that spells one out.
-- ✅ `DOCS-16` code-card-links: a code or file card's head links its lines on GitHub at the book's commit, the card links the whole file too and, for a crate listed in `[book] on-crates-io`, to docs.rs; no card opens while the reader selects text.
+- ✅ `DOCS-15` abbreviations-on-hover: `abbreviation-first-use` takes two lists, `known` (plain) and the book's `docs/abbreviations.toml` (shown on hover by the book kit); it flags an abbreviation in neither and prose that spells one out.
+- ✅ `DOCS-16` code-card-links: a code or file card's head links its lines on GitHub at the book's commit, the card links the whole file too and, for a crate listed in `[book] on-crates-io`, to docs.rs; no card opens while the reader selects text. Moved to vhrd_zensical (REFS-2).
+- ✅ `DOCS-17` book-kit-settings: `glossary-terms` and `abbreviation-first-use` read the book kit's `vhrd_zensical.*` settings and files through `vz_core`, from `zensical.toml` or `mkdocs.yml`; `book-build-stamp` finds `vz stamp`, `vz prep` and `vz build`.
 
 ## AI - code written with agents
 
@@ -176,13 +177,13 @@ Status: ✅ done · 🚧 in progress · 📋 planned · 🐛 bug. Ids are stable
 
 - ✅ `BOOK-1` Lint and tier pages generated from metadata; `book --check` fails when stale.
 - ✅ `BOOK-2` Logo and brand assets from a Typst source (`assets/`); book favicon, header logo, README header.
-- ✅ `BOOK-3` `spl book stamp`: a book's footer build stamp (crate version, git commit, build time) and the reader-clock age script, serving `book-build-stamp` (D0017); `sl_book::stamp`.
+- ✅ `BOOK-3` book-stamp: a book's footer build stamp (crate version, git commit, build time) and the reader-clock age script, serving `book-build-stamp` (D0017). Moved to vhrd_zensical (STAMP-1).
 - ✅ `BOOK-4` `spl book sample`: a sample project's coloured `spl check` report as an SVG picture for the README; `book sample --check` fails when stale.
 - ✅ `BOOK-5` The book is published at spl.vhrd.tech from GitHub Actions; CI runs `just lint` and `just test`.
 - ✅ `BOOK-6` Coloured check output in the book: `<!-- spirit-level:check PATH ... -->` blocks of hand-written pages, written by `spl book docs` as HTML from the CLI's own colours; `book docs --check` fails when stale.
-- ✅ `BOOK-7` book-refs: glossary terms `[[term]]`, code links `` [`Item`] `` and file links `` [`file.rs:section`] `` in any Zensical book, each with a card; `spl book refs` writes the code index and the cards' files, the Python package `spl_book_ext` renders them; an unknown name fails the build.
-- ✅ `BOOK-8` console-lexer: `console` blocks colour each command, subcommand and flag, through `spl_book_ext.shell` (Pygments `spl-console`); `rust` blocks mark every macro call (`spl_book_ext.rust`, `spl-rust`); the book's code takes a colour per token kind.
-- ✅ `BOOK-9` book-build-stamp: the book's footer shows the version, commit and build time with the build's age (`spl book stamp` in `just docs-assets`).
+- ✅ `BOOK-7` book-refs: glossary terms `[[term]]`, code links `` [`Item`] `` and file links `` [`file.rs:section`] `` in any Zensical book, each with a card; an unknown name fails the build. Moved to vhrd_zensical (REFS-1).
+- ✅ `BOOK-8` console-lexer: `console` blocks colour each command, subcommand and flag; `rust` blocks mark every macro call; the book's code takes a colour per token kind. Moved to vhrd_zensical (LEX-1).
+- ✅ `BOOK-9` book-build-stamp: the book's footer shows the version, commit and build time with the build's age. Moved to vhrd_zensical (STAMP-1).
 - ✅ `BOOK-10` firmware-page: the Firmware page says which crates count as firmware and what the embedded lints need; it replaces the bedrock-lint migration guide.
 
 ## TESTKIT - the golden fixture harness

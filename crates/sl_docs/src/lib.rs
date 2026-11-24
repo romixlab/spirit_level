@@ -1,6 +1,7 @@
 //! The pages of a project as a reader meets them: each page's headings, prose, code and visual breaks in order
 //! ([`page`]), its reading metrics ([`stats`]), the words it names things with ([`terms`]), the Zensical book it
-//! belongs to ([`book`]), and the badges a README shows ([`badges`]).
+//! belongs to ([`book`]) with the book kit's settings and files ([`kit`]), and the badges a README shows
+//! ([`badges`]).
 //!
 //! Pages are read from their Markdown sources, Zensical's admonitions and content tabs with their bodies
 //! ([`dialect`]). A site built from templates holds much of a page outside its Markdown: such a site's built
@@ -10,6 +11,7 @@ pub mod badges;
 pub mod book;
 pub mod dialect;
 pub mod html;
+pub mod kit;
 pub mod page;
 pub mod site;
 pub mod stats;

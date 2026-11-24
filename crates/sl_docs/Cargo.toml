@@ -17,6 +17,7 @@ sl_config.workspace = true
 sl_core.workspace = true
 sl_model.workspace = true
 toml_edit.workspace = true
+vz_core.workspace = true
 
 [lints]
 workspace = true

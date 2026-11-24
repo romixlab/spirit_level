@@ -441,12 +441,13 @@ nav = [
 
 # The look: the logo (assets/logo, copied into docs/assets/logo by `just docs-assets`), its lime as the accent
 # (docs/stylesheets/brand.css), apple-touch and ICO links in docs-overrides/main.html
-extra_css = ["stylesheets/brand.css", "stylesheets/code.css"]
-# Written by `just docs-assets` (spl book stamp), not in git: the footer stamp's age from the reader's clock
-extra_javascript = ["javascripts/book-stamp-age.js"]
+# vz-code.css, the code colours, and vz-stamp-age.js, the footer stamp's age from the reader's clock: written by `just
+# docs-assets` (vz assets, vz stamp), not in git
+extra_css = ["stylesheets/brand.css", "stylesheets/vz-code.css"]
+extra_javascript = ["javascripts/vz-stamp-age.js"]
 
 # Zensical's default extensions, written out because a [project.markdown_extensions] table replaces them all; one
-# change: the `console` and `rust` fences take spl_book_ext's lexers (commands and flags coloured; every macro call)
+# change: the `console` and `rust` fences take the book kit's lexers (commands and flags coloured; every macro call)
 [project.markdown_extensions]
 abbr = {}
 admonition = {}
@@ -462,7 +463,7 @@ betterem = {}
 caret = {}
 details = {}
 emoji = { emoji_generator = "zensical.extensions.emoji.to_svg", emoji_index = "zensical.extensions.emoji.twemoji" }
-highlight = { anchor_linenums = true, line_spans = "__span", pygments_lang_class = true, extend_pygments_lang = [{ name = "console", lang = "spl-console" }, { name = "rust", lang = "spl-rust" }] }
+highlight = { anchor_linenums = true, line_spans = "__span", pygments_lang_class = true, extend_pygments_lang = [{ name = "console", lang = "vz-console" }, { name = "rust", lang = "vz-rust" }] }
 inlinehilite = {}
 keys = {}
 magiclink = {}

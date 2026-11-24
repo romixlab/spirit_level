@@ -54,7 +54,5 @@ jobs:
       - uses: taiki-e/install-action@v2
         with:
           tool: just,cargo-binstall,cargo-nextest
-      # spl_book_ext's tests (python/) run through uv
-      - uses: astral-sh/setup-uv@v10.2.0
       - run: just tools
       - run: just test

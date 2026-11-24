@@ -4,8 +4,9 @@
 name = "spirit-level-book"
 version = "0.7.5"
 requires-python = ">=3.12"
-# spl-book-ext: the `console` fence's lexer (zensical.toml's markdown_extensions)
-dependencies = ["zensical==0.0.74", "spl-book-ext"]
+# the book kit vhrd-zensical: the `console` and `rust` fences' lexers, the code colours and the `vz` command that
+# writes the footer stamp; its `zensical` extra pins the Zensical release the kit is tested against
+dependencies = ["vhrd-zensical[zensical]"]
 
 [tool.uv.sources]
-spl-book-ext = { path = "python/spl_book_ext" }
+vhrd-zensical = { git = "https://github.com/vhrdtech/vhrd_zensical", tag = "v0.1.0" }

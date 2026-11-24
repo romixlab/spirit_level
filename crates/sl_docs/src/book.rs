@@ -436,22 +436,22 @@ mod tests {
         };
         let t = toml_book(
             "ext",
-            "[project]\nrepo_url = \"https://github.com/o/r\"\n[project.markdown_extensions]\nabbr = {}\n\"spl_book_ext.code_refs\" = { index = \"i.json\" }\n",
+            "[project]\nrepo_url = \"https://github.com/o/r\"\n[project.markdown_extensions]\nabbr = {}\n\"vhrd_zensical.code_refs\" = { index = \"i.json\" }\n",
         );
-        assert_eq!(names(&t), ["abbr", "spl_book_ext.code_refs"]);
+        assert_eq!(names(&t), ["abbr", "vhrd_zensical.code_refs"]);
         assert_eq!(t.repo_url.as_deref(), Some("https://github.com/o/r"));
         let idx = t
-            .extension("spl_book_ext.code_refs")
+            .extension("vhrd_zensical.code_refs")
             .and_then(|c| c.get(&["index"]));
         assert_eq!(idx.and_then(ConfigNode::as_str), Some("i.json"));
         let y = book(
             "ext_yml",
             FILE_MKDOCS,
-            "site_name: x\nmarkdown_extensions:\n  - abbr\n  - toc:\n      permalink: true\n  - spl_book_ext.glossary:\n",
+            "site_name: x\nmarkdown_extensions:\n  - abbr\n  - toc:\n      permalink: true\n  - vhrd_zensical.glossary:\n",
         );
-        assert_eq!(names(&y), ["abbr", "toc", "spl_book_ext.glossary"]);
+        assert_eq!(names(&y), ["abbr", "toc", "vhrd_zensical.glossary"]);
         assert!(
-            y.extension("spl_book_ext.glossary")
+            y.extension("vhrd_zensical.glossary")
                 .and_then(ConfigNode::as_mapping)
                 .is_some()
         );

@@ -10,6 +10,7 @@ use sl_config::Config;
 use sl_core::{Confidence, Diagnostic, Span};
 use sl_docs::Page;
 use sl_docs::terms::{self, Abbreviation, AbbreviationIssue, EarlyTerm, WordUses};
+use std::collections::BTreeMap;
 
 /// A name a page uses for a concept the word list names otherwise
 #[derive(Clone, Debug, PartialEq, Eq, serde::Serialize)]
@@ -38,10 +39,13 @@ pub struct Words {
 }
 
 impl Words {
-    /// The words of every page, in order, with the word lints' parameters
-    pub(crate) fn all(config: &Config, pages: &[Page]) -> Vec<Self> {
-        let abbr = &config.lint(ABBREVIATION_FIRST_USE.id).params;
-        let (known, long) = (abbr.list("known"), abbr.table("long-forms"));
+    /// The words of every page, in order, with the word lints' parameters and the long forms the book shows
+    pub(crate) fn all(
+        config: &Config,
+        pages: &[Page],
+        long: &BTreeMap<String, String>,
+    ) -> Vec<Self> {
+        let known = config.lint(ABBREVIATION_FIRST_USE.id).params.list("known");
         let ignore = config.lint(TERM_BEFORE_DEFINITION.id).params.list("ignore");
         let syn = &config.lint(TERM_SYNONYMS.id).params;
         let groups = terms::word_groups(syn.list("words"));
@@ -115,14 +119,19 @@ fn synonyms(group: &[String], page: &WordUses, names: &[(String, usize)]) -> Vec
         .collect()
 }
 
-pub(crate) fn run(cx: &Context<'_>, pages: &[Page], english: bool) {
+pub(crate) fn run(
+    cx: &Context<'_>,
+    pages: &[Page],
+    english: bool,
+    long: &BTreeMap<String, String>,
+) {
     let ids = [
         "abbreviation-first-use",
         "term-before-definition",
         "term-synonyms",
     ];
     let words = if ids.iter().any(|id| cx.enabled(id)) {
-        Words::all(cx.config, pages)
+        Words::all(cx.config, pages, long)
     } else {
         vec![Words::default(); pages.len()]
     };
@@ -161,10 +170,10 @@ fn abbreviations(cx: &Context<'_>, p: &Page, w: &Words) {
             AbbreviationIssue::Unlisted => (
                 "abbr",
                 format!(
-                    "{} is neither in the `known` list nor in the table of long forms",
+                    "{} is neither in the `known` list nor in the book's abbreviations file",
                     a.abbr
                 ),
-                "an abbreviation every reader knows goes into the lint's `known` list; any other goes into its `long-forms` table with its long form, which the book shows on hover".to_owned(),
+                "an abbreviation every reader knows goes into the lint's `known` list; any other goes into the book's abbreviations file (docs/abbreviations.toml) with its long form, which the book shows on hover".to_owned(),
             ),
             AbbreviationIssue::KnownSpelledOut => (
                 "abbr-spelled",

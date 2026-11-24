@@ -1,3 +1,5 @@
+kit := "vhrd-zensical @ git+https://github.com/vhrdtech/vhrd_zensical@v0.1.0"
+
 # Writes the footer stamp and its age script, not in git
-book-refs:
-    spl book stamp --name fx overrides/partials/stamp.html docs/javascripts/book-stamp-age.js
+book-prep:
+    uv run --with "{{ kit }}" vz stamp --name fx

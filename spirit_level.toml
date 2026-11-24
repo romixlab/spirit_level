@@ -92,7 +92,6 @@ sl_config = { layer = "model" }
 sl_dependents = { layer = "model" }
 sl_docs = { layer = "model" }
 sl_badge = { layer = "model" }
-sl_book_refs = { layer = "model" }
 sl_tools = { layer = "model" }
 sl_firmware = { layer = "model" }
 sl_board_model = { layer = "model" }
@@ -142,6 +141,8 @@ vc_ui = { git = "https://github.com/vhrdtech/vhrd_cli", branch = "main", role = 
 vc_build = { git = "https://github.com/vhrdtech/vhrd_cli", branch = "main", role = "app" }
 vc_complete = { git = "https://github.com/vhrdtech/vhrd_cli", branch = "main", role = "app" }
 vc_usage = { git = "https://github.com/vhrdtech/vhrd_cli", branch = "main", role = "app" }
+# the book kit's formats: types and parsers, no I/O (any layer above core)
+vz_core = { git = "https://github.com/vhrdtech/vhrd_zensical", branch = "main", role = "core" }
 
 [map.forbid]
 # the library a project links to check itself never pulls the CLI's dependencies

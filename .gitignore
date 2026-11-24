@@ -2,12 +2,10 @@
 /site
 /.venv
 
-# spl_book_ext's environment and caches (python/)
-.venv/
-__pycache__/
-.pytest_cache/
-
-# what `just docs-assets` copies from assets/logo and writes with `spl book stamp`
+# what `just docs-assets` copies from assets/logo and writes with `vz assets` and `vz stamp`
 /docs/assets/logo/
-/docs/javascripts/book-stamp-age.js
-/docs-overrides/partials/stamp.html
+/docs/javascripts/vz-stamp-age.js
+/docs/javascripts/vz-refs.js
+/docs/stylesheets/vz-code.css
+/docs/stylesheets/vz-refs.css
+/docs-overrides/partials/vz-stamp.html

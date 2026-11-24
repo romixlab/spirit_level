@@ -10,6 +10,7 @@ use sl_model::workflow::{self, invokes};
 use sl_model::{Justfile, Workflow};
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
+use vz_core::stamp;
 
 pub(crate) fn run(cx: &Context<'_>, book: &Book) {
     let root = &cx.project.root;
@@ -75,20 +76,29 @@ fn nav_entries(cx: &Context<'_>, book: &Book) {
 }
 
 /// The sources that could carry a build stamp: the theme's override partial, every `extra_javascript` file, the
-/// built site's home page when it is there, and the files `spl book stamp` writes from a just recipe or a workflow
-/// (the stamp partial under the theme's `custom_dir`, the age script when it is registered as `extra_javascript`)
+/// built site's home page when it is there, and the files `vz stamp` (or `vz prep`, `vz build`) writes from a just
+/// recipe or a workflow (the stamp partial under the theme's `custom_dir`, the age script when it is registered as
+/// `extra_javascript`). A file carries the stamp or its age when it holds the lint's marker or the kit's.
 fn build_stamp(cx: &Context<'_>, root: &Path, book: &Book) {
     let id = "book-build-stamp";
     let p = cx.params(id);
     let partial = p.str("partial");
-    let marker = p.str("marker").to_lowercase();
-    let age_marker = p.str("age-marker").to_lowercase();
+    let markers = [
+        p.str("marker").to_lowercase(),
+        stamp::STAMP_MARKER.to_owned(),
+    ];
+    let age_markers = [
+        p.str("age-marker").to_lowercase(),
+        stamp::AGE_MARKER.to_owned(),
+    ];
     // (file, carries the stamp, carries its age)
     let mut sources: Vec<(String, bool, bool)> = Vec::new();
     let mut read = |rel: String| {
         if let Some(text) = walk::read_page(root, &rel) {
             let text = text.to_lowercase();
-            sources.push((rel, text.contains(&marker), text.contains(&age_marker)));
+            let stamp = markers.iter().any(|m| text.contains(m.as_str()));
+            let age = age_markers.iter().any(|m| text.contains(m.as_str()));
+            sources.push((rel, stamp, age));
         }
     };
     if let Some(dir) = &book.overrides_dir {
@@ -98,14 +108,15 @@ fn build_stamp(cx: &Context<'_>, root: &Path, book: &Book) {
         read(book.rel(js));
     }
     read(format!("{}/index.html", book.site_dir));
-    for (stamp, script) in stamp_writes(root) {
-        if book
-            .overrides_dir
-            .as_ref()
-            .is_some_and(|d| stamp.starts_with(&format!("{d}/")))
-        {
-            sources.push((stamp, true, false));
-        }
+    if let Some(dir) = &book.overrides_dir
+        && kit_writes_stamp(root)
+    {
+        sources.push((
+            format!("{dir}/{}", stamp::DEFAULT_STAMP_PARTIAL),
+            true,
+            false,
+        ));
+        let script = book.rel(stamp::DEFAULT_AGE_SCRIPT);
         if book
             .extra_javascript
             .iter()
@@ -124,8 +135,10 @@ fn build_stamp(cx: &Context<'_>, root: &Path, book: &Book) {
             )
             .span(Span::new(book.file_rel.clone(), 0))
             .help(format!(
-                "add an override partial under the theme's custom_dir that includes a generated stamp (crate \
-                 version, commit, build time) into {partial}"
+                "run `vz stamp` (or `vz prep`) of the book kit vhrd_zensical before the build, with the theme's \
+                 custom_dir set and {partial} including {}; or add an override partial that includes a generated \
+                 stamp (crate version, commit, build time) into {partial}",
+                stamp::DEFAULT_STAMP_PARTIAL
             )),
         );
         return;
@@ -138,17 +151,19 @@ fn build_stamp(cx: &Context<'_>, root: &Path, book: &Book) {
                 "the build stamp shows only the absolute build time: no age from the reader's own clock",
             )
             .span(Span::new(stamp_file.clone(), 1))
-            .help(
-                "add a small script that turns the build time into \"built 3 h ago\", coarser as it grows \
-                 (seconds, then minutes, hours, days), beside the absolute UTC time",
-            ),
+            .help(format!(
+                "register the age script `vz stamp` writes, {}, in extra_javascript; or add a small script that \
+                 turns the build time into \"built 3 h ago\", coarser as it grows, beside the absolute UTC time",
+                stamp::DEFAULT_AGE_SCRIPT
+            )),
         );
     }
 }
 
-/// The files `spl book stamp` writes from the project's just recipes and workflows: (stamp partial, age script),
-/// its two positional arguments, relative to the project root
-fn stamp_writes(root: &Path) -> Vec<(String, String)> {
+/// Whether a just recipe or a workflow of the project runs the book kit's `vz stamp`, `vz prep` or `vz build`
+/// (also under `uv run ...`) on the project itself: each writes the stamp partial and the age script at their
+/// default paths when the book sets a theme `custom_dir`
+fn kit_writes_stamp(root: &Path) -> bool {
     let mut commands: Vec<Vec<String>> = Justfile::read(root)
         .into_iter()
         .flat_map(|j| j.recipes)
@@ -158,28 +173,26 @@ fn stamp_writes(root: &Path) -> Vec<(String, String)> {
     for w in Workflow::all(root).into_iter().flatten() {
         commands.extend(w.commands().map(|(_, c)| c));
     }
-    commands
-        .iter()
-        .filter_map(|c| {
-            let at = c.windows(3).position(|w| {
-                w[0].rsplit('/').next() == Some("spl") && w[1] == "book" && w[2] == "stamp"
-            })?;
-            // every flag of `spl book stamp` takes a value: `--name X` or `--name=X`
-            let mut words = c[at + 3..].iter();
-            let mut args = Vec::new();
-            while let Some(w) = words.next() {
-                if w.starts_with('-') {
-                    if !w.contains('=') {
-                        words.next();
-                    }
-                } else {
-                    args.push(w.trim_start_matches("./").to_owned());
-                }
-            }
-            let [stamp, script] = <[String; 2]>::try_from(args).ok()?;
-            Some((stamp, script))
-        })
-        .collect()
+    commands.iter().any(|c| writes_stamp(c))
+}
+
+/// Whether one command runs `vz stamp`, `vz prep` or `vz build` on the project root: no `--root`, or `--root .`
+fn writes_stamp(command: &[String]) -> bool {
+    if !invokes(command, "vz", |s| matches!(s, "stamp" | "prep" | "build")) {
+        return false;
+    }
+    let mut words = command.iter();
+    while let Some(w) = words.next() {
+        let root = match w.strip_prefix("--root") {
+            Some("") => words.next().map(String::as_str),
+            Some(v) => v.strip_prefix('='),
+            None => continue,
+        };
+        if root.is_some_and(|r| !matches!(r.trim_matches(['"', '\'']), "." | "./")) {
+            return false;
+        }
+    }
+    true
 }
 
 /// Whether a command builds the book strict: `zensical build` or `mkdocs build` with `--strict`
@@ -508,7 +521,47 @@ fn admonitions(cx: &Context<'_>, p: &Page) {
 
 #[cfg(test)]
 mod tests {
-    use super::target;
+    use super::{target, writes_stamp};
+
+    fn words(command: &str) -> Vec<String> {
+        command.split_whitespace().map(str::to_owned).collect()
+    }
+
+    #[test]
+    fn kit_commands_that_write_the_stamp() {
+        for c in [
+            "vz stamp",
+            "vz prep --name spirit_level",
+            "uv run --with \"vhrd-zensical @ git+https://github.com/vhrdtech/vhrd_zensical@v0.1.0\" vz build",
+            "/home/x/.local/bin/vz stamp --root .",
+            "vz prep --root=./",
+        ] {
+            assert!(writes_stamp(&words(c)), "{c}");
+        }
+        for c in [
+            "vz refs",
+            "vz assets",
+            "vz stamp --root ../other",
+            "vz prep --root=../other",
+            "vz-stamp stamp",
+            "uv run zensical build",
+        ] {
+            assert!(!writes_stamp(&words(c)), "{c}");
+        }
+    }
+
+    #[test]
+    fn the_partial_default_is_the_kits_theme_partial() {
+        let partial = crate::BOOK_BUILD_STAMP
+            .params
+            .iter()
+            .find(|p| p.name == "partial")
+            .map(|p| p.default);
+        assert_eq!(
+            partial,
+            Some(format!("\"{}\"", vz_core::stamp::THEME_PARTIAL).as_str())
+        );
+    }
 
     #[test]
     fn link_targets() {

@@ -2,6 +2,21 @@
 
 ## [Unreleased]
 
+### Changed
+
+- **Breaking:** `glossary-terms` reads the book kit's `vhrd_zensical.glossary` settings, not `spl_book_ext.glossary` (DOCS-17).
+- **Breaking:** `abbreviation-first-use` reads long forms from the file `vhrd_zensical.abbreviations` names, `docs/abbreviations.toml` (DOCS-17).
+- **Breaking:** `book-build-stamp` finds `vz stamp`, `vz prep` or `vz build` instead of `spl book stamp` (DOCS-17).
+- spl's own book takes its lexers, code colours and stamp from vhrd-zensical 0.1.0 (DOCS-17).
+
+### Removed
+
+- **Breaking:** `spl book refs`, the code index and card assets; vhrd_zensical's `vz refs` replaces them (BOOK-7).
+- **Breaking:** `spl book stamp`; vhrd_zensical's `vz stamp` replaces it (BOOK-3).
+- **Breaking:** Python package `spl_book_ext`; vhrd_zensical's extensions and `vz-console`, `vz-rust` lexers replace it (BOOK-8).
+- **Breaking:** `abbreviation-first-use`'s `long-forms` parameter; long forms go into `docs/abbreviations.toml` (DOCS-15).
+- **Breaking:** `spirit_level.toml`'s `[book]` table; `on-crates-io` goes into `on_crates_io` of the kit's code link settings (DOCS-16).
+
 ## [0.8.1] - 2026-11-24
 
 ### Added

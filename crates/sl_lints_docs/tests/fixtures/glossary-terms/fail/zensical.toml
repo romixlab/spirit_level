@@ -2,4 +2,4 @@
 site_name = "Tapes"
 
 [project.markdown_extensions]
-"spl_book_ext.glossary" = {}
+"vhrd_zensical.glossary" = {}

@@ -17,5 +17,5 @@ skip-tree = [
 [sources]
 unknown-registry = "deny"
 unknown-git = "deny"
-# the generic CLI parts (vc_ui, vc_build, vc_complete, vc_usage)
-allow-git = ["https://github.com/vhrdtech/vhrd_cli"]
+# the generic CLI parts (vc_ui, vc_build, vc_complete, vc_usage) and the book kit's formats (vz_core)
+allow-git = ["https://github.com/vhrdtech/vhrd_cli", "https://github.com/vhrdtech/vhrd_zensical"]

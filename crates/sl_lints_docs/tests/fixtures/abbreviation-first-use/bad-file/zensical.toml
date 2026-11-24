@@ -1,0 +1,6 @@
+[project]
+site_name = "fx"
+
+[project.markdown_extensions]
+abbr = {}
+"vhrd_zensical.abbreviations" = { file = "docs/abbr.toml" }

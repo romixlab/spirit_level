@@ -16,10 +16,12 @@ pub use words::{Synonym, Words};
 
 use sl_analysis::{Analysis, Context, lint};
 use sl_config::Config;
-use sl_core::{LintMeta, Params};
+use sl_core::{Diagnostic, LintMeta, Params, Span};
 use sl_docs::page::ImageRules;
 use sl_docs::{Book, Kind, Page, ReadingSpeed, Selection, Site, SiteError, Source, Stats};
 use sl_model::Project;
+use std::collections::BTreeMap;
+use std::path::Path;
 
 lint!(PROSE_RUN_WORDS, "D0001", "prose-run-words", "reading", "prose between two visual breaks stays short",
     params: [("max-words", Int, "400", "words of prose a reader meets between two headings, figures, tables or code blocks"),
@@ -76,7 +78,6 @@ lint!(ADMONITION_SYNTAX, "D0011", "admonition-syntax", "book", "admonitions use 
     needs: [], fix: None);
 lint!(ABBREVIATION_FIRST_USE, "D0012", "abbreviation-first-use", "words", "an abbreviation is one every reader knows or one the book shows the long form of on hover, and prose never spells it out",
     params: [("known", StrList, "[\"AI\", \"AMD\", \"API\", \"ASCII\", \"CI\", \"CLI\", \"CPU\", \"CSS\", \"CSV\", \"DNS\", \"FAQ\", \"GPU\", \"HTML\", \"HTTP\", \"HTTPS\", \"IBM\", \"ID\", \"IDE\", \"IP\", \"JSON\", \"LED\", \"OK\", \"OS\", \"PC\", \"PCB\", \"PDF\", \"PNG\", \"PR\", \"RAM\", \"README\", \"SDK\", \"SQL\", \"SSH\", \"SVG\", \"TCP\", \"TLS\", \"TOML\", \"UDP\", \"UI\", \"URL\", \"USB\", \"UTF\", \"XML\", \"YAML\"]", "abbreviations every reader knows: written plain, no long form, no tooltip"),
-             ("long-forms", StrTable, "{}", "abbreviations with their long forms, which spl_book_ext shows on hover wherever the book writes the abbreviation"),
              ("pages", Choice["all", "guide", "reference"], "\"all\"", "the kinds of page judged")],
     needs: [], fix: None);
 lint!(TERM_BEFORE_DEFINITION, "D0013", "term-before-definition", "words", "a page defines a term before it uses it",
@@ -168,7 +169,21 @@ impl Analysis for Docs {
         match pages(cx.project, cx.config) {
             Ok(pages) => {
                 reading::run(cx, &pages);
-                words::run(cx, &pages, english(cx.project, cx.config));
+                let long = long_forms(&cx.project.root).unwrap_or_else(|e| {
+                    if cx.enabled(ABBREVIATION_FIRST_USE.id) {
+                        cx.emit(
+                            Diagnostic::new(
+                                ABBREVIATION_FIRST_USE.id,
+                                format!("file:{}", e.file),
+                                e.message,
+                            )
+                            .span(Span::new(e.file, 1))
+                            .help("fix the file or setting: the book's build fails on it too"),
+                        );
+                    }
+                    BTreeMap::new()
+                });
+                words::run(cx, &pages, english(cx.project, cx.config), &long);
                 links::run(cx, &pages);
             }
             Err(e) => {
@@ -220,6 +235,35 @@ fn pages(project: &Project, config: &Config) -> Result<Vec<Page>, SiteError> {
         pages.extend(site.pages(&project.root, |rel| sel.kind(rel), sel.images));
     }
     Ok(pages)
+}
+
+/// Why the long forms the book shows cannot be read
+struct LongFormsError {
+    /// The file at fault, relative to the project root
+    file: String,
+    /// What is wrong
+    message: String,
+}
+
+/// The long forms the book shows on hover: the abbreviations file its kit settings name; none when there is no
+/// book or it does not turn the abbreviations extension on
+fn long_forms(root: &Path) -> Result<BTreeMap<String, String>, LongFormsError> {
+    let Ok(Some(book)) = Book::read(root) else {
+        return Ok(BTreeMap::new());
+    };
+    let settings = book.kit().map_err(|e| LongFormsError {
+        message: format!("the book kit's settings do not read: {e}"),
+        file: book.file_rel.clone(),
+    })?;
+    let Some(a) = settings.abbreviations else {
+        return Ok(BTreeMap::new());
+    };
+    sl_docs::kit::read_abbreviations(root, &a.file)
+        .map(|a| a.long_forms)
+        .map_err(|e| LongFormsError {
+            message: format!("the abbreviations file does not read: {e}"),
+            file: a.file,
+        })
 }
 
 /// Whether a page is in English: a built page's own language, else the project's
@@ -292,7 +336,11 @@ pub fn report(project: &Project, config: &Config) -> Result<Vec<PageReport>, Sit
     let speed = reading_speed(config);
     let en = english(project, config);
     let pages = pages(project, config)?;
-    let words = Words::all(config, &pages);
+    let words = Words::all(
+        config,
+        &pages,
+        &long_forms(&project.root).unwrap_or_default(),
+    );
     Ok(pages
         .iter()
         .zip(words)

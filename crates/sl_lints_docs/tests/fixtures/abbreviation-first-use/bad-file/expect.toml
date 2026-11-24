@@ -1,0 +1,8 @@
+[[finding]]
+at = "README.md:3"
+contains = "MCU is neither in the `known` list"
+confidence = "candidate"
+
+[[finding]]
+at = "docs/abbr.toml:1"
+contains = "the abbreviations file does not read: \"MCU\": long form \"\" is blank or spans lines"

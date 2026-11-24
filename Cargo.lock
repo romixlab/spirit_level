@@ -1065,27 +1065,11 @@ name = "sl_book"
 version = "0.8.1"
 dependencies = [
  "serde_json",
- "sl_book_refs",
  "sl_config",
  "sl_core",
- "sl_docs",
- "sl_model",
  "sl_report",
  "spirit_level",
- "toml",
- "vc_build",
  "vc_ui",
-]
-
-[[package]]
-name = "sl_book_refs"
-version = "0.8.1"
-dependencies = [
- "proc-macro2",
- "serde",
- "sl_model",
- "syn 3.0.10",
- "toml",
 ]
 
 [[package]]
@@ -1126,6 +1110,7 @@ dependencies = [
  "sl_core",
  "sl_model",
  "toml_edit",
+ "vz_core",
 ]
 
 [[package]]
@@ -1224,12 +1209,12 @@ version = "0.8.1"
 dependencies = [
  "serde",
  "sl_analysis",
- "sl_book_refs",
  "sl_config",
  "sl_core",
  "sl_docs",
  "sl_model",
  "sl_testkit",
+ "vz_core",
 ]
 
 [[package]]
@@ -1943,6 +1928,15 @@ checksum = "2e369bee1b05d510a7b4ed645f5faa90619e05437111783ea5848f28d97d3c2e"
 dependencies = [
  "proc-macro2",
  "quote",
+]
+
+[[package]]
+name = "vz_core"
+version = "0.1.0"
+source = "git+https://github.com/vhrdtech/vhrd_zensical#f267f7b2e4a5cac55bd950d423d3e1742171593c"
+dependencies = [
+ "serde",
+ "toml",
 ]
 
 [[package]]

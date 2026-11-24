@@ -13,15 +13,10 @@ default:
 test *flags:
     {{ if flags == "--changed" { "changedtests run" } else { just_executable() + " test-all" } }}
 
-# Every test: nextest, then the doctests (nextest does not run them), then spl_book_ext's
+# Every test: nextest, then the doctests (nextest does not run them)
 test-all:
     cargo nextest run --workspace --no-fail-fast
     cargo test --workspace --doc -q
-    {{just_executable()}} test-py
-
-# The tests of the Markdown extension spl_book_ext (python/spl_book_ext), with uv
-test-py:
-    uv run --directory python/spl_book_ext pytest -q
 
 # Format, clippy, spl on itself at the big tier (`just tools` installs the tools it needs), the lint codes, book and README picture freshness
 lint:
@@ -62,10 +57,11 @@ docs: book docs-assets
 docs-build: book docs-assets
     uv run zensical build --clean --strict
 
-# What the book needs beside its pages, none of it in git: the logo files in docs/assets/logo, the footer's build
-# stamp and the script that shows its age
+# What the book needs beside its pages, none of it in git: the logo files in docs/assets/logo, the book kit's
+# assets (the code colours) and the footer's build stamp with the script that shows its age
 docs-assets:
-    cargo run -q -p spirit_level_cli -- book stamp --name spirit_level docs-overrides/partials/stamp.html docs/javascripts/book-stamp-age.js
+    uv run vz assets
+    uv run vz stamp --name spirit_level
     mkdir -p docs/assets/logo
     cp assets/logo/mark-light.svg assets/logo/mark-dark.svg assets/logo/spirit_level-light.svg assets/logo/spirit_level-dark.svg assets/logo/icon-small.svg assets/logo/favicon.ico assets/logo/png/icon-180.png docs/assets/logo/
 

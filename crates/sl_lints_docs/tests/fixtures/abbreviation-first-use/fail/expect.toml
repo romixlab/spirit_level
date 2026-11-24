@@ -1,6 +1,6 @@
 [[finding]]
 at = "README.md:3"
-contains = "SPI is neither in the `known` list nor in the table of long forms"
+contains = "SPI is neither in the `known` list nor in the book's abbreviations file"
 confidence = "candidate"
 
 [[finding]]

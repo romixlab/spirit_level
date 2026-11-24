@@ -37,9 +37,6 @@
 //! [docs]                              # the pages: Markdown, or a built site (see [`docs`])
 //! reference = ["docs/lints/**"]
 //!
-//! [book]                              # what the book says of the crates (see [`book`])
-//! on-crates-io = ["foo_sdk"]
-//!
 //! [cli]                               # how the CLI lints build and run the tools (see [`cli`])
 //! timeout-secs = 20
 //!
@@ -51,7 +48,6 @@
 //! ```
 
 pub mod board;
-pub mod book;
 pub mod cli;
 pub mod clippy;
 pub mod dependents;
@@ -64,7 +60,6 @@ mod reader;
 pub mod standing;
 
 pub use board::Board;
-pub use book::BookRefs;
 pub use cli::CliProbe;
 pub use clippy::{ClippyConfig, ClippyLint, ClippySet};
 pub use dependents::Dependents;
@@ -181,8 +176,6 @@ pub struct Config {
     pub dependents: Option<Dependents>,
     /// The Markdown pages: the `[docs]` table, or its defaults
     pub docs: Docs,
-    /// The `[book]` table: the crates published on crates.io
-    pub book: BookRefs,
     /// How the CLI lints build and run the tools
     pub cli: CliProbe,
     /// The board descriptions and their chip data: the `[board]` table, or its defaults
@@ -517,7 +510,6 @@ struct Resolver<'a> {
     clippy: ClippySet,
     dependents: Option<Dependents>,
     docs: Docs,
-    book: BookRefs,
     cli: CliProbe,
     board: Board,
     embedded: Embedded,
@@ -566,7 +558,6 @@ impl<'a> Resolver<'a> {
             clippy: ClippySet::default(),
             dependents: None,
             docs: Docs::default(),
-            book: BookRefs::default(),
             cli: CliProbe::default(),
             board: Board::default(),
             embedded: Embedded::default(),
@@ -595,7 +586,6 @@ impl<'a> Resolver<'a> {
             clippy: self.clippy,
             dependents: self.dependents,
             docs: self.docs,
-            book: self.book,
             cli: self.cli,
             board: self.board,
             embedded: self.embedded,
@@ -733,9 +723,6 @@ impl<'a> Resolver<'a> {
         }
         if let Some(d) = r.table("docs", errs) {
             self.docs = Docs::read(d, dir, errs);
-        }
-        if let Some(b) = r.table("book", errs) {
-            self.book = BookRefs::read(b, errs);
         }
         if let Some(c) = r.table("cli", errs) {
             self.cli = CliProbe::read(c, errs);

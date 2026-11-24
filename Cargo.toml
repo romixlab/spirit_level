@@ -31,6 +31,9 @@ vc_build = { git = "https://github.com/vhrdtech/vhrd_cli", default-features = fa
 vc_complete = { git = "https://github.com/vhrdtech/vhrd_cli", default-features = false }
 vc_ui = { git = "https://github.com/vhrdtech/vhrd_cli", default-features = false }
 vc_usage = { git = "https://github.com/vhrdtech/vhrd_cli", default-features = false }
+# the book kit's formats (vhrd_zensical): glossary, abbreviations, extension settings, stamp markers; on its default
+# branch (main), Cargo.lock fixes the version
+vz_core = { git = "https://github.com/vhrdtech/vhrd_zensical", default-features = false }
 # spl's progress display on stderr (console, portable-atomic, unit-prefix; no C)
 indicatif = { version = "0.18", default-features = false, features = ["unicode-width"] }
 # spl's tests: a pseudo-terminal to see the progress display as a person does
@@ -72,7 +75,6 @@ sl_board = { path = "crates/sl_board" }
 sl_board_model = { path = "crates/sl_board_model" }
 sl_book = { path = "crates/sl_book" }
 sl_badge = { path = "crates/sl_badge" }
-sl_book_refs = { path = "crates/sl_book_refs" }
 sl_config = { path = "crates/sl_config" }
 sl_dependents = { path = "crates/sl_dependents" }
 sl_docs = { path = "crates/sl_docs" }
