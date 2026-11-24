@@ -6,4 +6,4 @@ version = "0.7.5"
 requires-python = ">=3.12"
 # the book kit vhrd-zensical: the `console` and `rust` fences' lexers, the code colours and the `vz` command that
 # writes the footer stamp; its `zensical` extra pins the Zensical release the kit is tested against
-dependencies = ["vhrd-zensical[zensical]==0.2.0"]
+dependencies = ["vhrd-zensical[zensical]==0.2.1"]

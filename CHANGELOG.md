@@ -4,7 +4,7 @@
 
 ### Changed
 
-- spl's own book pins vhrd-zensical 0.2.0 from PyPI, not the git tag (DOCS-17).
+- spl's own book pins vhrd-zensical 0.2.1 from PyPI, not the git tag (DOCS-17).
 
 ## [0.9.0] - 2026-11-24
 
