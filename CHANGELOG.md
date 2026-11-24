@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-11-24
+
 ### Changed
 
 - **Breaking:** `glossary-terms` reads the book kit's `vhrd_zensical.glossary` settings, not `spl_book_ext.glossary` (DOCS-17).
