@@ -87,7 +87,7 @@ lint!(PARAGRAPH_SENTENCES, "P0013", "paragraph-sentences", "prose", "paragraphs 
              ("skip", StrList, "[]", "globs of Markdown files left out")],
     needs: [], fix: None);
 lint!(COMMIT_SUBJECT_LENGTH, "P0007", "commit-subject-length", "commits", "a commit subject stays under its length limit",
-    params: [("max-chars", Int, "60", "characters a subject may have"),
+    params: [("max-chars", Int, "72", "characters a subject may have"),
              ("base", Str, "\"main\"", "the branch work merges into; commits in base..HEAD are checked"),
              ("after", Str, "\"\"", "a commit or tag; only commits after it are checked, for history that cannot be rewritten")],
     needs: [Need::Tool("git")], fix: None);

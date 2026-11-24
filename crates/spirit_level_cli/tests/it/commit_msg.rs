@@ -53,22 +53,22 @@ fn text(o: &Output) -> String {
     )
 }
 
-/// CLI-11: a 70-char subject is denied with the limit; a 50-char one passes. No `Cargo.toml` anywhere:
+/// CLI-11: a 73-char subject is denied with the limit; a 72-char one passes. No `Cargo.toml` anywhere:
 /// `commit-msg` reads only `spirit_level.toml`, never cargo metadata.
 #[test]
 fn a_long_subject_is_denied_a_short_one_passes() {
     let p = Scratch::new("ai", &[("spirit_level.toml", "extends = \"ai\"\n")]);
     p.write(
         "msg",
-        &format!("{}\n\nTested: not needed\n", "a".repeat(70)),
+        &format!("{}\n\nTested: not needed\n", "a".repeat(73)),
     );
     let o = run(&p.0, &["commit-msg", "msg"]);
     assert_eq!(o.status.code(), Some(1), "{}", text(&o));
     let t = text(&o);
     assert!(t.contains("commit-subject-length"), "{t}");
-    assert!(t.contains("limit 60"), "{t}");
+    assert!(t.contains("limit 72"), "{t}");
 
-    p.write("msg", "a subject of fifty characters, give or take\n");
+    p.write("msg", &format!("{}\n", "a".repeat(72)));
     let o = run(&p.0, &["commit-msg", "msg"]);
     assert_eq!(o.status.code(), Some(0), "{}", text(&o));
 }
@@ -89,13 +89,13 @@ fn comment_lines_are_stripped_before_the_subject_is_measured() {
         "msg",
         &format!(
             "# {}\n{}\n# Please enter the commit message\n",
-            "x".repeat(70),
-            "a".repeat(70)
+            "x".repeat(73),
+            "a".repeat(73)
         ),
     );
     let o = run(&p.0, &["commit-msg", "msg"]);
     let t = text(&o);
     assert_eq!(o.status.code(), Some(1), "{t}");
-    // the comment's own 72-char line never becomes the measured subject
-    assert!(t.contains("commit subject of 70 characters"), "{t}");
+    // the comment's own 75-char line never becomes the measured subject
+    assert!(t.contains("commit subject of 73 characters"), "{t}");
 }

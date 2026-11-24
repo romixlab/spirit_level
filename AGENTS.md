@@ -12,7 +12,7 @@ spirit_level is a linter for Rust projects of every size. Lints are declared in 
 
 ## 2. Terse output
 
-Result first, then only what the reader must decide or do. Bullets for lists, tables for options, one fact per line. No recap, no narration. Limits: CHANGELOG entry 1 line and 20 words, commit subject 60 characters, this file 150 lines. spirit_level's own `prose` lints check these.
+Result first, then only what the reader must decide or do. Bullets for lists, tables for options, one fact per line. No recap, no narration. Limits: CHANGELOG entry 1 line and 20 words, commit subject 72 characters, this file 150 lines. spirit_level's own `prose` lints check these.
 
 ## 3. Layout
 

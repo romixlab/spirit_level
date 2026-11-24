@@ -12,4 +12,5 @@ reason = "fixture"
 
 [lints.commit-subject-length]
 level = "warn"
+max-chars = 60
 reason = "fixture"
