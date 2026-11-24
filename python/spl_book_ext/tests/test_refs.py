@@ -223,7 +223,10 @@ def test_a_word_naming_two_terms_fails(book):
 def test_an_item_card_renders_its_docs_and_highlights_its_signature(book):
     html = render(book, "Call [`TapeWriter::resume_on`] after a crash.")
     assert f'href="{BLOB}src/lib.rs#L3-L9"><code>TapeWriter::resume_on</code></a>' in html
-    assert '<div class="spl-card-head">fn tape::writer::TapeWriter::resume_on</div>' in html
+    assert (
+        f'<div class="spl-card-head"><a href="{BLOB}src/lib.rs#L3-L9">fn tape::writer::TapeWriter::resume_on</a></div>'
+        in html
+    )
     assert 'class="language-rust highlight"' in html
     # an intra-doc link that resolves opens the item's lines; one that does not stays plain code
     assert f'<a href="{BLOB}src/lib.rs#L20-L30"><code>Recovery</code></a>' in html
@@ -298,15 +301,25 @@ def test_a_rustdoc_link_with_a_target_is_left_alone(book):
 def test_a_section_card_shows_its_lines(book):
     html = render(book, "See [`resume.rs:call`].")
     assert f'href="{BLOB}tests/resume.rs#L3-L3"><code>resume.rs:call</code></a>' in html
-    assert '<div class="spl-card-head">tests/resume.rs, section call</div>' in html
+    assert (
+        f'<div class="spl-card-head"><a href="{BLOB}tests/resume.rs#L3-L3">tests/resume.rs, section call</a></div>'
+        in html
+    )
     assert "resume_on" in html and "fn x()" not in html
     assert '<div class="spl-card-where">tests/resume.rs:3-3</div>' in html
+    links = re.findall(r'<div class="spl-card-links">(.*?)</div>', html)
+    assert re.findall(r'<a href="([^"]+)">([^<]+)</a>', links[0]) == [
+        (f"{BLOB}tests/resume.rs#L3-L3", "Lines on GitHub"),
+        (f"{BLOB}tests/resume.rs", "File on GitHub"),
+    ]
 
 
 def test_a_file_card_is_bounded(book):
     html = render(book, "See [`tests/resume.rs`].", card_lines_max=2)
     assert f'href="{BLOB}tests/resume.rs"' in html
     assert "2 more lines in the source" in html
+    links = re.findall(r'<div class="spl-card-links">(.*?)</div>', html)
+    assert re.findall(r'<a href="([^"]+)">([^<]+)</a>', links[0]) == [(f"{BLOB}tests/resume.rs", "File on GitHub")]
 
 
 def test_a_stale_file_or_section_fails(book):
@@ -392,9 +405,10 @@ def test_a_card_links_to_the_source_and_docs_rs_for_a_published_crate(book):
         links = re.findall(r'<div class="spl-card-links">(.*?)</div>', html)
         assert len(links) == 1, text
         hrefs = re.findall(r'<a href="([^"]+)">([^<]+)</a>', links[0])
-        assert [t for _, t in hrefs] == ["Source on GitHub", "docs.rs"], text
+        assert [t for _, t in hrefs] == ["Source on GitHub", "File on GitHub", "docs.rs"], text
         assert hrefs[0][0].startswith(f"{BLOB}src/lib.rs#L"), text
-        assert hrefs[1][0] == docs, text
+        assert hrefs[1][0] == f"{BLOB}src/lib.rs", text
+        assert hrefs[2][0] == docs, text
 
 
 def test_a_card_of_an_unpublished_crate_links_to_the_source_alone(book):
@@ -402,7 +416,7 @@ def test_a_card_of_an_unpublished_crate_links_to_the_source_alone(book):
     html = render(book, "[`tape::Bits`]")
     links = re.findall(r'<div class="spl-card-links">(.*?)</div>', html)
     hrefs = re.findall(r'<a href="([^"]+)">([^<]+)</a>', links[0])
-    assert [t for _, t in hrefs] == ["Source on GitHub"]
+    assert [t for _, t in hrefs] == ["Source on GitHub", "File on GitHub"]
     assert "docs.rs" not in html
 
 

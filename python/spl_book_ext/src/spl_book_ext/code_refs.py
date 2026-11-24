@@ -336,6 +336,18 @@ def _more(n: int) -> str:
     return card.part("spl-card-more", f"{n} more line{'s' if n != 1 else ''} in the source") if n else ""
 
 
+def _head(text: str, href: str) -> str:
+    """A card's first line, a link to what it names on the forge"""
+    return card.part("spl-card-head", f'<a href="{card.escape(href)}">{card.escape(text)}</a>')
+
+
+def _links(links: list[tuple[str, str]]) -> str:
+    """A card's links, text and address each"""
+    return card.part(
+        "spl-card-links", " · ".join(f'<a href="{card.escape(u)}">{card.escape(t)}</a>' for t, u in links)
+    )
+
+
 class _Refs(InlineProcessor):
     def __init__(self, pattern: str, ext: CodeRefExtension, index: Index):
         super().__init__(pattern, ext.md)
@@ -357,7 +369,7 @@ class ItemPattern(_Refs):
     def build(self, card_id: str, item: dict) -> str:
         src, left = _lines(item["source"], self.ext.lines_max)
         arm = f", cfg({item['cfg']})" if item.get("cfg") else ""
-        body = card.part("spl-card-head", card.escape(f"{item['kind']} {item['path']}{arm}"))
+        body = _head(f"{item['kind']} {item['path']}{arm}", item["url"])
         body += card.part("spl-card-src", card.code(src, "rust")) + _more(left)
         if item["doc"]:
             doc, cut = bounded(doc_links(item["doc"], item, self.index), self.ext.doc_chars_max)
@@ -365,12 +377,10 @@ class ItemPattern(_Refs):
             if cut:
                 body += card.part("spl-card-more", "The docs go on in the source")
         body += card.part("spl-card-where", card.escape(f"{item['file']}:{item['lines'][0]}"))
-        links = [("Source on GitHub", item["url"])]
+        links = [("Source on GitHub", item["url"]), ("File on GitHub", item["url"].split("#", 1)[0])]
         if docs := docs_rs_url(item, self.index):
             links.append(("docs.rs", docs))
-        body += card.part(
-            "spl-card-links", " · ".join(f'<a href="{card.escape(u)}">{card.escape(t)}</a>' for t, u in links)
-        )
+        body += _links(links)
         return card.frame(card_id, "code", body)
 
 
@@ -392,12 +402,12 @@ class FilePattern(_Refs):
             first, last = span
             href = f"{self.index.blob}{f['path']}#L{first}-L{last}"
         key = f"file {f['path']}:{section or ''}"
-        card_id = card.page_cards(self.md).add(key, lambda i: self.build(i, f, section, first, last))
+        card_id = card.page_cards(self.md).add(key, lambda i: self.build(i, f, section, first, last, href))
         code_el = etree.Element("code")
         code_el.text = m.group(0)[2:-2]
         return card.reference(code_el, href, "file", card_id), m.start(0), m.end(0)
 
-    def build(self, card_id: str, f: dict, section: str | None, first: int, last: int) -> str:
+    def build(self, card_id: str, f: dict, section: str | None, first: int, last: int, href: str) -> str:
         try:
             lines = Path(f["path"]).read_text(encoding="utf-8").split("\n")[first - 1 : last]
         except OSError as e:
@@ -405,9 +415,12 @@ class FilePattern(_Refs):
         src, left = _lines("\n".join(lines), self.ext.lines_max)
         ext = f["path"].rsplit(".", 1)[-1].lower()
         head = f["path"] + (f", section {section}" if section else "")
-        body = card.part("spl-card-head", card.escape(head))
+        body = _head(head, href)
         body += card.part("spl-card-src", card.code(src, _LANGS.get(ext, ext))) + _more(left)
         body += card.part("spl-card-where", card.escape(f"{f['path']}:{first}-{last}"))
+        whole = self.index.blob + f["path"]
+        links = [("Lines on GitHub", href)] if section is not None else []
+        body += _links(links + [("File on GitHub", whole)])
         return card.frame(card_id, "file", body)
 
 

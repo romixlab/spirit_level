@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Book cards: the head links the lines on GitHub; code and file cards link the whole file too (DOCS-16).
+
 ## [0.8.0] - 2026-11-24
 
 ### Added
