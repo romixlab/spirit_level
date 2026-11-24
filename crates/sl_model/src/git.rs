@@ -1,7 +1,7 @@
 //! The commits of a branch, read with git: `base..HEAD`, merges left out, oldest first.
 //!
 //! A commit's findings are placed at `commit:<12 hex>` with the line of its message (the subject is line 1). The
-//! engine reads `Spirit-Level: allow(lint) reason` trailers of the commits a run read as waivers of that commit.
+//! engine reads `Spirit-Level: allow(lint) reason` trailers of the commits a lint checked as waivers of that commit.
 
 use crate::project::command;
 use std::collections::BTreeMap;
@@ -64,14 +64,17 @@ impl Commit {
 /// A commit list, or why it could not be read
 type Read = Result<Arc<[Commit]>, String>;
 
-/// The commit lists read during a run, by base
+/// The commit lists read during a run, by base, and the commits each lint checked
 #[derive(Debug, Default)]
-pub(crate) struct Cache(Mutex<BTreeMap<String, Read>>);
+pub(crate) struct Cache {
+    read: Mutex<BTreeMap<String, Read>>,
+    checked: Mutex<BTreeMap<String, Arc<[Commit]>>>,
+}
 
 impl Cache {
     pub(crate) fn get(&self, root: &Path, base: &str) -> Result<Arc<[Commit]>, String> {
         let mut map = self
-            .0
+            .read
             .lock()
             .unwrap_or_else(std::sync::PoisonError::into_inner);
         map.entry(base.to_owned())
@@ -79,13 +82,19 @@ impl Cache {
             .clone()
     }
 
-    pub(crate) fn read_so_far(&self) -> Vec<Arc<[Commit]>> {
-        let map = self
-            .0
+    pub(crate) fn check(&self, lint: &str, commits: Arc<[Commit]>) {
+        self.checked
             .lock()
-            .unwrap_or_else(std::sync::PoisonError::into_inner);
-        map.values()
-            .filter_map(|r| r.as_ref().ok().cloned())
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .insert(lint.to_owned(), commits);
+    }
+
+    pub(crate) fn checked(&self) -> Vec<(String, Arc<[Commit]>)> {
+        self.checked
+            .lock()
+            .unwrap_or_else(std::sync::PoisonError::into_inner)
+            .iter()
+            .map(|(l, c)| (l.clone(), c.clone()))
             .collect()
     }
 }

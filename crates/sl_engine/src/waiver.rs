@@ -32,6 +32,8 @@ pub struct Waiver {
     pub expires: Option<Expiry>,
     /// The lines it covers, inclusive
     pub covers: (u32, u32),
+    /// A commit's waiver: the lints that checked its commit, the only ones it can be unused for; None in a file
+    pub checked_by: Option<Vec<String>>,
 }
 
 /// A waiver written wrong
@@ -141,6 +143,7 @@ fn parse(
             reason,
             expires,
             covers,
+            checked_by: None,
         });
     }
 }
@@ -211,7 +214,7 @@ fn allow(
     Some((lints, expires, tail.to_owned()))
 }
 
-/// The waivers in the messages of the commits the run read: a `Spirit-Level: allow(lint) reason` trailer covers
+/// The waivers in the messages of the commits a lint checked: a `Spirit-Level: allow(lint) reason` trailer covers
 /// its whole commit (`commit:<12 hex>`)
 pub fn collect_commits(
     project: &Project,
@@ -219,30 +222,40 @@ pub fn collect_commits(
     today: Date,
     version: Option<Version>,
 ) -> (Vec<Waiver>, Vec<Problem>) {
+    let mut by_hash: std::collections::BTreeMap<&str, (&sl_model::git::Commit, Vec<String>)> =
+        std::collections::BTreeMap::new();
+    let checked = project.commits_checked();
+    for (lint, list) in &checked {
+        for c in list.iter() {
+            by_hash
+                .entry(&c.hash)
+                .or_insert((c, Vec::new()))
+                .1
+                .push(lint.clone());
+        }
+    }
     let mut ws = Vec::new();
     let mut ps = Vec::new();
-    let mut seen = std::collections::BTreeSet::new();
-    for list in project.commits_read() {
-        for c in list.iter().filter(|c| seen.insert(c.hash.clone())) {
-            for t in c.trailers(COMMIT_TRAILER) {
-                let file = c.file();
-                let parsed = allow(&t.value, resolve, today, version, &mut |m| {
-                    ps.push(Problem {
-                        file: file.clone(),
-                        line: t.line,
-                        message: m,
-                    });
+    for (c, lints_checking) in by_hash.into_values() {
+        for t in c.trailers(COMMIT_TRAILER) {
+            let file = c.file();
+            let parsed = allow(&t.value, resolve, today, version, &mut |m| {
+                ps.push(Problem {
+                    file: file.clone(),
+                    line: t.line,
+                    message: m,
                 });
-                if let Some((lints, expires, reason)) = parsed {
-                    ws.push(Waiver {
-                        file,
-                        line: t.line,
-                        lints,
-                        reason,
-                        expires,
-                        covers: (0, u32::MAX),
-                    });
-                }
+            });
+            if let Some((lints, expires, reason)) = parsed {
+                ws.push(Waiver {
+                    file,
+                    line: t.line,
+                    lints,
+                    reason,
+                    expires,
+                    covers: (0, u32::MAX),
+                    checked_by: Some(lints_checking.clone()),
+                });
             }
         }
     }

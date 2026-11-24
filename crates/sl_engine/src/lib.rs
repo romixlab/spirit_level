@@ -193,7 +193,8 @@ pub fn all_lints(analyses: &[&dyn Analysis]) -> Vec<&'static LintMeta> {
     v
 }
 
-/// The findings of `waiver-unused`: each waiver that allowed nothing, when every lint it names ran
+/// The findings of `waiver-unused`: each waiver that allowed nothing, when every lint it names ran and, for a
+/// commit's waiver, checked that commit
 fn unused_waivers(
     waivers: &[waiver::Waiver],
     used: &[bool],
@@ -202,8 +203,13 @@ fn unused_waivers(
     waivers
         .iter()
         .zip(used)
-        // a waiver of a lint that did not run this time is not unused
-        .filter(|(w, u)| !**u && w.lints.iter().all(|l| ran.contains(l)))
+        // a waiver of a lint that did not run this time, or did not check its commit, is not unused
+        .filter(|(w, u)| {
+            !**u && w
+                .lints
+                .iter()
+                .all(|l| ran.contains(l) && w.checked_by.as_ref().is_none_or(|c| c.contains(l)))
+        })
         .map(|(w, _)| {
             Diagnostic::new(
                 "waiver-unused",

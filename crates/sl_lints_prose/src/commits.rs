@@ -12,22 +12,22 @@ fn span(c: &Commit, line: u32) -> Span {
     Span::new(c.file(), line)
 }
 
-/// The commits of the branch for lint `id`: those in `base..HEAD`, and after its `after` commit when it names one;
-/// None after reporting why they could not be read
+/// The commits of the branch for lint `id`: those in `base..HEAD`, and after its `after` commit when it names one,
+/// recorded as checked by `id` for the waivers in their messages; None after reporting why they could not be read
 pub(crate) fn branch(cx: &Context<'_>, id: &str) -> Option<Arc<[Commit]>> {
     let params = cx.params(id);
     let (base, after) = (params.str("base"), params.str("after"));
-    let list = read(cx, id, "base", base)?;
-    if after.is_empty() {
-        return Some(list);
-    }
-    let later = read(cx, id, "after", after)?;
-    Some(
-        list.iter()
+    let mut list = read(cx, id, "base", base)?;
+    if !after.is_empty() {
+        let later = read(cx, id, "after", after)?;
+        list = list
+            .iter()
             .filter(|c| later.iter().any(|l| l.hash == c.hash))
             .cloned()
-            .collect(),
-    )
+            .collect();
+    }
+    cx.project.check_commits(id, list.clone());
+    Some(list)
 }
 
 /// The commits in `rev..HEAD`, `rev` being the lint's parameter `param`; None after reporting why they could not

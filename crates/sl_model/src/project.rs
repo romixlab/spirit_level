@@ -572,9 +572,14 @@ impl Project {
         self.commits.get(&self.root, base)
     }
 
-    /// Every commit list this run has read so far, for the waivers in their messages
-    pub fn commits_read(&self) -> Vec<std::sync::Arc<[crate::git::Commit]>> {
-        self.commits.read_so_far()
+    /// Records that lint `lint` checked `commits`: the engine reads the waivers in their messages for it
+    pub fn check_commits(&self, lint: &str, commits: std::sync::Arc<[crate::git::Commit]>) {
+        self.commits.check(lint, commits);
+    }
+
+    /// The commits each lint checked this run, by lint
+    pub fn commits_checked(&self) -> Vec<(String, std::sync::Arc<[crate::git::Commit]>)> {
+        self.commits.checked()
     }
 }
 

@@ -36,7 +36,7 @@ Fix the frame length check
 Spirit-Level: allow(fix-without-test) the reproducer needs the board on the bench
 ```
 
-The trailer covers the whole commit. [waiver-invalid](lints/C0012.md) and [waiver-unused](lints/C0013.md) check it as they check a comment. A commit already on the base branch is never checked again, so a waiver is only needed while the commit is on the branch.
+The trailer covers the whole commit. [waiver-invalid](lints/C0012.md) and [waiver-unused](lints/C0013.md) check it as they check a comment. A commit already on the base branch is never checked again, so its waiver is needed, and judged, only while the commit is on the branch.
 
 ## A landing run
 

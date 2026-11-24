@@ -572,3 +572,58 @@ fn readme_badges_fix_writes_the_badge_and_links_the_tier() {
         p.read(".github/spl-badge.svg")
     );
 }
+
+/// Runs git in `dir` with no user configuration
+fn git(dir: &Path, args: &[&str]) {
+    let out = std::process::Command::new("git")
+        .args(args)
+        .current_dir(dir)
+        .env("GIT_CONFIG_GLOBAL", "/dev/null")
+        .env("GIT_CONFIG_NOSYSTEM", "1")
+        .env("GIT_AUTHOR_NAME", "fixture")
+        .env("GIT_AUTHOR_EMAIL", "fixture@example.org")
+        .env("GIT_COMMITTER_NAME", "fixture")
+        .env("GIT_COMMITTER_EMAIL", "fixture@example.org")
+        .output()
+        .expect("git starts");
+    assert!(
+        out.status.success(),
+        "git {args:?}: {}",
+        String::from_utf8_lossy(&out.stderr)
+    );
+}
+
+#[test]
+fn commit_waiver_is_unused_only_while_its_lint_checks_the_commit() {
+    let p = workspace(
+        "[lints.fix-without-test]\nlevel = \"deny\"\nreason = \"r\"\nafter = \"start\"\n\n[lints.waiver-unused]\nlevel = \"deny\"\nreason = \"r\"\n",
+    );
+    git(&p.0, &["init", "-q", "-b", "main"]);
+    git(&p.0, &["add", "-A"]);
+    git(&p.0, &["commit", "-q", "-m", "initial"]);
+    git(&p.0, &["tag", "start"]);
+    git(&p.0, &["switch", "-q", "-c", "work"]);
+    std::fs::write(
+        p.0.join("crates/a/src/lib.rs"),
+        "//! a\n\n/// One\npub fn one() {}\n",
+    )
+    .unwrap();
+    git(
+        &p.0,
+        &[
+            "commit",
+            "-q",
+            "-am",
+            "Fix the timing on the board\n\nSpirit-Level: allow(fix-without-test) needs the board",
+        ],
+    );
+    let o = run(&p.0, &["check"]);
+    assert_eq!(o.status.code(), Some(0), "{}", text(&o));
+    assert!(text(&o).contains("1 allowed"), "{}", text(&o));
+    // landed: after..HEAD still holds the commit, base..HEAD does not, so the lint no longer checks it
+    git(&p.0, &["switch", "-q", "main"]);
+    git(&p.0, &["merge", "-q", "--ff-only", "work"]);
+    let o = run(&p.0, &["check"]);
+    assert_eq!(o.status.code(), Some(0), "{}", text(&o));
+    assert!(!text(&o).contains("waiver-unused"), "{}", text(&o));
+}

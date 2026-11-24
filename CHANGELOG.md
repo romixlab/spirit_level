@@ -12,6 +12,7 @@
 
 ### Fixed
 
+- `waiver-unused` no longer flags a landed commit's trailer that `after..HEAD` still reads (ENG-10).
 - `spl tools needed --toolchains` names the pinned nightly a nightly tool needs, also with `--all` (TOOL-2).
 
 ### Removed
