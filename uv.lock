@@ -231,7 +231,7 @@ dependencies = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "vhrd-zensical", extras = ["zensical"], git = "https://github.com/vhrdtech/vhrd_zensical?tag=v0.1.0" }]
+requires-dist = [{ name = "vhrd-zensical", extras = ["zensical"], specifier = "==0.2.1" }]
 
 [[package]]
 name = "tomli"
@@ -298,12 +298,21 @@ wheels = [
 
 [[package]]
 name = "vhrd-zensical"
-version = "0.1.0"
-source = { git = "https://github.com/vhrdtech/vhrd_zensical?tag=v0.1.0#f267f7b2e4a5cac55bd950d423d3e1742171593c" }
+version = "0.2.1"
+source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "markdown" },
     { name = "pygments" },
     { name = "pymdown-extensions" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/4d/b1/d1a1f3cb87a0cd33ad5067ced23e646fe2148af0897cdf5d5f2a90ea2253/vhrd_zensical-0.2.1.tar.gz", hash = "sha256:36922491bfe83e5ff7b443baf2ed4e67531ab299c3678f168478c61fe323f9df", size = 105829, upload-time = "2026-11-24T17:13:57.219Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f0/6e/8572b8ce393649c3e0ac01359ecda43a5a31960ebe1e0d32d34f06b7ebea/vhrd_zensical-0.2.1-cp312-abi3-macosx_10_12_universal2.macosx_10_12_x86_64.macosx_11_0_arm64.whl", hash = "sha256:3f9234c81b91c568f78f405af9d7654249677d7397e192fc470c169bf902daf4", size = 3298873, upload-time = "2026-11-24T17:13:47.897Z" },
+    { url = "https://files.pythonhosted.org/packages/ed/4b/462ecc97b857de29d0b8e6cfeffff69b49de12cd7b5251b90bc742c9ca63/vhrd_zensical-0.2.1-cp312-abi3-manylinux2014_aarch64.manylinux_2_17_aarch64.whl", hash = "sha256:ecf9f5e5c3df932c0fa25595ea864530bebd878df86ddb19e12f2a82810b3505", size = 1749345, upload-time = "2026-11-24T17:13:49.587Z" },
+    { url = "https://files.pythonhosted.org/packages/54/c0/7355ea20f6354830d6320b7d0f83f4477408646d660311b628bb29046060/vhrd_zensical-0.2.1-cp312-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl", hash = "sha256:4bcecdf9389770c71c069654977fde6c4778cbb8fb5adc842ce33248e69a940e", size = 1814979, upload-time = "2026-11-24T17:13:51.244Z" },
+    { url = "https://files.pythonhosted.org/packages/aa/4d/de7e81d5e1c9accc0f913ef82d718aaedb0a01377be7adacc27a145d599e/vhrd_zensical-0.2.1-cp312-abi3-musllinux_1_2_aarch64.whl", hash = "sha256:65fe5c5192cd777a7440164d7e50e66cf13ae282b8d2139760849f2b8a1c4fa9", size = 1929023, upload-time = "2026-11-24T17:13:52.791Z" },
+    { url = "https://files.pythonhosted.org/packages/4f/b4/807a4e6706e6f1a0c131dc94b8a83c2f662d6c65adc3d380ccec7c96ceeb/vhrd_zensical-0.2.1-cp312-abi3-musllinux_1_2_x86_64.whl", hash = "sha256:5b9d52680f621afd533504b54790b4fafd6332b1c6e89cf1b6d12b2f52cc7c3c", size = 2042001, upload-time = "2026-11-24T17:13:54.297Z" },
+    { url = "https://files.pythonhosted.org/packages/82/33/68af0de7c47991e94b14b4e2ece48563239b30af857011c03c27cec64043/vhrd_zensical-0.2.1-cp312-abi3-win_amd64.whl", hash = "sha256:16e85adbcc4b7490501e8fa116940ffd5ec9041187ec9d699cc999d913898287", size = 1672923, upload-time = "2026-11-24T17:13:55.81Z" },
 ]
 
 [package.optional-dependencies]
