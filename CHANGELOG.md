@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-11-24
+
 ### Added
 
 - `spl commit-msg FILE` checks one commit message's lints fast, for a commit-msg hook (CLI-11).
