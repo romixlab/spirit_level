@@ -1932,8 +1932,8 @@ dependencies = [
 
 [[package]]
 name = "vz_core"
-version = "0.1.0"
-source = "git+https://github.com/vhrdtech/vhrd_zensical#f267f7b2e4a5cac55bd950d423d3e1742171593c"
+version = "0.3.0"
+source = "git+https://github.com/vhrdtech/vhrd_zensical#d072d98f37edd0e19fc389cbf2b83c80e8e976ba"
 dependencies = [
  "serde",
  "toml",

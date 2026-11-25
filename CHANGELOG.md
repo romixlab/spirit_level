@@ -6,6 +6,7 @@
 
 - `commit-subject-length` (P0007): `max-chars` default raised 60 to 72; messages show the new limit (CLI-11).
 - spl's own book pins vhrd-zensical 0.2.1 from PyPI, not the git tag (DOCS-17).
+- Book settings read through vhrd_zensical 0.3.0: code_refs accepts `sources`, for pages copied from other repositories (DOCS-17).
 
 ## [0.9.0] - 2026-11-24
 
