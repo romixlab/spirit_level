@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-11-25
+
 ### Changed
 
 - `commit-subject-length` (P0007): `max-chars` default raised 60 to 72; messages show the new limit (CLI-11).
